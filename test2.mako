@@ -16,10 +16,10 @@
 <h1>Check out my protein</h1>
 <p>This is from a PyMOl view. <button onClick="javascript:saveImg()">Save</button></p>
 <div id="viewport" style="width:100%; height: 0; padding-bottom: 100%;"></div>
-<script src="ngl.js" type="text/javascript"></script>
+
+${code}
 
 <script type="text/javascript">
-    ${code}
     function saveImg() {
         stage.makeImage( {
       trim: true,

@@ -24,6 +24,7 @@ if sys.version_info[0] < 3:
 import numpy as np
 from mako.template import Template
 import markdown
+import string
 ###############################################################
 
 
@@ -32,9 +33,8 @@ import markdown
 class PyMolTranspiler:
     """
     The class initialises as a blank object with settings unless view and/or reps is passed.
-    For views see `.convert_view(view_string)`, which processes the output of PyMOL command set_view
-    For representation see `.convert_reps(reps_string)`.
-
+    For views see `.convert_view(view_string)`, which processes the output of PyMOL command `set_view`
+    For representation see `.convert_reps(reps_string)`, which process the output of PyMOL command `iterate 1UBQ, print resi, resn,name,ID,reps`
     """
 
     def __init__(self, verbose=False, validation=False,view=None, reps=None, pdb=''):
@@ -63,7 +63,7 @@ class PyMolTranspiler:
         :param output: 'matrix' | 'string'
         :return: np 4x4 matrix or a NGL string
         """
-        pymolian = np.array([float(i.replace(',', '')) for i in text.split() if i.find('.') > 0])  # isnumber is for ints
+        pymolian = np.array([float(i.replace('\\','').replace(',', '')) for i in text.split() if i.find('.') > 0])  # isnumber is for ints
         self.rotation = pymolian[0:9].reshape([3, 3])
         depth = pymolian[9:12]
         self.z = abs(depth[2])
@@ -110,14 +110,15 @@ class PyMolTranspiler:
         for line in text.split('\n'):
             if not line:
                 continue
-            elif line.find('Iterate: ') != -1:
+            elif line.find('terate') != -1: #twice. I/i
                 continue
             else:
                 self.atoms.append(dict(zip(('resi', 'resn', 'name', 'ID', 'reps'),line.split())))
         return self.get_reps()
 
-    def get_reps(self): #'^'+atom['chain']
+    def get_reps(self, tabbed=6): #'^'+atom['chain']
         assert self.atoms, 'Needs convert_reps first'
+        T='\n'+'\t'*int(tabbed)
         sticks=[]
         lines=[]
         cartoon=[]
@@ -141,7 +142,34 @@ class PyMolTranspiler:
         if cartoon:
             code.append('var cartoon = new NGL.Selection( "{0}" );'.format(' or '.join(cartoon)))
             code.append('protein.addRepresentation( "cartoon", { sele: cartoon.string} );\n')
-        return '\n'+'\n'.join(code)
+        return T+T.join(code)
+
+    def to_html_line(self, ngl='https://cdn.rawgit.com/arose/ngl/v0.10.4-1/dist/ngl.js', viewport='viewport', tabbed=6):
+        """
+        Returns a string to be copy-pasted into HTML code.
+        :param ngl: (optional) the address to ngl.js. If unspecified it gets it from the RawGit CDN
+        :param viewport: (optional) the id of the viewport div, without the hash.
+        :return: a string.
+        """
+        return string.Template('''
+        <!-- **inserted code**  -->
+        <script src="$ngl" type="text/javascript"></script>
+        <script type="text/javascript">
+                    var stage = new NGL.Stage( "$viewport",{backgroundColor: "white"});
+                    stage.loadFile( "$pdb").then(function (protein) {
+                        window.protein=protein;
+                        $orient
+                        $reps
+                        stage.viewerControls.orient(m4);
+                    });
+        </script>
+        <!-- **end of code** -->
+            ''').safe_substitute(reps=self.get_reps(tabbed=tabbed),
+                                 orient=self.get_view(output='string'),
+                                 pdb=('rcsb://'+self.pdb if len(self.pdb) == 4 else self.pdb),
+                                 ngl=ngl,
+                                 viewport=viewport)
+
 
     def write_hmtl(self, template_file='test.mako', output_file='test_generated.html', **kargs):
         if self.verbose:
@@ -158,20 +186,11 @@ def test():
     for block in data:
         if 'get_view' in block:
             view = block
+        elif 'iterate' in block: #strickly lowercase as it ends in _I_terate
+            reps = block
     trans.convert_view(view)
     trans.convert_reps(reps)
-    import string
-    code=string.Template('''
-        // **inserted code**
-        var stage = new NGL.Stage( "viewport",{backgroundColor: "white"});
-        stage.loadFile( "rcsb://1UBQ").then(function (protein) {
-            window.protein=protein;
-            $orient;
-            $reps;
-            stage.viewerControls.orient(m4);
-        });
-        // **end of code**
-        ''').safe_substitute(reps=trans.get_reps(),orient=trans.get_view(output='string'))
+    code=trans.to_html_line(ngl='ngl.js')
     trans.write_hmtl(template_file='test2.mako',output_file='test_2.html', code=code)
 
 
