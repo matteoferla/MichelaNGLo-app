@@ -1,7 +1,7 @@
 # PyMOL-to-NGL-transpiler
 A script to transpile a PyMOL PSE file to a NGL.js view.
 
-*Status*: unfinished draft
+*Status*: unfinished, but core functionality present.
 
 ## Parts to convert
 Three parts are needed to convert a `.pse` file into a NGL view.
@@ -45,11 +45,13 @@ The source of the NGL code can be changed:
     >>> trans.to_html_line(ngl='ngl.js')
     
 ## To do
-Add color and surface. Maybe arrows and labels.
-Automate the retrieval of PyMOL data. Currently text output is parsed. But a wrapper for the application would be better.
-Make a server.
+* Add color and surface.
+* Maybe arrows and labels.
+* Automate the retrieval of PyMOL data: currently text output is parsed. But a wrapper for the application or using the pymol library would be best.
+* Make a server.
 
-## Notes
+## Notes on PSE side
+A Pse is encoded, so there is no way to read it except with Pymol. But Pymol can reveal it's secrets.
 ### Orientation
 I was driven spare with converting the orientation. It simply was a question of inverting the sign on the $\vec{x}$ and $\vec{z}$ of the rotational matrix, multiplying it by the absolute of the scale and adding the origin of rotation's position with inverted sign.
 For more see [my notes on the conversion of the view](notes_on_view_conversion.md)
