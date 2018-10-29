@@ -27,10 +27,13 @@
                         var m4 = (new NGL.Matrix4).fromArray([-33.08379747084204, 52.62455953102059, -26.32785134913191, 0.0, -56.675070010806365, -20.374221977107002, 30.493959724841147, 0.0, 15.825718589909755, 37.04851937306921, 54.166395608812174, 0.0, -30.421813965, -32.531013489, -13.075076103, 1.0]); stage.viewerControls.orient(m4);
                         
 						protein.removeAllRepresentations();
+						var lines = new NGL.Selection( "66.N or 66.CA or 66.C or 66.O or 66.CB or 66.CG2 or 66.OG1" );
+						protein.addRepresentation( "line", { sele: lines.string} );
+
 						var sticks = new NGL.Selection( "67.N or 67.CA or 67.C or 67.O or 67.CB or 67.CG or 67.CD1 or 67.CD2" );
 						protein.addRepresentation( "licorice", { sele: sticks.string} );
 
-						var cartoon = new NGL.Selection( "28 or 29 or 31 or 23 or 26 or 32 or 24 or 25 or 33 or 27 or 30 or 34 or 35 or 22" );
+						var cartoon = new NGL.Selection( "28 or 35 or 24 or 25 or 32 or 26 or 27 or 29 or 31 or 22 or 33 or 34 or 30 or 23" );
 						protein.addRepresentation( "cartoon", { sele: cartoon.string} );
 
                         stage.viewerControls.orient(m4);

@@ -125,11 +125,11 @@ class PyMolTranspiler:
         for atom in self.atoms:
             reps=list(reversed("{0:0>8b}".format(int(atom['reps']))))
             # sticks
-            if reps[0] == '1':
+            if reps[0] == '1': #sticks.
                 sticks.append(atom['resi']+'.'+atom['name'])
-            if reps[0] == '7':
+            if reps[7] == '1': #lines.
                 lines.append(atom['resi'] + '.' + atom['name'])
-            if reps[5] == '1': # special case...
+            if reps[5] == '1': # cartoon. special case...
                 cartoon.append(atom['resi'])
         cartoon=list(set(cartoon))
         code=['protein.removeAllRepresentations();']
@@ -182,7 +182,7 @@ def test():
     trans.pdb='1UBQ'
     view=''
     reps=''
-    data=open('PyMol_output.txt').read().split('PyMOL>')
+    data=open('PyMol_output_example.txt').read().split('PyMOL>')
     for block in data:
         if 'get_view' in block:
             view = block
@@ -191,7 +191,7 @@ def test():
     trans.convert_view(view)
     trans.convert_reps(reps)
     code=trans.to_html_line() #ngl='ngl.js'
-    trans.write_hmtl(template_file='test2.mako',output_file='test_2.html', code=code)
+    trans.write_hmtl(template_file='test2.mako',output_file='example.html', code=code)
 
 
 if __name__ == "__main__":
