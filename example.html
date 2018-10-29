@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Test 2</title>
+    <title>Example</title>
     <style>
         pre code {
           background-color: #eee;
@@ -12,10 +12,11 @@
         }
     </style>
 </head>
-<body>
+<body style="background-color: #eeeeee">
 <h1>Check out my protein</h1>
 <p>This is from a PyMOl view. <button onClick="javascript:saveImg()">Save</button></p>
-<div id="viewport" style="width:100%; height: 0; padding-bottom: 100%;"></div>
+
+<div style="max-width: 800px;"><div id="viewport" style="width:100%; height: 0; padding-bottom: 100%;"></div></div>
 
 
         <!-- **inserted code**  -->
@@ -33,7 +34,7 @@
 						var sticks = new NGL.Selection( "67.N or 67.CA or 67.C or 67.O or 67.CB or 67.CG or 67.CD1 or 67.CD2" );
 						protein.addRepresentation( "licorice", { sele: sticks.string} );
 
-						var cartoon = new NGL.Selection( "28 or 35 or 24 or 25 or 32 or 26 or 27 or 29 or 31 or 22 or 33 or 34 or 30 or 23" );
+						var cartoon = new NGL.Selection( "23 or 34 or 33 or 26 or 29 or 35 or 32 or 24 or 27 or 31 or 28 or 25 or 30 or 22" );
 						protein.addRepresentation( "cartoon", { sele: cartoon.string} );
 
                         stage.viewerControls.orient(m4);

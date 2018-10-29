@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Test 2</title>
+    <title>Example</title>
     <style>
         pre code {
           background-color: #eee;
@@ -12,10 +12,11 @@
         }
     </style>
 </head>
-<body>
+<body style="background-color: #eeeeee">
 <h1>Check out my protein</h1>
-<p>This is from a PyMOl view. <button onClick="javascript:saveImg()">Save</button></p>
-<div id="viewport" style="width:100%; height: 0; padding-bottom: 100%;"></div>
+<p>This is from a PyMOL view. <button onClick="javascript:saveImg()">Save</button></p>
+
+<div style="max-width: 800px;"><div id="viewport" style="width:100%; height: 0; padding-bottom: 100%;"></div></div>
 
 ${code}
 

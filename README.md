@@ -53,7 +53,7 @@ The source of the NGL code can be changed:
 ## Example
 Here is a rather funny view in PyMOL:
 ![Pymol](images/example_pymol.png)
-Here is the equivalent snapshot transpiled to NGL.
+Here is the equivalent snapshot transpiled to NGL (link to [example.html](http://www.well.ox.ac.uk/~matteo/junk/example.html)).
 ![Pymol](images/example_ngl.png)
 
 ## Notes on PSE side
@@ -65,6 +65,7 @@ For more see [my notes on the conversion of the view](notes_on_view_conversion.m
 ### Representation
 The atom information is kept in `reps`. Say `PyMOL>iterate 1UBQ, print resi, resn,name,ID,reps`.
 This is an integer with no information give. However, looking at how it behaves it is clear it is a binary number where each position controls lines, sticks, cartoon and surface.
+
 0. Sticks
 1. Spheres
 2. Surface
