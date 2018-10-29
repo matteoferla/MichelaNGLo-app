@@ -190,7 +190,7 @@ def test():
             reps = block
     trans.convert_view(view)
     trans.convert_reps(reps)
-    code=trans.to_html_line(ngl='ngl.js')
+    code=trans.to_html_line() #ngl='ngl.js'
     trans.write_hmtl(template_file='test2.mako',output_file='test_2.html', code=code)
 
 

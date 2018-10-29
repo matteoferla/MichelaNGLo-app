@@ -50,6 +50,12 @@ The source of the NGL code can be changed:
 * Automate the retrieval of PyMOL data: currently text output is parsed. But a wrapper for the application or using the pymol library would be best.
 * Make a server.
 
+## Example
+Here is a rather funny view in PyMOL:
+![Pymol](images/example_pymol.png)
+Here is the equivalent snapshot transpiled to NGL.
+![Pymol](images/example_ngl.png)
+
 ## Notes on PSE side
 A Pse is encoded, so there is no way to read it except with Pymol. But Pymol can reveal it's secrets.
 ### Orientation

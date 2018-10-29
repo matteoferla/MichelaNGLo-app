@@ -24,14 +24,14 @@
                     var stage = new NGL.Stage( "viewport",{backgroundColor: "white"});
                     stage.loadFile( "rcsb://1UBQ").then(function (protein) {
                         window.protein=protein;
-                        var m4 = (new NGL.Matrix4).fromArray([0.7028832919662867, -15.555627368224188, -42.22285806091866, 0.0, 44.899153041969875, 3.027791553007612, -0.36819969318162726, 0.0, 2.968061030936039, -42.12016318698766, 15.567270234463177, 0.0, -26.235111237, -28.054784775, -3.878722429, 1.0]); stage.viewerControls.orient(m4);
+                        var m4 = (new NGL.Matrix4).fromArray([-33.08379747084204, 52.62455953102059, -26.32785134913191, 0.0, -56.675070010806365, -20.374221977107002, 30.493959724841147, 0.0, 15.825718589909755, 37.04851937306921, 54.166395608812174, 0.0, -30.421813965, -32.531013489, -13.075076103, 1.0]); stage.viewerControls.orient(m4);
                         
-					protein.removeAllRepresentations();
-					var sticks = new NGL.Selection( "1.N or 1.CA or 1.C or 1.O or 1.CB or 1.CG or 1.SD or 1.CE or 30.N or 30.CA or 30.C or 30.O or 30.CB or 30.CG1 or 30.CG2 or 30.CD1" );
-					protein.addRepresentation( "licorice", { sele: sticks.string} );
+						protein.removeAllRepresentations();
+						var sticks = new NGL.Selection( "67.N or 67.CA or 67.C or 67.O or 67.CB or 67.CG or 67.CD1 or 67.CD2" );
+						protein.addRepresentation( "licorice", { sele: sticks.string} );
 
-					var cartoon = new NGL.Selection( "14 or 15 or 19 or 1 or 13 or 16 or 11 or 17 or 12 or 20 or 18 or 10 or 2" );
-					protein.addRepresentation( "cartoon", { sele: cartoon.string} );
+						var cartoon = new NGL.Selection( "28 or 29 or 31 or 23 or 26 or 32 or 24 or 25 or 33 or 27 or 30 or 34 or 35 or 22" );
+						protein.addRepresentation( "cartoon", { sele: cartoon.string} );
 
                         stage.viewerControls.orient(m4);
                     });
