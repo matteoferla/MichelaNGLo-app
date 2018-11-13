@@ -20,6 +20,7 @@ I am not sure how, but this could be due to a potential different handedness of 
 In NGL the following is seen:
 
     //position from PyMOL
+    //gained from the PyMOL cmd `get_view`
     var position = (new THREE.Vector3).fromArray([29.512767792, 18.998723984, 16.735183716]);
     shapeComp.setPosition(position) //is in the right place
     shapeComp.position //is negative
