@@ -1,0 +1,3 @@
+[run]
+source = pymol_ngl_transpiler_app
+omit = pymol_ngl_transpiler_app/test*

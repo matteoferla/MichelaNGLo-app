@@ -18,42 +18,40 @@
 
 <div style="max-width: 800px;"><div id="viewport" style="width:100%; height: 0; padding-bottom: 100%;"></div></div>
 
-
-        <!-- **inserted code**  -->
-        <script src="https://cdn.rawgit.com/arose/ngl/v0.10.4-1/dist/ngl.js" type="text/javascript"></script>
-        <script type="text/javascript">
-                    var stage = new NGL.Stage( "viewport",{backgroundColor: "white"});
-                    stage.loadFile( "rcsb://1UBQ").then(function (protein) {
-                        window.protein=protein;
-                        var nonCmap = {"N": "0x3333ff", "O": "0xff4c4c", "S": "0xff3333"};
-        var sermap={'298': '0x33ff33', '301': '0x33ff33', '302': '0x33ff33'}; 
-        var chainmap={'A': '0x00ffff'}; 
-        var resmap={'A12': '0xff00ff', 'A15': '0x00ff7f', 'A58': '0xff00ff', 'A64': '0x00ff7f', 'A71': '0x00ff7f'};
-        var schemeId = NGL.ColormakerRegistry.addScheme(function (params) {
-          this.atomColor = function (atom) {
-            if (atom.serial in sermap)  {return +sermap[atom.serial]}
-            else if (atom.element in nonCmap) {return +nonCmap[atom.element]}
-            else if (atom.chainid+atom.resno in resmap) {return +resmap[atom.chainid+atom.resno]}
-            else if (atom.chainid in chainmap) {return +chainmap[atom.chainid]}
-            else {return 0x000000} //black as the darkest error!
+<!-- **inserted code**  -->
+<script src="https://cdn.rawgit.com/arose/ngl/v0.10.4-1/dist/ngl.js" type="text/javascript"></script>
+<script type="text/javascript">            
+            var stage = new NGL.Stage( "viewport",{backgroundColor: "white"});
+            stage.loadFile( "rcsb://1UBQ").then(function (protein) {
+                window.protein=protein;
+                    
+                var nonCmap = {"N": "0x3333ff", "O": "0xff4c4c", "S": "0xff3333"};
+                var sermap={'298': '0x33ff33', '301': '0x33ff33', '302': '0x33ff33'}; 
+                var chainmap={'A': '0x00ffff'}; 
+                var resmap={'A12': '0xff00ff', 'A15': '0x00ff7f', 'A58': '0xff00ff', 'A64': '0x00ff7f', 'A71': '0x00ff7f'};
+                var schemeId = NGL.ColormakerRegistry.addScheme(function (params) {
+                    this.atomColor = function (atom) {
+                        if (atom.serial in sermap)  {return +sermap[atom.serial]}
+                        else if (atom.element in nonCmap) {return +nonCmap[atom.element]}
+                        else if (atom.chainid+atom.resno in resmap) {return +resmap[atom.chainid+atom.resno]}
+                        else if (atom.chainid in chainmap) {return +chainmap[atom.chainid]}
+                        else {return 0x000000} //black as the darkest error!
+                    };
+                });
             
-          };
-        });
-
-                        var m4 = (new NGL.Matrix4).fromArray([20.041469671207093, -52.00370189098627, -37.70915085659872, 0.0, 10.739955719928115, 41.65853161862732, -51.74222357868491, 0.0, 63.33268584003554, 9.39199537068619, 20.707364538764377, 0.0, -30.626810074, -30.357639313, -19.690916061, 1.0]); stage.viewerControls.orient(m4);
-                        
-						protein.removeAllRepresentations();
-						var sticks = new NGL.Selection( "1.N or 1.CA or 1.C or 1.O or 1.CB or 1.CG or 1.SD or 1.CE or 39.N or 39.CA or 39.C or 39.O or 39.CB or 39.CG or 39.OD1 or 39.OD2 or 65.N or 65.CA or 65.C or 65.O or 65.CB or 65.OG" );
-						protein.addRepresentation( "licorice", {color: schemeId, sele: sticks.string} );
-
-						var cartoon = new NGL.Selection( "29 or 54 or 26 or 1 or 61 or 31 or 75 or 15 or 38 or 49 or 52 or 4 or 37 or 46 or 53 or 71 or 72 or 70 or 32 or 23 or 67 or 65 or 59 or 58 or 63 or 7 or 20 or 41 or 12 or 24 or 8 or 57 or 39 or 47 or 64 or 30 or 21 or 3 or 14 or 35 or 40 or 16 or 76 or 68 or 13 or 27 or 45 or 66 or 48 or 36 or 22 or 25 or 6 or 42 or 43 or 34 or 9 or 44 or 50 or 69 or 17 or 51 or 10 or 73 or 60 or 74 or 19 or 33 or 18 or 11 or 56 or 62 or 55 or 2 or 28 or 5" );
-						protein.addRepresentation( "cartoon", {color: schemeId, sele: cartoon.string} );
-
-                        stage.viewerControls.orient(m4);
-                    });
-        </script>
-        <!-- **end of code** -->
+                    
+                protein.removeAllRepresentations();
+                var sticks = new NGL.Selection( "1.N or 1.CA or 1.C or 1.O or 1.CB or 1.CG or 1.SD or 1.CE or 39.N or 39.CA or 39.C or 39.O or 39.CB or 39.CG or 39.OD1 or 39.OD2 or 65.N or 65.CA or 65.C or 65.O or 65.CB or 65.OG" );
+                protein.addRepresentation( "licorice", {color: schemeId, sele: sticks.string} );
+                var cartoon = new NGL.Selection( "8 or 68 or 34 or 33 or 54 or 9 or 73 or 32 or 58 or 43 or 40 or 25 or 49 or 24 or 50 or 45 or 12 or 59 or 46 or 26 or 28 or 51 or 66 or 1 or 39 or 4 or 69 or 52 or 38 or 21 or 61 or 3 or 16 or 53 or 10 or 19 or 76 or 56 or 60 or 63 or 41 or 5 or 11 or 47 or 57 or 62 or 23 or 7 or 75 or 37 or 2 or 18 or 71 or 13 or 22 or 65 or 31 or 35 or 15 or 48 or 17 or 14 or 36 or 20 or 74 or 30 or 44 or 42 or 67 or 29 or 72 or 6 or 70 or 64 or 55 or 27" );
+                protein.addRepresentation( "cartoon", {color: schemeId, sele: cartoon.string} );
             
+                var m4 = (new NGL.Matrix4).fromArray([20.041469671207093, -52.00370189098627, -37.70915085659872, 0.0, 10.739955719928115, 41.65853161862732, -51.74222357868491, 0.0, 63.33268584003554, 9.39199537068619, 20.707364538764377, 0.0, -30.626810074, -30.357639313, -19.690916061, 1.0]); stage.viewerControls.orient(m4);
+                stage.viewerControls.orient(m4);
+            });
+</script>
+<!-- **end of code** -->
+
 
 <script type="text/javascript">
     function saveImg() {

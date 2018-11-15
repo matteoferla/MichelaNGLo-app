@@ -138,8 +138,17 @@ class PyMolTranspiler:
                      ('pseudoatom', 5387, (0.8999999761581421, 0.8999999761581421, 0.8999999761581421))])
 
     def __init__(self, verbose=False, validation=False, view=None, representation=None, pdb=''):
+        """
+        Converter
+        :param verbose: print?
+        :param validation: print validation_text set for pymol?
+        :param view: the text from PymOL get_view
+        :param representation: the text from PyMOL iterate
+        :param pdb: the PDB name or code
+        """
         self.verbose = verbose
-        self.validation = validation
+        self.validation = validation #boolean for printing.
+        self.validation_text = ''
         self.pdb = pdb
         self.rotation = None
         self.modrotation = None
@@ -177,15 +186,15 @@ class PyMolTranspiler:
         m4 = np.vstack((c, np.ones((1, 4))))
         m4[3, 0:3] = -self.position
         self.m4 = m4
-        if self.validation == True:
-            print('axes')
-            print('cgo_arrow [-50,0,0], [50,0,0], gap=0,color=tv_red')
-            print('cgo_arrow [0,-50,0], [0,50,0], gap=0,color=tv_green')
-            print('cgo_arrow [0,0,-50], [0,0,50], gap=0,color=tv_blue')
-            print('cgo_arrow {0}, {1}, gap=0'.format(self.teleposition.tolist(), self.position.tolist()))
+        self.validation_text = 'axes\ncgo_arrow [-50,0,0], [50,0,0], gap=0,color=tv_red\n'+\
+                               'cgo_arrow [0,-50,0], [0,50,0], gap=0,color=tv_green\n'+\
+                               'cgo_arrow [0,0,-50], [0,0,50], gap=0,color=tv_blue\n'+\
+                               'cgo_arrow {0}, {1}, gap=0'.format(self.teleposition.tolist(), self.position.tolist())+\
+                               'set_view (\\\n{})'.format(',\\\n'.join(['{0:f}, {1:f}, {2:f}'.format(x, y, z) for x, y, z in
+                                                           zip(pymolian[:-2:3], pymolian[1:-1:3], pymolian[2::3])]))
             # So it is essential that the numbers be in f format and not e format. or it will be shifted. Likewise for the brackets.
-            print('set_view (\\\n{})'.format(',\\\n'.join(['{0:f}, {1:f}, {2:f}'.format(x, y, z) for x, y, z in
-                                                           zip(pymolian[:-2:3], pymolian[1:-1:3], pymolian[2::3])])))
+        if self.validation == True:
+            print(self.validation)
         return self
 
     def get_view(self, output='matrix'):
@@ -201,7 +210,7 @@ class PyMolTranspiler:
             return self.m4
 
     def convert_representation(self, text):
-        """PyMOL>iterate 1UBQ, print resi, resn,name,ID,reps, color
+        """PyMOL>iterate all, print resi, resn,name,ID,reps, color
         reps seems to be a binary number. controlling the following
         * 0th bit: sticks
         * 7th bit: line
@@ -251,26 +260,25 @@ class PyMolTranspiler:
         self.colors = {'carbon':carboncolorset,'non-carbon': colorset}
         return self
 
-    def get_reps(self, tabbed=6):  # '^'+atom['chain']
+    def get_reps(self, inner_tabbed=1):  # '^'+atom['chain']
         assert self.atoms, 'Needs convert_reps first'
-        T = '\n' + '\t' * int(tabbed)
-        code = ['protein.removeAllRepresentations();']
+        code = ['','protein.removeAllRepresentations();']
         if self.colors:
             color_str='color: schemeId,'
         else:
             color_str =''
         if self.lines:
             code.append('var lines = new NGL.Selection( "{0}" );'.format(' or '.join(self.lines)))
-            code.append('protein.addRepresentation( "line", {'+color_str+' sele: lines.string} );\n')
+            code.append('protein.addRepresentation( "line", {'+color_str+' sele: lines.string} );')
         if self.sticks:
             code.append('var sticks = new NGL.Selection( "{0}" );'.format(' or '.join(self.sticks)))
-            code.append('protein.addRepresentation( "licorice", {'+color_str+' sele: sticks.string} );\n')
+            code.append('protein.addRepresentation( "licorice", {'+color_str+' sele: sticks.string} );')
         if self.cartoon:
             code.append('var cartoon = new NGL.Selection( "{0}" );'.format(' or '.join(self.cartoon)))
-            code.append('protein.addRepresentation( "cartoon", {'+color_str+' sele: cartoon.string} );\n')
-        return T + T.join(code)
+            code.append('protein.addRepresentation( "cartoon", {'+color_str+' sele: cartoon.string} );')
+        return self.indent(code, inner_tabbed)
 
-    def get_color(self):
+    def get_color(self, uniform_non_carbon=False, inner_tabbed=1):
         #determine what colors we have.
         #{'carbon':carboncolorset,'non-carbon': colorset}
         elemental_mapping = {}
@@ -285,9 +293,10 @@ class PyMolTranspiler:
             else:
                 colors_by_usage=sorted(self.colors['non-carbon'][elem].keys(), key=lambda c: len(self.colors['non-carbon'][elem][c]), reverse=True)
                 elemental_mapping[elem]=self.swatch[colors_by_usage[0]].hex
-                for color_id in colors_by_usage[1:]:
-                    for serial in self.colors['non-carbon'][elem][color_id]:
-                        serial_mapping[serial] = self.swatch[color_id].hex
+                if not uniform_non_carbon:
+                    for color_id in colors_by_usage[1:]:
+                        for serial in self.colors['non-carbon'][elem][color_id]:
+                            serial_mapping[serial] = self.swatch[color_id].hex
         #carbon
         for chain in self.colors['carbon']:
             colors_by_usage = sorted(set([col for resi in self.colors['carbon'][chain] for col in self.colors['carbon'][chain][resi]]),
@@ -301,49 +310,58 @@ class PyMolTranspiler:
                 else:
                     print(self.colors['carbon'][chain][resi])
                     pass # residue with different colored carbons!
-        return string.Template('''var nonCmap = $elem;
-        var sermap=$ser; 
-        var chainmap=$chain; 
-        var resmap=$res;
-        var schemeId = NGL.ColormakerRegistry.addScheme(function (params) {
-          this.atomColor = function (atom) {
-            if (atom.serial in sermap)  {return +sermap[atom.serial]}
-            else if (atom.element in nonCmap) {return +nonCmap[atom.element]}
-            else if (atom.chainid+atom.resno in resmap) {return +resmap[atom.chainid+atom.resno]}
-            else if (atom.chainid in chainmap) {return +chainmap[atom.chainid]}
-            else {return 0x000000} //black as the darkest error!
-            $ifs
-          };
-        });
-''').safe_substitute(ifs='',elem=json.dumps(elemental_mapping), ser=serial_mapping, chain=catenary_mapping, res=residual_mapping)
+        code= string.Template('''
+var nonCmap = $elem;
+var sermap=$ser; 
+var chainmap=$chain; 
+var resmap=$res;
+var schemeId = NGL.ColormakerRegistry.addScheme(function (params) {
+    this.atomColor = function (atom) {
+        if (atom.serial in sermap)  {return +sermap[atom.serial]}
+        else if (atom.element in nonCmap) {return +nonCmap[atom.element]}
+        else if (atom.chainid+atom.resno in resmap) {return +resmap[atom.chainid+atom.resno]}
+        else if (atom.chainid in chainmap) {return +chainmap[atom.chainid]}
+        else {return 0x000000} //black as the darkest error!
+    };
+});''').safe_substitute(elem=json.dumps(elemental_mapping), ser=serial_mapping, chain=catenary_mapping, res=residual_mapping)
+        return self.indent(code, inner_tabbed)
 
-    def to_html_line(self, ngl='https://cdn.rawgit.com/arose/ngl/v0.10.4-1/dist/ngl.js', viewport='viewport', tabbed=6):
+    def indent(self,code, tabbed=0):
+        if isinstance(code, str):
+            code = code.split('\n')
+        return ''.join([' ' * 4 * int(tabbed) + row + '\n' for row in code])
+
+    def get_js(self, viewport='viewport', inner_tabbed=3, uniform_non_carbon=False):
+        code = string.Template('''
+var stage = new NGL.Stage( "$viewport",{backgroundColor: "white"});
+stage.loadFile( "$pdb").then(function (protein) {
+    window.protein=protein;
+    $color
+    $reps
+    $orient
+    stage.viewerControls.orient(m4);
+});''').safe_substitute(reps=self.get_reps(),
+                                         orient=self.get_view(output='string'),
+                                         color=self.get_color(uniform_non_carbon),
+                                         pdb=('rcsb://' + self.pdb if len(self.pdb) == 4 else self.pdb),
+                                         viewport=viewport)
+        return self.indent(code, inner_tabbed)
+
+    def get_html(self, ngl='https://cdn.rawgit.com/arose/ngl/v0.10.4-1/dist/ngl.js', viewport='viewport', tabbed=0, uniform_non_carbon=False):
         """
         Returns a string to be copy-pasted into HTML code.
         :param ngl: (optional) the address to ngl.js. If unspecified it gets it from the RawGit CDN
         :param viewport: (optional) the id of the viewport div, without the hash.
         :return: a string.
         """
-        return string.Template('''
-        <!-- **inserted code**  -->
-        <script src="$ngl" type="text/javascript"></script>
-        <script type="text/javascript">
-                    var stage = new NGL.Stage( "$viewport",{backgroundColor: "white"});
-                    stage.loadFile( "$pdb").then(function (protein) {
-                        window.protein=protein;
-                        $color
-                        $orient
-                        $reps
-                        stage.viewerControls.orient(m4);
-                    });
-        </script>
-        <!-- **end of code** -->
-            ''').safe_substitute(reps=self.get_reps(tabbed=tabbed),
-                                 orient=self.get_view(output='string'),
-                                 color=self.get_color(),
-                                 pdb=('rcsb://' + self.pdb if len(self.pdb) == 4 else self.pdb),
-                                 ngl=ngl,
-                                 viewport=viewport)
+        if ngl:
+            ngl_string='<script src="{0}" type="text/javascript"></script>\n'.format(ngl)
+        else:
+            ngl_string = ''
+        code=('<!-- **inserted code**  -->\n{ngl_string}<script type="text/javascript">{js}</script>\n<!-- **end of code** -->').format(
+                                 ngl_string=ngl_string,
+                                 js=self.get_js(viewport, inner_tabbed=tabbed + 3, uniform_non_carbon=uniform_non_carbon))
+        return self.indent(code, tabbed)
 
     def write_hmtl(self, template_file='test.mako', output_file='test_generated.html', **kargs):
         if self.verbose:
@@ -369,7 +387,8 @@ def test():
             warn('Unknown block: '+block)
     trans.convert_view(view)
     trans.convert_representation(reps)
-    code = trans.to_html_line()  # ngl='ngl.js'
+    code = trans.get_html(tabbed=0)  # ngl='ngl.js'
+    print(code)
     trans.write_hmtl(template_file='test2.mako', output_file='example.html', code=code)
 
 
