@@ -45,7 +45,8 @@ def ajax_convert(request):
         else:
             return {'snippet': code, 'snippet_run':trans.get_js(uniform_non_carbon=uniform_non_carbon), 'error': False,'validation':trans.validation_text}
     except:
-        return {'snippet': traceback.format_exc(), 'error': 'danger','error_msg':'The code failed to run serverside','validation':''}
+        print(traceback.format_exc())
+        return {'snippet': traceback.format_exc(), 'snippet_run':'','error_title':'A major error arose', 'error': 'danger','error_msg':'The code failed to run serverside','validation':''}
 
 
 

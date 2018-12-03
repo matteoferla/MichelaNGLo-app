@@ -177,7 +177,7 @@ class PyMolTranspiler:
         pymolian = np.array([float(i.replace('\\', '').replace(',', '')) for i in text.split() if i.find('.') > 0])  # isnumber is for ints
         self.rotation = pymolian[0:9].reshape([3, 3])
         depth = pymolian[9:12]
-        self.z = abs(depth[2])
+        self.z = abs(depth[2])*.6
         self.position = pymolian[12:15]
         self.teleposition = np.matmul(self.rotation, -depth) + self.position
 
@@ -210,24 +210,30 @@ class PyMolTranspiler:
             return self.m4
 
     def convert_representation(self, text):
-        """PyMOL>iterate all, print resi, resn,name,ID,reps, color
+        """iterate all, ID,chain,resi, resn,name, elem,reps, color
         reps seems to be a binary number. controlling the following
         * 0th bit: sticks
         * 7th bit: line
         * 5th bit: cartoon
         * 2th bit: surface
         """
+        headers=('ID','chain','resi', 'resn', 'name', 'elem','reps', 'color')
         for line in text.split('\n'):
             if not line:
                 continue
             elif line.find('terate') != -1:  # twice. I/i
-                continue
+                if line.count(':'):
+                    continue
+                else:
+                    headers = [element.rstrip().lstrip() for element in line.split(',')][1:]
             else:
-                self.atoms.append(dict(zip(('ID','chain','resi', 'resn', 'name', 'elem','reps', 'color'), line.split())))
+                # pymol seems to have two alternative outputs.
+                self.atoms.append(dict(zip(headers, line.replace('(','').replace(')','').replace(',','').replace('\'','').split())))
         # convert reps field
         sticks = []
         lines = []
         cartoon = []
+        surface = []
         for atom in self.atoms:
             reps = list(reversed("{0:0>8b}".format(int(atom['reps']))))
             # sticks
@@ -237,6 +243,8 @@ class PyMolTranspiler:
                 lines.append(atom['resi'] + '.' + atom['name'])
             if reps[5] == '1':  # cartoon. special case...
                 cartoon.append(atom['resi'])
+            if reps[2] == '1':
+                surface.append(atom['resi'])
         self.cartoon = list(set(cartoon))
         self.sticks = sticks
         self.lines = lines
@@ -259,6 +267,14 @@ class PyMolTranspiler:
                 colorset[atom['elem']][atom['color']].append(atom['ID'])
         self.colors = {'carbon':carboncolorset,'non-carbon': colorset}
         return self
+
+    @staticmethod
+    def collapse_list(l):
+        l=sorted(l)
+        for i in range(1,len(l)):
+            e = l[i]
+            #if l[i-1] == ....
+        return ' or '.join(l)
 
     def get_reps(self, inner_tabbed=1):  # '^'+atom['chain']
         assert self.atoms, 'Needs convert_reps first'

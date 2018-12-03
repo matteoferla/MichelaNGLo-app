@@ -11,7 +11,7 @@
                 <p class="card-text">Please see <a href="https://github.com/matteoferla/PyMOL-to-NGL-transpiler/blob/master/README.md">the Github readme</a> for documentation.</p>
                 <h3>Input via PyMOL output</h3>
                 <p>For now this is the only way. In future an upload will be present.</p>
-                <p>To generate the pyMOL ouput use the commands in PyMOL <code>iterate all, print resi, resn,name,ID,reps, color</code> and <code>get_view</code>. Then copy-paste the whole output
+                <p>To generate the pyMOL ouput use the commands in PyMOL <code>iterate all, ID,chain,resi, resn,name, elem,reps, color</code> and <code>get_view</code>. Then copy-paste the whole output
                     here.</p>
                 <form>
                     <div class="row">

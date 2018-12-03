@@ -25,9 +25,11 @@
                 <code id="validation_code">${validation}</code></pre>
         </div>
     % endif
-            <hr>
+    % if snippet:
+        <hr>
         <h4>Live</h4>
         <div id="viewport" style="width:100%; height: 0; padding-bottom: 100%;"></div>
+    % endif
     % endif
 </li>
 % if snippet:
