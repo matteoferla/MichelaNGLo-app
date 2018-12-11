@@ -264,6 +264,7 @@ class PyMolTranspiler:
             if atom['elem'] == 'C':
                 carboncolorset[atom['chain']][atom['resi']][atom['color']].append(atom['name'])
             else:
+                print(atom)
                 colorset[atom['elem']][atom['color']].append(atom['ID'])
         self.colors = {'carbon':carboncolorset,'non-carbon': colorset}
         return self

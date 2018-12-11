@@ -8,7 +8,7 @@ set_view (\
     30.626810074,   30.357639313,   19.690916061,\
     41.949493408,   92.637161255,  -20.000000000 )
 ### cut above here and paste into script ###
-PyMOL>iterate all, print ID,chain, resi, resn,name,elem,reps, color
+PyMOL>iterate all, ID,chain, resi, resn,name,elem,reps, color
 1 A 1 MET N N 33 27
 2 A 1 MET CA C 33 5
 3 A 1 MET C C 33 5
