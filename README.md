@@ -80,6 +80,32 @@ This is an integer with no information give. However, looking at how it behaves 
 11. Non-bounded &mdash;Ligand (HETATM) properties are otherwise the same
 12. Cell
 
+### Primitive equivalence table
+
+| PyMol  | PyMol reps bit | NGL |
+| ------------- | --- |------------- |
+| `spheres`  | 000000000010 | `spacefill` |
+| NA | &mdash; | `ball+stick` |
+| NA | &mdash; | `helixorient` |
+| `lines`  | 000010000000 | `line` |
+| `sticks`  | 000000000001 | `licorice`  |
+| NA | &mdash; | `hyperball` |
+| NA | &mdash; | `trace` |
+| `ribbon` | 000001000000 | `backbone` |
+| NA | &mdash; | `ribbon` |
+| `cartoon` | 000000100000 | `cartoon` |
+| `surface` | 000000000100 | `surface` | 
+| `label` | 000000001000 | `label` |
+| `non-bounded spheres` | 000000010000 | ?? |
+| NA | &mdash; |`rope`|
+| "putty"* | &mdash; | `tube` |
+| `mesh`   | 000100000000 | &lowast; |
+| `dots`  | 001000000000 | `point` |
+| `non-bounded` | 010000000000 | &lowast; |
+| `cell` | 100000000000 | `cell` |
+
+&lowast;) The two differ in how this is handled.
+
 ### Complicated?
 The code seems a bit complex when it comes to selections. The most obvious thing to do is to just have a list of the atoms with a given color and representation. However, this has two problems:
 first, the NGL atom serial does not always map to the same PyMOL atom ID as both try to fix issues in PDB atom id, the second is that having a list of thousands of ids quickly becomes heavy.
