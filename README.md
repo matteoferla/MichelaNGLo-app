@@ -96,7 +96,7 @@ This is an integer with no information give. However, looking at how it behaves 
 | `cartoon` | 000000100000 | `cartoon` |
 | `surface` | 000000000100 | `surface` | 
 | `label` | 000000001000 | `label` |
-| `non-bounded spheres` | 000000010000 | ?? |
+| `non-bounded spheres` | 000000010000 | &lowast; |
 | NA | &mdash; |`rope`|
 | "putty"* | &mdash; | `tube` |
 | `mesh`   | 000100000000 | &lowast; |

@@ -23,7 +23,7 @@ def ajax_convert(request):
             uniform_non_carbon = True
         indent=int(request.POST['indent'])
         # make results
-        trans = PyMolTranspiler(False,False)
+        trans = PyMolTranspiler(verbose=False, validation=False)
         trans.pdb = request.POST['pdb']
         view = ''
         reps = ''

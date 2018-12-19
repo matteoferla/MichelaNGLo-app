@@ -237,7 +237,7 @@ class PyMolTranspiler:
         * 2th bit: surface
         """
         if isinstance(represenation,str):
-            text=represenation # TODO FIX!
+            text=represenation
             headers=('ID','chain','resi', 'resn', 'name', 'elem','reps', 'color') # gets ignored if iterate> like is present
             for line in text.split('\n'):
                 if not line:
