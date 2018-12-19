@@ -28,6 +28,10 @@ from mako.template import Template
 import markdown
 import string
 
+pymol_argv = ['pymol', '-qc']
+import pymol
+pymol.finish_launching()
+
 
 ###############################################################
 
@@ -137,9 +141,10 @@ class PyMolTranspiler:
                      ('deuterium', 5385, (0.8999999761581421, 0.8999999761581421, 0.8999999761581421)), ('lonepair', 5386, (0.5, 0.5, 0.5)),
                      ('pseudoatom', 5387, (0.8999999761581421, 0.8999999761581421, 0.8999999761581421))])
 
-    def __init__(self, verbose=False, validation=False, view=None, representation=None, pdb=''):
+    def __init__(self, file=None, verbose=False, validation=False, view=None, representation=None, pdb=''):
         """
         Converter
+        :param: file: filename of PSE file.
         :param verbose: print?
         :param validation: print validation_text set for pymol?
         :param view: the text from PymOL get_view
@@ -162,19 +167,33 @@ class PyMolTranspiler:
         self.lines=[]
         self.sticks=[]
         self.colors=[]
+        if file:
+            assert '.pse' in file.lower(), 'Only PSE files accepted.'
+            pymol.cmd.load(file)
+            v = pymol.cmd.get_view()
+            keys = ('ID', 'chain', 'resi', 'resn', 'name', 'elem', 'reps', 'color')
+            myspace = {'data': []} #myspace['data'] is the same as self.atoms
+            pymol.cmd.iterate('(all)', "data.append({'ID': ID, 'chain': chain, 'resi': resi, 'resn': resn, 'name':name, 'elem':elem, 'reps':reps, 'color':color})", space=myspace)
+            self.convert_representation(myspace['data'])
+            self.convert_view(v)
+            pymol.cmd.save(file.replace('.pse','')+'.pdb')
+            pymol.cmd.remove('(all)')
         if view:
             self.convert_view(view)
         if representation:
             self.convert_representation(representation)
 
-    def convert_view(self, text):
+    def convert_view(self, view):
         """
         Converts a Pymol `get_view` output to a NGL M4 matrix.
         If the output is set to string, the string will be a JS command that will require the object stage to exist.
-        :param text:
+        :param view: str or tuple
         :return: np 4x4 matrix or a NGL string
         """
-        pymolian = np.array([float(i.replace('\\', '').replace(',', '')) for i in text.split() if i.find('.') > 0])  # isnumber is for ints
+        if isinstance(view, str):
+            pymolian = np.array([float(i.replace('\\', '').replace(',', '')) for i in view.split() if i.find('.') > 0])  # isnumber is for ints
+        else:
+            pymolian = np.array(view)
         self.rotation = pymolian[0:9].reshape([3, 3])
         depth = pymolian[9:12]
         self.z = abs(depth[2])*.6
@@ -209,7 +228,7 @@ class PyMolTranspiler:
         elif output.lower() == 'matrix':
             return self.m4
 
-    def convert_representation(self, text):
+    def convert_representation(self, represenation):
         """iterate all, ID,chain,resi, resn,name, elem,reps, color
         reps seems to be a binary number. controlling the following
         * 0th bit: sticks
@@ -217,18 +236,22 @@ class PyMolTranspiler:
         * 5th bit: cartoon
         * 2th bit: surface
         """
-        headers=('ID','chain','resi', 'resn', 'name', 'elem','reps', 'color')
-        for line in text.split('\n'):
-            if not line:
-                continue
-            elif line.find('terate') != -1:  # twice. I/i
-                if line.count(':'):
+        if isinstance(represenation,str):
+            text=represenation # TODO FIX!
+            headers=('ID','chain','resi', 'resn', 'name', 'elem','reps', 'color') # gets ignored if iterate> like is present
+            for line in text.split('\n'):
+                if not line:
                     continue
+                elif line.find('terate') != -1:  # twice. I/i
+                    if line.count(':'):
+                        continue
+                    else:
+                        headers = [element.rstrip().lstrip() for element in line.split(',')][1:]
                 else:
-                    headers = [element.rstrip().lstrip() for element in line.split(',')][1:]
-            else:
-                # pymol seems to have two alternative outputs.
-                self.atoms.append(dict(zip(headers, line.replace('(','').replace(')','').replace(',','').replace('\'','').split())))
+                    # pymol seems to have two alternative outputs.
+                    self.atoms.append(dict(zip(headers, line.replace('(','').replace(')','').replace(',','').replace('\'','').split())))
+        else:
+            self.atoms=represenation
         # convert reps field
         sticks = []
         lines = []
@@ -264,7 +287,6 @@ class PyMolTranspiler:
             if atom['elem'] == 'C':
                 carboncolorset[atom['chain']][atom['resi']][atom['color']].append(atom['name'])
             else:
-                print(atom)
                 colorset[atom['elem']][atom['color']].append(atom['ID'])
         self.colors = {'carbon':carboncolorset,'non-carbon': colorset}
         return self
@@ -408,8 +430,18 @@ def test():
     print(code)
     trans.write_hmtl(template_file='test2.mako', output_file='example.html', code=code)
 
+def file_test():
+    trans = PyMolTranspiler(file='1gfl.pse')
+    print(trans.get_view())
+    print(trans.get_reps())
+
 
 if __name__ == "__main__":
+    file_test()
+
+
+
+    exit(0)
     ## ARGPARSER
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--version', action='version', version=__version__)
