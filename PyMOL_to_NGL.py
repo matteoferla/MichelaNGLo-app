@@ -28,7 +28,11 @@ from mako.template import Template
 import markdown
 import string
 
-pymol_argv = ['pymol', '-qc']
+if __name__ == '__main__':
+    pymol_argv = ['pymol', '-qc']
+else:
+    import __main__
+    __main__.pymol_argv = ['pymol', '-qc']
 import pymol
 pymol.finish_launching()
 
@@ -167,6 +171,7 @@ class PyMolTranspiler:
         self.lines=[]
         self.sticks=[]
         self.colors=[]
+        self.raw_pdb=None
         if file:
             assert '.pse' in file.lower(), 'Only PSE files accepted.'
             pymol.cmd.load(file)
@@ -224,7 +229,7 @@ class PyMolTranspiler:
         """
         assert self.m4 is not None, 'Cannot call get_view without having loaded the data with `convert_view(text)` or loaded a 4x4 transformation matrix (`.m4 =`)'
         if output.lower() == 'string':
-            return 'var m4 = (new NGL.Matrix4).fromArray({}); stage.viewerControls.orient(m4);'.format(self.m4.reshape(16, ).tolist())
+            return '//orient\nvar m4 = (new NGL.Matrix4).fromArray({});\nstage.viewerControls.orient(m4);'.format(self.m4.reshape(16, ).tolist())
         elif output.lower() == 'matrix':
             return self.m4
 
@@ -301,7 +306,7 @@ class PyMolTranspiler:
 
     def get_reps(self, inner_tabbed=1):  # '^'+atom['chain']
         assert self.atoms, 'Needs convert_reps first'
-        code = ['','protein.removeAllRepresentations();']
+        code = ['//representations','protein.removeAllRepresentations();']
         if self.colors:
             color_str='color: schemeId,'
         else:
@@ -347,9 +352,9 @@ class PyMolTranspiler:
                     if color_id != colors_by_usage[0]:
                         residual_mapping[chain+resi] = self.swatch[color_id].hex
                 else:
-                    print(self.colors['carbon'][chain][resi])
+                    #print(self.colors['carbon'][chain][resi])
                     pass # residue with different colored carbons!
-        code= string.Template('''
+        code= string.Template('''//define colors
 var nonCmap = $elem;
 var sermap=$ser; 
 var chainmap=$chain; 
@@ -371,20 +376,20 @@ var schemeId = NGL.ColormakerRegistry.addScheme(function (params) {
         return ''.join([' ' * 4 * int(tabbed) + row + '\n' for row in code])
 
     def get_js(self, viewport='viewport', inner_tabbed=3, uniform_non_carbon=False):
-        code = string.Template('''
-var stage = new NGL.Stage( "$viewport",{backgroundColor: "white"});
-stage.loadFile( "$pdb").then(function (protein) {
-    window.protein=protein;
-    $color
-    $reps
-    $orient
-    stage.viewerControls.orient(m4);
-});''').safe_substitute(reps=self.get_reps(),
-                                         orient=self.get_view(output='string'),
-                                         color=self.get_color(uniform_non_carbon),
-                                         pdb=('rcsb://' + self.pdb if len(self.pdb) == 4 else self.pdb),
-                                         viewport=viewport)
-        return self.indent(code, inner_tabbed)
+        code =      '\nvar stage = new NGL.Stage( "{viewport}",{{backgroundColor: "white"}});\n'.format(viewport=viewport)
+        if self.raw_pdb:
+            code += 'var stringBlob = new Blob( [ pdbData ], { type: "text/plain"} );'
+            loader=' stringBlob, { ext: "pdb" } '
+        else:
+            loader='"rcsb://' + (self.pdb if len(self.pdb) == 4 else self.pdb)+'"'
+        code +=     'stage.loadFile({loader}).then(function (protein) {{\n'.format(loader=loader)
+        code +=     '   window.protein=protein;\n'+\
+                    '   {color}\n  {reps}\n   {orient}\n'.format(reps=self.get_reps(), orient=self.get_view(output='string'), color=self.get_color(uniform_non_carbon)) +\
+                    '});\n'
+        if self.raw_pdb:
+            return 'pdbData = `{0}`;'.format(self.raw_pdb)+self.indent(code, inner_tabbed) #don't indent the raw data!
+        else:
+            return self.indent(code, inner_tabbed)
 
     def get_html(self, ngl='https://cdn.rawgit.com/arose/ngl/v0.10.4-1/dist/ngl.js', viewport='viewport', tabbed=0, uniform_non_carbon=False):
         """
@@ -427,7 +432,6 @@ def test():
     trans.convert_view(view)
     trans.convert_representation(reps)
     code = trans.get_html(tabbed=0)  # ngl='ngl.js'
-    print(code)
     trans.write_hmtl(template_file='test2.mako', output_file='example.html', code=code)
 
 def file_test():

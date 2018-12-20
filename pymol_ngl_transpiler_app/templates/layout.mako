@@ -15,9 +15,10 @@
 
     <!-- Custom styles for this scaffold -->
     <link href="${request.static_url('pymol_ngl_transpiler_app:static/theme.css')}" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.1/css/all.css" integrity="sha384-gfdkjb5BdAXd+lj+gudLWI+BXq4IuLW5IT+brZEZsLFm++aCMlF1V92rMkPaX4PP" crossorigin="anonymous">
     <style>
 
-        .footer {
+.footer {
     position: absolute;
     bottom: 0;
     width: 100%;
@@ -42,6 +43,13 @@ pre {
     background:gainsboro;
     color: darkslategrey;
     font-family: monospace;
+}
+
+.custom-file-label:after {
+    color: #fff;
+    background-color: #1e7e34;
+    border-color: #1c7430;
+    pointer: cursor;
 }
 
     </style>
