@@ -29,12 +29,21 @@ def ajax_convert(request):
             return {'error': 'danger', 'error_title': 'No PyMOL code', 'error_msg': 'PyMOL code is required to make the NGL viewer show a protein.','snippet':'','validation':''}
         elif request.params['mode'] == 'file' and not request.POST['file'].filename:
             return {'error': 'danger', 'error_title': 'No PSE file', 'error_msg': 'A PyMOL file to make the NGL viewer show a protein.','snippet':'','validation':''}
-        # convert booleans
-        if not request.POST['uniform_non_carbon'] or request.POST['uniform_non_carbon'] == 'false':
-            uniform_non_carbon=False
-        else:
-            uniform_non_carbon = True
-        indent=int(request.POST['indent'])
+
+        ## convert booleans and settings
+        def is_js_true(value): # booleans get converted into strings in json.
+            if not value or value == 'false':
+                return False
+            else:
+                return True
+
+        settings = {'tabbed': int(request.POST['indent']),
+                    'viewport': request.POST['viewport_id'],
+                    'image': is_js_true(request.POST['image']),
+                    'uniform_non_carbon':is_js_true(request.POST['uniform_non_carbon']),
+                    'verbose': False,
+                    'validation': False}
+
         # parse data
         if request.params['mode'] == 'out':
             view = ''
@@ -49,29 +58,29 @@ def ajax_convert(request):
                     pass  # empty line.
                 else:
                     minor_error = 'Unknown block: ' + block
-            trans = PyMolTranspiler(verbose=False, validation=False, view=view, representation=reps, pdb=request.POST['pdb'])
+            trans = PyMolTranspiler(view=view, representation=reps, pdb=request.POST['pdb'], **settings)
         elif request.params['mode'] == 'file':
             filename=os.path.join('pymol_ngl_transpiler_app', 'temp','{0}.pse'.format(uuid.uuid4()))
             request.POST['file'].file.seek(0)
             with open(filename, 'wb') as output_file:
                 shutil.copyfileobj(request.POST['file'].file, output_file)
-            trans = PyMolTranspiler(verbose=False, validation=False, file=filename)
+            trans = PyMolTranspiler(file=filename, **settings)
             request.session['file'] = filename
             if 'pdb_string' in request.params:
                 trans.raw_pdb = open(filename.replace('.pse','.pdb')).read()
             else:
                 trans.pdb = request.POST['pdb']
         else:
-            return {'snippet': 'Please stop trying to hack the server', 'snippet_run': '', 'error_title': 'A major error arose', 'error': 'danger', 'error_msg': 'The code failed to run serverside. Most likely malicius', 'validation': ''}
+            return {'snippet': 'Please stop trying to hack the server', 'error_title': 'A major error arose', 'error': 'danger', 'error_msg': 'The code failed to run serverside. Most likely malicius','viewport':settings['viewport']}
         # make output
-        code = trans.get_html(ngl=request.POST['cdn'], uniform_non_carbon=uniform_non_carbon, tabbed=int(indent))
+        code = trans.get_html(ngl=request.POST['cdn'], **settings)
         if minor_error:
-            return {'snippet': code, 'error': 'warning', 'error_msg':minor_error, 'error_title':'A minor error arose','validation':trans.validation_text}
+            return {'snippet': code, 'error': 'warning', 'error_msg':minor_error, 'error_title':'A minor error arose','validation':trans.validation_text, 'viewport':settings['viewport']}
         else:
-            return {'snippet': code, 'snippet_run':trans.get_js(uniform_non_carbon=uniform_non_carbon), 'error': False,'validation':trans.validation_text}
+            return {'snippet': code, 'snippet_run':trans.get_js(**{**settings, 'image': False}),'validation':trans.validation_text, 'viewport':settings['viewport']}
     except:
         print(traceback.format_exc())
-        return {'snippet': traceback.format_exc(), 'snippet_run':'','error_title':'A major error arose', 'error': 'danger','error_msg':'The code failed to run serverside','validation':''}
+        return {'snippet': traceback.format_exc(), 'snippet_run':'','error_title':'A major error arose', 'error': 'danger','error_msg':'The code failed to run serverside','validation':'', 'viewport':settings['viewport']}
 
 @view_config(route_name='save_pdb')
 def save_pdb(request):

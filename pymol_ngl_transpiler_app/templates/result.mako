@@ -1,3 +1,5 @@
+<%page args="snippet='', snippet_run='', error='', error_msg='', error_title='', validation='', viewport='viewport'"/>
+
 <li class="list-group-item" id="results">
     <h3>Results</h3>
     % if error:
@@ -10,7 +12,7 @@
     % endif
 
     % if snippet:
-        <p>Add wherever needed to the page add <code> &lt;div id="viewport" style="width:100%; height: 0; padding-bottom: 100%;"&gt;&lt;/div&gt;</code> or something similar.</p>
+        <p>Add wherever needed to the page add <code> &lt;div id="${viewport}" style="width:100%; height: 0; padding-bottom: 100%;"&gt;&lt;/div&gt;</code> or something similar.</p>
         <pre></pre>
         <p>The CSS style can be different, but the important thing is that there is a <code>width</code> or a <code>min-width</code> and a <code>height</code> or a <code>min-height</code> &mdash;in
             this example the 0 height is a special case and results in the height being equal to the width.</p>

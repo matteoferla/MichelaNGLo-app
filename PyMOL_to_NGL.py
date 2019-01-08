@@ -28,6 +28,8 @@ from mako.template import Template
 import markdown
 import string
 
+
+# prevent pymol from launching in normal mode.
 if __name__ == '__main__':
     pymol_argv = ['pymol', '-qc']
 else:
@@ -60,7 +62,7 @@ class ColorSwatch:
 
 class PyMolTranspiler:
     """
-    The class initialises as a blank object with settings unless view and/or reps is passed.
+    The class initialises as a blank object with settings unless the `file` (filename of PSE file) or `view` and/or `reps` is passed.
     For views see `.convert_view(view_string)`, which processes the output of PyMOL command `set_view`
     For representation see `.convert_reps(reps_string)`, which process the output of PyMOL command `iterate 1UBQ, print resi, resn,name,ID,reps`
     """
@@ -145,7 +147,7 @@ class PyMolTranspiler:
                      ('deuterium', 5385, (0.8999999761581421, 0.8999999761581421, 0.8999999761581421)), ('lonepair', 5386, (0.5, 0.5, 0.5)),
                      ('pseudoatom', 5387, (0.8999999761581421, 0.8999999761581421, 0.8999999761581421))])
 
-    def __init__(self, file=None, verbose=False, validation=False, view=None, representation=None, pdb=''):
+    def __init__(self, file=None, verbose=False, validation=False, view=None, representation=None, pdb='', **settings):
         """
         Converter
         :param: file: filename of PSE file.
@@ -188,7 +190,7 @@ class PyMolTranspiler:
         if representation:
             self.convert_representation(representation)
 
-    def convert_view(self, view):
+    def convert_view(self, view, **settings):
         """
         Converts a Pymol `get_view` output to a NGL M4 matrix.
         If the output is set to string, the string will be a JS command that will require the object stage to exist.
@@ -221,7 +223,7 @@ class PyMolTranspiler:
             print(self.validation)
         return self
 
-    def get_view(self, output='matrix'):
+    def get_view(self, output='matrix', **settings):
         """
         If the output is set to string, the string will be a JS command that will require the object stage to exist.
         :param output: 'matrix' | 'string'
@@ -233,7 +235,7 @@ class PyMolTranspiler:
         elif output.lower() == 'matrix':
             return self.m4
 
-    def convert_representation(self, represenation):
+    def convert_representation(self, represenation, **settings):
         """iterate all, ID,chain,resi, resn,name, elem,reps, color
         reps seems to be a binary number. controlling the following
         * 0th bit: sticks
@@ -266,13 +268,13 @@ class PyMolTranspiler:
             reps = list(reversed("{0:0>8b}".format(int(atom['reps']))))
             # sticks
             if reps[0] == '1':  # sticks.
-                sticks.append(atom['resi'] + '.' + atom['name'])
+                sticks.append('{resi}:{chain}.{name}'.format_map(atom))
             if reps[7] == '1':  # lines.
-                lines.append(atom['resi'] + '.' + atom['name'])
+                lines.append('{resi}:{chain}.{name}'.format_map(atom))
             if reps[5] == '1':  # cartoon. special case...
-                cartoon.append(atom['resi'])
+                cartoon.append('{resi}:{chain}'.format_map(atom))
             if reps[2] == '1':
-                surface.append(atom['resi'])
+                surface.append('{resi}:{chain}'.format_map(atom))
         self.cartoon = list(set(cartoon))
         self.sticks = sticks
         self.lines = lines
@@ -304,7 +306,7 @@ class PyMolTranspiler:
             #if l[i-1] == ....
         return ' or '.join(l)
 
-    def get_reps(self, inner_tabbed=1):  # '^'+atom['chain']
+    def get_reps(self, inner_tabbed=1, **settings):  # '^'+atom['chain']
         assert self.atoms, 'Needs convert_reps first'
         code = ['//representations','protein.removeAllRepresentations();']
         if self.colors:
@@ -322,7 +324,7 @@ class PyMolTranspiler:
             code.append('protein.addRepresentation( "cartoon", {'+color_str+' sele: cartoon.string} );')
         return self.indent(code, inner_tabbed)
 
-    def get_color(self, uniform_non_carbon=False, inner_tabbed=1):
+    def get_color(self, uniform_non_carbon=False, inner_tabbed=1, **settings):
         #determine what colors we have.
         #{'carbon':carboncolorset,'non-carbon': colorset}
         elemental_mapping = {}
@@ -375,27 +377,43 @@ var schemeId = NGL.ColormakerRegistry.addScheme(function (params) {
             code = code.split('\n')
         return ''.join([' ' * 4 * int(tabbed) + row + '\n' for row in code])
 
-    def get_js(self, viewport='viewport', inner_tabbed=3, uniform_non_carbon=False):
-        code =      '\nvar stage = new NGL.Stage( "{viewport}",{{backgroundColor: "white"}});\n'.format(viewport=viewport)
+    def get_js(self, viewport='viewport', inner_tabbed=3, uniform_non_carbon=False, image=False, **settings):
+        code ='\n'
+        code += 'var stage = new NGL.Stage( "{viewport}",{{backgroundColor: "white"}});\n'.format(viewport=viewport)
         if self.raw_pdb:
             code += 'var stringBlob = new Blob( [ pdbData ], { type: "text/plain"} );'
             loader=' stringBlob, { ext: "pdb" } '
         else:
             loader='"rcsb://' + (self.pdb if len(self.pdb) == 4 else self.pdb)+'"'
-        code +=     'stage.loadFile({loader}).then(function (protein) {{\n'.format(loader=loader)
-        code +=     '   window.protein=protein;\n'+\
-                    '   {color}\n  {reps}\n   {orient}\n'.format(reps=self.get_reps(), orient=self.get_view(output='string'), color=self.get_color(uniform_non_carbon)) +\
-                    '});\n'
+        code += 'stage.loadFile({loader}).then(function (protein) {{\n'.format(loader=loader)
+        code += '   window.protein=protein;\n'+\
+                '   {color}\n  {reps}\n   {orient}\n'.format(reps=self.get_reps(), orient=self.get_view(output='string'), color=self.get_color(uniform_non_carbon)) +\
+                '});\n'
+        if image:
+            code = """var imagemode=true;
+function activate () {
+    if (imagemode) {
+        var w=$('#viewport img').width();
+        var h=$('#viewport img').height();
+        $('#viewport img').detach();
+        $('#viewport p').detach();
+        $('#viewport').css('width',w).css('height',h);
+        """+code+"""
+        imagemode = false;
+    }
+}
+"""
         if self.raw_pdb:
             return 'pdbData = `{0}`;'.format(self.raw_pdb)+self.indent(code, inner_tabbed) #don't indent the raw data!
         else:
             return self.indent(code, inner_tabbed)
 
-    def get_html(self, ngl='https://cdn.rawgit.com/arose/ngl/v0.10.4-1/dist/ngl.js', viewport='viewport', tabbed=0, uniform_non_carbon=False):
+    def get_html(self, ngl='https://cdn.rawgit.com/arose/ngl/v0.10.4-1/dist/ngl.js', viewport='viewport', tabbed=0, uniform_non_carbon=False, image=False, **settings):
         """
         Returns a string to be copy-pasted into HTML code.
         :param ngl: (optional) the address to ngl.js. If unspecified it gets it from the RawGit CDN
         :param viewport: (optional) the id of the viewport div, without the hash.
+        :param image: (optional) advanced mode with clickable image?
         :return: a string.
         """
         if ngl:
@@ -404,7 +422,7 @@ var schemeId = NGL.ColormakerRegistry.addScheme(function (params) {
             ngl_string = ''
         code=('<!-- **inserted code**  -->\n{ngl_string}<script type="text/javascript">{js}</script>\n<!-- **end of code** -->').format(
                                  ngl_string=ngl_string,
-                                 js=self.get_js(viewport, inner_tabbed=tabbed + 3, uniform_non_carbon=uniform_non_carbon))
+                                 js=self.get_js(viewport, inner_tabbed=tabbed + 3, uniform_non_carbon=uniform_non_carbon, image=image))
         return self.indent(code, tabbed)
 
     def write_hmtl(self, template_file='test.mako', output_file='test_generated.html', **kargs):

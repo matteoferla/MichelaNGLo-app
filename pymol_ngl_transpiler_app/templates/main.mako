@@ -12,7 +12,7 @@
                 <form>
                 <!-- mode selector -->
                 <div class="row">
-                    <div class="col-lg-6 mb-3">
+                    <div class="col-lg-8 mb-3">
                         <div class="input-group" data-toggle="tooltip" title="Choose input method">
                           <div class="input-group-prepend">
                             <span class="input-group-text" id="input_mode-addon">Mode </span>
@@ -160,6 +160,30 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-xl-4 col-md-6 pb-4">
+                                <div class="input-group mb-3" data-toggle="tooltip"
+                                     title="the id of the div that will contain the viewport">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Viewport id</span>
+                                    </div>
+                                    <input type="text" class="form-control" id="viewport_id" value="viewport" required>
+                                    <div class="invalid-feedback" id="error_pdb">No id</div>
+                                </div>
+                            </div>
+                        <div class="col-xl-4 col-md-6 mb-4">
+                            <div class="input-group" data-toggle="tooltip"
+                                 title="Use a static image that when clicked becomes the NGL interactive protein">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text bg-secondary">
+                                        <input type="checkbox" id="image"></div>
+                                </div>
+                                <div class="input-group-append">
+                            <span class="input-group-text">
+                                Static image
+                            </span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 </form>
@@ -236,10 +260,13 @@
 
             function valid_value(id){
                 if (! $(id).val()) {
-                    $(id).addClass('is-invalid');
-                    $(id)[0].scrollIntoView();
-                    $('error_' + id).show();
-                    throw 'Incomplete #pymol_output';
+                    window.setTimeout(function () {
+                        $(id).addClass('is-invalid');
+                        $(id)[0].scrollIntoView();
+                        $('#error_' + id.replace('#','')).show();
+                        $('#throbber').modal('hide');
+                        },0);
+                    throw 'Incomplete '+id;
                 }
                 else if (!! $(id)[0].files) {return $(id)[0].files[0]}
                 else {return $(id).val();}
@@ -300,6 +327,8 @@
                 } else if (mode == 'file') {    data.append( 'file', valid_value('#upload'));
                 } else {throw 'Impossible mode';}
                 data.append( 'uniform_non_carbon',$('#uniform_non_carbon').is(':checked'));
+                data.append('viewport_id',valid_value('#viewport_id'));
+                data.append( 'image',$('#image').is(':checked'));
                 var cdn = '';
                 if ($('#cdn_bool').is(':checked')) {
                     cdn = $('#cdn').val();
