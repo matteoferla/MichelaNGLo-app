@@ -1,23 +1,34 @@
-# PyMOL-to-NGL-transpiler
+# PyMOL-to-NGL transpiler
 A script to transpile a PyMOL PSE file to a NGL.js view.
 
-*Status*: unfinished, but core functionality present.
+This is available as the script itself and [a web app (temp URL)](ngl.matteoferla.com).
 
-## Parts to convert
-Three parts are needed to convert a `.pse` file into a NGL view.
-* the model
-* orientation
-* representation
-    * lines, sticks, cartoon etc.
-    * colors
-    * surface (handled differently in NGL)
+*Status*: unfinished, but functional. See To do list.
 
-Additionally, there are
-* text/labels which are normally added in photoshop by people...
-* arrows, which are great, but in PyMol are from the add-on script `cgo_arrows` and not part of the native code
+## Aim
+
+The aim of this app is to provide a way for a user to easily generate a web-ready output that can be pasted into a webpage editor resulting in an iteractive protein view.
+
+Therefore the intended audience are biochemists that may not have any web knowledge that wish to display on their academic pages their researched protein.
+
+A future possibility is that in collaboration with specific journals this could be rolled out in papers.
+
+### Transpiler
+
+The script, and associated web app, gets a PSE file and converts it to a copy-pastable piece of code.
+
+If needed, this piece of code can include the PDB data itself, thus removing the need to store the PDB file somewhere.
+
+### Image
+
+The most commonly used protein viewing software is PyMol. Most researchers render a view and label/draw upon it in Paint/Powerpoint/Photoshop.
+Consequently, TBC.
 
 ## Script functionality
-The script `PyMOL_to_NGL.py` has the class `PyMolTranspiler`, which can be initialised thusly:
+The script `PyMOL_to_NGL.py` has the class `PyMolTranspiler`. Which accepts different starting values.
+If Pymol is installed on the system and the system is not a Windows machine, the filename of the PSE is passed and processed.
+
+which can be initialised thusly:
 
     >>> trans = PyMolTranspiler(view=get_view_output_as_string, reps=interate_output_as_string, pdb=file_of_saved_pdb)
     >>> trans.to_html_line()
@@ -40,6 +51,10 @@ The script `PyMOL_to_NGL.py` has the class `PyMolTranspiler`, which can be initi
         </script>
         <!-- **end of code** -->
         
+The The class initialises as a blank object with default settings unless the `file` (filename of PSE file) or `view` and/or `reps` is passed.
+For views see `.convert_view(view_string)`, which processes the output of PyMOL command `set_view`
+For representation see `.convert_reps(reps_string)`, which process the output of PyMOL command `iterate 1UBQ, print resi, resn,name,ID,reps`
+    
 The source of the NGL code can be changed:
 
     >>> trans.to_html_line(ngl='ngl.js')
@@ -56,7 +71,39 @@ Here is a rather funny view in PyMOL:
 Here is the equivalent snapshot transpiled to NGL (link to [example.html](http://www.well.ox.ac.uk/~matteo/junk/example.html)).
 ![Pymol](images/example_ngl.png)
 
-## Notes on PSE side
+## Issues
+If it does not work on your site, it may because some information is lost.
+
+Try adding to your page:
+
+    I am definitely in the correct HTML editor mode as this is <b>enboldened</b> and this is <span id='blue'>blue</span>.<script type="text/javascript">document.getElementById("blue").style.color = "blue";</script>
+
+And view it.
+
+* If the emboldened text is not bold, but has `&gt;b&lt;` before it, you were ending your html page in an editor that showed you the end formatting (WYSIWYG) not the raw HTML code.
+* If the emboldened text was bold, but the ought-to-be blue text was not, they the editor may be stripping JS for security reasons or you switched from raw to WYSIWYG before saving and it stripped it.
+* If both displayed as hoped then it is trickier.
+
+On Chrome show the console. To do so press the menu button at the top right next to the your face, then `More tools...` then `Developer tools`.
+Here you can see what went wrong with your page. Is there a resource not found error? If so, you may have set it to fetch something that was not there or in that location.
+
+If you thing, the fault is in the code please let me know by email. MailHide issue!
+
+## Technicalities
+### Parts to convert
+Three parts are needed to convert a `.pse` file into a NGL view.
+* the model
+* orientation
+* representation
+    * lines, sticks, cartoon etc.
+    * colors
+    * surface (handled differently in NGL)
+
+Additionally, there are
+* text/labels which are normally added in photoshop by people...
+* arrows, which are great, but in PyMol are from the add-on script `cgo_arrows` and not part of the native code
+
+### Notes on PSE side
 A Pse is encoded, so there is no way to read it except with Pymol. But Pymol can reveal it's secrets.
 ### Orientation
 I was driven spare with converting the orientation. It simply was a question of inverting the sign on the $\vec{x}$ and $\vec{z}$ of the rotational matrix, multiplying it by the absolute of the scale and adding the origin of rotation's position with inverted sign.
