@@ -23,11 +23,11 @@ def ajax_convert(request):
     try:
         minor_error=''
         ## assertions
-        if not 'pdb_string' in request.params and not request.params['pdb']:
+        if not 'pdb_string' in request.POST and not request.POST['pdb']:
             return {'error': 'danger', 'error_title': 'No PDB code', 'error_msg': 'A PDB code is required to make the NGL viewer show a protein.','snippet':'','validation':''}
-        elif request.params['mode'] == 'out' and not request.POST['pymol_output']:
+        elif request.POST['mode'] == 'out' and not request.POST['pymol_output']:
             return {'error': 'danger', 'error_title': 'No PyMOL code', 'error_msg': 'PyMOL code is required to make the NGL viewer show a protein.','snippet':'','validation':''}
-        elif request.params['mode'] == 'file' and not request.POST['file'].filename:
+        elif request.POST['mode'] == 'file' and not request.POST['file'].filename:
             return {'error': 'danger', 'error_title': 'No PSE file', 'error_msg': 'A PyMOL file to make the NGL viewer show a protein.','snippet':'','validation':''}
 
         ## convert booleans and settings
@@ -45,7 +45,7 @@ def ajax_convert(request):
                     'validation': False}
 
         # parse data
-        if request.params['mode'] == 'out':
+        if request.POST['mode'] == 'out':
             view = ''
             reps = ''
             data = request.POST['pymol_output'].split('PyMOL>')
@@ -59,14 +59,14 @@ def ajax_convert(request):
                 else:
                     minor_error = 'Unknown block: ' + block
             trans = PyMolTranspiler(view=view, representation=reps, pdb=request.POST['pdb'], **settings)
-        elif request.params['mode'] == 'file':
+        elif request.POST['mode'] == 'file':
             filename=os.path.join('pymol_ngl_transpiler_app', 'temp','{0}.pse'.format(uuid.uuid4()))
             request.POST['file'].file.seek(0)
             with open(filename, 'wb') as output_file:
                 shutil.copyfileobj(request.POST['file'].file, output_file)
             trans = PyMolTranspiler(file=filename, **settings)
             request.session['file'] = filename
-            if 'pdb_string' in request.params:
+            if 'pdb_string' in request.POST:
                 trans.raw_pdb = open(filename.replace('.pse','.pdb')).read()
             else:
                 trans.pdb = request.POST['pdb']
@@ -85,5 +85,5 @@ def ajax_convert(request):
 @view_config(route_name='save_pdb')
 def save_pdb(request):
     filename=request.session['file']
-    return FileResponse(filename,content_disposition='attachment; filename="{}"'.format(request.params['name']))
+    return FileResponse(filename,content_disposition='attachment; filename="{}"'.format(request.POST['name']))
 
