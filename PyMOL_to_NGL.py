@@ -363,13 +363,16 @@ var chainmap=$chain;
 var resmap=$res;
 var schemeId = NGL.ColormakerRegistry.addScheme(function (params) {
     this.atomColor = function (atom) {
+        chainid=atom.chainid;
+        if (! isNaN(parseFloat(chainid))) {chainid=atom.chainname} // hack for chainid/chainIndex/chainname issue if the structure is loaded from string.
         if (atom.serial in sermap)  {return +sermap[atom.serial]}
         else if (atom.element in nonCmap) {return +nonCmap[atom.element]}
-        else if (atom.chainid+atom.resno in resmap) {return +resmap[atom.chainid+atom.resno]}
-        else if (atom.chainid in chainmap) {return +chainmap[atom.chainid]}
+        else if (chainid+atom.resno in resmap) {return +resmap[chainid+atom.resno]}
+        else if (chainid in chainmap) {return +chainmap[chainid]}
         else {return 0x000000} //black as the darkest error!
     };
 });''').safe_substitute(elem=json.dumps(elemental_mapping), ser=serial_mapping, chain=catenary_mapping, res=residual_mapping)
+        #RE hack: curious issue that multichain protein chainid sometimes is numeric: protein.structure.eachAtom(function(atom) {console.log(atom.chainid);}); or atom.chainIndex atom.chainname
         return self.indent(code, inner_tabbed)
 
     def indent(self,code, tabbed=0):
