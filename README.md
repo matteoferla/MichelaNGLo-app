@@ -72,7 +72,7 @@ Here is the equivalent snapshot transpiled to NGL (link to [example.html](http:/
 ![Pymol](images/example_ngl.png)
 
 ## Issues
-If it does not work on your site, it may because some information is lost.
+If it does not work on your site, it may because some information is lost when you added it.
 
 Try adding to your page:
 
@@ -87,7 +87,10 @@ And view it.
 On Chrome show the console. To do so press the menu button at the top right next to the your face, then `More tools...` then `Developer tools`.
 Here you can see what went wrong with your page. Is there a resource not found error? If so, you may have set it to fetch something that was not there or in that location.
 
-If you thing, the fault is in the code please let me know by email. MailHide issue!
+If you thing, the fault is in the code please email me.
+
+If the demo image gives you an unsolicited black, that means something went wrong with the parsing of the parts. See the `else {return 0x000000} //black as the darkest error!` line? That is there as a last ditch.
+To debug this yourself, open the console and type `protein.structure.eachAtom(function(atom) {console.log(atom.chainid);});` or `atom.resno` or other property of `atom` until you figure out what is wrong with your structure.
 
 ## Technicalities
 ### Parts to convert
@@ -156,6 +159,27 @@ This is an integer with no information give. However, looking at how it behaves 
 ### Complicated?
 The code seems a bit complex when it comes to selections. The most obvious thing to do is to just have a list of the atoms with a given color and representation. However, this has two problems:
 first, the NGL atom serial does not always map to the same PyMOL atom ID as both try to fix issues in PDB atom id, the second is that having a list of thousands of ids quickly becomes heavy.
+
+## Python3 compiled Pymol in Ubuntu
+This app requires Python3 compiled Pymol. This is not a simple job on a Linux machine. This is straightforward on a Mac or PC installation, but not on Linux.
+
+The Pro version of PyMol is a 'portable' and I could not make it use Python 3.
+Using `conda install -c schrodinger pymol` with a 3.7 Conda won't work.
+There appearts to be a `python3-pymol` aptitude package for Ubuntu Disco Dingo, but not earlier versions (current stable is Bionic Beaver).
+
+The following commands will compile PyMol opensource under Python3.
+
+    #get all prerequisites
+    sudo apt-get install python3 #or anaconda3
+    sudo apt-get install python3-dev libglm-dev freeglut3-dev libglew-dev libpng12-dev libfreetype6-dev build-essential libxml++2.6-dev
+    pip3 install pmw numpy
+    prefix=/opt/Pymol/
+    modules=$prefix/modules
+    mkdir -p $prefix
+    sudo python3 setup.py build install --home=$prefix --install-lib=$modules --install-scripts=$prefix
+    #add the module to python
+    sudo echo $modules > /usr/lib/python3/dist-packages/pymol.pth
+
 
 ## Licence
 * [PyMOL](https://github.com/schrodinger/pymol-open-source/blob/master/LICENSE) is a trademark of Schrodinger, LLC, and can be used freely.
