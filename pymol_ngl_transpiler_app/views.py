@@ -7,7 +7,7 @@ import os
 from pyramid.response import FileResponse
 
 print(os.getcwd())
-if os.path.join('pymol_ngl_transpiler_app','temp'):
+if os.path.isdir(os.path.join('pymol_ngl_transpiler_app','temp')):
     for file in os.listdir(os.path.join('pymol_ngl_transpiler_app','temp')):
         os.remove(os.path.join('pymol_ngl_transpiler_app','temp',file))
 else:
