@@ -63,12 +63,13 @@ The source of the NGL code can be changed:
 * Add color and surface.
 * Maybe arrows and labels.
 * Automate the retrieval of PyMOL data: currently text output is parsed. But a wrapper for the application or using the pymol library would be best.
-* Make a server.
+
+For now, the third party js is naughtly served as a copy without git&ndash;submodul'ing it, because it's a private repo.
 
 ## Example
 Here is a rather funny view in PyMOL:
 ![Pymol](images/example_pymol.png)
-Here is the equivalent snapshot transpiled to NGL (link to [example.html](http://www.well.ox.ac.uk/~matteo/junk/example.html)).
+Here is the equivalent snapshot transpiled to NGL (link to [example.html](http://www.well.ox.ac.uk/~matteo/junk/example.html)) before color was implemented.
 ![Pymol](images/example_ngl.png)
 
 ## Issues
