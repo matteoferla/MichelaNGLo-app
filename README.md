@@ -157,6 +157,11 @@ This is an integer with no information give. However, looking at how it behaves 
 
 &lowast;) The two differ in how this is handled.
 
+### The SS problem
+NGL does not assign secondary structure. Therefore, if not specified everything will be a turn/loop, so both the helices and sheet (especially) will look anemic.
+![with SHEET](images/sheeted.png =200x)
+![without SHEET](images/unsheeted.png =200x)
+
 ### Complicated?
 The code seems a bit complex when it comes to selections. The most obvious thing to do is to just have a list of the atoms with a given color and representation. However, this has two problems:
 first, the NGL atom serial does not always map to the same PyMOL atom ID as both try to fix issues in PDB atom id, the second is that having a list of thousands of ids quickly becomes heavy.

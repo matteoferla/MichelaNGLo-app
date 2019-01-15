@@ -321,7 +321,7 @@ class PyMolTranspiler:
             code.append('protein.addRepresentation( "licorice", {'+color_str+' sele: sticks.string} );')
         if self.cartoon:
             code.append('var cartoon = new NGL.Selection( "{0}" );'.format(' or '.join(self.cartoon)))
-            code.append('protein.addRepresentation( "cartoon", {'+color_str+' sele: cartoon.string} );')
+            code.append('protein.addRepresentation( "cartoon", {'+color_str+' sele: cartoon.string, smoothSheet: true} );') # capped does not add arrow heads.
         return self.indent(code, inner_tabbed)
 
     def get_color(self, uniform_non_carbon=False, inner_tabbed=1, **settings):
