@@ -159,8 +159,8 @@ This is an integer with no information give. However, looking at how it behaves 
 
 ### The SS problem
 NGL does not assign secondary structure. Therefore, if not specified everything will be a turn/loop, so both the helices and sheet (especially) will look anemic.
-![with SHEET](images/sheeted.png =200x)
-![without SHEET](images/unsheeted.png =200x)
+![with SHEET](images/sheeted.png)
+![without SHEET](images/unsheeted.png)
 
 ### Complicated?
 The code seems a bit complex when it comes to selections. The most obvious thing to do is to just have a list of the atoms with a given color and representation. However, this has two problems:
