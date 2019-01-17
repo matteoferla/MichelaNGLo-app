@@ -22,7 +22,10 @@ If needed, this piece of code can include the PDB data itself, thus removing the
 ### Image
 
 The most commonly used protein viewing software is PyMol. Most researchers render a view and label/draw upon it in Paint/Powerpoint/Photoshop.
-Consequently, TBC.
+
+Consequently, the code allows users to generate code than when a given static image is clicked it results in a NGL viewer div. Example: [demo](https://www.well.ox.ac.uk/~matteo/LZTR1.html).
+
+The mouse image can be found [here](images/clickmap.jpg).
 
 ## Script functionality
 The script `PyMOL_to_NGL.py` has the class `PyMolTranspiler`. Which accepts different starting values.
@@ -92,6 +95,7 @@ If you thing, the fault is in the code please email me.
 
 If the demo image gives you an unsolicited black, that means something went wrong with the parsing of the parts. See the `else {return 0x000000} //black as the darkest error!` line? That is there as a last ditch.
 To debug this yourself, open the console and type `protein.structure.eachAtom(function(atom) {console.log(atom.chainid);});` or `atom.resno` or other property of `atom` until you figure out what is wrong with your structure.
+I am aware of two unfixed bugs, one is the CD2 atom in histidine residues with different colored carbons and the other is the absence of shades of gray (_e.g._ `gray40`) in the color chart.
 
 ## Technicalities
 ### Parts to convert
@@ -159,8 +163,11 @@ This is an integer with no information give. However, looking at how it behaves 
 
 ### The SS problem
 NGL does not assign secondary structure. Therefore, if not specified everything will be a turn/loop, so both the helices and sheet (especially) will look anemic.
+
 <img src="images/sheeted.png" width="200">
 <img src="images/unsheeted.png" width="200">
+
+The script `SS.py` can generate this in PDB file via PyMol. However, the generated `SHEET` definition is not as it ought to be, as it gives out mulitple separate strands as opposed to a single multistrand sheet &mdash;It works though, so who cares? 
 
 ### Complicated?
 The code seems a bit complex when it comes to selections. The most obvious thing to do is to just have a list of the atoms with a given color and representation. However, this has two problems:
