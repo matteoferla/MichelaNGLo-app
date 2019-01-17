@@ -58,7 +58,10 @@ class ColorSwatch:
             self._swatch[c.index]=c
 
     def __getitem__(self, index): # a pymol color index
-        return self._swatch[int(index)]
+        if int(index) in self._swatch:
+            return self._swatch[int(index)]
+        else:
+            return self._swatch[1] # black
 
 class PyMolTranspiler:
     """
@@ -292,7 +295,7 @@ class PyMolTranspiler:
         colorset = defaultdict(ddictlist) # element -> color_id -> list of atom ids
         for atom in self.atoms:
             if atom['elem'] == 'C':
-                carboncolorset[atom['chain']][atom['resi']][atom['color']].append(atom['name'])
+                carboncolorset[atom['chain']][atom['resi']][atom['color']].append(atom['ID'])
             else:
                 colorset[atom['elem']][atom['color']].append(atom['ID'])
         self.colors = {'carbon':carboncolorset,'non-carbon': colorset}
@@ -354,8 +357,11 @@ class PyMolTranspiler:
                     if color_id != colors_by_usage[0]:
                         residual_mapping[chain+resi] = self.swatch[color_id].hex
                 else:
-                    #print(self.colors['carbon'][chain][resi])
-                    pass # residue with different colored carbons!
+                    print(self.colors['carbon'][chain][resi])
+                    # residue with different colored carbons!
+                    for color_id in self.colors['carbon'][chain][resi]:
+                        for serial in self.colors['carbon'][chain][resi][color_id]:
+                            serial_mapping[serial] = self.swatch[color_id].hex
         code= string.Template('''//define colors
 var nonCmap = $elem;
 var sermap=$ser; 
@@ -405,7 +411,8 @@ function activate () {
         imagemode = false;
     }
 }
-"""
+$('#viewport img').click(activate);
+""".replace('viewport',viewport)
         if self.raw_pdb:
             return 'pdbData = `{0}`;'.format(self.raw_pdb)+self.indent(code, inner_tabbed) #don't indent the raw data!
         else:
