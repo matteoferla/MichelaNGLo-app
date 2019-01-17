@@ -85,5 +85,5 @@ def ajax_convert(request):
 @view_config(route_name='save_pdb')
 def save_pdb(request):
     filename=request.session['file']
-    return FileResponse(filename,content_disposition='attachment; filename="{}"'.format(request.POST['name']))
+    return FileResponse(filename, content_disposition='attachment; filename="{}"'.format(request.POST['name']))
 

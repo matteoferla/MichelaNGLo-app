@@ -13,7 +13,8 @@
 
     % if snippet:
         <p>Add wherever needed to the page add <code> &lt;div id="${viewport}" style="width:100%; height: 0; padding-bottom: 100%;"&gt;&lt;/div&gt;</code> or something similar.</p>
-        <pre></pre>
+        <p>If you are adding an image, you might need to add it manually as many WYSIWYG editors with insert image buttons (<i>e.g.</i> Blogger) make images that when clicked result in a pop-up with the image fullsize, which is obviously incompatible.
+        Therefore add or edit the image thusly: <code>&lt;div id="viewport"&gt; &lt;img src="my_protein.jpg" alt="my protein" width='100%'&gt;&lt;/div&gt;</code>.</p>
         <p>The CSS style can be different, but the important thing is that there is a <code>width</code> or a <code>min-width</code> and a <code>height</code> or a <code>min-height</code> &mdash;in
             this example the 0 height is a special case and results in the height being equal to the width.</p>
         <p>Copy-paste this at the bottom of the HTML document (with the editor in HTML mode).</p>

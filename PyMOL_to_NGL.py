@@ -176,15 +176,17 @@ class PyMolTranspiler:
         self.lines=[]
         self.sticks=[]
         self.colors=[]
-        self.raw_pdb=None
+        self.ss=[]
+        self.raw_pdb=None  #this is set from the instance `prot.raw_pdb = open(file).read()`
         if file:
             assert '.pse' in file.lower(), 'Only PSE files accepted.'
             pymol.cmd.load(file)
             v = pymol.cmd.get_view()
             keys = ('ID', 'chain', 'resi', 'resn', 'name', 'elem', 'reps', 'color')
             myspace = {'data': []} #myspace['data'] is the same as self.atoms
-            pymol.cmd.iterate('(all)', "data.append({'ID': ID, 'chain': chain, 'resi': resi, 'resn': resn, 'name':name, 'elem':elem, 'reps':reps, 'color':color})", space=myspace)
+            pymol.cmd.iterate('(all)', "data.append({'ID': ID, 'chain': chain, 'resi': resi, 'resn': resn, 'name':name, 'elem':elem, 'reps':reps, 'color':color, 'ss': ss})", space=myspace)
             self.convert_representation(myspace['data'])
+            self.parse_ss(myspace['data'])
             self.convert_view(v)
             pymol.cmd.save(file.replace('.pse','')+'.pdb')
             pymol.cmd.remove('(all)')
@@ -239,7 +241,7 @@ class PyMolTranspiler:
             return self.m4
 
     def convert_representation(self, represenation, **settings):
-        """iterate all, ID,chain,resi, resn,name, elem,reps, color
+        """iterate all, ID,chain,resi, resn,name, elem,reps, color,ss
         reps seems to be a binary number. controlling the following
         * 0th bit: sticks
         * 7th bit: line
@@ -357,7 +359,6 @@ class PyMolTranspiler:
                     if color_id != colors_by_usage[0]:
                         residual_mapping[chain+resi] = self.swatch[color_id].hex
                 else:
-                    print(self.colors['carbon'][chain][resi])
                     # residue with different colored carbons!
                     for color_id in self.colors['carbon'][chain][resi]:
                         for serial in self.colors['carbon'][chain][resi][color_id]:
@@ -380,6 +381,57 @@ var schemeId = NGL.ColormakerRegistry.addScheme(function (params) {
 });''').safe_substitute(elem=json.dumps(elemental_mapping), ser=serial_mapping, chain=catenary_mapping, res=residual_mapping)
         #RE hack: curious issue that multichain protein chainid sometimes is numeric: protein.structure.eachAtom(function(atom) {console.log(atom.chainid);}); or atom.chainIndex atom.chainname
         return self.indent(code, inner_tabbed)
+
+    def parse_ss(self, data, **settings):
+        def _deal_with():
+            if ss_last == 'H':  # previous was the other type
+                self.ss.append('{typos}    {ss_count: >3}HA {resn_start} A  {resi_start: >3}  {resn_end} A  {resi_end: >3} {h_class: >2}                                  {length: >2}'.format(
+                    typos='HELIX',
+                    ss_count=ss_count[ss_last],
+                    resn_start=resn_start,
+                    resi_start=resi_start,
+                    resn_end=resn_last,
+                    resi_end=resi_last,
+                    h_class=1,
+                    length=int(resi_last) - int(resi_start)
+                ))
+                ss_count[ss_last] += 1
+            elif ss_last == 'S':  # previous was the other type
+                self.ss.append('{typos}  {ss_count: >3} {ss_count: >2}S 1 {resn_start} A {resi_start: >3}  {resn_end} A {resi_end: >3}  0'.format(
+                    typos='SHEET',
+                    ss_count=ss_count[ss_last],
+                    resn_start=resn_start,
+                    resi_start=resi_start,
+                    resn_end=resn_last,
+                    resi_end=resi_last,
+                    h_class=0,
+                    length=int(resi_last) - int(resi_start)
+                ))
+                ss_count[ss_last] += 1
+
+        ss_last = 'L'
+        resi_start = '0'
+        resn_start = 'XXX'
+        resi_last = '0'
+        resn_last = 'XXX'
+        ss_count = {'H': 1, 'S': 1, 'L': 0}
+        for line in data:  # ss_list:
+            if line['name'] == 'CA':
+                (resi_this, ss_this, resn_this) = (line['resi'], line['ss'], line['resn'])
+                if ss_last != ss_this:
+                    # deal with previous first
+                    _deal_with()
+                    # deal with current
+                    if ss_this in ('S', 'H'):  # start of a new
+                        resi_start = resi_this
+                        resn_start = resn_this
+                        ss_last = ss_this
+                # move on
+                resi_last = resi_this
+                resn_last = resn_this
+                ss_last = ss_this
+        _deal_with()
+
 
     def indent(self,code, tabbed=0):
         if isinstance(code, str):
@@ -414,7 +466,10 @@ function activate () {
 $('#viewport img').click(activate);
 """.replace('viewport',viewport)
         if self.raw_pdb:
-            return 'pdbData = `{0}`;'.format(self.raw_pdb)+self.indent(code, inner_tabbed) #don't indent the raw data!
+            if self.ss:
+                return 'pdbData = `{1}\n{0}`;'.format(self.raw_pdb,'\n'.join(self.ss))+self.indent(code, inner_tabbed) #don't indent the raw data!
+            else:
+                return 'pdbData = `{0}`;'.format(self.raw_pdb) + self.indent(code, inner_tabbed)  # don't indent the raw data!
         else:
             return self.indent(code, inner_tabbed)
 
@@ -469,21 +524,13 @@ def file_test():
 
 
 if __name__ == "__main__":
-    file_test()
-
-
-
-    exit(0)
     ## ARGPARSER
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--version', action='version', version=__version__)
     parser.add_argument('--verbose', action='store_true', help='Runs giving details...')
     args = parser.parse_args()
-    ## SCRIPT
-    test()
+    exit(0)
 
-    # import pymol
-    # pymol.finish_launching()
-    # pymol.load('test.pse')
-    # pymol.cmd.get_view()
-    # print('Done')
+    ## Tests
+    test()
+    file_test()
