@@ -440,7 +440,7 @@ var schemeId = NGL.ColormakerRegistry.addScheme(function (params) {
 
     def get_js(self, viewport='viewport', inner_tabbed=3, uniform_non_carbon=False, image=False, **settings):
         code ='\n'
-        code += 'var stage = new NGL.Stage( "{viewport}",{{backgroundColor: "white"}});\n'.format(viewport=viewport)
+        code += 'window.stage = new NGL.Stage( "{viewport}",{{backgroundColor: "white"}});\n'.format(viewport=viewport)
         if self.raw_pdb:
             code += 'var stringBlob = new Blob( [ pdbData ], { type: "text/plain"} );'
             loader=' stringBlob, { ext: "pdb" } '
@@ -450,6 +450,7 @@ var schemeId = NGL.ColormakerRegistry.addScheme(function (params) {
         code += '   window.protein=protein;\n'+\
                 '   {color}\n  {reps}\n   {orient}\n'.format(reps=self.get_reps(), orient=self.get_view(output='string'), color=self.get_color(uniform_non_carbon)) +\
                 '});\n'
+        code += 'function saveImg() {stage.makeImage( {trim: true, antialias: true, transparent: false }).then(function (img) {window.img=img; NGL.download(img);});}'
         if image:
             code = """var imagemode=true;
 function activate () {

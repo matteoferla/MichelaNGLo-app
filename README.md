@@ -70,10 +70,10 @@ The source of the NGL code can be changed:
 For now, the third party js is naughtly served as a copy without git&ndash;submodul'ing it, because it's a private repo.
 
 ## Example
-Here is a rather funny view in PyMOL:
-![Pymol](images/example_pymol.png)
-Here is the equivalent snapshot transpiled to NGL (link to [example.html](http://www.well.ox.ac.uk/~matteo/junk/example.html)) before color was implemented.
-![Pymol](images/example_ngl.png)
+Here is a rather funny view in PyMOL and the equivalent snapshot transpiled to NGL (link to [example.html](http://www.well.ox.ac.uk/~matteo/junk/example.html)).
+
+<img src="images/example_pymol.png" width="200">
+<img src="images/example_ngl.png" width="200">
 
 ## Issues
 If it does not work on your site, it may because some information is lost when you added it.
