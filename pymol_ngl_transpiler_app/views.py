@@ -4,6 +4,7 @@ from PyMOL_to_NGL import PyMolTranspiler
 import uuid
 import shutil
 import os
+import mako
 from pyramid.response import FileResponse
 
 print(os.getcwd())
@@ -42,7 +43,8 @@ def ajax_convert(request):
                     'image': is_js_true(request.POST['image']),
                     'uniform_non_carbon':is_js_true(request.POST['uniform_non_carbon']),
                     'verbose': False,
-                    'validation': False}
+                    'validation': False,
+                    'stick': request.POST['stick']}
 
         # parse data
         if request.POST['mode'] == 'out':
@@ -74,13 +76,30 @@ def ajax_convert(request):
             return {'snippet': 'Please stop trying to hack the server', 'error_title': 'A major error arose', 'error': 'danger', 'error_msg': 'The code failed to run serverside. Most likely malicius','viewport':settings['viewport']}
         # make output
         code = trans.get_html(ngl=request.POST['cdn'], **settings)
+        page=str(uuid.uuid4())
+        snippet_run=trans.get_js(**{**settings, 'image': False})
+        make_static_page(snippet_run, page)
+        try:
+            make_static_page(snippet_run, page)
+        except:
+            page=''
+
         if minor_error:
-            return {'snippet': code, 'error': 'warning', 'error_msg':minor_error, 'error_title':'A minor error arose','validation':trans.validation_text, 'viewport':settings['viewport']}
+            return {'snippet': code, 'error': 'warning', 'error_msg':minor_error, 'error_title':'A minor error arose','validation':trans.validation_text, 'viewport':settings['viewport'], 'page': page}
         else:
-            return {'snippet': code, 'snippet_run':trans.get_js(**{**settings, 'image': False}),'validation':trans.validation_text, 'viewport':settings['viewport']}
+            return {'snippet': code, 'snippet_run':snippet_run,'validation':trans.validation_text, 'viewport':settings['viewport'], 'page': page}
+
     except:
         print(traceback.format_exc())
         return {'snippet': traceback.format_exc(), 'snippet_run':'','error_title':'A major error arose', 'error': 'danger','error_msg':'The code failed to run serverside','validation':'', 'viewport':settings['viewport']}
+
+
+def make_static_page(code, page):
+    open(os.path.join('pymol_ngl_transpiler_app','user', page+'.html'), 'w', newline='\n').write(
+        mako.template.Template(filename=os.path.join('pymol_ngl_transpiler_app','templates','user_protein.mako'),
+                               format_exceptions=True,
+                               lookup=mako.lookup.TemplateLookup(directories=[os.getcwd()])
+        ).render_unicode(code=code))
 
 @view_config(route_name='save_pdb')
 def save_pdb(request):

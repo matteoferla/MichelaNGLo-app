@@ -10,6 +10,8 @@ def main(global_config, **settings):
     config.set_session_factory(my_session_factory)
     config.include('pyramid_mako')
     config.add_static_view('static', 'static', cache_max_age=3600)
+    config.add_static_view('user-structures', 'user', cache_max_age=3600)
+    config.add_static_view('images', '../images', cache_max_age=3600)
     config.add_route('home', '/')
     config.add_route('ajax_convert', '/ajax_convert')
     config.add_route('save_pdb', '/save_pdb')

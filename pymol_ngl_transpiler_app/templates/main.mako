@@ -117,6 +117,25 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-xl-6 col-md-8 mb-4">
+                            <div class="input-group" data-toggle="tooltip" data-html="true"
+                                 title="<p>The equivalent of PyMOL sticks is liquorice in NGL, however, hyperball looks a lot nicer.</p><img src='images/stick.png' width='100px'><img src='images/sym_stick.png' width='100px'><img src='images/hyperball.png' width='100px'>">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="input_mode-addon">Sticks as </span>
+                                  </div>
+                                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                                  <label class="btn btn-secondary">
+                                    <input type="radio" name="sticks" id="sticks_licorice" autocomplete="off" value="licorice"> Liquorice
+                                  </label>
+                                <label class="btn btn-secondary active">
+                                    <input type="radio" name="sticks" id="sticks_sym_licorice" autocomplete="off" value="sym_licorice" checked> <small>Liquorice<br/>w&#773; double bonds</small>
+                                  </label>
+                                  <label class="btn btn-secondary">
+                                    <input type="radio" name="sticks" id="sticks_hyperball" value="hyperball" autocomplete="off"> Hyperball
+                                  </label>
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="col-xl-12 col-md-12 mb-4">
                             <div class="input-group" data-toggle="tooltip"
@@ -329,6 +348,7 @@
                 data.append( 'uniform_non_carbon',$('#uniform_non_carbon').is(':checked'));
                 data.append('viewport_id',valid_value('#viewport_id'));
                 data.append( 'image',$('#image').is(':checked'));
+                data.append('stick',$("input[name='sticks']:checked").val());
                 var cdn = '';
                 if ($('#cdn_bool').is(':checked')) {
                     cdn = $('#cdn').val();

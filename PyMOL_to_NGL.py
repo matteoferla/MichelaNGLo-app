@@ -283,6 +283,7 @@ class PyMolTranspiler:
         self.cartoon = list(set(cartoon))
         self.sticks = sticks
         self.lines = lines
+        self.surface = surface
         # convert color field
         colorset=defaultdict(list)
         # self.swatch[atom['color']]
@@ -311,7 +312,7 @@ class PyMolTranspiler:
             #if l[i-1] == ....
         return ' or '.join(l)
 
-    def get_reps(self, inner_tabbed=1, **settings):  # '^'+atom['chain']
+    def get_reps(self, inner_tabbed=1, stick='sym_licorice', **settings):  # '^'+atom['chain']
         assert self.atoms, 'Needs convert_reps first'
         code = ['//representations','protein.removeAllRepresentations();']
         if self.colors:
@@ -323,10 +324,20 @@ class PyMolTranspiler:
             code.append('protein.addRepresentation( "line", {'+color_str+' sele: lines.string} );')
         if self.sticks:
             code.append('var sticks = new NGL.Selection( "{0}" );'.format(' or '.join(self.sticks)))
-            code.append('protein.addRepresentation( "licorice", {'+color_str+' sele: sticks.string} );')
+            if stick == 'sym_licorice':
+                code.append('protein.addRepresentation( "licorice", {'+color_str+' sele: sticks.string, multipleBond: "symmetric"} );')
+            elif stick == 'licorice':
+                code.append('protein.addRepresentation( "licorice", {' + color_str + ' sele: sticks.string} );')
+            elif stick == 'hyperball':
+                code.append('protein.addRepresentation( "hyperball", {' + color_str + ' sele: sticks.string} );')
+            elif stick == 'ball':
+                code.append('protein.addRepresentation( "ball+stick", {' + color_str + ' sele: sticks.string, multipleBond: "symmetric"} );')
         if self.cartoon:
             code.append('var cartoon = new NGL.Selection( "{0}" );'.format(' or '.join(self.cartoon)))
             code.append('protein.addRepresentation( "cartoon", {'+color_str+' sele: cartoon.string, smoothSheet: true} );') # capped does not add arrow heads.
+        if self.surface:
+            code.append('var surf = new NGL.Selection( "{0}" );'.format(' or '.join(self.surface)))
+            code.append('protein.addRepresentation( "surface", {' + color_str + ' sele: surf.string} );')
         return self.indent(code, inner_tabbed)
 
     def get_color(self, uniform_non_carbon=False, inner_tabbed=1, **settings):
@@ -438,7 +449,7 @@ var schemeId = NGL.ColormakerRegistry.addScheme(function (params) {
             code = code.split('\n')
         return ''.join([' ' * 4 * int(tabbed) + row + '\n' for row in code])
 
-    def get_js(self, viewport='viewport', inner_tabbed=3, uniform_non_carbon=False, image=False, **settings):
+    def get_js(self, viewport='viewport', inner_tabbed=3, uniform_non_carbon=False, image=False, stick='sym_licorice', **settings):
         code ='\n'
         code += 'window.stage = new NGL.Stage( "{viewport}",{{backgroundColor: "white"}});\n'.format(viewport=viewport)
         if self.raw_pdb:
@@ -448,7 +459,7 @@ var schemeId = NGL.ColormakerRegistry.addScheme(function (params) {
             loader='"rcsb://' + (self.pdb if len(self.pdb) == 4 else self.pdb)+'"'
         code += 'stage.loadFile({loader}).then(function (protein) {{\n'.format(loader=loader)
         code += '   window.protein=protein;\n'+\
-                '   {color}\n  {reps}\n   {orient}\n'.format(reps=self.get_reps(), orient=self.get_view(output='string'), color=self.get_color(uniform_non_carbon)) +\
+                '   {color}\n  {reps}\n   {orient}\n'.format(reps=self.get_reps(stick=stick), orient=self.get_view(output='string'), color=self.get_color(uniform_non_carbon)) +\
                 '});\n'
         code += 'function saveImg() {stage.makeImage( {trim: true, antialias: true, transparent: false }).then(function (img) {window.img=img; NGL.download(img);});}'
         if image:
@@ -474,7 +485,7 @@ $('#viewport img').click(activate);
         else:
             return self.indent(code, inner_tabbed)
 
-    def get_html(self, ngl='https://cdn.rawgit.com/arose/ngl/v0.10.4-1/dist/ngl.js', viewport='viewport', tabbed=0, uniform_non_carbon=False, image=False, **settings):
+    def get_html(self, ngl='https://cdn.rawgit.com/arose/ngl/v0.10.4-1/dist/ngl.js', viewport='viewport', tabbed=0, uniform_non_carbon=False, image=False, stick='sym_licorice', **settings):
         """
         Returns a string to be copy-pasted into HTML code.
         :param ngl: (optional) the address to ngl.js. If unspecified it gets it from the RawGit CDN
@@ -488,7 +499,7 @@ $('#viewport img').click(activate);
             ngl_string = ''
         code=('<!-- **inserted code**  -->\n{ngl_string}<script type="text/javascript">{js}</script>\n<!-- **end of code** -->').format(
                                  ngl_string=ngl_string,
-                                 js=self.get_js(viewport, inner_tabbed=tabbed + 3, uniform_non_carbon=uniform_non_carbon, image=image))
+                                 js=self.get_js(viewport, inner_tabbed=tabbed + 3, uniform_non_carbon=uniform_non_carbon, image=image, stick=stick))
         return self.indent(code, tabbed)
 
     def write_hmtl(self, template_file='test.mako', output_file='test_generated.html', **kargs):
