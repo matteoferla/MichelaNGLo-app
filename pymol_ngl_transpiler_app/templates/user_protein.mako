@@ -14,9 +14,9 @@
                     <div class="float-right"><button type="button" class="btn btn-primary" id="edit_btn" data-target="#edit_modal" data-toggle="modal"><i class="far fa-edit"></i></button></div>
                         <p>${description}</p>
                         <hr/>
-                        <button type="button" class="btn btn-success" id="save"><i class="far fa-camera"></i></button> Save image</div>
+                        <button type="button" class="btn btn-success" id="save"><i class="far fa-camera"></i> Save image</button></div>
                         <hr/>
-                        <p>Credits.</p>
+                        <p>Credits...</p>
                     </div>
                 </div>
         </div>
