@@ -15,5 +15,6 @@ def main(global_config, **settings):
     config.add_route('home', '/')
     config.add_route('ajax_convert', '/ajax_convert')
     config.add_route('save_pdb', '/save_pdb')
+    config.add_route('edit_user-page', '/edit_user-page')
     config.scan()
     return config.make_wsgi_app()

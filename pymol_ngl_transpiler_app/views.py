@@ -78,12 +78,13 @@ def ajax_convert(request):
         code = trans.get_html(ngl=request.POST['cdn'], **settings)
         page=str(uuid.uuid4())
         snippet_run=trans.get_js(**{**settings, 'image': False})
-        make_static_page(snippet_run, page)
+        # sharable page
         try:
-            make_static_page(snippet_run, page)
-        except:
+            make_static_page(request, snippet_run, page)
+        except Exception as err:
             page=''
-
+            minor_error='Could not generate sharable static page ({0})'.format(err)
+        # return
         if minor_error:
             return {'snippet': code, 'error': 'warning', 'error_msg':minor_error, 'error_title':'A minor error arose','validation':trans.validation_text, 'viewport':settings['viewport'], 'page': page}
         else:
@@ -94,12 +95,19 @@ def ajax_convert(request):
         return {'snippet': traceback.format_exc(), 'snippet_run':'','error_title':'A major error arose', 'error': 'danger','error_msg':'The code failed to run serverside','validation':'', 'viewport':settings['viewport']}
 
 
-def make_static_page(code, page):
+def make_static_page(request, code, page, description='Editable text. press pen to edit.',title='User submitted structure'):
     open(os.path.join('pymol_ngl_transpiler_app','user', page+'.html'), 'w', newline='\n').write(
         mako.template.Template(filename=os.path.join('pymol_ngl_transpiler_app','templates','user_protein.mako'),
                                format_exceptions=True,
                                lookup=mako.lookup.TemplateLookup(directories=[os.getcwd()])
-        ).render_unicode(code=code))
+        ).render_unicode(code=code, request=request, description=description, title=title))
+
+
+@view_config(route_name='edit_user-page', renderer='json')
+def edit(request):
+    print(request.POST)
+    make_static_page(request, request.POST['code'], request.POST['page'], request.POST['description'], request.POST['title'])
+    return {'success': 1}
 
 @view_config(route_name='save_pdb')
 def save_pdb(request):

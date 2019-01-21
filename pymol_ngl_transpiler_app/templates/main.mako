@@ -250,13 +250,11 @@
           <pre><code>&lt;script type="text/javascript" scr="ngl.js"&gt;&lt;/script&gt;</code></pre>
           <p>If you are going to use the code on a page where you are not free to control what files are served, say your departmental webpage, opt for the remotely held file (CDN), which is the default value.</p>
           <pre><code>&lt;script type="text/javascript" scr="https://cdn.rawgit.com/arose/ngl/v0.10.4-1/dist/ngl.js"&gt;&lt;/script&gt;</code></pre>
-          <p>This also applies for the PDB code. If you add a PDB code, it will use that from the PDB. If it looks like a file name ('file.pdb') then </p>
+          <p>This also applies for the PDB code. If you add a PDB code, it will use that from the PDB. If it looks like a file name (<i>e.g.</i> <code>file.pdb</code>) then it will assume you add it to the correct place (same name as the stated and in the same folder as the PDB. Alternatively you can click <code>Include PDB data</code></p>
       </div>
     </div>
   </div>
 </div>
-
-
 
 <%block name="script">
     <script type="text/javascript">
