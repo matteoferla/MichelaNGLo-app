@@ -19,7 +19,7 @@
                           </div>
                           <div class="btn-group btn-group-toggle" data-toggle="buttons">
                           <label class="btn btn-secondary active">
-                            <input type="radio" name="input_mode" id="input_mode_out" autocomplete="off" value="file" checked> Upload PDB
+                            <input type="radio" name="input_mode" id="input_mode_out" autocomplete="off" value="file" checked> Upload PSE
                           </label>
                           <label class="btn btn-secondary">
                             <input type="radio" name="input_mode" id="input_mode_file" value="out" autocomplete="off"> Input PyMol output
