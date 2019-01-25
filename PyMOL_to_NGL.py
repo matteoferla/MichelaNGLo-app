@@ -506,15 +506,22 @@ $('#viewport img').click(activate);
         if self.verbose:
             print('Making file {0} using template {1}'.format(output_file, template_file))
         template = Template(filename=template_file, format_exceptions=True)
-        open(output_file, 'w', newline='\n').write(template.render_unicode(transpiler=self, **kargs))
+        open(output_file, 'w', newline='\n').write(
+            template.render_unicode(transpiler=self, **kargs))
         return self
 
+    def mako_js(self, **settings):
+        code=Template(filename=os.path.join('pymol_ngl_transpiler_app', 'templates', 'output.js.mako'))\
+            .render_unicode(structure=self)
+        return code
+
+
 def test():
-    trans = PyMolTranspiler(verbose=True, validation=False)
-    trans.pdb = '1UBQ'
+    transpiler = PyMolTranspiler(verbose=True, validation=False)
+    transpiler.pdb = '1UBQ'
     view = ''
     reps = ''
-    data = open('PyMol_output_example.txt').read().split('PyMOL>')
+    data = open(os.path.join('pymol_ngl_transpiler_app','static','pymol_demo.txt')).read().split('PyMOL>')
     for block in data:
         if 'get_view' in block:
             view = block
@@ -524,15 +531,23 @@ def test():
             pass #empty line.
         else:
             warn('Unknown block: '+block)
-    trans.convert_view(view)
-    trans.convert_representation(reps)
-    code = trans.get_html(tabbed=0)  # ngl='ngl.js'
-    trans.write_hmtl(template_file='test2.mako', output_file='example.html', code=code)
+    transpiler.convert_view(view)
+    transpiler.convert_representation(reps)
+    code = transpiler.get_html(tabbed=0)  # ngl='ngl.js'
+    transpiler.write_hmtl(template_file='test2.mako', output_file='example.html', code=code)
+    return transpiler
 
 def file_test():
-    trans = PyMolTranspiler(file='1gfl.pse')
-    print(trans.get_view())
-    print(trans.get_reps())
+    transpiler = PyMolTranspiler(file='1gfl.pse')
+    print(transpiler.get_view())
+    print(transpiler.get_reps())
+    return transpiler
+
+def new_template_testing():
+    #transpiler = PyMolTranspiler(file='images/1ubq.pse')
+    transpiler = test()
+    transpiler = '1UBQ'
+    print(transpiler.mako_js())
 
 
 if __name__ == "__main__":
@@ -546,3 +561,4 @@ if __name__ == "__main__":
     ## Tests
     test()
     file_test()
+    new_template_testing()

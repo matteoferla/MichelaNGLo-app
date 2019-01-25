@@ -1,11 +1,10 @@
-<%page args="structure, filename, m4, m4_alt=None, toggle_fx=False, raw_pdb='', sticks='', cartoon='', nonCmap={}, sermap={}, chainmap={}, resmap={}, viewport='viewport', variants=[], save_button='save_button', backgroundColor='white'"/>
+<%page args="structure, m4, m4_alt=None, has_image=False, toggle_fx=True, raw_pdb='', sticks='', cartoon='', nonCmap={}, sermap={}, chainmap={}, resmap={}, viewport='viewport', variants=[], save_button='save_button', backgroundColor='white'"/>
 <script type="text/javascript">
+
 % if structure.raw_pdb:
-    pdbData = `${structure.ss+'\n'+structure.raw_pdb}`;
+    pdbData = `${structure.ss}
+${structure.raw_pdb}`;
 % endif
-var imagemode=true;
-
-
 
 % if toggle_fx == True:
 function show_region(ab,ad) {
@@ -39,28 +38,38 @@ $('#${save_button}').click(function () {
    stage.makeImage( {trim: true, antialias: true, transparent: false }).then(function (img) {window.img=img; NGL.download(img);});
 });
 
-
-function load_file(filename) {
-	if (!! $('#${viewport} img').length) { //there is an image. Remove and get the sizes
+% if has_image:
+var imagemode=true;
+% endif
+function loader(filename) {
+    % if has_image:
+        if (!! $('#${viewport} img').length) { //there is an image. Remove and get the sizes
 		var w=$('#${viewport} img').width();
 		var h=$('#${viewport} img').height();
 		$('#${viewport} img').detach();
 		$('#${viewport} p').detach();
 		$('#${viewport}').css('width',w).css('height',h);
 	}
+    % endif
 	// cases...
 	if (filename && window.stage) { //new model. Force reset
 		stage.removeAllComponents();
 	} else if (! window.stage) {
-		filename=filename || '${filename}';
+		filename=filename || '${structure.pdb}';
 		window.stage = new NGL.Stage( "viewport",{backgroundColor: "${backgroundColor}"});
 	} else {
 		//nothing to be done.
 		return true;
 	}
-	stage.loadFile(filename).then(function (protein) {
-	   window.protein=protein;
-		   //define colors
+    % if structure.raw_pdb:
+    var stringBlob = new Blob( [ pdbData ], { type: "text/plain"} );
+    stage.loadFile(stringBlob, { ext: "pdb" })
+    % else:
+	stage.loadFile(filename)
+    % endif
+            .then(function (protein) {
+               window.protein=protein;
+    //define colors
 		var nonCmap = ${nonCmap};
 		var sermap=${sermap};
 		var chainmap=${chainmap};
@@ -91,19 +100,27 @@ function load_file(filename) {
             window.alt_view = (new NGL.Matrix4).fromArray(${m4_alt});
         % endif
 		stage.viewerControls.orient(main_view);
-	});
+});
 }
 
+% if raw_pdb:
+    //do something
+% else:
+    % if len(self.pdb) == 4:
+        var filepath="rcsb://${structure.pdb}";
+    % else:
+        var filepath="${structure.pdb}";
+    % endif
+    $('#${viewport} img').click(function () {loader(filepath);});
+% endif
 
-$('#${viewport} img').click(function () {load_file('${filename}');});
 
 // Handle window resizing
 window.addEventListener( "resize", function( event ){
     stage.handleResize();
 }, false );
 
-
-
+// move out
 var mutants=${variants};
 $('#view_dropdown').append('<a class="dropdown-item" href="#" id="main_view">main view</a>');
 $('#main_view').click(function() {load_file (); stage.viewerControls.orient(top_view);});
