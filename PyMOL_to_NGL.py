@@ -170,6 +170,7 @@ class PyMolTranspiler:
         self.teleposition = None
         self.scale = 10
         self.m4 = None
+        self.m4_alt = None
         self.notes = ''
         self.atoms = []
         self.cartoon=[]
@@ -343,37 +344,37 @@ class PyMolTranspiler:
     def get_color(self, uniform_non_carbon=False, inner_tabbed=1, **settings):
         #determine what colors we have.
         #{'carbon':carboncolorset,'non-carbon': colorset}
-        elemental_mapping = {}
-        catenary_mapping = {} #pertaining to chains...
-        residual_mapping = {}
-        serial_mapping = {}
+        self.elemental_mapping = {}
+        self.catenary_mapping = {} #pertaining to chains...
+        self.residual_mapping = {}
+        self.serial_mapping = {}
         #non-carbon
         for elem in self.colors['non-carbon']: # element -> color_id -> list of atom ids
             if len(self.colors['non-carbon'][elem]) == 1:
                 color_id=list(self.colors['non-carbon'][elem].keys())[0]
-                elemental_mapping[elem] = self.swatch[color_id].hex
+                self.elemental_mapping[elem] = self.swatch[color_id].hex
             else:
                 colors_by_usage=sorted(self.colors['non-carbon'][elem].keys(), key=lambda c: len(self.colors['non-carbon'][elem][c]), reverse=True)
-                elemental_mapping[elem]=self.swatch[colors_by_usage[0]].hex
+                self.elemental_mapping[elem]=self.swatch[colors_by_usage[0]].hex
                 if not uniform_non_carbon:
                     for color_id in colors_by_usage[1:]:
                         for serial in self.colors['non-carbon'][elem][color_id]:
-                            serial_mapping[serial] = self.swatch[color_id].hex
+                            self.serial_mapping[serial] = self.swatch[color_id].hex
         #carbon
         for chain in self.colors['carbon']:
             colors_by_usage = sorted(set([col for resi in self.colors['carbon'][chain] for col in self.colors['carbon'][chain][resi]]),
                                      key=lambda c: len([self.colors['carbon'][chain][resi][c] for resi in self.colors['carbon'][chain] if c in self.colors['carbon'][chain][resi]]), reverse=True)
-            catenary_mapping[chain] = self.swatch[colors_by_usage[0]].hex
+            self.catenary_mapping[chain] = self.swatch[colors_by_usage[0]].hex
             for resi in self.colors['carbon'][chain]: #-> resi -> color_id -> list of atom ids
                 if len(self.colors['carbon'][chain][resi]) == 1:
                     color_id = list(self.colors['carbon'][chain][resi].keys())[0]
                     if color_id != colors_by_usage[0]:
-                        residual_mapping[chain+resi] = self.swatch[color_id].hex
+                        self.residual_mapping[chain+resi] = self.swatch[color_id].hex
                 else:
                     # residue with different colored carbons!
                     for color_id in self.colors['carbon'][chain][resi]:
                         for serial in self.colors['carbon'][chain][resi][color_id]:
-                            serial_mapping[serial] = self.swatch[color_id].hex
+                            self.serial_mapping[serial] = self.swatch[color_id].hex
         code= string.Template('''//define colors
 var nonCmap = $elem;
 var sermap=$ser; 
@@ -389,7 +390,7 @@ var schemeId = NGL.ColormakerRegistry.addScheme(function (params) {
         else if (chainid in chainmap) {return +chainmap[chainid]}
         else {return 0x000000} //black as the darkest error!
     };
-});''').safe_substitute(elem=json.dumps(elemental_mapping), ser=serial_mapping, chain=catenary_mapping, res=residual_mapping)
+});''').safe_substitute(elem=json.dumps(self.elemental_mapping), ser=self.serial_mapping, chain=self.catenary_mapping, res=self.residual_mapping)
         #RE hack: curious issue that multichain protein chainid sometimes is numeric: protein.structure.eachAtom(function(atom) {console.log(atom.chainid);}); or atom.chainIndex atom.chainname
         return self.indent(code, inner_tabbed)
 
@@ -499,7 +500,7 @@ $('#viewport img').click(activate);
             ngl_string = ''
         code=('<!-- **inserted code**  -->\n{ngl_string}<script type="text/javascript">{js}</script>\n<!-- **end of code** -->').format(
                                  ngl_string=ngl_string,
-                                 js=self.get_js(viewport, inner_tabbed=tabbed + 3, uniform_non_carbon=uniform_non_carbon, image=image, stick=stick))
+                                 js=self.mako_js(viewport=viewport, inner_tabbed=tabbed + 3, uniform_non_carbon=uniform_non_carbon, image=image, stick=stick, **settings))
         return self.indent(code, tabbed)
 
     def write_hmtl(self, template_file='test.mako', output_file='test_generated.html', **kargs):
@@ -511,8 +512,9 @@ $('#viewport img').click(activate);
         return self
 
     def mako_js(self, **settings):
-        code=Template(filename=os.path.join('pymol_ngl_transpiler_app', 'templates', 'output.js.mako'))\
-            .render_unicode(structure=self)
+        self.get_color(True)
+        code=Template(filename=os.path.join('pymol_ngl_transpiler_app', 'templates', 'output.js.mako'), format_exceptions=True,)\
+            .render_unicode(structure=self, **settings)
         return code
 
 
@@ -525,7 +527,7 @@ def test():
     for block in data:
         if 'get_view' in block:
             view = block
-        elif 'iterate' in block:  # strickly lowercase as it ends in _I_terate
+        elif 'iterate' in block:  # strickly lowercase as it ends in *I*terate
             reps = block
         elif not block:
             pass #empty line.
@@ -534,7 +536,6 @@ def test():
     transpiler.convert_view(view)
     transpiler.convert_representation(reps)
     code = transpiler.get_html(tabbed=0)  # ngl='ngl.js'
-    transpiler.write_hmtl(template_file='test2.mako', output_file='example.html', code=code)
     return transpiler
 
 def file_test():
@@ -546,9 +547,10 @@ def file_test():
 def new_template_testing():
     #transpiler = PyMolTranspiler(file='images/1ubq.pse')
     transpiler = test()
-    transpiler = '1UBQ'
-    print(transpiler.mako_js())
-
+    transpiler.pdb = '1UBQ'
+    transpiler.m4_alt = None
+    code=transpiler.mako_js(toggle_fx=True, viewport='viewport', variants=[], save_button='save_button', backgroundColor='white',tag_wrapped=True)
+    transpiler.write_hmtl(template_file='test2.mako', output_file='example.html', code=code)
 
 if __name__ == "__main__":
     ## ARGPARSER

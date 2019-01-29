@@ -77,7 +77,7 @@ def ajax_convert(request):
         # make output
         code = trans.get_html(ngl=request.POST['cdn'], **settings)
         page=str(uuid.uuid4())
-        snippet_run=trans.get_js(**{**settings, 'image': False})
+        snippet_run=trans.mako_js(**{**settings, 'image': False})
         # sharable page
         try:
             make_static_page(request, snippet_run, page)
@@ -112,5 +112,9 @@ def edit(request):
 @view_config(route_name='save_pdb')
 def save_pdb(request):
     filename=request.session['file']
+    raise NotImplementedError
     return FileResponse(filename, content_disposition='attachment; filename="{}"'.format(request.POST['name']))
 
+@view_config(route_name='save_zip')
+def save_zip(request):
+    raise NotImplementedError

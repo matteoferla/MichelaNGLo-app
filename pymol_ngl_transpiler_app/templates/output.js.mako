@@ -1,10 +1,19 @@
-<%page args="structure, m4, m4_alt=None, has_image=False, toggle_fx=True, raw_pdb='', sticks='', cartoon='', nonCmap={}, sermap={}, chainmap={}, resmap={}, viewport='viewport', variants=[], save_button='save_button', backgroundColor='white'"/>
-<script type="text/javascript">
-
-% if structure.raw_pdb:
-    pdbData = `${structure.ss}
-${structure.raw_pdb}`;
+<%page args="structure, toggle_fx=False, viewport='viewport', variants=[], save_button=False, backgroundColor='white', lipid=False, image=False, tag_wrapped=False, **other" />
+% if tag_wrapped:
+    <script type="text/javascript">
 % endif
+
+$( document ).ready(function () {
+    window.myData={current_index: 0, variants: []};
+% if structure.raw_pdb:
+    myData.pdbs = [new Blob( [ `${'\n'.join(structure.ss)+'\n'+structure.raw_pdb}` ], { type: "text/plain"} )];
+    myData.imagemode=true;
+% elif len(structure.pdb) == 4:
+    myData.pdbs=['rcsb://${structure.pdb}'];
+% else:
+    myData.pdbs=['${structure.pdb}'];
+% endif
+
 
 % if toggle_fx == True:
 function show_region(ab,ad) {
@@ -13,6 +22,7 @@ function show_region(ab,ad) {
 	protein.addRepresentation( "cartoon", {color: schemeId });
 	protein.autoView();
 }
+
 function show_residue(resi) {
     // there should only be two representations...
     for (var i=2; i < protein.reprList.length; i++) {
@@ -33,47 +43,33 @@ function show_residue(resi) {
 }
 % endif
 
-//save
-$('#${save_button}').click(function () {
+//save button
+%if save_button:
+    $('#${save_button}').click(function () {
    stage.makeImage( {trim: true, antialias: true, transparent: false }).then(function (img) {window.img=img; NGL.download(img);});
 });
+%endif
 
-% if has_image:
-var imagemode=true;
-% endif
-function loader(filename) {
-    % if has_image:
-        if (!! $('#${viewport} img').length) { //there is an image. Remove and get the sizes
-		var w=$('#${viewport} img').width();
-		var h=$('#${viewport} img').height();
-		$('#${viewport} img').detach();
-		$('#${viewport} p').detach();
-		$('#${viewport}').css('width',w).css('height',h);
-	}
-    % endif
-	// cases...
-	if (filename && window.stage) { //new model. Force reset
-		stage.removeAllComponents();
-	} else if (! window.stage) {
-		filename=filename || '${structure.pdb}';
-		window.stage = new NGL.Stage( "viewport",{backgroundColor: "${backgroundColor}"});
+//lipid button
+% if lipid:
+    window.lipidRepresentation=false;
+    $('#${lipid}').click(function () {
+	if (! myData.lipidRepresentation) {
+		myData.lipidRepresentation=protein.addRepresentation("licorice",{sele:':C or :Z'});
 	} else {
-		//nothing to be done.
-		return true;
+	protein.removeRepresentation(window.lipidRepresentation);
+	window.lipidRepresentation=false;
 	}
-    % if structure.raw_pdb:
-    var stringBlob = new Blob( [ pdbData ], { type: "text/plain"} );
-    stage.loadFile(stringBlob, { ext: "pdb" })
-    % else:
-	stage.loadFile(filename)
-    % endif
-            .then(function (protein) {
-               window.protein=protein;
-    //define colors
-		var nonCmap = ${nonCmap};
-		var sermap=${sermap};
-		var chainmap=${chainmap};
-		var resmap=${resmap};
+});
+% endif
+
+function _loading (protein) {
+	   myData.protein=protein;
+		   //define colors
+		var nonCmap = ${structure.elemental_mapping};
+		var sermap=${structure.serial_mapping};
+		var chainmap=${structure.catenary_mapping};
+		var resmap=${structure.residual_mapping};
 		var schemeId = NGL.ColormakerRegistry.addScheme(function (params) {
 			this.atomColor = function (atom) {
 				chainid=atom.chainid;
@@ -88,54 +84,107 @@ function loader(filename) {
 		});
 
 		//representations
-		protein.removeAllRepresentations();
-		var sticks = new NGL.Selection( "${sticks}" );
-		stickRep = protein.addRepresentation( "licorice", {color: schemeId, sele: sticks.string} );
-		var cartoon = new NGL.Selection( "${cartoon}" );
-		cartoonRep = protein.addRepresentation( "cartoon", {color: schemeId, sele: cartoon.string, smoothSheet: true} );
+        <%
+            if structure.colors:
+                color_str='color: schemeId,'
+            else:
+                color_str =''
+        %>
+        protein.removeAllRepresentations();
+        % if structure.lines:
+            var lines = new NGL.Selection( "${' or '.join(structure.lines)}" );
+            myData.lineRepresentation = protein.addRepresentation( "line", {${color_str} sele: lines.string} );
+        % endif
+        % if structure.sticks:
+            var sticks = new NGL.Selection( "${' or '.join(structure.sticks)}" );
+            % if stick == 'sym_licorice':
+                myData.stickRepresentation = protein.addRepresentation( "licorice", {${color_str} sele: sticks.string, multipleBond: "symmetric"} );
+            % elif stick == 'licorice':
+                myData.stickRepresentation = protein.addRepresentation( "licorice", {${color_str}  sele: sticks.string} );
+            % elif stick == 'hyperball':
+                myData.stickRepresentation = protein.addRepresentation( "hyperball", {${color_str}  sele: sticks.string} );
+            % elif stick == 'ball':
+                myData.stickRepresentation = protein.addRepresentation( "ball+stick", {${color_str}  sele: sticks.string, multipleBond: "symmetric"} );
+            % endif
+        % endif
+        % if structure.cartoon:
+            var cartoon = new NGL.Selection( "${' or '.join(structure.cartoon)}" );
+            myData.cartoonRepresentation = protein.addRepresentation( "cartoon", {${color_str}  sele: cartoon.string, smoothSheet: true} );
+        % endif
+        % if structure.surface:
+            var surf = new NGL.Selection( "${' or '.join(structure.surface)}" );
+            myData.surfRepresentation = protein.addRepresentation( "surface", {${color_str} sele: surf.string} );
+        % endif
 
 		//orient
-		window.main_view = (new NGL.Matrix4).fromArray(${m4});
-		% if m4_alt:
-            window.alt_view = (new NGL.Matrix4).fromArray(${m4_alt});
+		myData.main_view = (new NGL.Matrix4).fromArray(${structure.m4.reshape(16, ).tolist()});
+		% if structure.m4_alt:
+            myData.alt_view = (new NGL.Matrix4).fromArray(${structure.m4_alt.reshape(16, ).tolist()});
         % endif
-		stage.viewerControls.orient(main_view);
-});
+		stage.viewerControls.orient(myData.main_view);
+	}
+
+function load_file(index) { //has the potential of having structure toggle.
+    if (typeof index != "number") {index = myData.current_index;} //"undefined"
+
+    % if image:
+        if (!! $('#${viewport} img').length) { //there is an image. Remove and get the sizes
+		var w=$('#${viewport} img').width();
+		var h=$('#${viewport} img').height();
+		$('#${viewport} img').detach();
+		$('#${viewport} p').detach();
+		$('#${viewport}').css('width',w).css('height',h);
+	}
+    % endif
+
+	// cases...
+	if ( (index != myData.current_index) && window.stage) { //new model. Force reset
+		stage.removeAllComponents();
+	} else if (! window.stage) {
+	    var pdb=myData.pdbs[index];
+		window.stage = new NGL.Stage( "viewport",{backgroundColor: "${backgroundColor}"});
+	} else {
+		//nothing to be done.
+		return true;
+	}
+	% if structure.raw_pdb:
+        stage.loadFile(pdb, { ext: "pdb" }).then(_loading);
+    % else:
+        stage.loadFile(pdb).then(_loading);
+    % endif
+
 }
 
-% if raw_pdb:
-    //do something
+% if image:
+    $('#${viewport} img').click(function () {load_file();});
 % else:
-    % if len(self.pdb) == 4:
-        var filepath="rcsb://${structure.pdb}";
-    % else:
-        var filepath="${structure.pdb}";
-    % endif
-    $('#${viewport} img').click(function () {loader(filepath);});
+    load_file();
 % endif
-
 
 // Handle window resizing
 window.addEventListener( "resize", function( event ){
     stage.handleResize();
 }, false );
 
-// move out
-var mutants=${variants};
-$('#view_dropdown').append('<a class="dropdown-item" href="#" id="main_view">main view</a>');
-$('#main_view').click(function() {load_file (); stage.viewerControls.orient(top_view);});
-% if m4_alt:
-$('#view_dropdown').append('<a class="dropdown-item" href="#" id="alt_view">alt view</a>');
-$('#alt_view').click(function() {load_file (); stage.viewerControls.orient(alt_view);});
+% if 1==0:
+    % if variants:
+    var mutants=${variants};
+    $('#view_dropdown').append('<a class="dropdown-item" href="#" id="main_view">main view</a>');
+    $('#main_view').click(function() {load_file (); stage.viewerControls.orient(top_view);});
+    % if structure.m4_alt:
+    $('#view_dropdown').append('<a class="dropdown-item" href="#" id="alt_view">alt view</a>');
+    $('#alt_view').click(function() {load_file (); stage.viewerControls.orient(alt_view);});
+    % endif
+    for (var i=0; i < mutants.length; i++) {
+        var x=mutants[i];
+        $('#view_dropdown').append('<a class="dropdown-item" href="#" id="'+x+'">'+x+'</a>');
+        $('#'+x).click(function() {
+            load_file ();
+            show_residue($( this ).attr('id').slice(1,-1));
+            });
+    }
 % endif
-for (var i=0; i < mutants.length; i++) {
-	var x=mutants[i];
-	$('#view_dropdown').append('<a class="dropdown-item" href="#" id="'+x+'">'+x+'</a>');
-	$('#'+x).click(function() {
-		load_file ();
-		show_residue($( this ).attr('id').slice(1,-1));
-		});
-}
+
 
 var models=[{name:'phyre', file:'LZTR1_data/LZTR1_5A10_noPhospho.pdb',text: 'Phyre one-to-one (PDB:5A10) &mdash; unphosphorylated'},
 			{name:'phyrep', file:'LZTR1_data/LZTR1_5A10.pdb',text: 'Phyre &mdash; phosphorylated (default)'},
@@ -143,12 +192,14 @@ var models=[{name:'phyre', file:'LZTR1_data/LZTR1_5A10_noPhospho.pdb',text: 'Phy
 			{name:'iTasser', file:'LZTR1_data/LZTR1_iTasser.pdb',text: 'I-Tasser model'},
 			{name:'iTassercul', file:'LZTR1_data/LZTR1_iTasser_4apf.pdb',text: 'I-Tasser model w N-terminus of Cullin-3 (PDB:4APF'}];
 
-			//{name:'phyreu', file:'LZTR1_data/LZTR1_5A10_ubi.pdb',text: 'Phyre &mdash; itself ubiquinated'},
 for (var i=0; i < models.length; i++) {
 	var x=models[i];
 	$('#dropdownModel').append('<a class="dropdown-item" href="#" id="'+x.name+'" data-file="'+x.file+'" data-text="'+x.text+'">'+x.text+'</a>');
 	$('#'+x.name).click(function() {load_file ($(this).attr('data-file')); $('h1 small').html($(this).attr('data-text'));});
 }
 
-
-</script>
+% endif
+});//doc-ready
+% if tag_wrapped:
+    </script>
+% endif

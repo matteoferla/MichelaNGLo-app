@@ -23,6 +23,7 @@
     <!-- Custom styles for this scaffold -->
     <link href="${request.static_url('pymol_ngl_transpiler_app:static/theme.css')}" rel="stylesheet">
     <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-LRlmVvLKVApDVGuspQFnRQJjkv0P7/YFrw84YYQtmYG4nK8c+M+NlmYDCv0rKWpG" crossorigin="anonymous">
+    <!--<link rel="stylesheet" href="http://www.matteoferla.com/Font-Awesome-Pro/css/all.min.css" crossorigin="anonymous">-->
     <style>
 
 .footer {
