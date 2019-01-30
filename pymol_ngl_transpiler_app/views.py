@@ -6,8 +6,8 @@ import shutil
 import os
 import mako
 from pyramid.response import FileResponse
+password='protein'
 
-print(os.getcwd())
 if os.path.isdir(os.path.join('pymol_ngl_transpiler_app','temp')):
     for file in os.listdir(os.path.join('pymol_ngl_transpiler_app','temp')):
         os.remove(os.path.join('pymol_ngl_transpiler_app','temp',file))
@@ -117,3 +117,29 @@ def save_pdb(request):
 @view_config(route_name='save_zip')
 def save_zip(request):
     raise NotImplementedError
+
+
+@view_config(route_name='admin', renderer='templates/private.mako', http_cache=0)
+def admin_callable(request):
+    status='This area is not for users. Sorry.'
+    if 'admin' in request.session and request.session['admin']:
+        admin=True
+    else:
+        admin=False
+    if 'password' in request.POST:
+        if request.POST['password'] == password:
+            print('Granted')
+            request.session['admin'] = True
+            admin=True
+            status = 'The password is right. How did you get this message?'
+        else:
+            print('wrong...{}'.format(request.POST['password']))
+            admin = False
+            status='禁 Warning: Password wrong!'
+    else:
+        status=''
+    if admin:
+        return {'admin': True, 'status': ''}
+    else:
+        return {'admin': False, 'status': status}
+
