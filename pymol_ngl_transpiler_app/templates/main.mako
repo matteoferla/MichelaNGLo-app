@@ -332,6 +332,7 @@
             $('#submit').click(function () {
                 $('#throbber').modal('show');
                 $('#results').remove();
+                stage=false;
                 $('.is-invalid').removeClass('is-invalid');
                 $('.is-valid').removeClass('is-valid');
                 $('.invalid-feedback').hide();

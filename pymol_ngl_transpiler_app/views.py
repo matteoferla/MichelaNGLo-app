@@ -37,7 +37,6 @@ def ajax_convert(request):
                 return False
             else:
                 return True
-
         settings = {'tabbed': int(request.POST['indent']),
                     'viewport': request.POST['viewport_id'],
                     'image': is_js_true(request.POST['image']),
@@ -77,7 +76,7 @@ def ajax_convert(request):
         # make output
         code = trans.get_html(ngl=request.POST['cdn'], **settings)
         page=str(uuid.uuid4())
-        snippet_run=trans.mako_js(**{**settings, 'image': False})
+        snippet_run=trans.code
         # sharable page
         try:
             make_static_page(request, snippet_run, page)
@@ -86,9 +85,9 @@ def ajax_convert(request):
             minor_error='Could not generate sharable static page ({0})'.format(err)
         # return
         if minor_error:
-            return {'snippet': code, 'error': 'warning', 'error_msg':minor_error, 'error_title':'A minor error arose','validation':trans.validation_text, 'viewport':settings['viewport'], 'page': page}
+            return {'snippet': code, 'error': 'warning', 'error_msg':minor_error, 'error_title':'A minor error arose','validation':trans.validation_text, 'viewport':settings['viewport'], 'page': page, 'image': settings['image']}
         else:
-            return {'snippet': code, 'snippet_run':snippet_run,'validation':trans.validation_text, 'viewport':settings['viewport'], 'page': page}
+            return {'snippet': code, 'snippet_run':snippet_run,'validation':trans.validation_text, 'viewport':settings['viewport'], 'page': page, 'image': settings['image']}
 
     except:
         print(traceback.format_exc())

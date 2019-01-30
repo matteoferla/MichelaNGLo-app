@@ -162,9 +162,7 @@ function load_file(index) { //has the potential of having structure toggle.
 % endif
 
 // Handle window resizing
-window.addEventListener( "resize", function( event ){
-    stage.handleResize();
-}, false );
+window.addEventListener( "resize", function( event ){stage.handleResize();}, false );
 
 % if 1==0:
     % if variants:

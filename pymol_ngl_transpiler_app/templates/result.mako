@@ -1,4 +1,4 @@
-<%page args="snippet='', snippet_run='', error='', error_msg='', error_title='', validation='', viewport='viewport'"/>
+<%page args="snippet='', snippet_run='', error='', error_msg='', error_title='', validation='', viewport='viewport', image=False"/>
 
 <li class="list-group-item" id="results">
     <h3>Results</h3>
@@ -26,7 +26,12 @@
           %if page:
               <p>For a sharable and editable version <a href="user-structures/${page}.html">click here.</a></p>
           %endif
-          <div id="viewport" style="width:100%; height: 0; padding-bottom: 100%;"></div>
+          % if image:
+              <div id="${viewport}"><img src="images/clickmap.jpg" alt="clickmap" width='100%' style='cursor: pointer'></div>
+          % else:
+              <div id="${viewport}" style="width:100%; height: 0; padding-bottom: 100%;"></div>
+          % endif
+
       </div>
       <div class="tab-pane fade" id="nav-code" role="tabpanel" aria-labelledby="nav-code-tab">
         <pre class="p-2"><div class="float-right"><a href="#snippet" data-clipboard-target="#snippet" id="copy_snippet">Copy</a></div>

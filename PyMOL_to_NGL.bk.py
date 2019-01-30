@@ -183,7 +183,6 @@ class PyMolTranspiler:
         self.sticks=[]
         self.colors=[]
         self.ss=[]
-        self.code=''
         self.raw_pdb=None  #this is set from the instance `prot.raw_pdb = open(file).read()`
         if file:
             assert '.pse' in file.lower(), 'Only PSE files accepted.'
@@ -192,7 +191,7 @@ class PyMolTranspiler:
             keys = ('ID', 'chain', 'resi', 'resn', 'name', 'elem', 'reps', 'color')
             myspace = {'data': []} #myspace['data'] is the same as self.atoms
             pymol.cmd.iterate('(all)', "data.append({'ID': ID, 'chain': chain, 'resi': resi, 'resn': resn, 'name':name, 'elem':elem, 'reps':reps, 'color':color, 'ss': ss})", space=myspace)
-            self.convert_representation(myspace['data'], **settings)
+            self.convert_representation(myspace['data'])
             self.parse_ss(myspace['data'])
             self.convert_view(v)
             pymol.cmd.save(file.replace('.pse','')+'.pdb')
@@ -200,7 +199,7 @@ class PyMolTranspiler:
         if view:
             self.convert_view(view)
         if representation:
-            self.convert_representation(representation, **settings)
+            self.convert_representation(representation)
 
     def convert_view(self, view, **settings):
         """
@@ -231,6 +230,8 @@ class PyMolTranspiler:
                                'set_view (\\\n{})'.format(',\\\n'.join(['{0:f}, {1:f}, {2:f}'.format(x, y, z) for x, y, z in
                                                            zip(pymolian[:-2:3], pymolian[1:-1:3], pymolian[2::3])]))
             # So it is essential that the numbers be in f format and not e format. or it will be shifted. Likewise for the brackets.
+        if self.validation == True:
+            print(self.validation)
         return self
 
     def get_view(self, output='matrix', **settings):
@@ -382,7 +383,24 @@ class PyMolTranspiler:
                     for color_id in self.colors['carbon'][chain][resi]:
                         for serial in self.colors['carbon'][chain][resi][color_id]:
                             self.serial_mapping[serial] = self.swatch[color_id].hex
-        return self
+        code= string.Template('''//define colors
+var nonCmap = $elem;
+var sermap=$ser; 
+var chainmap=$chain; 
+var resmap=$res;
+var schemeId = NGL.ColormakerRegistry.addScheme(function (params) {
+    this.atomColor = function (atom) {
+        chainid=atom.chainid;
+        if (! isNaN(parseFloat(chainid))) {chainid=atom.chainname} // hack for chainid/chainIndex/chainname issue if the structure is loaded from string.
+        if (atom.serial in sermap)  {return +sermap[atom.serial]}
+        else if (atom.element in nonCmap) {return +nonCmap[atom.element]}
+        else if (chainid+atom.resno in resmap) {return +resmap[chainid+atom.resno]}
+        else if (chainid in chainmap) {return +chainmap[chainid]}
+        else {return 0x000000} //black as the darkest error!
+    };
+});''').safe_substitute(elem=json.dumps(self.elemental_mapping), ser=self.serial_mapping, chain=self.catenary_mapping, res=self.residual_mapping)
+        #RE hack: curious issue that multichain protein chainid sometimes is numeric: protein.structure.eachAtom(function(atom) {console.log(atom.chainid);}); or atom.chainIndex atom.chainname
+        return self.indent(code, inner_tabbed)
 
     def parse_ss(self, data, **settings):
         def _deal_with():
@@ -433,9 +451,14 @@ class PyMolTranspiler:
                 resn_last = resn_this
                 ss_last = ss_this
         _deal_with()
-        return self
 
-    def get_html(self, ngl='https://cdn.rawgit.com/arose/ngl/v0.10.4-1/dist/ngl.js', **settings):
+
+    def indent(self,code, tabbed=0):
+        if isinstance(code, str):
+            code = code.split('\n')
+        return ''.join([' ' * 4 * int(tabbed) + row + '\n' for row in code])
+
+    def get_html(self, ngl='https://cdn.rawgit.com/arose/ngl/v0.10.4-1/dist/ngl.js', viewport='viewport', tabbed=0, uniform_non_carbon=False, image=False, stick='sym_licorice', **settings):
         """
         Returns a string to be copy-pasted into HTML code.
         :param ngl: (optional) the address to ngl.js. If unspecified it gets it from the RawGit CDN
@@ -447,11 +470,10 @@ class PyMolTranspiler:
             ngl_string='<script src="{0}" type="text/javascript"></script>\n'.format(ngl)
         else:
             ngl_string = ''
-        if not self.code:
-            self.get_js(**settings)
-        return '<!-- **inserted code**  -->\n{ngl_string}<script type="text/javascript">{js}</script>\n<!-- **end of code** -->'.format(
+        code=('<!-- **inserted code**  -->\n{ngl_string}<script type="text/javascript">{js}</script>\n<!-- **end of code** -->').format(
                                  ngl_string=ngl_string,
-                                 js=self.code)
+                                 js=self.get_js(viewport=viewport, inner_tabbed=tabbed + 3, uniform_non_carbon=uniform_non_carbon, image=image, stick=stick, **settings))
+        return self.indent(code, tabbed)
 
     def write_hmtl(self, template_file='test.mako', output_file='test_generated.html', **kargs):
         if self.verbose:
@@ -462,9 +484,8 @@ class PyMolTranspiler:
         return self
 
     def get_js(self, **settings):
-        code=Template(filename=os.path.join('pymol_ngl_transpiler_app', 'templates', 'output.js.mako'))\
+        code=Template(filename=os.path.join('pymol_ngl_transpiler_app', 'templates', 'output.js.mako'),)\
             .render_unicode(structure=self, **settings)
-        self.code=code
         return code
 
 
