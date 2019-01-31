@@ -18,7 +18,7 @@
         <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
         <a href="https://github.com/matteoferla/PyMOL-to-NGL-transpiler" class="btn btn-primary" >Visit Github</a>
-        <a href="http://ngl.matteoferla.com" type="button" class="btn btn-primary">Visit App</a>
+        <a href="http://ngl.matteoferla.com" class="btn btn-primary">Visit App</a>
       </div>
       </div>
     </div>

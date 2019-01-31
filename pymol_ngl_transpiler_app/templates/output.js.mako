@@ -1,4 +1,4 @@
-<%page args="structure, toggle_fx=False, viewport='viewport', variants=[], save_button=False, backgroundColor='white', lipid=False, image=False, tag_wrapped=False, **other" />
+<%page args="structure, toggle_fx=True, viewport='viewport', variants=[], save=False, backgroundColor='white', lipid=False, image=False, tag_wrapped=False, **other" />
 % if tag_wrapped:
     <script type="text/javascript">
 % endif
@@ -43,15 +43,17 @@ function show_residue(resi) {
 }
 % endif
 
-//save button
-%if save_button:
-    $('#${save_button}').click(function () {
+
+%if save:
+    //save button
+    $('#${save}').click(function () {
    stage.makeImage( {trim: true, antialias: true, transparent: false }).then(function (img) {window.img=img; NGL.download(img);});
 });
 %endif
 
-//lipid button
+
 % if lipid:
+    //lipid button
     window.lipidRepresentation=false;
     $('#${lipid}').click(function () {
 	if (! myData.lipidRepresentation) {
@@ -143,6 +145,8 @@ function load_file(index) { //has the potential of having structure toggle.
 	} else if (! window.stage) {
 	    var pdb=myData.pdbs[index];
 		window.stage = new NGL.Stage( "viewport",{backgroundColor: "${backgroundColor}"});
+		// Handle window resizing
+        window.addEventListener( "resize", function( event ){stage.handleResize();}, false );
 	} else {
 		//nothing to be done.
 		return true;
@@ -161,27 +165,25 @@ function load_file(index) { //has the potential of having structure toggle.
     load_file();
 % endif
 
-// Handle window resizing
-window.addEventListener( "resize", function( event ){stage.handleResize();}, false );
+
 
 % if 1==0:
     % if variants:
-    var mutants=${variants};
-    $('#view_dropdown').append('<a class="dropdown-item" href="#" id="main_view">main view</a>');
-    $('#main_view').click(function() {load_file (); stage.viewerControls.orient(top_view);});
-    % if structure.m4_alt:
-    $('#view_dropdown').append('<a class="dropdown-item" href="#" id="alt_view">alt view</a>');
-    $('#alt_view').click(function() {load_file (); stage.viewerControls.orient(alt_view);});
+        var mutants=${variants};
+        $('#view_dropdown').append('<a class="dropdown-item" href="#" id="main_view">main view</a>');
+        $('#main_view').click(function() {load_file (); stage.viewerControls.orient(top_view);});
+        % if structure.m4_alt:
+        $('#view_dropdown').append('<a class="dropdown-item" href="#" id="alt_view">alt view</a>');
+        $('#alt_view').click(function() {load_file (); stage.viewerControls.orient(alt_view);});
+        % endif
+        for (var i=0; i < mutants.length; i++) {
+            var x=mutants[i];
+            $('#view_dropdown').append('<a class="dropdown-item" href="#" id="'+x+'">'+x+'</a>');
+            $('#'+x).click(function() {
+                show_residue($( this ).attr('id').slice(1,-1));
+                });
+        }
     % endif
-    for (var i=0; i < mutants.length; i++) {
-        var x=mutants[i];
-        $('#view_dropdown').append('<a class="dropdown-item" href="#" id="'+x+'">'+x+'</a>');
-        $('#'+x).click(function() {
-            load_file ();
-            show_residue($( this ).attr('id').slice(1,-1));
-            });
-    }
-% endif
 
 
 var models=[{name:'phyre', file:'LZTR1_data/LZTR1_5A10_noPhospho.pdb',text: 'Phyre one-to-one (PDB:5A10) &mdash; unphosphorylated'},

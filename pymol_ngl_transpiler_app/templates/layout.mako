@@ -85,7 +85,7 @@ pre {
 
 <footer class="footer">
       <div class="container">
-        <span class="text-muted">PyMOL(TM) is a trademark of Schrodinger, LLC.</span>
+        <span class="text-muted"><small>PyMOL(TM) is a trademark of Schr&ouml;dinger , LLC. The authors are not affiliated or involved in any way with PyMOL or Schr&ouml;dinger. Data is not kept for commercial or analytic purposes.</small></span>
       </div>
     </footer>
 

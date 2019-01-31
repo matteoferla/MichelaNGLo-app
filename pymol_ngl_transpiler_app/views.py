@@ -28,7 +28,7 @@ def ajax_convert(request):
             return {'error': 'danger', 'error_title': 'No PDB code', 'error_msg': 'A PDB code is required to make the NGL viewer show a protein.','snippet':'','validation':''}
         elif request.POST['mode'] == 'out' and not request.POST['pymol_output']:
             return {'error': 'danger', 'error_title': 'No PyMOL code', 'error_msg': 'PyMOL code is required to make the NGL viewer show a protein.','snippet':'','validation':''}
-        elif request.POST['mode'] == 'file' and not request.POST['file'].filename:
+        elif request.POST['mode'] == 'file' and not (('demo_file' in request.POST and request.POST['demo_file']) or ('file' in request.POST and request.POST['file'].filename)):
             return {'error': 'danger', 'error_title': 'No PSE file', 'error_msg': 'A PyMOL file to make the NGL viewer show a protein.','snippet':'','validation':''}
 
         ## convert booleans and settings
@@ -37,13 +37,13 @@ def ajax_convert(request):
                 return False
             else:
                 return True
-        settings = {'tabbed': int(request.POST['indent']),
-                    'viewport': request.POST['viewport_id'],
+        settings = {'viewport': request.POST['viewport_id'],#'tabbed': int(request.POST['indent']),
                     'image': is_js_true(request.POST['image']),
                     'uniform_non_carbon':is_js_true(request.POST['uniform_non_carbon']),
                     'verbose': False,
                     'validation': False,
-                    'stick': request.POST['stick']}
+                    'stick': request.POST['stick'],
+                    'save': request.POST['save']}
 
         # parse data
         if request.POST['mode'] == 'out':
@@ -61,10 +61,13 @@ def ajax_convert(request):
                     minor_error = 'Unknown block: ' + block
             trans = PyMolTranspiler(view=view, representation=reps, pdb=request.POST['pdb'], **settings)
         elif request.POST['mode'] == 'file':
-            filename=os.path.join('pymol_ngl_transpiler_app', 'temp','{0}.pse'.format(uuid.uuid4()))
-            request.POST['file'].file.seek(0)
-            with open(filename, 'wb') as output_file:
-                shutil.copyfileobj(request.POST['file'].file, output_file)
+            if 'demo_file' in request.POST:
+                filename=os.path.join('pymol_ngl_transpiler_app', 'demo',request.POST['demo_file'])
+            else:
+                filename=os.path.join('pymol_ngl_transpiler_app', 'temp','{0}.pse'.format(uuid.uuid4()))
+                request.POST['file'].file.seek(0)
+                with open(filename, 'wb') as output_file:
+                    shutil.copyfileobj(request.POST['file'].file, output_file)
             trans = PyMolTranspiler(file=filename, **settings)
             request.session['file'] = filename
             if 'pdb_string' in request.POST:
@@ -85,27 +88,27 @@ def ajax_convert(request):
             minor_error='Could not generate sharable static page ({0})'.format(err)
         # return
         if minor_error:
-            return {'snippet': code, 'error': 'warning', 'error_msg':minor_error, 'error_title':'A minor error arose','validation':trans.validation_text, 'viewport':settings['viewport'], 'page': page, 'image': settings['image']}
+            return {'snippet': code, 'error': 'warning', 'error_msg':minor_error, 'error_title':'A minor error arose','validation':trans.validation_text, 'page': page, **settings}
         else:
-            return {'snippet': code, 'snippet_run':snippet_run,'validation':trans.validation_text, 'viewport':settings['viewport'], 'page': page, 'image': settings['image']}
+            return {'snippet': code, 'snippet_run':snippet_run,'validation':trans.validation_text, 'page': page, **settings}
 
     except:
         print(traceback.format_exc())
-        return {'snippet': traceback.format_exc(), 'snippet_run':'','error_title':'A major error arose', 'error': 'danger','error_msg':'The code failed to run serverside','validation':'', 'viewport':settings['viewport']}
+        return {'snippet': traceback.format_exc(), 'snippet_run':'','error_title':'A major error arose', 'error': 'danger','error_msg':'The code failed to run serverside','validation':''}
 
 
-def make_static_page(request, code, page, description='Editable text. press pen to edit.',title='User submitted structure'):
+def make_static_page(request, code, page, description='Editable text. press pen to edit.',title='User submitted structure',residues=''):
     open(os.path.join('pymol_ngl_transpiler_app','user', page+'.html'), 'w', newline='\n').write(
         mako.template.Template(filename=os.path.join('pymol_ngl_transpiler_app','templates','user_protein.mako'),
                                format_exceptions=True,
                                lookup=mako.lookup.TemplateLookup(directories=[os.getcwd()])
-        ).render_unicode(code=code, request=request, description=description, title=title))
+        ).render_unicode(code=code, request=request, description=description, title=title, residues=residues))
 
 
 @view_config(route_name='edit_user-page', renderer='json')
 def edit(request):
     print(request.POST)
-    make_static_page(request, request.POST['code'], request.POST['page'], request.POST['description'], request.POST['title'])
+    make_static_page(request, request.POST['code'], request.POST['page'], request.POST['description'], request.POST['title'], request.POST['residues'])
     return {'success': 1}
 
 @view_config(route_name='save_pdb')

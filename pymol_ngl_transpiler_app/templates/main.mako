@@ -24,9 +24,6 @@
                           <label class="btn btn-secondary">
                             <input type="radio" name="input_mode" id="input_mode_file" value="out" autocomplete="off"> Input PyMol output
                           </label>
-                          <label class="btn btn-secondary">
-                            <input type="radio" name="input_mode" id="input_mode3" value="what" autocomplete="off"> Other
-                          </label>
                         </div>
                         </div>
                     </div>
@@ -35,7 +32,6 @@
                 <!-- in via out -->
                 <div id="in_via_out" class="collapse">
                     <h3>Input via PyMOL output</h3>
-                    <p>For now this is the only way. In future an upload will be present.</p>
                     <p>To generate the pyMOL ouput use the commands in PyMOL:</p>
                         <pre><code>iterate all, ID,chain,resi, resn,name, elem,reps, color</code></pre><p>and</p><pre><code>get_view</code></pre>
                     <p>Then copy-paste the whole output here.</p>
@@ -68,6 +64,9 @@
                                 <input type="file" class="custom-file-input" id="upload" aria-describedby="upload_addon" accept=".pse">
                                 <label class="custom-file-label" for="upload">Choose file</label>
                               </div>
+                                <div class="input-group-append">
+                                <button type="button" class="btn btn-info" id="demo_mod_btn" data-toggle="modal" data-target="#demo_modal">Demo</button>
+                                </div>
                             </div>
                             <div class="invalid-feedback" id="error_upload">Please upload a valid pse file.</div>
                         </div>
@@ -91,7 +90,6 @@
 
                 <!-- in common -->
                 <div id="in_common">
-                    <h3>Further parameters</h3>
                     <div class="row">
                         <div class="col-xl-4 col-md-6 pb-4">
                                 <div class="input-group mb-3" data-toggle="tooltip"
@@ -117,6 +115,20 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="input-group" data-toggle="tooltip"
+                                 title="Use a static image that when clicked becomes the NGL interactive protein">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text bg-secondary">
+                                        <input type="checkbox" id="image"></div>
+                                </div>
+                                <div class="input-group-append">
+                            <span class="input-group-text">
+                                Static image
+                            </span>
+                                </div>
+                            </div>
+                        </div><!--image-->
                         <div class="col-xl-6 col-md-8 mb-4">
                             <div class="input-group" data-toggle="tooltip" data-html="true"
                                  title="<p>The equivalent of PyMOL sticks is liquorice in NGL, however, hyperball looks a lot nicer.</p><img src='images/stick.png' width='100px'><img src='images/sym_stick.png' width='100px'><img src='images/hyperball.png' width='100px'>">
@@ -128,34 +140,18 @@
                                     <input type="radio" name="sticks" id="sticks_licorice" autocomplete="off" value="licorice"> Liquorice
                                   </label>
                                 <label class="btn btn-secondary active">
-                                    <input type="radio" name="sticks" id="sticks_sym_licorice" autocomplete="off" value="sym_licorice" checked> <small>Liquorice<br/>w&#773; double bonds</small>
+                                    <input type="radio" name="sticks" id="sticks_sym_licorice" autocomplete="off" value="sym_licorice" checked> Liq. w&#773; db bonds
                                   </label>
                                   <label class="btn btn-secondary">
                                     <input type="radio" name="sticks" id="sticks_hyperball" value="hyperball" autocomplete="off"> Hyperball
                                   </label>
                                 </div>
                             </div>
-                        </div>
+                        </div><!--sticks-->
 
-                        <div class="col-xl-12 col-md-12 mb-4">
-                            <div class="input-group" data-toggle="tooltip"
-                                 title="The output can contain an script element pointing to a ngl.js source. Disable the checkbox to not have one or alter the address.">
-                                <div class="input-group-prepend">
-                                    <div class="input-group-text">NGL Address</div>
 
-                                </div>
-                                <div class="input-group-text bg-secondary rounded-0">
-                                    <input type="checkbox" id="cdn_bool" checked>
-                                </div>
-                                <input type="text" class="form-control" id="cdn" value="https://cdn.rawgit.com/arose/ngl/v0.10.4-1/dist/ngl.js">
-                                <div class="input-group-append">
-                                    <div class="btn btn-info" data-toggle="modal" data-target="#CDN_modal" >?</div>
 
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-xl-4 col-md-6 pb-4">
+                        <!--<div class="col-xl-4 col-md-6 pb-4">
                             <div class="input-group" data-toggle="tooltip"
                                  title="This is just a stylistic thing...">
                                 <div class="input-group-prepend">
@@ -178,7 +174,10 @@
                                     </datalist>
                                 </div>
                             </div>
-                        </div>
+                        </div>-->
+                    </div>
+                    <h3>Technical</h3>
+                    <div class="row">
                         <div class="col-xl-4 col-md-6 pb-4">
                                 <div class="input-group mb-3" data-toggle="tooltip"
                                      title="the id of the div that will contain the viewport">
@@ -188,21 +187,39 @@
                                     <input type="text" class="form-control" id="viewport_id" value="viewport" required>
                                     <div class="invalid-feedback" id="error_pdb">No id</div>
                                 </div>
-                            </div>
-                        <div class="col-xl-4 col-md-6 mb-4">
+                            </div><!--viewport-->
+                        <div class="col-xl-5 col-md-6 mb-4">
                             <div class="input-group" data-toggle="tooltip"
-                                 title="Use a static image that when clicked becomes the NGL interactive protein">
+                                 title="Add a 'take snapshop' function. To do this a button is required with a given id.">
                                 <div class="input-group-prepend">
                                     <div class="input-group-text bg-secondary">
-                                        <input type="checkbox" id="image"></div>
-                                </div>
-                                <div class="input-group-append">
-                            <span class="input-group-text">
-                                Static image
+                                        <input type="checkbox" id="snapshot" checked></div>
+                                    <span class="input-group-text">
+                                Snapshot
                             </span>
                                 </div>
+                                <div class="input-group-append">
+                                    <input type="text" class="form-control" id="snapshot_id" value="saveBtn">
+                                </div>
                             </div>
-                        </div>
+                        </div><!--snap-->
+                        <div class="col-xl-12 col-md-12 mb-4">
+                            <div class="input-group" data-toggle="tooltip"
+                                 title="The output can contain an script element pointing to a ngl.js source. Disable the checkbox to not have one or alter the address.">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text">NGL Address</div>
+
+                                </div>
+                                <div class="input-group-text bg-secondary rounded-0">
+                                    <input type="checkbox" id="cdn_bool" checked>
+                                </div>
+                                <input type="text" class="form-control" id="cdn" value="https://cdn.rawgit.com/arose/ngl/v0.10.4-1/dist/ngl.js">
+                                <div class="input-group-append">
+                                    <div class="btn btn-info" data-toggle="modal" data-target="#CDN_modal" >?</div>
+
+                                </div>
+                            </div>
+                        </div><!--NGL-->
                     </div>
                 </div>
                 </form>
@@ -251,6 +268,39 @@
           <p>If you are going to use the code on a page where you are not free to control what files are served, say your departmental webpage, opt for the remotely held file (CDN), which is the default value.</p>
           <pre><code>&lt;script type="text/javascript" scr="https://cdn.rawgit.com/arose/ngl/v0.10.4-1/dist/ngl.js"&gt;&lt;/script&gt;</code></pre>
           <p>This also applies for the PDB code. If you add a PDB code, it will use that from the PDB. If it looks like a file name (<i>e.g.</i> <code>file.pdb</code>) then it will assume you add it to the correct place (same name as the stated and in the same folder as the PDB. Alternatively you can click <code>Include PDB data</code></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" tabindex="-1" role="dialog" id="demo_modal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Demo PSE</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Demo PSEs. Protein alphabet taken from Howaarth (2015). </p>
+          <div class="row">
+              <div class="col-6 pr-0">
+                  <div class="list-group">
+              % for i in range(ord('A'), ord('N')+1):
+                  <button type="button" class="list-group-item list-group-item-action demo-pse" data-value="${chr(i)}.pse"> ${chr(i)}.pse </button>
+              % endfor
+            </div>
+              </div>
+              <div class="col-6 pl-0"><div class="list-group">
+                  % for i in range(ord('N'), ord('Z')+1):
+                  <button type="button" class="list-group-item list-group-item-action demo-pse" data-value="${chr(i)}.pse"> ${chr(i)}.pse </button>
+              % endfor
+                  <button type="button" class="list-group-item list-group-item-action demo-pse" data-value="art.pse"> art.pse </button>
+              </div></div>
+          </div>
+
       </div>
     </div>
   </div>
@@ -341,13 +391,20 @@
                 var mode=$("input[name='input_mode']:checked").val();
                 if ($('#pdb_string').is(':checked')) {data.append( 'pdb', ''); data.append('pdb_string',1)} else {data.append( 'pdb', valid_value('#pdb'));}
                 data.append( 'mode', mode );
-                if        (mode == 'out')  {    data.append( 'pymol_output',valid_value('#pymol_output'));
+                if        (mode == 'out') {
+                    data.append('pymol_output', valid_value('#pymol_output'));
+                } else if (mode == 'file' && !! demo_pse) {data.append('demo_file',demo_pse);
                 } else if (mode == 'file') {    data.append( 'file', valid_value('#upload'));
                 } else {throw 'Impossible mode';}
                 data.append( 'uniform_non_carbon',$('#uniform_non_carbon').is(':checked'));
                 data.append('viewport_id',valid_value('#viewport_id'));
                 data.append( 'image',$('#image').is(':checked'));
                 data.append('stick',$("input[name='sticks']:checked").val());
+                var snapshot = '';
+                if ($('#snapshot').is(':checked')) {
+                    snapshot = $('#snapshot_id').val();
+                }
+                data.append('save',snapshot);
                 var cdn = '';
                 if ($('#cdn_bool').is(':checked')) {
                     cdn = $('#cdn').val();
@@ -382,6 +439,15 @@
                 $('.is-valid').removeClass('is-valid');
                 $('.invalid-feedback').hide();
             });
+
+        var demo_pse='';
+        $('.demo-pse').click(function () {
+            demo_pse=$(this).data('value');
+            $('#upload+.custom-file-label').html('DEMO: '+demo_pse);
+            $('#demo_modal').modal('hide');
+            $('#pdb_string').prop('checked',true);
+            $('#pdb_string').trigger('change');
+        })
         });
     </script>
 </%block>
