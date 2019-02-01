@@ -112,14 +112,13 @@ for (var i=0; i < residuedex.length; i++) {
         if (r.length > 1) {
             label = r.splice(1).join(' ');
         }
-        $('#residues').append('<a class="dropdown-item" href="#" data-selection="'+r[0]+'">'+label+'</a>');
-        $('#'+x).click(function() {
+        $('#residues').append('<a class="dropdown-item residue" href="#" data-selection="'+r[0]+'">'+label+'</a>');
+    }
+}
+$('.residue').click(function() {
             load_file ();
             show_residue($( this ).data('selection'));
             });
-    }
-
-}
 
 });
 </script>
