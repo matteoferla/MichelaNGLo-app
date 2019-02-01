@@ -1,8 +1,13 @@
 <%inherit file="layout.mako"/>
-
+<%namespace file="labels.mako" name="info"/>
 <div class="card">
     <div class="card-header">
-        <h1 class="card-title">PyMOL&rarr;NGL transpiler</h1>
+        <h1 class="card-title">PyMOL&rarr;NGL transpiler
+            <div class="float-right">
+                <button type="button" class="btn btn-outline-secondary"><i class="far fa-question"></i></button><br/>
+                <button type="button" class="btn btn-outline-secondary"><i class="fab fa-github"></i></button>
+            </div>
+        </h1>
         <h3 class="card-subtitle mb-2 text-muted">Generate a NGL view from a PyMOL PSE file.</h3>
     </div>
     <div class="card-body">
@@ -72,7 +77,7 @@
                         </div>
                         <div class="col-xl-4 col-md-6 mb-4">
                             <div class="input-group" data-toggle="tooltip"
-                                 title="In order to allow visitors to see files that are not from RCSB PDB, you need to either put them online somewhere or you can provide the PDB data in the code itself (which makes it big).">
+                                 title="Basically, if you are using a PSE based on a RCSB PDB structure, don't tick this, but give the PDB code. Otherwise, tick this. For more info, press the question mark.">
                                 <div class="input-group-prepend">
                                     <div class="input-group-text bg-secondary">
                                         <input type="checkbox" id="pdb_string"></div>
@@ -81,6 +86,7 @@
                             <span class="input-group-text">
                                 Include PDB data
                             </span>
+                                    <div class="btn btn-info" data-toggle="modal" data-target="#CDN_modal" >?</div>
                                 </div>
                             </div>
                         </div>
@@ -93,7 +99,7 @@
                     <div class="row">
                         <div class="col-xl-4 col-md-6 pb-4">
                                 <div class="input-group mb-3" data-toggle="tooltip"
-                                     title="Two options: the PDB code from PDB or a web address to a file with suffix and all. If you are just opening a .html file on your computer and the custom pdb file is next to the .html file, just write the name of the file (relative path)">
+                                     title="${info.attr.pdb|n}">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">PDB code/name</span>
                                     </div>
@@ -103,7 +109,7 @@
                             </div>
                         <div class="col-xl-4 col-md-6 mb-4">
                             <div class="input-group" data-toggle="tooltip"
-                                 title="It is unlikely that one purposefully wants a non-carbon element to be represented with different colors. By checking this, the most common color for that element will be used.">
+                                 title="${info.attr.uniform_non_carbon|n}">
                                 <div class="input-group-prepend">
                                     <div class="input-group-text bg-secondary">
                                         <input type="checkbox" id="uniform_non_carbon"></div>
@@ -129,9 +135,9 @@
                                 </div>
                             </div>
                         </div><!--image-->
-                        <div class="col-xl-6 col-md-8 mb-4">
+                        <div class="col-xl-7 col-md-8 mb-4">
                             <div class="input-group" data-toggle="tooltip" data-html="true"
-                                 title="<p>The equivalent of PyMOL sticks is liquorice in NGL, however, hyperball looks a lot nicer.</p><img src='images/stick.png' width='100px'><img src='images/sym_stick.png' width='100px'><img src='images/hyperball.png' width='100px'>">
+                                 title="${info.attr.sticks|n}">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text" id="input_mode-addon">Sticks as </span>
                                   </div>
@@ -177,7 +183,7 @@
                         </div>-->
                     </div>
                     <h3>Technical</h3>
-                    <div class="row">
+                    <div class="row"  id="technical_div">
                         <div class="col-xl-4 col-md-6 pb-4">
                                 <div class="input-group mb-3" data-toggle="tooltip"
                                      title="the id of the div that will contain the viewport">
@@ -253,12 +259,14 @@
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">NGL library</h5>
+        <h5 class="modal-title">NGL library and PDB file</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
+          <p>For a web page to load a resource (<i>e.g.</i> image, PDB file or JS libary), the latter needs to be available online (<i>i.e.</i>not on one's laptop).</p>
+          <h6>NGL</h6>
         <p>In order to use the NGL protein viewer it needs to be loaded by your browser. This is a piece of JavaScript code which is requested to be loaded by the HTML page with a line </p>
           <pre><code>&lt;script scr="address where the script can be downloaded dot js"&gt;&lt;/script&gt;</code></pre>
           <p>This checkbox allows you to ommit this line (unchecked) if you are making other arrangements (<i>i.e.</i> you know what you are doing).</p>
@@ -267,7 +275,14 @@
           <pre><code>&lt;script type="text/javascript" scr="ngl.js"&gt;&lt;/script&gt;</code></pre>
           <p>If you are going to use the code on a page where you are not free to control what files are served, say your departmental webpage, opt for the remotely held file (CDN), which is the default value.</p>
           <pre><code>&lt;script type="text/javascript" scr="https://cdn.rawgit.com/arose/ngl/v0.10.4-1/dist/ngl.js"&gt;&lt;/script&gt;</code></pre>
-          <p>This also applies for the PDB code. If you add a PDB code, it will use that from the PDB. If it looks like a file name (<i>e.g.</i> <code>file.pdb</code>) then it will assume you add it to the correct place (same name as the stated and in the same folder as the PDB. Alternatively you can click <code>Include PDB data</code></p>
+          <h6>PDB files</h6>
+          <p>This also applies for the PDB code. If you add a PDB code, it will use that from the PDB. If it looks like a file name (<i>e.g.</i> <code>file.pdb</code>) then it will assume <b>you</b> will upload it to the correct place (<i>e.g.</i> <code>file.pdb</code> the PDB file is uploaded to the same folder as the HTML page; <code>https://www.myuni.ac.uk/~myusername/file.pdb</code> will <i>try</i> to fetch it from the URL &mdash;do note that some places don't serve 'raw' or 'cross-origin' files. Alternatively you can click <code>Include PDB data</code>, which means you don't have to worry.</p>
+          <h6>The big red 403</h6>
+          <p>The PDB and JS files cannot be kept on Dropbox or most cloud storage providers. If you get a Dropbox share link, set it 'all with link' and add the URL query <code>?db=1</code> to it, you will get the following error in the JS console (in Chrome, right click, inspect, Console tab):</p>
+          <pre><code>stage.loadFile("https://www.dropbox.com/s/23mxwy0okylrvll/dddG.pdb?dl=1")
+(index):1 Access to XMLHttpRequest at 'https://www.dropbox.com/s/23mxwy0okylrvll/dddG.pdb?dl=1' from origin 'http://ngl.matteoferla.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.</code></pre>
+          <p>This is because of a server-side security setting, which cannot be circumvented by the user &mdash;and Bitcoin hacker-miners. Likewise, only a specially configured server will serve JS libraries (called a "CDN").</p>
+          <p><b>Consequently, it is best to use the default CDN for NGL and tick <code>Include PDB data</code>.</b></p>
       </div>
     </div>
   </div>
@@ -447,7 +462,104 @@
             $('#demo_modal').modal('hide');
             $('#pdb_string').prop('checked',true);
             $('#pdb_string').trigger('change');
-        })
         });
+
+        window.tour = new Tour({
+          backdrop: true,
+          steps: [
+          {
+            element: "h1",
+            title: "Aim",
+            content: `${info.attr.aim|n}`,
+            placement: "bottom"
+          },
+          {
+            element: "h1",
+            title: "Where to use",
+            content: `${info.attr.usable|n}`,
+            placement: "bottom"
+          },{
+            element: "h1 .fa-github",
+            title: "GitHub Repository",
+            content: `${info.attr.github|n}`,
+            placement: "right"
+          },
+
+          {
+            element: "#input_mode_file",
+            title: "Input mode",
+            content: `${info.attr.mode|n}`,
+            placement: "bottom"
+          },
+          {
+            element: "#upload",
+            title: "Upload your PSE file",
+            content: `${info.attr.upload|n}`,
+            placement: "bottom"
+          },
+          {
+            element: "#demo_mod_btn",
+            title: "Demo PSE",
+            content: `${info.attr.demo_pse|n}`,
+            placement: "bottom"
+          },
+          {
+            element: "#pdb_string",
+            title: "Include PDB text?",
+            content: `${info.attr.pdb_string|n}`,
+            placement: "top"
+          },
+          {
+            element: "#pdb",
+            title: "PDB address",
+            content: `${info.attr.pdb|n}`,
+            placement: "top"
+          },
+          {
+            element: "#uniform_non_carbon",
+            title: "Correct color error for non-carbons",
+            content: `${info.attr.uniform_non_carbon|n}`,
+            placement: "top"
+          },
+          {
+            element: "#image",
+            title: "Static image on load",
+            content: `${info.attr.image|n}`,
+            placement: "top"
+          },
+          {
+            element: "#sticks_sym_licorice",
+            title: "Stick conversion",
+            content: `${info.attr.sticks|n}`,
+            placement: "top"
+          },
+          {
+            element: "#technical_div",
+            title: "Technicalities",
+            content: 'These options are best left alone at first.',
+            placement: "top"
+          },
+          {
+            element: "#submit",
+            title: "Results",
+            content: 'This completes the tour of the inputs. For a tour of the results, choose a demo PSE and submit the job and click the question mark.',
+            placement: "top"
+          }
+
+
+
+
+        ]});
+
+        $('.card-title .fa-question').click(function () {
+            // Initialize the tour
+            tour.init();
+            // Start the tour
+            if (tour.ended()) {tour.goTo(0);}
+            tour.start(true);
+
+        });
+
+        }); //ready
     </script>
 </%block>

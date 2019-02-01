@@ -1,6 +1,10 @@
 <%page args="snippet='', snippet_run='', error='', error_msg='', error_title='', validation='', viewport='viewport', image=False, save=''"/>
+<%namespace file="labels.mako" name="info"/>
 
 <li class="list-group-item" id="results">
+    <div class="float-right">
+                <button type="button" class="btn btn-outline-secondary" id="tour_result"><i class="far fa-question"></i></button>
+            </div>
     <h3>Results</h3>
 
     % if error:
@@ -17,7 +21,7 @@
       <div class="nav nav-tabs" id="nav-tab" role="tablist">
         <a class="nav-item nav-link active" id="nav-protein-tab" data-toggle="tab" href="#nav-protein" role="tab" aria-controls="nav-protein" aria-selected="true">Live</a>
         <a class="nav-item nav-link" id="nav-code-tab" data-toggle="tab" href="#nav-code" role="tab" aria-controls="nav-code" aria-selected="false">Code</a>
-        <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-implement" role="tab" aria-controls="nav-implement" aria-selected="false">Instructions</a>
+        <a class="nav-item nav-link" id="nav-implement-tab" data-toggle="tab" href="#nav-implement" role="tab" aria-controls="nav-implement" aria-selected="false">Instructions</a>
         <a class="nav-item nav-link" id="nav-downloads-tab" data-toggle="tab" href="#nav-downloads" role="tab" aria-controls="nav-downloads" aria-selected="false">Shareables</a>
       </div>
     </nav>
@@ -83,6 +87,49 @@
     <script type="text/javascript">
         new ClipboardJS('#copy_snippet,#copy_validation');
         $(document).ready(function () {${snippet_run|n}});
+
+
+
+        window.tour_result = new Tour({
+          backdrop: true,
+          orphan: true,
+          onStart: function () {$('#nav-protein-tab').trigger('click');},
+          steps: [
+          {
+            element: "#nav-protein-tab",
+            title: "Example of interactive",
+            content: `${info.attr.protein|n}`,
+            placement: "top",
+              onNext: function() {$('#nav-code-tab').trigger('click');}
+          },{
+            element: "#nav-code-tab",
+            title: "Code to use",
+            content: `${info.attr.code|n}`,
+            placement: "top",
+              onNext: function() {$('#nav-implement-tab').trigger('click');}
+          },{
+            element: "#nav-implement-tab",
+            title: "Code to use",
+            content: `${info.attr.implement|n}`,
+            placement: "top",
+              onNext: function() {$('#nav-downloads-tab').trigger('click');}
+          },{
+            element: "#nav-downloads-tab",
+            title: "Code to use",
+            content: `${info.attr.downloads|n}`,
+            placement: "top",
+              onNext: function() {$('#nav-downloads-tab').trigger('click');}
+          }]});
+
+        $('#tour_result').click(function () {
+            // Initialize the tour
+            tour_result.init();
+            // Start the tour
+            if (tour_result.ended()) {tour_result.goTo(0);}
+            tour_result.start(true);
+        });
+
+
     </script>
 % endif
 <%include file='about.mako'/>

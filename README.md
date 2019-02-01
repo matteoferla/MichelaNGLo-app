@@ -21,7 +21,7 @@ If needed, this piece of code can include the PDB data itself, thus removing the
 
 ### Image
 
-The most commonly used protein viewing software is PyMol. Most researchers render a view and label/draw upon it in Paint/Powerpoint/Photoshop.
+Whereas, the most commonly used protein viewing software is PyMol, most researchers render a view and label/draw upon it in Paint/Powerpoint/Photoshop.
 
 Consequently, the code allows users to generate code than when a given static image is clicked it results in a NGL viewer div. Example: [demo](http://www.matteoferla.com/LZTR1.html).
 
@@ -63,7 +63,6 @@ The source of the NGL code can be changed:
     >>> trans.to_html_line(ngl='ngl.js')
     
 ## To do
-* Add color and surface.
 * Maybe arrows and labels.
 * Automate the retrieval of PyMOL data: currently text output is parsed. But a wrapper for the application or using the pymol library would be best.
 
@@ -74,6 +73,14 @@ Here is a rather funny view in PyMOL and the equivalent snapshot transpiled to N
 
 <img src="images/example_pymol.png" width="200">
 <img src="images/example_ngl.png" width="200">
+
+## Where
+The script output a secret temporary page that can be shared, but also a block of code that can be used by the user on their sites.       
+About the latter usage, to use the output code one needs access to the raw HTML. Not necessarily of the whole page as only a small part is fine. For example:
+<img src="WYSIWYG_editor.png" width="200">
+<img src="raw_editor.png" width="200">
+In the first case, the HTML code is hidden as one sees what one gets as an end result. In the second case, the HTML code is visible: words between tags such as &lt;b&gt; are not styled. In most cases JS can be added here.
+</div>
 
 ## Issues
 If it does not work on your site, it may because some information is lost when you added it.

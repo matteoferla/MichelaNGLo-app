@@ -28,7 +28,6 @@ from mako.template import Template
 import markdown
 import string
 
-
 # prevent pymol from launching in normal mode.
 if __name__ == '__main__':
     pymol_argv = ['pymol', '-qc']
