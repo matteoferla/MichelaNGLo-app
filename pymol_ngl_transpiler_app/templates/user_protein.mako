@@ -86,9 +86,7 @@
           <input type="text" class="form-control" value="new view" aria-label="Title" aria-describedby="view-title-addon1" id="store_view_title">
         </div>
           <p>Code that makes a link that reorients to that view</p>
-          <pre><code>
-              &lt;a href='#' onclick='<span id="view_text"></span>'&gt;INSERT TEXT TO DISPLAY HERE&lt;/a&gt;
-          </code></pre>
+          <pre><code id="view_code"></code></pre>
         <div class="modal-footer">
         <button type="button" class="btn btn-primary" id="store_view_submit">Save changes</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Discard</button>
@@ -152,7 +150,7 @@ $('.residue').click(function() {
 
 
 $('store_view_btn').click(function () {
-    $('#view_text').html('stage.viewerControls.orient('+JSON.stringify(stage.viewerControls.getOrientation().elements)+');');
+    $('#view_code').html("&lt;a href='#' onclick='stage.viewerControls.orient("+JSON.stringify(stage.viewerControls.getOrientation().elements)+");'&gt;INSERT TEXT TO DISPLAY HERE&lt;/a&gt;');");
 });
 
 $('#store_view_submit').click(function () {
