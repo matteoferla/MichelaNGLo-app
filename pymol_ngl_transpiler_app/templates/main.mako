@@ -299,7 +299,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <p>Demo PSEs. Protein alphabet taken from Howaarth (2015). </p>
+        <p>Demo PSEs. Protein alphabet taken from Howarth (2015). </p>
           <div class="row">
               <div class="col-6 pr-0">
                   <div class="list-group">

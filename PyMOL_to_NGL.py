@@ -277,14 +277,24 @@ class PyMolTranspiler:
         for atom in self.atoms:
             reps = list(reversed("{0:0>8b}".format(int(atom['reps']))))
             # sticks
-            if reps[0] == '1':  # sticks.
-                sticks.append('{resi}:{chain}.{name}'.format_map(atom))
-            if reps[7] == '1':  # lines.
-                lines.append('{resi}:{chain}.{name}'.format_map(atom))
-            if reps[5] == '1':  # cartoon. special case...
-                cartoon.append('{resi}:{chain}'.format_map(atom))
-            if reps[2] == '1':
-                surface.append('{resi}:{chain}'.format_map(atom))
+            if atom.chain:
+                if reps[0] == '1':  # sticks.
+                    sticks.append('{resi}:{chain}.{name}'.format_map(atom))
+                if reps[7] == '1':  # lines.
+                    lines.append('{resi}:{chain}.{name}'.format_map(atom))
+                if reps[5] == '1':  # cartoon. special case...
+                    cartoon.append('{resi}:{chain}'.format_map(atom))
+                if reps[2] == '1':
+                    surface.append('{resi}:{chain}'.format_map(atom))
+            else:
+                if reps[0] == '1':  # sticks.
+                    sticks.append('{resi}.{name}'.format_map(atom))
+                if reps[7] == '1':  # lines.
+                    lines.append('{resi}.{name}'.format_map(atom))
+                if reps[5] == '1':  # cartoon. special case...
+                    cartoon.append('{resi}'.format_map(atom))
+                if reps[2] == '1':
+                    surface.append('{resi}'.format_map(atom))
         self.cartoon = list(set(cartoon))
         self.sticks = sticks
         self.lines = lines
