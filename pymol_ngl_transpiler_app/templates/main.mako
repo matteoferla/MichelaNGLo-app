@@ -551,13 +551,13 @@
 
         ]});
 
+        tour.init();
         $('.card-title .fa-question').click(function () {
             // Initialize the tour
-            tour.init();
+
             // Start the tour
             if (tour.ended()) {tour.goTo(0);}
             tour.start(true);
-
         });
 
         }); //ready

@@ -12,16 +12,17 @@
                 <div class="card-body">
                     <h3>Description</h3>
                     <div class="float-right"><button type="button" class="btn btn-outline-primary my-1" id="edit_btn" data-target="#edit_modal" data-toggle="modal"><i class="far fa-edit"></i></button></div>
-                        <p>${description}</p>
+                        <p>${description|n}</p>
                         <hr/>
                         <button type="button" class="btn btn-success w-100 my-1" id="save"><i class="far fa-camera"></i> Take snapshot</button>
                         <div class="dropdown">
-			  <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="residueButton" data-toggle="residue" aria-haspopup="true" aria-expanded="false">
+			  <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="residueButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 				<i class="far fa-search"></i> Zoom to a residue
 			  </button>
 			  <div class="dropdown-menu" aria-labelledby="residueMenuButton" id='residue'>
 			  </div>
 			</div>
+                <button type="button" class="btn btn-outline-primary w-100 my-1" id="store_view_btn" data-target="#store_view_modal" data-toggle="modal"><i class="far fa-save"></i> Store view</button>
                 <button type="button" class="btn btn-primary w-100 my-1" data-toggle="modal" data-target="#basics"><i class="far fa-cubes"></i> Protein basics</button>
                 <button type="button" class="btn btn-primary w-100 my-1" data-toggle="modal" data-target="#about"><i class="far fa-code"></i> Credits</button>
                     </div></div>
@@ -61,6 +62,35 @@
 
         <div class="modal-footer">
         <button type="button" class="btn btn-primary" id="edit_submit">Save changes</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Discard</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="store_view_modal">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="far fa-pen-alt"></i> Store view</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="view-title-addon1">Short descriptive label</span>
+          </div>
+          <input type="text" class="form-control" value="new view" aria-label="Title" aria-describedby="view-title-addon1" id="store_view_title">
+        </div>
+          <p>Code that makes a link that reorients to that view</p>
+          <pre><code>
+              &lt;a href='#' onclick='<span id="view_text"></span>'&gt;INSERT TEXT TO DISPLAY HERE&lt;/a&gt;
+          </code></pre>
+        <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="store_view_submit">Save changes</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Discard</button>
       </div>
     </div>
@@ -120,6 +150,24 @@ $('.residue').click(function() {
             show_residue($( this ).data('selection'));
             });
 
+
+$('store_view_btn').click(function () {
+    $('#view_text').html('stage.viewerControls.orient('+JSON.stringify(stage.viewerControls.getOrientation().elements)+');');
 });
+
+$('#store_view_submit').click(function () {
+    var new_view = stage.viewerControls.getOrientation();
+
+    // change for the now.
+    if (! myData.user_views) {myData.user_views = []}
+    myData.user_views.push(stage.viewerControls.getOrientation());
+    var i = myData.user_views.length - 1;
+    $('#residue').append('<a class="dropdown-item" href="#" id="user_view_'+i.toString()+'">'+$('#store_view_title').val()+'</a>');
+    $('#user_view_'+i.toString()).click(function() {stage.viewerControls.orient(myData.user_views[i]);});
+    $('#store_view_modal').modal('hide');
+});
+
+}); //ready
+
 </script>
 </%block>

@@ -277,7 +277,7 @@ class PyMolTranspiler:
         for atom in self.atoms:
             reps = list(reversed("{0:0>8b}".format(int(atom['reps']))))
             # sticks
-            if atom.chain:
+            if atom['chain']:
                 if reps[0] == '1':  # sticks.
                     sticks.append('{resi}:{chain}.{name}'.format_map(atom))
                 if reps[7] == '1':  # lines.
