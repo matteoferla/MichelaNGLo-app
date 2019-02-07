@@ -1,9 +1,7 @@
 # PyMOL-to-NGL transpiler
-A script to transpile a PyMOL PSE file to a NGL.js view.
+A script to convert a PyMOL PSE file to a easy to implement NGL.js view.
 
 This is available as the script itself and [a web app (temp URL)](ngl.matteoferla.com).
-
-*Status*: unfinished, but functional. See To do list.
 
 ## Aim
 
@@ -12,6 +10,8 @@ The aim of this app is to provide a way for a user to easily generate a web-read
 Therefore the intended audience are biochemists that may not have any web knowledge that wish to display on their academic pages their researched protein.
 
 A future possibility is that in collaboration with specific journals this could be rolled out in papers.
+
+![process](images/process-01.jpg)
 
 ### Transpiler
 
@@ -77,8 +77,8 @@ Here is a rather funny view in PyMOL and the equivalent snapshot transpiled to N
 ## Where
 The script output a secret temporary page that can be shared, but also a block of code that can be used by the user on their sites.       
 About the latter usage, to use the output code one needs access to the raw HTML. Not necessarily of the whole page as only a small part is fine. For example:
-<img src="WYSIWYG_editor.png" width="200">
-<img src="raw_editor.png" width="200">
+<img src="images/WYSIWYG_editor.png" width="200">
+<img src="images/raw_editor.png" width="200">
 In the first case, the HTML code is hidden as one sees what one gets as an end result. In the second case, the HTML code is visible: words between tags such as &lt;b&gt; are not styled. In most cases JS can be added here.
 </div>
 
