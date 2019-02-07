@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="PyMOL-NGL transpiler application">
     <meta name="author" content="Matteo Ferla">
-    <link rel="shortcut icon" href="${request.static_url('pymol_ngl_transpiler_app:static/mashup.png')}">
+    <link rel="shortcut icon" href="${request.static_url('pymol_ngl_transpiler_app:static/NGL.png')}">
 
     <title>PyMOL-NGL transpiler</title>
     % if bootstrap == 'materials':
@@ -90,7 +90,7 @@ pre {
 
 <footer class="footer">
       <div class="container">
-        <span class="text-muted"><small>PyMOL(TM) is a trademark of Schr&ouml;dinger , LLC. The authors are not affiliated or involved in any way with PyMOL or Schr&ouml;dinger. Data is not kept for commercial or analytic purposes.</small></span>
+          <span class="text-muted"><small><a href="https://www.schrodinger.com/" target="_blank">PyMOL <i class="far fa-external-link-square"></i></a> is a trademark of <a href="https://pymol.org/2/" target="_blank">Schr&ouml;dinger , LLC <i class="far fa-external-link-square"></i></a>. The authors are not affiliated or involved in any way with PyMOL or Schr&ouml;dinger. Data is not kept for commercial or analytic purposes.</small></span>
       </div>
     </footer>
 

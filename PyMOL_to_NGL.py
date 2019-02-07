@@ -188,6 +188,7 @@ class PyMolTranspiler:
             assert '.pse' in file.lower(), 'Only PSE files accepted.'
             pymol.cmd.load(file)
             v = pymol.cmd.get_view()
+            self.fix_structure()
             keys = ('ID', 'chain', 'resi', 'resn', 'name', 'elem', 'reps', 'color')
             myspace = {'data': []} #myspace['data'] is the same as self.atoms
             pymol.cmd.iterate('(all)', "data.append({'ID': ID, 'chain': chain, 'resi': resi, 'resn': resn, 'name':name, 'elem':elem, 'reps':reps, 'color':color, 'ss': ss})", space=myspace)
@@ -200,6 +201,17 @@ class PyMolTranspiler:
             self.convert_view(view)
         if representation:
             self.convert_representation(representation, **settings)
+
+    def fix_structure(self):
+        """
+        Fix any issues with structure.
+        :return:
+        """
+        pymol.cmd.alter("chain ''", 'chain="Z"') #missing chain ID is still causing issues.
+        pymol.cmd.sort('all')
+        return self
+
+
 
     def convert_view(self, view, **settings):
         """

@@ -9,7 +9,7 @@ $( document ).ready(function () {
     myData.pdbs = [new Blob( [ `${'\n'.join(structure.ss)+'\n'+structure.raw_pdb}` ], { type: "text/plain"} )];
     myData.imagemode=true;
 % elif len(structure.pdb) == 4:
-    myData.pdbs=['rcsb://${structure.pdb}'];
+    myData.pdbs=['rcsb://${structure.pdb.upper()}'];
 % else:
     myData.pdbs=['${structure.pdb}'];
 % endif
