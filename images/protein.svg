@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 19.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 174 130" style="enable-background:new 0 0 174 130;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:none;stroke:#010101;stroke-width:20;stroke-linecap:round;stroke-miterlimit:10;}
+	.st1{fill:#010101;}
+	.st2{fill:none;stroke:#010101;stroke-width:4;stroke-linecap:round;stroke-miterlimit:10;}
+</style>
+<g>
+	<g>
+		<line class="st0" x1="32.5" y1="32.9" x2="105.2" y2="32.9"/>
+		<g>
+			<polygon class="st1" points="99.3,52.8 133.9,32.9 99.3,12.9 			"/>
+		</g>
+	</g>
+	<g>
+		<line class="st0" x1="133.9" y1="70" x2="61.2" y2="70"/>
+		<g>
+			<polygon class="st1" points="67.1,50.1 32.5,70 67.1,89.9 			"/>
+		</g>
+	</g>
+	<g>
+		<line class="st0" x1="32.5" y1="105.1" x2="105.2" y2="105.1"/>
+		<g>
+			<polygon class="st1" points="99.3,125.1 133.9,105.1 99.3,85.2 			"/>
+		</g>
+	</g>
+	<path class="st2" d="M42.6,29.9c0,0-31,0.1-31,20.1c0,20.8,31,20.1,31,20.1"/>
+	<path class="st2" d="M129.3,106.3c0,0,28.7-0.1,28.7-18.6c0-19.2-28.7-18.6-28.7-18.6"/>
+</g>
+</svg>
