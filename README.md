@@ -82,6 +82,17 @@ About the latter usage, to use the output code one needs access to the raw HTML.
 In the first case, the HTML code is hidden as one sees what one gets as an end result. In the second case, the HTML code is visible: words between tags such as &lt;b&gt; are not styled. In most cases JS can be added here.
 </div>
 
+## data-toggle='protein'
+Extra functionality can be optionally added, including the ability to create links that control the protein.
+
+Namely, `<a href='#viewport'>you see this text as a link</a>` is technically called an anchor element and is commonly called a link.
+Like all HTML elements, everything with the within the lesser-than and greater-than symbols controls its behaviour.
+The `href` attribute () tells the browser where to point, either to another page or to an element within the page &mdash;the hash symbol means the elements `id` attribute, its unique name.
+Following JQuery and Bootstrap behaviour, if a `data-toggle='protein'` is added the code will know to change the protein depending on the other tags.
+If a `data-residue='23'` is added a residue index and it's neighourhood is focused on (for chains, use a synthax like `23:A`), for a region use `data-region='23-45'`.
+Optionally, `data-title` controls the text that appears in the viewer, while `data-color` (US spelling) controls the colour of the selection.
+The default values for the latter are <span style='color: green;'>green for regions</span> and <span style='color: hotpink;'>hotpink for residues</span> &mdash;See [here for HTML colour names](https://htmlcolorcodes.com/color-names/), for a specific PyMOL colour RGB value, follow the commands in [this PyMOL Wiki page](https://pymolwiki.org/index.php/Get_Color_Indices) and then [convert it to a hex code](https://htmlcolorcodes.com/color-picker/).
+
 ## Issues
 If it does not work on your site, it may because some information is lost when you added it.
 

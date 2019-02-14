@@ -2,13 +2,13 @@
 <%namespace file="labels.mako" name="info"/>
 <div class="card">
     <div class="card-header">
-        <h1 class="card-title">PyMOL&rarr;NGL transpiler
+        <h1 class="card-title">PyMOL&rarr;NGL converter and generator
             <div class="float-right">
                 <button type="button" class="btn btn-outline-secondary"><i class="far fa-question"></i></button><br/>
                 <button type="button" class="btn btn-outline-secondary"><i class="fab fa-github"></i></button>
             </div>
         </h1>
-        <h3 class="card-subtitle mb-2 text-muted">Generate a NGL view from a PyMOL PSE file.</h3>
+        <h3 class="card-subtitle mb-2 text-muted">Generate a NGL view from a PyMOL PSE file or from a PDB file.</h3>
     </div>
     <div class="card-body">
         <ul class="list-group list-group-flush">
@@ -25,6 +25,9 @@
                           <div class="btn-group btn-group-toggle" data-toggle="buttons">
                           <label class="btn btn-secondary active">
                             <input type="radio" name="input_mode" id="input_mode_out" autocomplete="off" value="file" checked> Upload PSE
+                          </label>
+                          <label class="btn btn-secondary">
+                            <input type="radio" name="input_mode" id="input_mode_pdb" value="pdb" autocomplete="off"> Upload PDB
                           </label>
                           <label class="btn btn-secondary">
                             <input type="radio" name="input_mode" id="input_mode_file" value="out" autocomplete="off"> Input PyMol output
@@ -56,7 +59,7 @@
                         </div>
                 </div>
 
-                <!-- in via file -->
+                <!-- in via PSE file -->
                 <div id="in_via_file" class="collapse show">
                     <h3>Input via PyMol</h3>
                     <div class="row">
@@ -91,6 +94,40 @@
                             </div>
                         </div>
 
+                    </div>
+                </div>
+
+                <!-- in via PDB file -->
+                    <div id="in_via_pdb" class="collapse">
+                    <h3>Input via PDB</h3>
+                    <div class="row">
+                        <div class="col-lg-6 mb-3">
+                            <div class="input-group" data-toggle="tooltip" title="Upload your PDB file">
+                              <div class="input-group-prepend">
+                                <span class="input-group-text" id="upload_addon_pdb">Upload PDB (opt.)</span>
+                              </div>
+                              <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="upload_pdb" aria-describedby="upload_addon_pdb" accept=".pdb, .cif">
+                                <label class="custom-file-label" for="upload_pdb">Choose file</label>
+                              </div>
+                            </div>
+                            <div class="invalid-feedback" id="error_upload_pdb">Please upload a valid pdb file.</div>
+                        </div>
+                        <div class="col-xl-4 col-md-6 mb-4">
+                            <div class="input-group" data-toggle="tooltip"
+                                 title="Basically, if you are using a RCSB PDB structure, don't tick this, but give the PDB code. Otherwise, tick this. For more info, press the question mark.">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text bg-secondary">
+                                        <input type="checkbox" id="pdb_string_pdb"></div>
+                                </div>
+                                <div class="input-group-append">
+                            <span class="input-group-text">
+                                Include PDB data
+                            </span>
+                                    <div class="btn btn-info" data-toggle="modal" data-target="#CDN_modal" >?</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -325,241 +362,8 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-            $('#pdb_string').change(function () {
-                if ($('#pdb_string').is(':checked')) {
-                    $('#pdb').attr('disabled',true);
-                    $('#pdb').val('N/A');
-                    $('#pdb').removeClass('is-invalid');
-                    $('#error_pdb').hide();
-                } else {
-                    $('#pdb').removeAttr('disabled');
-                    $('#pdb').val('');
-                    $('#pdb').addClass('is-invalid');
-                    $('#error_pdb').show();
-                }
-            });
-
-
-            function valid_value(id){
-                if (! $(id).val()) {
-                    window.setTimeout(function () {
-                        $(id).addClass('is-invalid');
-                        $(id)[0].scrollIntoView();
-                        $('#error_' + id.replace('#','')).show();
-                        $('#throbber').modal('hide');
-                        },0);
-                    throw 'Incomplete '+id;
-                }
-                else if (!! $(id)[0].files) {return $(id)[0].files[0]}
-                else {return $(id).val();}
-            }
-
-            $('[name="input_mode"]').on('change', function() {
-              if($(this).val() === "file") {
-                $('#in_via_file').collapse('show');
-                $('#in_via_out').collapse('hide');
-              } else if($(this).val() === "out") {
-                $('#in_via_file').collapse('hide');
-                $('#in_via_out').collapse('show');
-              } else {
-                  alert('No idea why I thought I needed a third.')
-              }
-            });
-
-            $('#upload').change(function () {
-                var file=$('#upload').val().split('\\').slice(-1)[0];
-                if (!! $('#upload').val()) {
-                    if ($('#upload').val().toLowerCase().search('.pse') != -1) {
-                    $('#upload').addClass('is-valid');
-                    $('#upload').removeClass('is-invalid');
-                    $('#error_upload').hide();
-                    if (! $('#pdb').val()) {$('#pdb').val(file).replace('.pse','.pdb')}
-                }
-                else {
-                    $('#upload').removeClass('is-valid');
-                    $('#upload').addClass('is-invalid');
-                    $('#error_upload').show();
-                }
-                $('#upload+.custom-file-label').html(file);
-                } // else? nothing added. user chickened out.
-            });
-
-
-            $('[data-toggle="tooltip"]').tooltip();
-
-            $('#demo').click(function () {
-                $("#input_mode_out").prop("checked", false);
-                $.get("static/pymol_demo.txt", function (text) {
-                    $('#pymol_output').val(text);
-                });
-            });
-
-            $('#submit').click(function () {
-                $('#throbber').modal('show');
-                $('#results').remove();
-                stage=false;
-                $('.is-invalid').removeClass('is-invalid');
-                $('.is-valid').removeClass('is-valid');
-                $('.invalid-feedback').hide();
-
-                data = new FormData();
-                var mode=$("input[name='input_mode']:checked").val();
-                if ($('#pdb_string').is(':checked')) {data.append( 'pdb', ''); data.append('pdb_string',1)} else {data.append( 'pdb', valid_value('#pdb'));}
-                data.append( 'mode', mode );
-                if        (mode == 'out') {
-                    data.append('pymol_output', valid_value('#pymol_output'));
-                } else if (mode == 'file' && !! demo_pse) {data.append('demo_file',demo_pse);
-                } else if (mode == 'file') {    data.append( 'file', valid_value('#upload'));
-                } else {throw 'Impossible mode';}
-                data.append( 'uniform_non_carbon',$('#uniform_non_carbon').is(':checked'));
-                data.append('viewport_id',valid_value('#viewport_id'));
-                data.append( 'image',$('#image').is(':checked'));
-                data.append('stick',$("input[name='sticks']:checked").val());
-                var snapshot = '';
-                if ($('#snapshot').is(':checked')) {
-                    snapshot = $('#snapshot_id').val();
-                }
-                data.append('save',snapshot);
-                var cdn = '';
-                if ($('#cdn_bool').is(':checked')) {
-                    cdn = $('#cdn').val();
-                }
-                data.append( 'cdn',cdn);
-                data.append( 'indent',$('#indent').val());
-                //{pdb: pdb, uniform_non_carbon: uniform_non_carbon, pymol_output: pymol_output, indent: indent, cdn: cdn}
-                $.ajax({
-                    type: "POST",
-                    url: "ajax_convert",
-                    processData: false,
-                    enctype: "multipart/form-data",
-                    cache: false,
-                    contentType: false,
-                    data:  data
-                })
-                        .done(function (msg) {
-                            $('#throbber').modal('hide');
-                            $('.card-body > ul').append(msg);
-                        })
-                        .fail(function () {
-                            $('#throbber').modal('hide');
-                            alert('ERROR');
-                        })
-            });
-
-            $('#clear').click(function () {
-                $('#results').remove();
-                $('#pymol_output').val('');
-                $('#pdb').val('');
-                $('.is-invalid').removeClass('is-invalid');
-                $('.is-valid').removeClass('is-valid');
-                $('.invalid-feedback').hide();
-            });
-
-        var demo_pse='';
-        $('.demo-pse').click(function () {
-            demo_pse=$(this).data('value');
-            $('#upload+.custom-file-label').html('DEMO: '+demo_pse);
-            $('#demo_modal').modal('hide');
-            $('#pdb_string').prop('checked',true);
-            $('#pdb_string').trigger('change');
-        });
-
-        window.tour = new Tour({
-          backdrop: true,
-          steps: [
-          {
-            element: "h1",
-            title: "Aim",
-            content: `${info.attr.aim|n}`,
-            placement: "bottom"
-          },
-          {
-            element: "h1",
-            title: "Where to use",
-            content: `${info.attr.usable|n}`,
-            placement: "bottom"
-          },{
-            element: "h1 .fa-github",
-            title: "GitHub Repository",
-            content: `${info.attr.github|n}`,
-            placement: "right"
-          },
-
-          {
-            element: "#input_mode_file",
-            title: "Input mode",
-            content: `${info.attr.mode|n}`,
-            placement: "bottom"
-          },
-          {
-            element: "#upload",
-            title: "Upload your PSE file",
-            content: `${info.attr.upload|n}`,
-            placement: "bottom"
-          },
-          {
-            element: "#demo_mod_btn",
-            title: "Demo PSE",
-            content: `${info.attr.demo_pse|n}`,
-            placement: "bottom"
-          },
-          {
-            element: "#pdb_string",
-            title: "Include PDB text?",
-            content: `${info.attr.pdb_string|n}`,
-            placement: "top"
-          },
-          {
-            element: "#pdb",
-            title: "PDB address",
-            content: `${info.attr.pdb|n}`,
-            placement: "top"
-          },
-          {
-            element: "#uniform_non_carbon",
-            title: "Correct color error for non-carbons",
-            content: `${info.attr.uniform_non_carbon|n}`,
-            placement: "top"
-          },
-          {
-            element: "#image",
-            title: "Static image on load",
-            content: `${info.attr.image|n}`,
-            placement: "top"
-          },
-          {
-            element: "#sticks_sym_licorice",
-            title: "Stick conversion",
-            content: `${info.attr.sticks|n}`,
-            placement: "top"
-          },
-          {
-            element: "#technical_div",
-            title: "Technicalities",
-            content: 'These options are best left alone at first.',
-            placement: "top"
-          },
-          {
-            element: "#submit",
-            title: "Results",
-            content: 'This completes the tour of the inputs. For a tour of the results, choose a demo PSE and submit the job and click the question mark.',
-            placement: "top"
-          }
-
-
-
-
-        ]});
-
-        tour.init();
-        $('.card-title .fa-question').click(function () {
-            // Initialize the tour
-
-            // Start the tour
-            if (tour.ended()) {tour.goTo(0);}
-            tour.start(true);
-        });
-
+        <%include file='main.mako.js'/>
+        <%include file='tour.mako.js'/>
         }); //ready
     </script>
 </%block>

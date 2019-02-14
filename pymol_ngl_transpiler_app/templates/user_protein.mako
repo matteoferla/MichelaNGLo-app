@@ -12,7 +12,7 @@
                 <div class="card-body">
                     <h3>Description</h3>
                     <div class="float-right"><button type="button" class="btn btn-outline-primary my-1" id="edit_btn" data-target="#edit_modal" data-toggle="modal"><i class="far fa-edit"></i></button></div>
-                        <p>${description|n}</p>
+                        <p>${description|n}</p>s
                         <hr/>
                         <button type="button" class="btn btn-success w-100 my-1" id="save"><i class="far fa-camera"></i> Take snapshot</button>
                         <div class="dropdown">
