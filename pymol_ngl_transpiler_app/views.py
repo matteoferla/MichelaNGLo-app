@@ -19,6 +19,10 @@ else:
 def my_view(request):
     return {'project': 'PyMOL_NGL_transpiler_app'}
 
+@view_config(route_name='markup', renderer="templates/markup.mako")
+def markup_view(request):
+    return {'project': 'PyMOL_NGL_transpiler_app'}
+
 @view_config(route_name='ajax_convert', renderer="templates/result.mako")
 def ajax_convert(request):
     try:

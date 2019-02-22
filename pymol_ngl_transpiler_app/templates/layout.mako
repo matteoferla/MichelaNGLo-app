@@ -23,8 +23,8 @@
     <!-- Custom styles for this scaffold -->
     <link href="${request.static_url('pymol_ngl_transpiler_app:static/theme.css')}" rel="stylesheet">
     <!--<link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-LRlmVvLKVApDVGuspQFnRQJjkv0P7/YFrw84YYQtmYG4nK8c+M+NlmYDCv0rKWpG" crossorigin="anonymous">-->
-    <link rel="stylesheet" href="http://www.matteoferla.com/Font-Awesome-Pro/css/all.min.css" crossorigin="anonymous">
-    <link rel="stylesheet" href="http://www.matteoferla.com/bootstrap-tour/build/css/bootstrap-tour.min.css">
+    <link rel="stylesheet" href="https://www.matteoferla.com/Font-Awesome-Pro/css/all.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://www.matteoferla.com/bootstrap-tour/build/css/bootstrap-tour.min.css">
     <style>
 
 .footer {
@@ -106,7 +106,7 @@ pre {
 % endif
 <script src="https://cdn.rawgit.com/arose/ngl/v0.10.4-1/dist/ngl.js" type="text/javascript"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
-<script src="http://www.matteoferla.com/bootstrap-tour/build/js/bootstrap-tour.min.js"></script>
+<script src="https://www.matteoferla.com/bootstrap-tour/build/js/bootstrap-tour.min.js"></script>
 <%block name="script"/>
 </body>
 </html>
