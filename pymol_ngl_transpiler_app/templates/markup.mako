@@ -36,10 +36,17 @@
                 <p>The first link is: <code>&lt;a href='#' data-toggle="protein" data-target="#viewport" data-region="11-228" data-color="lime"&gt;a &beta;-barrel&lt;/a&gt;</code></p>
 
                 <h3>Future</h3>
-                <p>The component object is simply dumped into the main namespace, which is not great &mdash;akin to BS4 <code>href="#viewport"</code> or <code>data-target="#viewport"</code>, should control the target. Also moneypatch the functions in NGL.</p>
+                <ul>
+                    <li>The component object is simply dumped into the main namespace, which is not great &mdash;whereas it should be akin to BS4 <code>href="#viewport"</code> or <code>data-target="#viewport"</code>, should control the target. Also moneypatch the functions in NGL.</li>
+                    <li>Make a <code>data-view="[1,2,3,4,5..]"</code> to set a view by giving the M4 matrix &mdash;with instructions on how to get it.</li>
+                    <li>Make a handy/simple generator to make these links.</li>
+                </ul>
             </div>
             <div class='col-6'>
 			<div id="viewport"style="width:100%; height: 0; padding-bottom: 100%;"></div>
+
+                <h3>Note</h3>
+                <p>There are three underlying functions. These are surprisingly small. Two are also shared with the feature viewer.</p>
 		</div>
 
 	</div>
