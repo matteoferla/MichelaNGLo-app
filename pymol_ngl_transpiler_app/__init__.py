@@ -14,6 +14,7 @@ def main(global_config, **settings):
     config.add_static_view('images', '../images', cache_max_age=3600)
     config.add_route('home', '/')
     config.add_route('markup', '/markup')
+    config.add_route('clash', '/clash')
     config.add_route('ajax_convert', '/ajax_convert')
     config.add_route('save_pdb', '/save_pdb')
     config.add_route('save_zip', '/save_zip')

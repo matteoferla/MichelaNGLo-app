@@ -23,6 +23,10 @@ def my_view(request):
 def markup_view(request):
     return {'project': 'PyMOL_NGL_transpiler_app'}
 
+@view_config(route_name='clash', renderer="templates/clash.mako")
+def clash_view(request):
+    return {'project': 'PyMOL_NGL_transpiler_app'}
+
 @view_config(route_name='ajax_convert', renderer="templates/result.mako")
 def ajax_convert(request):
     try:
