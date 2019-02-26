@@ -5,6 +5,7 @@ import uuid
 import shutil
 import os
 import mako
+import io
 
 #from pprint import PrettyPrinter
 #pprint = PrettyPrinter()
@@ -101,7 +102,7 @@ def ajax_custom(request):
         fh = open(filename)
     else:
         request.POST['file'].file.seek(0)
-        fh = request.POST['file'].file
+        fh = io.StringIO(request.POST['file'].file.read().decode("utf8"), newline=None)
     mesh = []
     o_name = ''
     scale_factor = 0
@@ -110,6 +111,7 @@ def ajax_custom(request):
     sum_centroid = [0,0,0]
     min_size = [0,0,0]
     max_size = [0,0,0]
+    centroid = [0, 0, 0]
     for row in fh:
         if row[0] == 'o':
             if o_name:
@@ -129,22 +131,24 @@ def ajax_custom(request):
                 min_size[ax] = min(min_size[ax], vertex[ax])
                 max_size[ax] = max(max_size[ax], vertex[ax])
         elif row[0] == 'f':
-            if scale_factor == 0: #first face.
+            if scale_factor == 0: #first face.27.7  24.5
+                # euclid = sum([(max_size[ax]-min_size[ax])**2 for ax in range(3)])**0.5
+                scale_factor = float(request.POST['scale']) / max([abs(max_size[ax] - min_size[ax]) for ax in range(3)])
                 if request.POST['centroid'] == 'origin':
                     centroid = [sum_centroid[ax]/len(vertices) for ax in range(3)]
                 elif request.POST['centroid'] == 'unaltered':
                     centroid = [0, 0, 0]
                 elif request.POST['centroid'] == 'custom':
                     origin = request.POST['origin'].split(',')
-                    centroid = [sum_centroid[ax] / len(vertices) + float(origin[ax])  for ax in range(3)]
-                # euclid = sum([(max_size[ax]-min_size[ax])**2 for ax in range(3)])**0.5
-                scale_factor = float(request.POST['scale'])/max([abs(max_size[ax]-min_size[ax]) for ax in range(3)])
+                    centroid = [sum_centroid[ax] / len(vertices) - float(origin[ax])/scale_factor  for ax in range(3)]  #the user gives scaled origin!
+                else:
+                    raise ValueError('Invalid request')
+
             new_face = [e.split('/')[0] for e in row.split()[1:]]
             if (len(new_face) != 3):
-                continue
-            trilist.extend([(vertices[int(i) - 1][ax]-centroid[ax])*scale_factor for i in new_face[0:3] for ax in range(3)])
+                pass
+            trilist.extend([int((vertices[int(i) - 1][ax]-centroid[ax])*scale_factor*100)/100 for i in new_face[0:3] for ax in range(3)])
     mesh.append({'o_name': o_name, 'triangles': trilist})
-    print('Done')
     return {'mesh': mesh}
 
 

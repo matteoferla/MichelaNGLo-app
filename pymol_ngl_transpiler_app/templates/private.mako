@@ -1,5 +1,7 @@
 <%inherit file="layout.mako"/>
 
+<div class="alert m-5">Password is "protein"</div>
+
 % if status:
     <div class="alert alert-danger m-5" role="alert" id="alert">
       ${status}

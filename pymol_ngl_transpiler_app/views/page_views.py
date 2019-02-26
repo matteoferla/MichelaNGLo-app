@@ -1,4 +1,4 @@
-from pyramid.view import view_config
+from pyramid.view import view_config, notfound_view_config
 from pyramid.renderers import render_to_response
 import os
 from pyramid.response import FileResponse
@@ -10,6 +10,7 @@ if os.path.isdir(os.path.join('pymol_ngl_transpiler_app','temp')):
 else:
     os.mkdir(os.path.join('pymol_ngl_transpiler_app','temp'))
 
+@notfound_view_config(renderer="../templates/404.mako")
 @view_config(route_name='clash', renderer="../templates/clash.mako")
 @view_config(route_name='custom', renderer="../templates/custom.mako")
 @view_config(route_name='home', renderer="../templates/main.mako")

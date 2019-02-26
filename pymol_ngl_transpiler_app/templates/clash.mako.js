@@ -221,9 +221,4 @@ function load_file(index) { //has the potential of having structure toggle.
 
     load_file();
 
-
-
-
-
-
-        }); //ready
+}); //ready
