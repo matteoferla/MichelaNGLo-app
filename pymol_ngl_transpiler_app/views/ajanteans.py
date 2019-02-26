@@ -5,29 +5,19 @@ import uuid
 import shutil
 import os
 import mako
-from pyramid.response import FileResponse
-password='protein'
 
-if os.path.isdir(os.path.join('pymol_ngl_transpiler_app','temp')):
-    for file in os.listdir(os.path.join('pymol_ngl_transpiler_app','temp')):
-        os.remove(os.path.join('pymol_ngl_transpiler_app','temp',file))
-else:
-    os.mkdir(os.path.join('pymol_ngl_transpiler_app','temp'))
+#from pprint import PrettyPrinter
+#pprint = PrettyPrinter()
+
+def demo_file(request):
+    demos=os.listdir(os.path.join('pymol_ngl_transpiler_app', 'demo'))
+    if request.POST['demo_file'] in demos:
+        return os.path.join('pymol_ngl_transpiler_app', 'demo', request.POST['demo_file'])
+    else:
+        raise Exception('Non existant demo file requested. Possible attack!')
 
 
-@view_config(route_name='home', renderer="templates/main.mako")
-def my_view(request):
-    return {'project': 'PyMOL_NGL_transpiler_app'}
-
-@view_config(route_name='markup', renderer="templates/markup.mako")
-def markup_view(request):
-    return {'project': 'PyMOL_NGL_transpiler_app'}
-
-@view_config(route_name='clash', renderer="templates/clash.mako")
-def clash_view(request):
-    return {'project': 'PyMOL_NGL_transpiler_app'}
-
-@view_config(route_name='ajax_convert', renderer="templates/result.mako")
+@view_config(route_name='ajax_convert', renderer="../templates/main.result.mako")
 def ajax_convert(request):
     try:
         minor_error=''
@@ -70,7 +60,7 @@ def ajax_convert(request):
             trans = PyMolTranspiler(view=view, representation=reps, pdb=request.POST['pdb'], **settings)
         elif request.POST['mode'] == 'file':
             if 'demo_file' in request.POST:
-                filename=os.path.join('pymol_ngl_transpiler_app', 'demo',request.POST['demo_file'])
+                filename=demo_file(request) #prevention against attacks
             else:
                 filename=os.path.join('pymol_ngl_transpiler_app', 'temp','{0}.pse'.format(uuid.uuid4()))
                 request.POST['file'].file.seek(0)
@@ -104,13 +94,58 @@ def ajax_convert(request):
         print(traceback.format_exc())
         return {'snippet': traceback.format_exc(), 'snippet_run':'','error_title':'A major error arose', 'error': 'danger','error_msg':'The code failed to run serverside','validation':''}
 
-
-def make_static_page(request, code, page, description='Editable text. press pen to edit.',title='User submitted structure',residues=''):
-    open(os.path.join('pymol_ngl_transpiler_app','user', page+'.html'), 'w', newline='\n').write(
-        mako.template.Template(filename=os.path.join('pymol_ngl_transpiler_app','templates','user_protein.mako'),
-                               format_exceptions=True,
-                               lookup=mako.lookup.TemplateLookup(directories=[os.getcwd()])
-        ).render_unicode(code=code, request=request, description=description, title=title, residues=residues))
+@view_config(route_name='ajax_custom', renderer="../templates/custom.result.mako")
+def ajax_custom(request):
+    if 'demo_file' in request.POST:
+        filename = demo_file(request)  # prevention against attacks
+        fh = open(filename)
+    else:
+        request.POST['file'].file.seek(0)
+        fh = request.POST['file'].file
+    mesh = []
+    o_name = ''
+    scale_factor = 0
+    vertices = []
+    trilist = []
+    sum_centroid = [0,0,0]
+    min_size = [0,0,0]
+    max_size = [0,0,0]
+    for row in fh:
+        if row[0] == 'o':
+            if o_name:
+                mesh.append({'o_name':o_name,'triangles':trilist})
+                vertices = []
+                trilist = []
+                scale_factor = 0
+                sum_centroid = [0,0,0]
+                min_size = [0,0,0]
+                max_size = [0,0,0]
+            o_name = row.rstrip().replace('o ','')
+        elif row[0] == 'v':
+            vertex = [float(e) for e in row.split()[1:]]
+            vertices.append(vertex)
+            for ax in range(3):
+                sum_centroid[ax] += vertex[ax]
+                min_size[ax] = min(min_size[ax], vertex[ax])
+                max_size[ax] = max(max_size[ax], vertex[ax])
+        elif row[0] == 'f':
+            if scale_factor == 0: #first face.
+                if request.POST['centroid'] == 'origin':
+                    centroid = [sum_centroid[ax]/len(vertices) for ax in range(3)]
+                elif request.POST['centroid'] == 'unaltered':
+                    centroid = [0, 0, 0]
+                elif request.POST['centroid'] == 'custom':
+                    origin = request.POST['origin'].split(',')
+                    centroid = [sum_centroid[ax] / len(vertices) + float(origin[ax])  for ax in range(3)]
+                # euclid = sum([(max_size[ax]-min_size[ax])**2 for ax in range(3)])**0.5
+                scale_factor = float(request.POST['scale'])/max([abs(max_size[ax]-min_size[ax]) for ax in range(3)])
+            new_face = [e.split('/')[0] for e in row.split()[1:]]
+            if (len(new_face) != 3):
+                continue
+            trilist.extend([(vertices[int(i) - 1][ax]-centroid[ax])*scale_factor for i in new_face[0:3] for ax in range(3)])
+    mesh.append({'o_name': o_name, 'triangles': trilist})
+    print('Done')
+    return {'mesh': mesh}
 
 
 @view_config(route_name='edit_user-page', renderer='json')
@@ -119,38 +154,12 @@ def edit(request):
     make_static_page(request, request.POST['code'], request.POST['page'], request.POST['description'], request.POST['title'], request.POST['residues'])
     return {'success': 1}
 
-@view_config(route_name='save_pdb')
-def save_pdb(request):
-    filename=request.session['file']
-    raise NotImplementedError
-    return FileResponse(filename, content_disposition='attachment; filename="{}"'.format(request.POST['name']))
-
-@view_config(route_name='save_zip')
-def save_zip(request):
-    raise NotImplementedError
 
 
-@view_config(route_name='admin', renderer='templates/private.mako', http_cache=0)
-def admin_callable(request):
-    status='This area is not for users. Sorry.'
-    if 'admin' in request.session and request.session['admin']:
-        admin=True
-    else:
-        admin=False
-    if 'password' in request.POST:
-        if request.POST['password'] == password:
-            print('Granted')
-            request.session['admin'] = True
-            admin=True
-            status = 'The password is right. How did you get this message?'
-        else:
-            print('wrong...{}'.format(request.POST['password']))
-            admin = False
-            status='禁 Warning: Password wrong!'
-    else:
-        status=''
-    if admin:
-        return {'admin': True, 'status': ''}
-    else:
-        return {'admin': False, 'status': status}
-
+##################### dependent methods
+def make_static_page(request, code, page, description='Editable text. press pen to edit.',title='User submitted structure',residues=''):
+    open(os.path.join('pymol_ngl_transpiler_app','user', page+'.html'), 'w', newline='\n').write(
+        mako.template.Template(filename=os.path.join('pymol_ngl_transpiler_app','templates','user_protein.mako'),
+                               format_exceptions=True,
+                               lookup=mako.lookup.TemplateLookup(directories=[os.getcwd()])
+        ).render_unicode(code=code, request=request, description=description, title=title, residues=residues))

@@ -28,7 +28,7 @@
   <div class="input-group-prepend">
     <span class="input-group-text" id="basic-addon1">Password</span>
   </div>
-  <input type="password" id='password' class="form-control" placeholder="****" aria-label="Username" aria-describedby="basic-addon1">
+  <input type="password" id='password' class="form-control" placeholder="*#€%£!!" aria-label="Username" aria-describedby="basic-addon1">
       <div class="input-group-append">
     <button class="btn btn-primary" type="button" id="password_send">Button</button>
   </div>

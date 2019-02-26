@@ -11,7 +11,7 @@ class ViewTests(unittest.TestCase):
         testing.tearDown()
 
     def test_my_view(self):
-        from .views import my_view
+        from pymol_ngl_transpiler_app.views.views import my_view
         request = testing.DummyRequest()
         info = my_view(request)
         self.assertEqual(info['project'], 'PyMOL_NGL_transpiler_app')

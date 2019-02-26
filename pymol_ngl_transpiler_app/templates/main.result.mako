@@ -132,5 +132,5 @@
 
     </script>
 % endif
-<%include file='about.mako'/>
-<%include file='basics.mako'/>
+<%include file="about.mako"/>
+<%include file="basics.mako"/>

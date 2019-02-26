@@ -1,8 +1,8 @@
 <%inherit file="layout.mako"/>
 <%namespace file="labels.mako" name="info"/>
 
-<div class="alert alert-warning py-5 alert-dismissible fade show" role="alert">
-  This got revised. for the old see <a href="/markup?version=old">old version.</a>
+<div class="alert alert-danger py-5 alert-dismissible fade show" role="alert">
+  This got revised and this is the old version. For the new see <a href="/markup">old version.</a>
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
     <span aria-hidden="true">&times;</span>
   </button>

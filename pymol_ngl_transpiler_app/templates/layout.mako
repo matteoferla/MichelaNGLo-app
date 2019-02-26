@@ -74,7 +74,6 @@ pre {
     <![endif]-->
 </head>
 <body>
-
 <br/>
 <br/>
 <br/>
@@ -108,5 +107,9 @@ pre {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
 <script src="https://www.matteoferla.com/bootstrap-tour/build/js/bootstrap-tour.min.js"></script>
 <%block name="script"/>
+<script type="text/javascript">
+    $('[data-toggle="popover"]').popover();
+</script>
+
 </body>
 </html>

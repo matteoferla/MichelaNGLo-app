@@ -3,10 +3,7 @@
 <div class="card">
     <div class="card-header">
         <h1 class="card-title">PyMOL&rarr;NGL converter and generator
-            <div class="float-right">
-                <button type="button" class="btn btn-outline-secondary"><i class="far fa-question"></i></button><br/>
-                <button type="button" class="btn btn-outline-secondary"><i class="fab fa-github"></i></button>
-            </div>
+            <%include file="menu_buttons.mako" args='tour=True'/>
         </h1>
         <h3 class="card-subtitle mb-2 text-muted">Generate a NGL view from a PyMOL PSE file or from a PDB file.</h3>
     </div>
@@ -362,8 +359,8 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-        <%include file='main.mako.js'/>
-        <%include file='tour.mako.js'/>
+        <%include file="main.mako.js"/>
+        <%include file="tour.mako.js"/>
         }); //ready
     </script>
 </%block>
