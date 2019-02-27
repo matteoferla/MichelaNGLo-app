@@ -14,6 +14,8 @@ else:
 @view_config(route_name='clash', renderer="../templates/clash.mako")
 @view_config(route_name='custom', renderer="../templates/custom.mako")
 @view_config(route_name='home', renderer="../templates/main.mako")
+@view_config(route_name='docs', renderer="../templates/docs.mako")
+@view_config(route_name='sandbox', renderer="../templates/sandbox.mako")
 def my_view(request):
     return {'project': 'PyMOL_NGL_transpiler_app'}
 

@@ -3,6 +3,7 @@
 
 <div class="alert alert-warning py-5 alert-dismissible fade show" role="alert">
   This got revised. for the old see <a href="/markup?version=old">old version.</a>
+    This page is running on the <a href="static/ngl.extended.js">file ngl.extended.js</a>
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
     <span aria-hidden="true">&times;</span>
   </button>
@@ -19,8 +20,11 @@
         <div class='row'>
             <div class='col-6'>
                 <h3>Demo</h3>
-                <p>Let's look at the structure of GFP. Overall is <a href='#' data-toggle="protein" data-target="#viewport" data-region="11-228" data-color="lime">a &beta;-barrel</a>, but sports <a href='#' data-toggle="protein" data-target="#viewport" data-region="54-82" data-color="purple">a loop that traverses the core</a>.</p>
-                <p>In this loop, there are <a href='#' data-toggle="protein" data-target="#viewport" data-residue="65-67" data-radius="2">three residues, SYG,</a> that mature to form a chromophore.</p>
+                <p>Let's look at the structure of GFP. Overall is <a href='#' data-toggle="protein" data-target="viewport" data-focus="domain" data-selection="11-228" data-color="lime">a &beta;-barrel</a>,
+                    but sports <a href='#' data-toggle="protein" data-target="#viewport" data-selection="54-82" data-color="purple">a loop that traverses the core</a>.</p>
+                <p>In this loop, there are <a href='#' data-toggle="protein" data-target="#viewport"  data-focus="residue" data-selection="65-67" data-radius="2">three residues, SYG,</a> that mature to form a chromophore.</p>
+                <p>Also, setting the tolerance to really low <a href='#' data-toggle="protein" data-target="#viewport"  data-focus="clash" data-selection="29" data-tolerance="0.1">we can see residues spuriously clashing</a>.  </p>
+
                 <h3>Aims</h3>
                 <p>A simple to implement system to control the protein that does not require JS coding.</p>
 
@@ -59,11 +63,13 @@
 </div>
 
 <%block name="script">
+    <script type="text/javascript" src="static/ngl.extended.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {
             //I kept this part simple for you, spying user.
             //See the part custom parts.
         window.stage = new NGL.Stage( "viewport",{backgroundColor: "white"});
+        NGL.stageIds['vieport'] = stage;
         stage.loadFile('static/gfp.pdb').then(function (component) {
             component.addRepresentation("cartoon",{smoothSheet: true});
             component.autoView();
@@ -72,63 +78,6 @@
         });
 		// Handle window resizing
         window.addEventListener( "resize", function( event ){stage.handleResize();}, false );
-
-        // custom parts.
-        window.show_region = function (resi, color) {
-            color = color || "green";
-            protein.removeAllRepresentations();
-            var schemeId = NGL.ColormakerRegistry.addSelectionScheme([[color, resi],["white", "*"]]);
-            protein.addRepresentation( "cartoon", {color: schemeId, smoothSheet: true});
-            protein.autoView();
-            protein.autoView(ab+'-'+ad, 2000);
-        };
-
-        window.show_residue = function (resi, color, radius) {
-            color = color || "hotpink";
-            radius = radius || 4;
-            resi=resi.toString();
-            // there should only be two representations...
-            for (var i=2; i < protein.reprList.length; i++) {
-                protein.removeRepresentation(protein.reprList[i]);
-            }
-            var selection = new NGL.Selection( resi );
-            var schemeId = NGL.ColormakerRegistry.addSelectionScheme([
-                [color,'_C'],["blue",'_N'],["red",'_O'],["white",'_H'],["yellow",'_S'],["orange","*"]
-            ]);
-            var atomSet = protein.structure.getAtomSetWithinSelection( selection, parseFloat(radius) );
-            // expand selection to complete groups
-            var atomSet2 = protein.structure.getAtomSetWithinGroup( atomSet );
-            licoriceRep = protein.addRepresentation( "licorice", { sele: atomSet2.toSeleString()} );
-            hyperRep = protein.addRepresentation( "hyperball", { sele: resi, color: schemeId} );
-            window.zoom=atomSet2.toSeleString();
-            protein.autoView(window.zoom, 2000);
-        };
-
-        $('[data-toggle="protein"]').click(function() {
-            if ($(this).data('residue')){
-                var i =$(this).data('residue');
-                var color = $(this).data('color');
-                var radius = $(this).data('radius');
-                show_residue(i, color, radius);
-            }
-            else if ($(this).data('region')){
-                var i = $(this).data('region');
-                var color = $(this).data('color');
-                show_region(i, color);
-            }
-            else {throw 'no data-region or data-residue tag.'}
-            if ($(this).data('title')) {
-                $('#viewport_title').html($(this).data('title'));
-                $('#viewport_title').show(1000);
-                $('#viewport_title').hide(1000);
-            }
-        });
-
-
-
-
-
-
         }); //ready
     </script>
 </%block>
