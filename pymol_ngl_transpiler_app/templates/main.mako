@@ -1,14 +1,12 @@
-<%inherit file="layout.mako"/>
+<%inherit file="layout_w_card.mako" args="
+                     tour=True,
+                     card_subtile='Generate a NGL view from a PyMOL PSE file or from a PDB file.',
+                     "/>
 <%namespace file="labels.mako" name="info"/>
-<div class="card">
-    <div class="card-header">
-        <h1 class="card-title">PyMOL&rarr;NGL converter and generator
-            <%include file="menu_buttons.mako" args='tour=True'/>
-        </h1>
-        <h3 class="card-subtitle mb-2 text-muted">Generate a NGL view from a PyMOL PSE file or from a PDB file.</h3>
-    </div>
-    <div class="card-body">
-        <ul class="list-group list-group-flush">
+
+
+######## block body
+<ul class="list-group list-group-flush">
             <li class="list-group-item">
                 <p class="card-text">Please see <a href="https://github.com/matteoferla/PyMOL-to-NGL-transpiler/blob/master/README.md">the Github readme</a> for documentation.</p>
                 <form>
@@ -276,10 +274,8 @@
             </li>
         </ul>
 
-
-    </div>
-</div>
-
+######## other blocks
+<%block name='modals'>
 <div class="modal" tabindex="-1" role="dialog" id="throbber" style="top:90%; overflow:hidden;">
   <div class="modal-dialog" role="document">
     <div class="modal-content bg-warning">
@@ -354,6 +350,8 @@
     </div>
   </div>
 </div>
+
+</%block>
 
 <%block name="script">
     <script type="text/javascript">
