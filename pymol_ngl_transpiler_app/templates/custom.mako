@@ -1,14 +1,16 @@
-<%inherit file="layout.mako"/>
+<%inherit file="layout_w_card.mako"/>
+<%block name="buttons">
+            <%include file="menu_buttons.mako" args='tour=False'/>
+</%block>
+<%block name="title">
+            Mesh converter
+</%block>
+<%block name="subtitle">
+            This tool converts a obj file into a NGL mesh for you
+</%block>
 
-<div class="card">
-    <div class="card-header">
-        <h1 class="card-title">Mesh converter
-            <%include file='menu_buttons.mako'/>
-        </h1>
-        <h3 class="card-subtitle mb-2 text-muted">This tool converts a obj file into a NGL mesh for you</h3>
-    </div>
-    <div class="card-body">
-        <ul class="list-group list-group-flush">
+#### main.
+<ul class="list-group list-group-flush">
             <li class="list-group-item">
         <div class='row'>
             ## obj input
@@ -92,12 +94,8 @@
                 </div>
             </li>
         </ul>
-    </div>
-</div>
 
-
-
-
+<%block name="modals">
 <div class="modal fade" tabindex="-1" role="dialog" id="demo_modal">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -134,6 +132,7 @@
     </div>
   </div>
 </div>
+</%block>
 
 <%block name="script">
     <script type="text/javascript">

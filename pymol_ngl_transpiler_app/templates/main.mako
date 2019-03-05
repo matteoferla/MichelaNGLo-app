@@ -1,8 +1,14 @@
-<%inherit file="layout_w_card.mako" args="
-                     tour=True,
-                     card_subtile='Generate a NGL view from a PyMOL PSE file or from a PDB file.',
-                     "/>
 <%namespace file="labels.mako" name="info"/>
+<%inherit file="layout_w_card.mako"/>
+<%block name="buttons">
+            <%include file="menu_buttons.mako" args='tour=True'/>
+</%block>
+<%block name="title">
+            PyMOL&rarr;NGL converter and generator
+</%block>
+<%block name="subtitle">
+            Generate a NGL view from a PyMOL PSE file or PDB file.
+</%block>
 
 
 ######## block body
@@ -251,7 +257,8 @@
                                 <div class="input-group-text bg-secondary rounded-0">
                                     <input type="checkbox" id="cdn_bool" checked>
                                 </div>
-                                <input type="text" class="form-control" id="cdn" value="https://cdn.rawgit.com/arose/ngl/v0.10.4-1/dist/ngl.js">
+                                <input type="text" class="form-control" id="cdn" value="https://unpkg.com/ngl@0.10.4/dist/ngl.js">
+                                ### https://cdn.rawgit.com/arose/ngl/v0.10.4-1/dist/ngl.js
                                 <div class="input-group-append">
                                     <div class="btn btn-info" data-toggle="modal" data-target="#CDN_modal" >?</div>
 
