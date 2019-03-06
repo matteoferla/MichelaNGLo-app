@@ -3,7 +3,7 @@
 
 <%block name="alert"/>
 
-<div class="card">
+<div class="card my-5">
     <div class="card-header">
         <h1 class="card-title">
             <%block name="title"/>

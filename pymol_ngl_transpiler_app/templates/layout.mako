@@ -81,7 +81,7 @@ pre {
 
 <main role='main' class="container-fluid">
     <div class="row">
-        <div class="col-lg-8 offset-lg-2">
+        <div class="col-lg-10 offset-lg-1">
             ${ next.body() }
         </div>
     </div>

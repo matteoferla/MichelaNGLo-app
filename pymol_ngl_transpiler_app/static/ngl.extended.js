@@ -91,6 +91,11 @@ NGL.specialOps.show_clash = function (id, selection, color, radius, tolerance) {
     }); //end this atom
 };
 
+NGL.specialOps.multiLoader = function (dex) {
+
+};
+
+
 NGL.getStage = function (id) {
     // returns a stage stored in stageIds ...
     // unless somehow a stage was given.
@@ -134,9 +139,13 @@ $(document).ready(function () {
             var color = $(this).data('color'); //optional settings in methods
             var radius = $(this).data('radius');
             var tolerance = $(this).data('tolerance');
-            var id = $(this).data('target') || 'viewport';
+            var id = 'viewport';
+            if ($(this).data('target')) {id = $(this).data('target')}
+            else if (!! $(this).attr('href') & !! $(this).attr('href').replace('#','')) { // # alone is not enough
+                id = $(this).attr('href');
+            }
             var title = $(this).data('title');
-            var focus = $(this).data('focus'); // residue | domain | clash
+            var focus = $(this).data('focus') || 'domain'; // residue | domain | clash
             if (focus == 'residue'){
                 NGL.specialOps.show_residue(id, selection, color, radius);
             }
