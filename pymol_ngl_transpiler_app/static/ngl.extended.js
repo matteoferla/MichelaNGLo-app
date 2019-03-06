@@ -1,10 +1,22 @@
-/* This script monkeypatches NGL to have the following...
+/* This script adds to NGL the following...
 
-* store stage in NGL.
-* NGL-controlling HTML markup
-* clash adding
+* NGL.stageIds an object taht stores id: stages
+* NGL.getStage(id) is a getter for this.
+* NGL.specialOps
+** NGL.specialOps.show_domain(id, selection, color), which focuses stage to show the given selection with the given color
+** NGL.specialOps.show_residue(id, selection, color, radius), which focuses on the selection and their neighbourhood by n radius
+** NGL.specialOps.show_clash(id, selection, color, radius, tolerance) which shows the clashes that selection may have
+** NGL.specialOps.multiLoader(id, proteins, image, backgroundColor, startIndex), see below about proteins object
+** NGL.specialOps.load(option)
+** NGL.specialOps.removeImg() switches the image off
+** NGL.specialOps._run_loadFx() and a few others.
+** NGL.Stage.prototype.getComponentByType allowing stage objects to return a component.
 
+
+proteins is an array of {name: 'unique_name', type: 'rcsb' (default) | 'file' | 'data', value: xxx, 'ext': 'pdb' (default), loadFx: xxx}
+where the optional loadFx is a function that is run on loading.
 */
+
 
 NGL.stageIds = {};
 
@@ -14,7 +26,7 @@ NGL.specialOps.show_domain = function (id, selection, color) {
         // Prepare
         color = color || "green";
         //selection = typeof selection === "string" ? new NGL.Selection(selection) : selection;
-        var protein = NGL.specialOps.getComponentByType(NGL.getStage(id),'structure');
+        var protein = NGL.getStage(id).getComponentByType('structure');
         protein.removeAllRepresentations();
         // Color in!
         var schemeId = NGL.ColormakerRegistry.addSelectionScheme([[color, selection],["white", "*"]]);
@@ -25,14 +37,9 @@ NGL.specialOps.show_domain = function (id, selection, color) {
 
 
 
-
-
-
-
-
 NGL.specialOps.show_residue = function (id, selection, color, radius) {
         // Prepare
-        var protein = NGL.specialOps.getComponentByType(NGL.getStage(id),'structure');
+        var protein = NGL.getStage(id).getComponentByType('structure');
         color = color || "hotpink";
         radius = radius || 4;
         //selection = typeof selection === "string" ? new NGL.Selection(selection) : selection;
@@ -60,13 +67,13 @@ NGL.specialOps.show_clash = function (id, selection, color, radius, tolerance) {
     tolerance= tolerance || 1; //how much is the wiggle room. 0.2 &Aring; is probs good.
     radius = radius || 2;
     NGL.specialOps.show_residue(id, selection, color, radius);
-    var protein = NGL.specialOps.getComponentByType(NGL.getStage(id),'structure');
+    var protein = NGL.getStage(id).getComponentByType('structure');
     // Find what clashes...
     protein.structure.getView(new NGL.Selection(selection.toString())).eachAtom(function (atom) {
     protein.structure.eachAtom(function (neighbour) {
         if ((atom.distanceTo(neighbour) < atom.vdw + neighbour.vdw - tolerance) &&
             (!atom.hasBondTo(neighbour))                          //they are bonded so must be fine.
-            && (atom.residueIndex != neighbour.residueIndex)) { //self clashes are fine.
+            && (atom.residueIndex !== neighbour.residueIndex)) { //self clashes are fine.
                 var position = [atom.x / 2 + neighbour.x / 2, atom.y / 2 + neighbour.y / 2, atom.z / 2 + neighbour.z / 2];
                 console.log('Clash between '+atom.atomname+' of residue ('+atom.vdw.toString()+' &Aring;) '+atom.residueIndex+' and '+
                     neighbour.atomname+' of residue '+neighbour.residueIndex+' ('+atom.vdw.toString()+' &Aring;). Distance: '+atom.distanceTo(neighbour).toString()+' cutoff: '+(atom.vdw + neighbour.vdw - tolerance).toString());
@@ -91,10 +98,95 @@ NGL.specialOps.show_clash = function (id, selection, color, radius, tolerance) {
     }); //end this atom
 };
 
-NGL.specialOps.multiLoader = function (dex) {
 
+NGL.specialOps.removeImg = function () {
+    var img = '#'+myData.id+' img';
+    if (!! $(img).length) { //there is an image. Remove and get the sizes
+		var w=$(img).width();
+		var h=$(img).height();
+		$(img).detach();
+		$(img).detach();
+		$(img).css('width',w).css('height',h);
+    }
 };
 
+NGL.specialOps._run_loadFx = function (protein, fx) {
+    if (typeof fx === 'function') {
+        fx(protein)}
+    else {
+        protein.addRepresentation("cartoon", {smoothSheet: true}); protein.autoView();
+    }
+    return protein;
+};
+
+NGL.specialOps.load = function (option) {
+    var index; //option could be blob or string or dictionary in future.
+    if (typeof option === "undefined") {index = myData.current_index;} //use is lazy.
+    else if (typeof option === "number") {index = option;} //user gave index.
+    else if (typeof option === 'object') { //user gave a protein object
+        myData.proteins.push(object);
+        index = myData.proteins.length - 1;
+    }
+    else if (typeof option === "string") { // user gave pdb code.
+        myData.proteins.push({type: 'rcsb', value: option});
+        index = myData.proteins.length - 1;
+    }
+    else {throw 'No idea what this use submitted option is.'}
+    // check if the one asked for is loaded.
+    if ( (index === myData.current_index)) {
+        var protein = NGL.stageIds[myData.id].getComponentByType('structure');
+        //if (typeof myData.proteins[index].loadFx === 'function') {myData.proteins[index].loadFx(protein)};
+        return protein
+    }
+    else {myData.current_index = index}
+    // deal with image.
+    if (myData.imagemode) { NGL.specialOps.removeImg();}
+    // toggle structure
+    // - check if there is a stage.
+    if (! NGL.getStage(myData.id)) {
+        NGL.stageIds[myData.id] = new NGL.Stage( "viewport",{backgroundColor: myData.backgroundColor});
+        window.addEventListener( "resize", function( event ){NGL.stageIds[myData.id].handleResize();}, false );
+    } else { //tabula rasa!
+        NGL.stageIds[myData.id].removeAllComponents();
+    }
+    //new model. Force reset
+    if (myData.proteins[index].type === 'file') {
+        return NGL.stageIds[myData.id].loadFile(myData.proteins[index].value).then(function (protein) {
+            NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);});
+
+    }
+    else if (myData.proteins[index].type === 'data') {
+        var ext = myData.proteins[index].ext || 'pdb';
+        if (typeof myData.proteins[index].value === 'string') {
+            return NGL.stageIds[myData.id].loadFile(new Blob [myData.proteins[index].value], { ext: ext }).then(function (protein) {
+            NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);});
+        } else { //is a blob already
+            return NGL.stageIds[myData.id].loadFile(myData.proteins[index].value, { ext: ext }).then(function (protein) {
+            NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);});
+        }
+    }
+    else { //PDB code.
+        return NGL.stageIds[myData.id].loadFile('rcsb://'+myData.proteins[index].value.replace('rcsb://','').toLowerCase().slice(0,4)).then(function (protein) {
+            NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);});
+    }
+};
+
+NGL.specialOps.multiLoader = function (id, proteins, image, backgroundColor, startIndex) {
+    /*
+    Note that the multiloader does not support multiple viewports.
+    id is the id.
+    proteins is a list of {name: 'unique_name', type: 'rcsb' (default) | 'file' | 'data', value: xxx, 'ext': 'pdb' , loadFx: xxx}
+    where loadFx is the function to run after loading.
+    image is a boolean.
+    background is a color (def white).
+    The multiLoader calls the load function with an index of startIndex or zero.
+    Do note that the function load returns a pr
+     */
+    startIndex = startIndex || 0;
+    window.myData={current_index: -1, proteins: proteins, id: id, imagemode: !! image, backgroundColor: backgroundColor || 'white'};
+    if (image) {$('#'+id+' img').click(function () {NGL.specialOps.load(startIndex);});}
+    else {return NGL.specialOps.load(startIndex);}
+};
 
 NGL.getStage = function (id) {
     // returns a stage stored in stageIds ...
@@ -122,16 +214,30 @@ NGL.getStage = function (id) {
 };
 
 
-//ToDo make this a prototype of NGL.Stage
-NGL.specialOps.getComponentByType = function (stage,type) {
+/*
+class _StageX extends NGL.Stage {
+    constructor(idOrElement, params) {
+        super(idOrElement, params);
+        this.getComponentByType = function (stage,type) {
+            //gets first structure
+            type = type || 'structure';
+            for (var component in stage.compList) {
+                if (stage.compList[component].type === type) {return stage.compList[component]}
+            }
+            return undefined;
+        };
+    }
+}
+*/
+
+NGL.Stage.prototype.getComponentByType = function(type) {
     //gets first structure
-    for (var component in stage.compList) {
-        if (stage.compList[component].type == type) {return stage.compList[component]}
+    type = type || 'structure';
+    for (var component in this.compList) {
+        if (this.compList[component].type === type) {return this.compList[component]}
     }
     return undefined;
 };
-
-
 
 $(document).ready(function () {
     $('[data-toggle="protein"]').click(function() {
@@ -139,27 +245,33 @@ $(document).ready(function () {
             var color = $(this).data('color'); //optional settings in methods
             var radius = $(this).data('radius');
             var tolerance = $(this).data('tolerance');
+            var structure = $(this).data('load');
             var id = 'viewport';
-            if ($(this).data('target')) {id = $(this).data('target')}
-            else if (!! $(this).attr('href') & !! $(this).attr('href').replace('#','')) { // # alone is not enough
+            if ($(this).data('target')) {id = $(this).data('target').replace('#','')}
+            else if (!! $(this).attr('href') && !! $(this).attr('href').replace('#','')) { // # alone is not enough
                 id = $(this).attr('href');
             }
             var title = $(this).data('title');
             var focus = $(this).data('focus') || 'domain'; // residue | domain | clash
-            if (focus == 'residue'){
+            if (structure) {
+                NGL.specialOps.load(structure);
+            }
+            else if (focus === 'residue'){
                 NGL.specialOps.show_residue(id, selection, color, radius);
             }
-            else if (focus == 'domain' || focus == 'region'){
+            else if (focus === 'domain' || focus === 'region'){
                 NGL.specialOps.show_domain(id, selection, color);
             }
-            else if (focus == 'clash'){
+            else if (focus === 'clash'){
                 NGL.specialOps.show_clash(id, selection, color, radius, tolerance);
             }
-            else {throw 'no data-focus tag.'}
+            else {throw 'ValueError: odd data-focus tag.'}
             if (title) {
-                $('#'+id+'_title').html(title);
-                $('#'+id+'_title').show(1000);
-                $('#'+id+'_title').hide(1000);
+                var titleEl = 'label[for="'+id+'"]';
+                if (! $(titleEl).length) {
+                    $('#'+id).after('<label for="'+id+'" style="text-align: center; display: block;">TITLE</label>');
+                }
+                $(titleEl).html(title).fadeIn( 1000 ).fadeOut(1000);
             }
         });
 });
