@@ -42,6 +42,9 @@ var shapeComp = stage.addComponentFromObject(shape);
 shapeComp.addRepresentation("buffer");
 setInterval(function(){ shapeComp.controls.spin([1,0,0],30)}, 100); // make it spin
     </code></pre>
+
+    <p>Do note that they are added as separete components as opposed to the polypeptide component. Therefore proteinComponent.removeAllRepresentations() will not work.</p>
+    <p>Also, note that <code>stage.getComponentsByName('clash').forEach(t => stage.removeComponent(t));</code> will go crazy as the array shrinks in size.</p>
 </div>
 
 </div>

@@ -6,7 +6,7 @@
 ** NGL.specialOps.show_domain(id, selection, color), which focuses stage to show the given selection with the given color
 ** NGL.specialOps.show_residue(id, selection, color, radius), which focuses on the selection and their neighbourhood by n radius
 ** NGL.specialOps.show_clash(id, selection, color, radius, tolerance) which shows the clashes that selection may have
-** NGL.specialOps.multiLoader(id, proteins, image, backgroundColor, startIndex), see below about proteins object
+** NGL.specialOps.multiLoader(id, proteins, backgroundColor, startIndex), see below about proteins object
 ** NGL.specialOps.load(option)
 ** NGL.specialOps.removeImg() switches the image off
 ** NGL.specialOps._run_loadFx() and a few others.
@@ -24,9 +24,11 @@ NGL.specialOps = {'note': 'This is a monkeypatch to allow HTML control of the st
 
 NGL.specialOps.show_domain = function (id, selection, color) {
         // Prepare
+        NGL.specialOps.postInitialise(); //worst case schenario prevention.
         color = color || "green";
         //selection = typeof selection === "string" ? new NGL.Selection(selection) : selection;
         var protein = NGL.getStage(id).getComponentByType('structure');
+        NGL.getStage(id).removeClashes();
         protein.removeAllRepresentations();
         // Color in!
         var schemeId = NGL.ColormakerRegistry.addSelectionScheme([[color, selection],["white", "*"]]);
@@ -39,6 +41,7 @@ NGL.specialOps.show_domain = function (id, selection, color) {
 
 NGL.specialOps.show_residue = function (id, selection, color, radius) {
         // Prepare
+        NGL.specialOps.postInitialise(); //worst case schenario prevention.
         var protein = NGL.getStage(id).getComponentByType('structure');
         color = color || "hotpink";
         radius = radius || 4;
@@ -49,6 +52,8 @@ NGL.specialOps.show_residue = function (id, selection, color, radius) {
                 protein.removeRepresentation(o);
             }); //.forEach representation
         }); //.map representation name
+        //remove clashes
+        NGL.getStage(id).removeClashes();
         var schemeId = NGL.ColormakerRegistry.addSelectionScheme([
             [color,'_C'],["blue",'_N'],["red",'_O'],["white",'_H'],["yellow",'_S'],["orange","*"] //this is such a weird way of doing it.
         ]);
@@ -64,6 +69,7 @@ NGL.specialOps.show_residue = function (id, selection, color, radius) {
 
 NGL.specialOps.show_clash = function (id, selection, color, radius, tolerance) {
     // Prepare
+    NGL.specialOps.postInitialise(); //worst case schenario prevention.
     tolerance= tolerance || 1; //how much is the wiggle room. 0.2 &Aring; is probs good.
     radius = radius || 2;
     NGL.specialOps.show_residue(id, selection, color, radius);
@@ -89,9 +95,10 @@ NGL.specialOps.show_clash = function (id, selection, color, radius, tolerance) {
                 shape.addBuffer(meshBuffer);
                 var shapeComp = protein.stage.addComponentFromObject(shape);
                 shapeComp.addRepresentation("buffer");
-                setInterval(function () {
+                if (! myData.spinningTimer) {myData.spinningTimer = [];}
+                myData.spinningTimer.push(setInterval(function () {
                     shapeComp.controls.spin([1, 0, 0], 30)
-                    }, 100);
+                    }, 100));
                 //spikyball made and added.
             } //end if
         }); //end neigh atom
@@ -120,16 +127,22 @@ NGL.specialOps._run_loadFx = function (protein, fx) {
 };
 
 NGL.specialOps.load = function (option) {
-    var index; //option could be blob or string or dictionary in future.
+    // super extreme case. No multiLoad has been called to initialise the scene. This a last ditch attempt.
+    NGL.specialOps.postInitialise();
+    // determine what option is.
+    var index;
     if (typeof option === "undefined") {index = myData.current_index;} //use is lazy.
     else if (typeof option === "number") {index = option;} //user gave index.
     else if (typeof option === 'object') { //user gave a protein object
         myData.proteins.push(object);
         index = myData.proteins.length - 1;
     }
-    else if (typeof option === "string") { // user gave pdb code.
-        myData.proteins.push({type: 'rcsb', value: option});
+    else if ((typeof option === "string") && (option.length) >= 4) { // user gave pdb code.
+        myData.proteins.push({type: 'rcsb', value: option.slice(0,4)}); //no chains please.
         index = myData.proteins.length - 1;
+    }
+    else if (parseInt(option) !== NaN < myData.proteins.length) { //user gave a number as a string.
+        index = parseInt(option);
     }
     else {throw 'No idea what this use submitted option is.'}
     // check if the one asked for is loaded.
@@ -140,7 +153,7 @@ NGL.specialOps.load = function (option) {
     }
     else {myData.current_index = index}
     // deal with image.
-    if (myData.imagemode) { NGL.specialOps.removeImg();}
+    if ($('#'+myData.id+' img')) { NGL.specialOps.removeImg();}
     // toggle structure
     // - check if there is a stage.
     if (! NGL.getStage(myData.id)) {
@@ -171,21 +184,31 @@ NGL.specialOps.load = function (option) {
     }
 };
 
-NGL.specialOps.multiLoader = function (id, proteins, image, backgroundColor, startIndex) {
+NGL.specialOps.multiLoader = function (id, proteins, backgroundColor, startIndex) {
     /*
     Note that the multiloader does not support multiple viewports.
     id is the id.
     proteins is a list of {name: 'unique_name', type: 'rcsb' (default) | 'file' | 'data', value: xxx, 'ext': 'pdb' , loadFx: xxx}
     where loadFx is the function to run after loading.
-    image is a boolean.
     background is a color (def white).
     The multiLoader calls the load function with an index of startIndex or zero.
     Do note that the function load returns a pr
      */
     startIndex = startIndex || 0;
-    window.myData={current_index: -1, proteins: proteins, id: id, imagemode: !! image, backgroundColor: backgroundColor || 'white'};
-    if (image) {$('#'+id+' img').click(function () {NGL.specialOps.load(startIndex);});}
+    // check for awkard case it has already been started.
+    if (typeof window.myData === 'object') {window.myData.proteins.push(...proteins);}
+    else {window.myData={current_index: -1, proteins: proteins, id: id, backgroundColor: backgroundColor || 'white'};}
+    var img = $('#'+id+' img');
+    if (img.length) {img.click(function () {NGL.specialOps.load(startIndex);});}
     else {return NGL.specialOps.load(startIndex);}
+};
+
+NGL.specialOps.postInitialise = function () {
+    //this should not be used routinely!
+    if (typeof window.myData === "undefined") {
+        console.log('WARNING. initilise the scene with NGL.specialOps.multiLoader!');
+        window.myData={current_index: -1, proteins: [], id: 'viewport', backgroundColor: 'white'};
+    }
 };
 
 NGL.getStage = function (id) {
@@ -239,13 +262,34 @@ NGL.Stage.prototype.getComponentByType = function(type) {
     return undefined;
 };
 
-$(document).ready(function () {
-    $('[data-toggle="protein"]').click(function() {
-            var selection =$(this).data('selection'); //mandatory.
+NGL.Stage.prototype.removeComponentsbyName = function (name) {
+    // forEach on a shrinking list problem.
+    var comps = this.getComponentsByName(name).list;
+    var maxi = comps.length;
+        for (var i=maxi; i >= 0; i--) {
+                this.removeComponent(comps[i]);
+        }
+};
+
+NGL.Stage.prototype.removeClashes = function () {
+    // clashes are special as they have timers.
+    if (! myData.spinningTimer) {return null;}
+    this.removeComponentsbyName('clash');
+    myData.spinningTimer.forEach(t => clearInterval(t));
+    myData.spinningTimer =[];
+};
+
+
+///////////////////////////// activate data-toggle='protein' ///////////////
+
+$.prototype.protein = function (){
+            $(this).click (function () {
+                var selection =$(this).data('selection'); //mandatory.
             var color = $(this).data('color'); //optional settings in methods
             var radius = $(this).data('radius');
             var tolerance = $(this).data('tolerance');
             var structure = $(this).data('load');
+            var view = $(this).data('view');
             var id = 'viewport';
             if ($(this).data('target')) {id = $(this).data('target').replace('#','')}
             else if (!! $(this).attr('href') && !! $(this).attr('href').replace('#','')) { // # alone is not enough
@@ -255,6 +299,24 @@ $(document).ready(function () {
             var focus = $(this).data('focus') || 'domain'; // residue | domain | clash
             if (structure) {
                 NGL.specialOps.load(structure);
+            }
+            else if (view === 'auto') { //special view case.
+                NGL.getStage(id).autoView(2000);
+            }
+            else if (view === 'reset') { //special view case.
+                if (typeof myData.proteins[myData.current_index].loadFx === 'function') {
+                    myData.proteins[myData.current_index].loadFx(NGL.getStage(id).getComponentByType('structure'));
+                }
+                else {
+                    NGL.getStage(id).getComponentByType('structure').autoView(2000);
+                }
+
+            }
+            else if (!! view) {
+                //NGL.getStage(id).getComponentByType('structure').autoView(2000); //zoom out.
+                if (typeof view !== 'string') {
+                    NGL.getStage(id).viewerControls.orient(view, 2000);
+                } else {NGL.getStage(id).viewerControls.orient(JSON.parse(view));}
             }
             else if (focus === 'residue'){
                 NGL.specialOps.show_residue(id, selection, color, radius);
@@ -266,6 +328,7 @@ $(document).ready(function () {
                 NGL.specialOps.show_clash(id, selection, color, radius, tolerance);
             }
             else {throw 'ValueError: odd data-focus tag.'}
+
             if (title) {
                 var titleEl = 'label[for="'+id+'"]';
                 if (! $(titleEl).length) {
@@ -273,5 +336,9 @@ $(document).ready(function () {
                 }
                 $(titleEl).html(title).fadeIn( 1000 ).fadeOut(1000);
             }
-        });
+            });
+        };
+
+$(document).ready(function () {
+    $('[data-toggle="protein"]').protein();
 });

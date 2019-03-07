@@ -19,9 +19,10 @@
                     <li>Let's check out <a href="#" data-toggle="protein" data-focus="clash" data-selection="1" data-tolerance="0.2">clash at residue 1 with tolerance set to 0.2</a>.</li>
                     <li>Let's check out <a href="#" data-toggle="protein" data-focus="domain" data-selection="10-20">residues 10-20</a>.</li>
                     <li>Let's check out <a href="#" data-toggle="protein" data-focus="domain" data-selection="73-76:A">residues 73-76</a>.
-                    <li>Let's check out <a href="#" data-toggle="protein" data-focus="domain" data-selection="73-76:A">residues 73-76</a>.
+                    <li>Let's check out <a href="#" data-title='fooo' data-toggle="protein" data-focus="domain" data-selection="73-76:A">residues 73-76</a>.
                     <li>Let's check out <a href="#" data-toggle="protein" data-load="6FWW" data-selection="66-68:A">GFP</a>.
-
+                    <li>Let's check out <a href="#" data-toggle="protein" data-view="[23.56205753705434, 25.14142618843425, -41.75561022036051, 0, 8.490802888119923, 43.55229529131292, 31.01445762029925, 0, 47.995088814712744, -20.04741983120362, 15.012169978727327, 0, -30.62681007385254, -30.35763931274414, -19.690916061401367, 1]">the underside</a> </li>
+                    <li>Let's reset things <a href="#" data-toggle="protein" data-view="reset">reset</a></li>
                 </ul>
 
                 <p>${'qwerty ' * 100}</p>
@@ -75,7 +76,7 @@
 		stage.viewerControls.orient(myData.main_view);
         };
 
-        NGL.specialOps.multiLoader('viewport', [{type: 'rcsb', value: '1ubq', loadFx: nice_ubi}], false, 'aquamarine')
+        NGL.specialOps.multiLoader('viewport', [{type: 'rcsb', value: '1ubq', loadFx: nice_ubi}], 'aquamarine')
 
     </script>
 </%block>
