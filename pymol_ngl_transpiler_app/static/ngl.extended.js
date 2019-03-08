@@ -7,11 +7,16 @@
 ** NGL.specialOps.show_residue(id, selection, color, radius), which focuses on the selection and their neighbourhood by n radius
 ** NGL.specialOps.show_clash(id, selection, color, radius, tolerance) which shows the clashes that selection may have
 ** NGL.specialOps.multiLoader(id, proteins, backgroundColor, startIndex), see below about proteins object
+** NGL.specialOps.postInitialise() gets called by load if the stage was not set via multiLoader
 ** NGL.specialOps.load(option)
 ** NGL.specialOps.removeImg() switches the image off
 ** NGL.specialOps._run_loadFx() and a few others.
+* NGL.Stage extra prototypes
 ** NGL.Stage.prototype.getComponentByType allowing stage objects to return a component.
-
+** NGL.Stage.prototype.removeComponentsbyName array version.
+** NGL.Stage.prototype.removeClashes removes clashes and the rotation.
+* $.prototype.protein to enable a link
+NB. this file ends with `$('[data-toggle="protein"]').protein();` to activate all links.
 
 proteins is an array of {name: 'unique_name', type: 'rcsb' (default) | 'file' | 'data', value: xxx, 'ext': 'pdb' (default), loadFx: xxx}
 where the optional loadFx is a function that is run on loading.
@@ -19,6 +24,33 @@ where the optional loadFx is a function that is run on loading.
 
 
 NGL.stageIds = {};
+
+NGL.getStage = function (id) {
+    // returns a stage stored in stageIds ...
+    // unless somehow a stage was given.
+    if (typeof id === 'string') {
+        id = id.replace('#','');
+        if (id in NGL.stageIds) {
+            return NGL.stageIds[id];
+        }
+        else if (window.stage !== undefined) {
+            if (NGL.Debug) {console.log('No stored stage in .stageIds, but there is a window.stage...');}
+            return window.stage;
+        } else {
+            if (NGL.Debug) {console.log('No stored stage in .stageIds nor is a window.stage...');}
+            return undefined;
+        }
+    } else if (id.compList !== undefined) { //it's an Stage
+        return id;
+
+    } else if (id.stage !== undefined) { //it's an Component
+        return id.stage;
+    } else {
+        if (NGL.Debug) {console.log('No idea what this is.');}
+    }
+};
+
+///////////////////////////// NGL.SpecialOps ///////////////
 
 NGL.specialOps = {'note': 'This is a monkeypatch to allow HTML control of the structure using the markup defined in ngl.matteoferla.com/markup'};
 
@@ -36,8 +68,6 @@ NGL.specialOps.show_domain = function (id, selection, color) {
         protein.autoView(2000);
         protein.autoView(selection, 2000);
     };
-
-
 
 NGL.specialOps.show_residue = function (id, selection, color, radius) {
         // Prepare
@@ -104,7 +134,6 @@ NGL.specialOps.show_clash = function (id, selection, color, radius, tolerance) {
         }); //end neigh atom
     }); //end this atom
 };
-
 
 NGL.specialOps.removeImg = function () {
     var img = '#'+myData.id+' img';
@@ -211,47 +240,7 @@ NGL.specialOps.postInitialise = function () {
     }
 };
 
-NGL.getStage = function (id) {
-    // returns a stage stored in stageIds ...
-    // unless somehow a stage was given.
-    if (typeof id === 'string') {
-        id = id.replace('#','');
-        if (id in NGL.stageIds) {
-            return NGL.stageIds[id];
-        }
-        else if (window.stage !== undefined) {
-            if (NGL.Debug) {console.log('No stored stage in .stageIds, but there is a window.stage...');}
-            return window.stage;
-        } else {
-            if (NGL.Debug) {console.log('No stored stage in .stageIds nor is a window.stage...');}
-            return undefined;
-        }
-    } else if (id.compList !== undefined) { //it's an Stage
-        return id;
-
-    } else if (id.stage !== undefined) { //it's an Component
-        return id.stage;
-    } else {
-        if (NGL.Debug) {console.log('No idea what this is.');}
-    }
-};
-
-
-/*
-class _StageX extends NGL.Stage {
-    constructor(idOrElement, params) {
-        super(idOrElement, params);
-        this.getComponentByType = function (stage,type) {
-            //gets first structure
-            type = type || 'structure';
-            for (var component in stage.compList) {
-                if (stage.compList[component].type === type) {return stage.compList[component]}
-            }
-            return undefined;
-        };
-    }
-}
-*/
+///////////////////////////// NGL.Stage monkeypatching ///////////////
 
 NGL.Stage.prototype.getComponentByType = function(type) {
     //gets first structure
@@ -279,65 +268,73 @@ NGL.Stage.prototype.removeClashes = function () {
     myData.spinningTimer =[];
 };
 
-
 ///////////////////////////// activate data-toggle='protein' ///////////////
 
 $.prototype.protein = function (){
+            //parse
             $(this).click (function () {
                 var selection =$(this).data('selection'); //mandatory.
-            var color = $(this).data('color'); //optional settings in methods
-            var radius = $(this).data('radius');
-            var tolerance = $(this).data('tolerance');
-            var structure = $(this).data('load');
-            var view = $(this).data('view');
-            var id = 'viewport';
-            if ($(this).data('target')) {id = $(this).data('target').replace('#','')}
-            else if (!! $(this).attr('href') && !! $(this).attr('href').replace('#','')) { // # alone is not enough
-                id = $(this).attr('href');
-            }
-            var title = $(this).data('title');
-            var focus = $(this).data('focus') || 'domain'; // residue | domain | clash
-            if (structure) {
-                NGL.specialOps.load(structure);
-            }
-            else if (view === 'auto') { //special view case.
-                NGL.getStage(id).autoView(2000);
-            }
-            else if (view === 'reset') { //special view case.
-                if (typeof myData.proteins[myData.current_index].loadFx === 'function') {
-                    myData.proteins[myData.current_index].loadFx(NGL.getStage(id).getComponentByType('structure'));
+                var color = $(this).data('color'); //optional settings in methods
+                var radius = $(this).data('radius');
+                var tolerance = $(this).data('tolerance');
+                var structure = $(this).data('load');
+                var view = $(this).data('view');
+                var id = 'viewport';
+                if ($(this).data('target')) {id = $(this).data('target').replace('#','')}
+                else if (!! $(this).attr('href') && !! $(this).attr('href').replace('#','')) { // # alone is not enough
+                    id = $(this).attr('href');
                 }
-                else {
-                    NGL.getStage(id).getComponentByType('structure').autoView(2000);
+                var title = $(this).data('title');
+                var focus = $(this).data('focus') || 'domain'; // residue | domain | clash
+
+                // title.
+                if (title) {
+                    var titleEl = 'label[for="'+id+'"]';
+                    if (! $(titleEl).length) {
+                        $('#'+id).after('<label for="'+id+'" style="text-align: center; display: block;">TITLE</label>');
+                    }
+                    $(titleEl).html(title).fadeIn( 1000 ).fadeOut(1000);
                 }
 
-            }
-            else if (!! view) {
-                //NGL.getStage(id).getComponentByType('structure').autoView(2000); //zoom out.
-                if (typeof view !== 'string') {
-                    NGL.getStage(id).viewerControls.orient(view, 2000);
-                } else {NGL.getStage(id).viewerControls.orient(JSON.parse(view));}
-            }
-            else if (focus === 'residue'){
-                NGL.specialOps.show_residue(id, selection, color, radius);
-            }
-            else if (focus === 'domain' || focus === 'region'){
-                NGL.specialOps.show_domain(id, selection, color);
-            }
-            else if (focus === 'clash'){
-                NGL.specialOps.show_clash(id, selection, color, radius, tolerance);
-            }
-            else {throw 'ValueError: odd data-focus tag.'}
+                // prep the action
+                function move() {
+                    if (view === 'auto') { //special view case.
+                        NGL.getStage(id).autoView(2000);
+                    }
+                    else if (view === 'reset') { //special view case.
+                        if (typeof myData.proteins[myData.current_index].loadFx === 'function') {
+                            myData.proteins[myData.current_index].loadFx(NGL.getStage(id).getComponentByType('structure'));
+                        }
+                        else {
+                            NGL.getStage(id).getComponentByType('structure').autoView(2000);
+                        }
 
-            if (title) {
-                var titleEl = 'label[for="'+id+'"]';
-                if (! $(titleEl).length) {
-                    $('#'+id).after('<label for="'+id+'" style="text-align: center; display: block;">TITLE</label>');
+                    }
+                    else if (!! view) {
+                        //NGL.getStage(id).getComponentByType('structure').autoView(2000); //zoom out.
+                        if (typeof view !== 'string') {
+                            NGL.getStage(id).viewerControls.orient(view, 2000);
+                        } else {NGL.getStage(id).viewerControls.orient(JSON.parse(view));}
+                    }
+                    else if (focus === 'residue'){
+                        NGL.specialOps.show_residue(id, selection, color, radius);
+                    }
+                    else if (focus === 'domain' || focus === 'region'){
+                        NGL.specialOps.show_domain(id, selection, color);
+                    }
+                    else if (focus === 'clash'){
+                        NGL.specialOps.show_clash(id, selection, color, radius, tolerance);
+                    }
+                    else if (structure !== undefined) {}//pass
+                    else {throw 'ValueError: odd data-focus tag.'}
                 }
-                $(titleEl).html(title).fadeIn( 1000 ).fadeOut(1000);
-            }
-            });
-        };
+
+                // action!
+                if (structure) {
+                    NGL.specialOps.load(structure).then(move);
+                } else {move();}
+        });
+};
 
 $(document).ready(function () {
     $('[data-toggle="protein"]').protein();
