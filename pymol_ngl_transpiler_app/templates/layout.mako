@@ -65,8 +65,20 @@ pre {
     max-width: 90vw; /* Max Width of the popover (depending on the container!) */
 }
 
-.protein-link {
-    color: purple;
+.protein {
+    width:100%;
+    height: 0;
+    padding-bottom: 100%;
+}
+
+.prolink {
+	color: mediumseagreen;
+}
+
+.prolink:hover {
+	color: seagreen;
+	cursor: pointer;
+	text-decoration: underline;
 }
 
     </style>
