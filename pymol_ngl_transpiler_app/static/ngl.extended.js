@@ -3,9 +3,11 @@
 * NGL.stageIds an object taht stores id: stages
 * NGL.getStage(id) is a getter for this.
 * NGL.specialOps
-** NGL.specialOps.show_domain(id, selection, color), which focuses stage to show the given selection with the given color
-** NGL.specialOps.show_residue(id, selection, color, radius), which focuses on the selection and their neighbourhood by n radius
-** NGL.specialOps.show_clash(id, selection, color, radius, tolerance) which shows the clashes that selection may have
+** NGL.specialOps.showDomain(id, selection, color, view), which focuses stage to show the given selection with the given color
+** NGL.specialOps.showResidue(id, selection, color, radius, view), which focuses on the selection and their neighbourhood by n radius
+** NGL.specialOps.showClash(id, selection, color, radius, tolerance, view) which shows the clashes that selection may have
+** NGL.specialOps.slowOrient deals with the view if provided for these previous three.
+** NGL.specialOps.showTitle(id,text) shows the title.
 ** NGL.specialOps.multiLoader(id, proteins, backgroundColor, startIndex), see below about proteins object
 ** NGL.specialOps.postInitialise() gets called by load if the stage was not set via multiLoader
 ** NGL.specialOps.load(option)
@@ -54,7 +56,15 @@ NGL.getStage = function (id) {
 
 NGL.specialOps = {'note': 'This is a monkeypatch to allow HTML control of the structure using the markup defined in ngl.matteoferla.com/markup'};
 
-NGL.specialOps.show_domain = function (id, selection, color) {
+NGL.specialOps.slowOrient = function (id, view) {
+    //wrapper for a string view.
+    NGL.getStage(id).getComponentByType('structure').autoView(2000); //zoom out.
+    if (typeof view !== 'string') {
+        NGL.getStage(id).animationControls.orient(view, 2000);
+    } else {NGL.getStage(id).animationControls.orient(JSON.parse(view), 2000);}
+};
+
+NGL.specialOps.showDomain = function (id, selection, color, view) {
         // Prepare
         NGL.specialOps.postInitialise(); //worst case schenario prevention.
         color = color || "green";
@@ -65,11 +75,14 @@ NGL.specialOps.show_domain = function (id, selection, color) {
         // Color in!
         var schemeId = NGL.ColormakerRegistry.addSelectionScheme([[color, selection],["white", "*"]]);
         protein.addRepresentation( "cartoon", {color: schemeId, smoothSheet: true});
+        if (!! view) {NGL.specialOps.slowOrient(id, view);}
+        else {
         protein.autoView(2000);
         protein.autoView(selection, 2000);
+        }
     };
 
-NGL.specialOps.show_residue = function (id, selection, color, radius) {
+NGL.specialOps.showResidue = function (id, selection, color, radius, view) {
         // Prepare
         NGL.specialOps.postInitialise(); //worst case schenario prevention.
         var protein = NGL.getStage(id).getComponentByType('structure');
@@ -93,16 +106,19 @@ NGL.specialOps.show_residue = function (id, selection, color, radius) {
         var atomSet2 = protein.structure.getAtomSetWithinGroup( atomSet );
         var licoriceRep = protein.addRepresentation( "licorice", { sele: atomSet2.toSeleString()} );
         var hyperRep = protein.addRepresentation( "hyperball", { sele: selection.toString(), color: schemeId} );
+        if (!! view) {NGL.specialOps.slowOrient(id, view);}
+        else {
         protein.autoView(2000);
         protein.autoView(atomSet2.toSeleString(), 2000);
+        }
     };
 
-NGL.specialOps.show_clash = function (id, selection, color, radius, tolerance) {
+NGL.specialOps.showClash = function (id, selection, color, radius, tolerance, view) {
     // Prepare
     NGL.specialOps.postInitialise(); //worst case schenario prevention.
     tolerance= tolerance || 1; //how much is the wiggle room. 0.2 &Aring; is probs good.
     radius = radius || 2;
-    NGL.specialOps.show_residue(id, selection, color, radius);
+    NGL.specialOps.showResidue(id, selection, color, radius, view);
     var protein = NGL.getStage(id).getComponentByType('structure');
     // Find what clashes...
     protein.structure.getView(new NGL.Selection(selection.toString())).eachAtom(function (atom) {
@@ -213,6 +229,19 @@ NGL.specialOps.load = function (option) {
     }
 };
 
+NGL.specialOps.showTitle = function (id, title) {
+    // shows a temporary title, which is actually a label element with a for attribute pointing to the viewport id.
+    // Consequently if one wanted to override it's location one could add <code>&lt;label for="viewport">&lt;/label></code> where desired.
+    if (title) {
+                    var titleEl = 'label[for="'+id+'"]';
+                    if (! $(titleEl).length) {
+                        $('#'+id).after('<label for="'+id+'" style="text-align: center; display: block;">TITLE</label>');
+                    }
+                    $(titleEl).html(title).fadeIn( 1000 ).fadeOut(1000);
+                }
+
+}
+
 NGL.specialOps.multiLoader = function (id, proteins, backgroundColor, startIndex) {
     /*
     Note that the multiloader does not support multiple viewports.
@@ -288,13 +317,8 @@ $.prototype.protein = function (){
                 var focus = $(this).data('focus') || 'domain'; // residue | domain | clash
 
                 // title.
-                if (title) {
-                    var titleEl = 'label[for="'+id+'"]';
-                    if (! $(titleEl).length) {
-                        $('#'+id).after('<label for="'+id+'" style="text-align: center; display: block;">TITLE</label>');
-                    }
-                    $(titleEl).html(title).fadeIn( 1000 ).fadeOut(1000);
-                }
+                NGL.specialOps.showTitle(id, title);
+
 
                 // prep the action
                 function move() {
@@ -308,24 +332,20 @@ $.prototype.protein = function (){
                         else {
                             NGL.getStage(id).getComponentByType('structure').autoView(2000);
                         }
-
-                    }
-                    else if (!! view) {
-                        //NGL.getStage(id).getComponentByType('structure').autoView(2000); //zoom out.
-                        if (typeof view !== 'string') {
-                            NGL.getStage(id).viewerControls.orient(view, 2000);
-                        } else {NGL.getStage(id).viewerControls.orient(JSON.parse(view));}
                     }
                     else if (focus === 'residue'){
-                        NGL.specialOps.show_residue(id, selection, color, radius);
+                        NGL.specialOps.showResidue(id, selection, color, radius, view);
                     }
                     else if (focus === 'domain' || focus === 'region'){
-                        NGL.specialOps.show_domain(id, selection, color);
+                        NGL.specialOps.showDomain(id, selection, color, view);
                     }
                     else if (focus === 'clash'){
-                        NGL.specialOps.show_clash(id, selection, color, radius, tolerance);
+                        NGL.specialOps.showClash(id, selection, color, radius, tolerance, view);
                     }
-                    else if (structure !== undefined) {}//pass
+                    else if (structure !== undefined) {}//change structure and nothing more.
+                    else if (!! view) {  //view, no selection.
+                        NGL.specialOps.slowOrient(id, view);
+                }
                     else {throw 'ValueError: odd data-focus tag.'}
                 }
 

@@ -38,11 +38,11 @@
                     </div>
                 </div>
                 %endfor
-                <div class="input-group">
+                <div class="input-group mb-2 mx-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text" >Orientation</span>
                   </div>
-                  <textarea class="form-control" aria-label="With textarea" placeholder="4x4 matrix or 16x1 array" id="markup_orient" style="font-size: 30%;"></textarea>
+                  <textarea class="form-control" aria-label="With textarea" rows="3" placeholder="4x4 matrix or 16x1 array" id="markup_orient" style="font-size: 80%;"></textarea>
                     <div class="input-group-append">
                     <button class="btn btn-info" id="markup_current">Get</button>
                   </div>

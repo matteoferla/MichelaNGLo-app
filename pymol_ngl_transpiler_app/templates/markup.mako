@@ -30,10 +30,12 @@
                 <p>This system to control the protein without any JS coding.</p>
                 <h3>Demo</h3>
                 <p><i class="far fa-hand-point-right"></i> This page is running on the <a href="static/ngl.extended.js">file ngl.extended.js</a></p>
-                <p>Let's look at the structure of GFP. Overall is <a href='#' data-toggle="protein" data-target="viewport" data-focus="domain" data-selection="11-228" data-color="lime">a &beta;-barrel</a>,
-                    but sports <a href='#' data-toggle="protein" data-target="#viewport" data-selection="54-82" data-color="purple">a loop that traverses the core</a>.</p>
-                <p>In this loop, there are <a href='#' data-toggle="protein" data-target="#viewport"  data-focus="residue" data-selection="65-67" data-radius="2">three residues, SYG,</a> that mature to form a chromophore.</p>
-                <p>Also, setting the tolerance to really low <a href='#' data-toggle="protein" data-target="#viewport"  data-focus="clash" data-selection="29" data-tolerance="0.1">we can see residues spuriously clashing</a>.  </p>
+                <p>Let's look at the structure of GFP. Overall is <span class="prolink" data-toggle="protein" data-target="viewport" data-focus="domain" data-selection="11-228" data-color="lime">a &beta;-barrel</span>,
+                    but sports <span class="prolink" data-toggle="protein" data-target="#viewport" data-selection="54-82" data-color="purple">a loop that traverses the core</span>.</p>
+                <p>In this loop, there are <span class="prolink" data-toggle="protein" data-target="#viewport"  data-focus="residue" data-selection="65-67" data-radius="2">three residues, SYG,</span> that mature to form a chromophore.</p>
+                <p>Also, setting the tolerance to really low <span class="prolink" data-toggle="protein" data-target="#viewport"  data-focus="clash" data-selection="29" data-tolerance="0.1">we can see residues spuriously clashing</span>.  </p>
+                <p>The camera can be set to <span class="prolink" href="#viewport" data-toggle="protein" data-view="[13.87245243079792,-18.27360233135557,63.99186261747443,0,-11.069766475366883,63.82311925112967,20.62517100777409,0,-65.62273457879594,-14.629178608334712,10.04847249632254,0,-0.7559999823570251,-65.44000244140625,5.427000045776367,1]" >predefined coordinates</span>.</p>
+                <p>This can be combined to allow <span class="prolink" data-toggle="protein" data-target="#viewport"  data-focus="residue" data-selection="65-67" data-radius="2" data-view="[21.083709695256083,3.2638383176464822,-24.800012660489337,0,-25.012283268399123,3.115199733699885,-20.8541914098467,0,0.28098794552718936,32.40152732655437,4.503127326542097,0,-11.023754117672173,-71.66366796614918,6.221244923015376,1]">selection of a given set of residues, such as the chromophore, but to manually fix an obstructed view</span></p>
                 <%include file='markup_builder_btn.mako'/>
             </div>
             <div class='col-12 col-sm-6'>
@@ -164,7 +166,7 @@ NGL.specialOps.multiLoader('viewport', [{type: 'rcsb', value: '1ubq', loadFx: ni
         $(document).ready(function () {
         // one way to init is:
         // NGL.specialOps.multiLoader('viewport', [{type: 'rcsb', value: '1ubq', loadFx: nice_ubi}], 'aquamarine')
-        // but let's say we don't want the multiloader... You will get a warning and all will work!
+        // but let's say we dovn't want the multiloader... You will get a warning and all will work!
         window.stage = new NGL.Stage( "viewport",{backgroundColor: "white"});
         NGL.stageIds['vieport'] = stage;
         stage.loadFile('static/gfp.pdb').then(function (component) {

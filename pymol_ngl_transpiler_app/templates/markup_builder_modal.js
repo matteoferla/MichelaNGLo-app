@@ -13,20 +13,21 @@ $('#markup_modal').on('shown.bs.modal', function (e) {
 
     //buttons.
     $('#markup_title').parent().show();
-    $('#markup_selection,#markup_color,#markup_radius,#markup_tolerance,#markup_orient').each(function () {$(this).parent().hide()});
+    $('#markup_selection,#markup_color,#markup_radius,#markup_tolerance').each(function () {$(this).parent().hide()});
     $('#markup_view_toggle label').click(function (){
         $('#markup_view_toggle label').each(function () {$(this).removeClass('btn-success').addClass('btn-secondary');});
         $(this).removeClass('btn-secondary').addClass('btn-success');
     });
     //make stuff toggle
     $('[name="markup_zoom"]').change(function () {
-        $('#markup_selection,#markup_color,#markup_radius,#markup_tolerance,#markup_orient').each(function () {
+        $('#markup_selection,#markup_color,#markup_radius,#markup_tolerance').each(function () {
             $(this).parent().hide();
             $(this).val('')});
-        if ($(this).attr('id') === 'domain') {$('#markup_selection,#markup_color').each(function () {$(this).parent().show()});}
-        else if ($(this).attr('id') === 'residue') {$('#markup_selection,#markup_color,#markup_radius').each(function () {$(this).parent().show()});}
-        else if ($(this).attr('id') === 'clash') {$('#markup_selection,#markup_color,#markup_radius,#markup_tolerance').each(function () {$(this).parent().show()});}
-        else if ($(this).attr('id') === 'orientation') {$('#markup_orient').each(function () {$(this).parent().show()});}
+            $('#markup_orient').attr('placeholder','optional 16x1 array');
+        if ($(this).attr('id') === 'domain') {$('#markup_selection,#markup_color,#markup_orient').each(function () {$(this).parent().show()});}
+        else if ($(this).attr('id') === 'residue') {$('#markup_selection,#markup_color,#markup_radius,#markup_orient').each(function () {$(this).parent().show()});}
+        else if ($(this).attr('id') === 'clash') {$('#markup_selection,#markup_color,#markup_radius,#markup_tolerance,#markup_orient').each(function () {$(this).parent().show()});}
+        else if ($(this).attr('id') === 'orientation') {$('#markup_orient').each(function () {$(this).parent().show()}); $('#markup_orient').attr('placeholder','16x1 array or the keywords "auto" or "reset"');}
         else {}
         //
     });
@@ -56,7 +57,7 @@ $('#markup_modal').on('shown.bs.modal', function (e) {
     }
     else {code = 'data-focus="'+mode+'"'}
     var id = '#viewport';
-    code = '<a href="'+id+'" '+code+' '+attributes+'>Try me</a>';
+    code = '<a href="'+id+'" data-toggle="protein" '+code+' '+attributes+'>Try me</a>';
     console.log(code);
 
     $('#results code').text(code);
