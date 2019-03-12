@@ -299,63 +299,85 @@ NGL.Stage.prototype.removeClashes = function () {
 
 ///////////////////////////// activate data-toggle='protein' ///////////////
 
+NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
+    //parse
+    var selection =$(prolink).data('selection'); //mandatory.
+    var color = $(prolink).data('color'); //optional settings in methods
+    var radius = $(prolink).data('radius');
+    var tolerance = $(prolink).data('tolerance');
+    var structure = $(prolink).data('load');
+    var view = $(prolink).data('view');
+    var id = 'viewport';
+    if ($(prolink).data('target')) {id = $(prolink).data('target').replace('#','')}
+    else if (!! $(prolink).attr('href') && !! $(prolink).attr('href').replace('#','')) { // # alone is not enough
+        id = $(prolink).attr('href');
+    }
+    var title = $(prolink).data('title');
+    var focus = $(prolink).data('focus') || 'domain'; // residue | domain | clash
+
+    // title.
+    NGL.specialOps.showTitle(id, title);
+
+    // prep the action
+    function move() {
+        if (view === 'auto') { //special view case.
+            NGL.getStage(id).autoView(2000);
+        }
+        else if (view === 'reset') { //special view case.
+            if (typeof myData.proteins[myData.current_index].loadFx === 'function') {
+                myData.proteins[myData.current_index].loadFx(NGL.getStage(id).getComponentByType('structure'));
+            }
+            else {
+                NGL.getStage(id).getComponentByType('structure').autoView(2000);
+            }
+        } else if ((!! view) && (! selection)) {  //view, no selection.
+            NGL.specialOps.slowOrient(id, view);
+        }
+        else if (focus === 'residue'){
+            NGL.specialOps.showResidue(id, selection, color, radius, view);
+        }
+        else if (focus === 'domain' || focus === 'region'){
+            NGL.specialOps.showDomain(id, selection, color, view);
+        }
+        else if (focus === 'clash'){
+            NGL.specialOps.showClash(id, selection, color, radius, tolerance, view);
+        }
+        else if (structure !== undefined) {}//change structure and nothing more.
+        else {throw 'ValueError: odd data-focus tag.'}
+    }
+
+    // action!
+    if (structure) {
+        NGL.specialOps.load(structure).then(move);
+    } else {move();}
+
+};
+
 $.prototype.protein = function (){
-            //parse
             $(this).click (function () {
-                var selection =$(this).data('selection'); //mandatory.
-                var color = $(this).data('color'); //optional settings in methods
-                var radius = $(this).data('radius');
-                var tolerance = $(this).data('tolerance');
-                var structure = $(this).data('load');
-                var view = $(this).data('view');
-                var id = 'viewport';
-                if ($(this).data('target')) {id = $(this).data('target').replace('#','')}
-                else if (!! $(this).attr('href') && !! $(this).attr('href').replace('#','')) { // # alone is not enough
-                    id = $(this).attr('href');
-                }
-                var title = $(this).data('title');
-                var focus = $(this).data('focus') || 'domain'; // residue | domain | clash
-
-                // title.
-                NGL.specialOps.showTitle(id, title);
-
-
-                // prep the action
-                function move() {
-                    if (view === 'auto') { //special view case.
-                        NGL.getStage(id).autoView(2000);
-                    }
-                    else if (view === 'reset') { //special view case.
-                        if (typeof myData.proteins[myData.current_index].loadFx === 'function') {
-                            myData.proteins[myData.current_index].loadFx(NGL.getStage(id).getComponentByType('structure'));
-                        }
-                        else {
-                            NGL.getStage(id).getComponentByType('structure').autoView(2000);
-                        }
-                    }
-                    else if (focus === 'residue'){
-                        NGL.specialOps.showResidue(id, selection, color, radius, view);
-                    }
-                    else if (focus === 'domain' || focus === 'region'){
-                        NGL.specialOps.showDomain(id, selection, color, view);
-                    }
-                    else if (focus === 'clash'){
-                        NGL.specialOps.showClash(id, selection, color, radius, tolerance, view);
-                    }
-                    else if (structure !== undefined) {}//change structure and nothing more.
-                    else if (!! view) {  //view, no selection.
-                        NGL.specialOps.slowOrient(id, view);
-                }
-                    else {throw 'ValueError: odd data-focus tag.'}
-                }
-
-                // action!
-                if (structure) {
-                    NGL.specialOps.load(structure).then(move);
-                } else {move();}
-        });
+                NGL.specialOps.prolink(this);
+            });
 };
 
 $(document).ready(function () {
+    //activate prolinks
     $('[data-toggle="protein"]').protein();
+    //activate viewport
+    $('[role="NGL"],[role="proteinViewport"],[role="proteinviewport"],[role="protein_viewport"]').each(function () {
+        // fix width:100%; height: 0; padding-bottom: 100%;
+        if (($(this).has('img').length === 0) && ($(this).height() === 0)) {
+            if ($(this).width() === 0) {$(this).css('width','100%');}
+            $(this).height($(this).width());
+            $(this).css('padding-bottom','100%');
+            console.log($(this).width());
+            console.log($(this).height());
+        }
+        var backgroudcolor = $(this).data('backgroudcolor') || 'white';
+        var data;
+        if ($(this).data('proteins')) { data = JSON.parse($(this).data('proteins'));
+        } else if ($(this).data('load')) { data = $(this).data('load').split(',').map(v => ({name: v, value: v, type: 'rcsb'}));
+        } else {data = [];}
+        NGL.specialOps.multiLoader($(this).attr('id'), data, backgroudcolor);
+        if ($(this).data('focus') || $(this).data('view')) {NGL.specialOps.prolink(this);}
+    });
 });

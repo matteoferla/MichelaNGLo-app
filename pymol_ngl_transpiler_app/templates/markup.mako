@@ -48,7 +48,16 @@
                 <p>Following Bootstrap, the most common CSS framework, several <code>data-*</code> attributes are proposed and implemented to control what is shown. If you are unfamilar with the terms "attribute" or "element" see <a href="#basics">basics</a>.</p>
     <p>The first link is: <code>&lt;a href='#viewport' data-toggle="protein" data-focus="domain" data-selection="11-228:A" data-color="lime" &gt;a &beta;-barrel&lt;/a&gt;</code>. Actually, it is <code>&lt;span class="prolink" data-target="viewport" &hellip;&gt;&lt;/span&gt;</code> in order to add custom CSS styling (green).</p>
     <p>The attribute <code>data-toggle="protein"</code> is what tells the browser that the link controls the protein (<a href="#row_toggle">see below for more</a>), <code>data-focus="domain"</code> tells it how to zoom (domain | residue | clash) to use, while <code>data-selection="11-228:A"</code> controls what to zoom into.</p>
-    <h4>List of attributes</h4>
+    <h4>Viewport</h4>
+    <p>There are three ways to declare the viewport.</p>
+    <ul class="fa-ul">
+        <li><span class="fa-li" ><i class="far fa-scroll-old"></i></span> <b>old way.</b> In JS you load it as the NGL suggests, but keeping the stage object globally declared as <code>stage</code>: <code>window.stage = new NGL.Stage( "viewport",{backgroundColor: "white"}); stage.loadFile('static/gfp.pdb')</code> &mdash; adding <code>stage</code> as a property of <code>window</code> (<i>i.e.</i><code>window.stage = &hellip;</code>) is the same as declaring without <code>var</code> (<i>i.e.</i><code>stage = &hellip;</code>; <i>cf.</i> <code>var stage = &hellip;</code>).</li>
+        <li><span class="fa-li" ><i class="far fa-scroll"></i></span> <b>Modded old way.</b> As above but you add your stage to the object <code>NGL.stageId</code> thusly <code>var id = "viewport"; NGL.stageIds[id] = new NGL.Stage( id,{backgroundColor: "white"}); NGL.stageIds[id].loadFile('static/gfp.pdb')</code></li>
+        <li><span class="fa-li" ><i class="far fa-bolt"></i></span> <b>MultiLoader way.</b> Using the <code>multiLoader</code> function described below (<code>NGL.specialOps.multiLoader('viewport', [{type: 'rcsb', value: '1ubq', loadFx: myFancyLoadFunction}], 'gainsboro')</code>), which allows <code>data-load</code> prolinks to toggle between multiple proteins (pdb strings, custom pdb files or RCSB pdb entries) each with an optional load function.</li>
+        <li><span class="fa-li" ><i class="far fa-robot"></i></span> <b>No JS way.</b> Using the attribute <code>role="NGL"</code> on the viewer div-element in combination with prolink <code>data-*</code> attributes, <i>e.g.</i> <code>&lt;div id="viewport" role="NGL" data-load="1ubq" data-focus="residue" data-selection="30:A" data-view="[&hellip;]"&gt;</code>. If multiple PDB proteins are required, use <code>data-proteins</code> as opposed to load where the value is a comma separated space free list of codes (not array), these can be accessed via <code>data-load=3</code> prolinks as usual (this is less clear than simply specifying prolinks with <code>data-load</code> with a file or PDB code, but has the sole benefit that, data-load='1ubq' will re-load the file even if 1ubq is loaded, while data-load=2 will not if the current index is 2, however in future unique names will be implemented to avoid this drama). Note that the height issue is sorted and that it can be combined like everything else with click-to-enable-NGL images.</li>
+    </ul>
+
+    <h4>List of attributes for prolinks</h4>
     <table class="table table-striped">
         <thead>
         <tr>
@@ -113,7 +122,7 @@
             <td><code>data-view</code></td>
             <td>&mdash;</td>
             <td></td>
-            <td>accepts three possible values, one of these is an orientation matrix as begot from <code>stage.viewerControls.getOrientation()</code>. Do note that the orientation matrix view transition is instantaneous unfortunately.</td>
+            <td>accepts three possible values, one of these is an orientation matrix as begot from <code>stage.viewerControls.getOrientation()</code>. The 16-dimension vector can be used to manually correct residue selections (data-focus) by using both.</td>
         </tr>
         <tr>
             <td colspan="2"><code>data-view='auto'</code></td>
