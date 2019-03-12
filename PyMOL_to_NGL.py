@@ -408,25 +408,27 @@ class PyMolTranspiler:
     def parse_ss(self, data, **settings):
         def _deal_with():
             if ss_last == 'H':  # previous was the other type
-                self.ss.append('{typos}    {ss_count: >3}HA {resn_start} A  {resi_start: >3}  {resn_end} A  {resi_end: >3} {h_class: >2}                                  {length: >2}'.format(
+                self.ss.append('{typos}    {ss_count: >3}HA {resn_start} {chain}  {resi_start: >3}  {resn_end} {chain}  {resi_end: >3} {h_class: >2}                                  {length: >2}'.format(
                     typos='HELIX',
                     ss_count=ss_count[ss_last],
                     resn_start=resn_start,
                     resi_start=resi_start,
                     resn_end=resn_last,
                     resi_end=resi_last,
+                    chain=chain,
                     h_class=1,
                     length=int(resi_last) - int(resi_start)
                 ))
                 ss_count[ss_last] += 1
             elif ss_last == 'S':  # previous was the other type
-                self.ss.append('{typos}  {ss_count: >3} {ss_count: >2}S 1 {resn_start} A {resi_start: >3}  {resn_end} A {resi_end: >3}  0'.format(
+                self.ss.append('{typos}  {ss_count: >3} {ss_count: >2}S 1 {resn_start} {chain} {resi_start: >3}  {resn_end} {chain} {resi_end: >3}  0'.format(
                     typos='SHEET',
                     ss_count=ss_count[ss_last],
                     resn_start=resn_start,
                     resi_start=resi_start,
                     resn_end=resn_last,
                     resi_end=resi_last,
+                    chain=chain,
                     h_class=0,
                     length=int(resi_last) - int(resi_start)
                 ))
@@ -438,9 +440,10 @@ class PyMolTranspiler:
         resi_last = '0'
         resn_last = 'XXX'
         ss_count = {'H': 1, 'S': 1, 'L': 0}
+        chain = 'X'
         for line in data:  # ss_list:
             if line['name'] == 'CA':
-                (resi_this, ss_this, resn_this) = (line['resi'], line['ss'], line['resn'])
+                (resi_this, ss_this, resn_this, chain) = (line['resi'], line['ss'], line['resn'], line['chain'])
                 if ss_last != ss_this:
                     # deal with previous first
                     _deal_with()
