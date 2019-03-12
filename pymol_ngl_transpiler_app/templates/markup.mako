@@ -156,8 +156,14 @@ NGL.specialOps.multiLoader('viewport', [{type: 'rcsb', value: '1ubq', loadFx: ni
         </code></pre>
     <p>The <code>data-load</code> can load proteins from the myData.proteins (and run the custom function LoadFx) if an index is provided.</p>
     <h3 id="note">Note</h3>
-                <p>There are three-plus underlying functions. They are in the file: <a href="static/ngl.extended.js">file ngl.extended.js</a>, which requires JQuery.</p>
-            <p>One issue is holding onto the stage object in JS. Therefore the stage is added as follows: <code>NGL.stageIds['viewport'] = new Stage( ...</code>. However, a better feature is using the <code>NGL.specialOps.multiLoad</code>, which handles it.</p>
+                <p>There are a bunch of underlying functions. They are in the file: <a href="static/ngl.extended.js">file ngl.extended.js</a>, which requires JQuery and NGL, which works as usual*. So at the end of your documents you should have:</p>
+                <pre><code>
+&lt;script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"&gt;&lt;/script&gt;
+&lt;script src="https://unpkg.com/ngl@2.0.0-dev.34/dist/ngl.js" type="text/javascript"&gt;&lt;/script&gt;
+&lt;script src="https://www.matteoferla.com/ngl.extended.js" type="text/javascript"&gt;&lt;/script&gt;
+                </code></pre>
+    <p>There is no official CDN for <code>ngl.extended.js</code>, but if you are checking this out, you can sneakily use the last address, but please do not use it in production.</p>
+            <p>&lowast;One issue is holding onto the stage object in JS. Therefore the stage is added as follows: <code>NGL.stageIds['viewport'] = new Stage( ...</code>. However, a better feature is using the <code>NGL.specialOps.multiLoad</code>, which handles it.</p>
 
                 <h3 id="basics">Basic terms</h3>
                 <p>A HTML page is formed by various elements with the following syntax: <code>&lt;ELEMENT attribute="value"&gt; text &lt;/ELEMENT&gt;</code>.
