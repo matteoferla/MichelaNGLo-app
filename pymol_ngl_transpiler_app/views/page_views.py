@@ -16,6 +16,7 @@ else:
 @view_config(route_name='home', renderer="../templates/main.mako")
 @view_config(route_name='docs', renderer="../templates/docs.mako")
 @view_config(route_name='sandbox', renderer="../templates/sandbox.mako")
+@view_config(route_name='imagetoggle', renderer="../templates/image.mako")
 def my_view(request):
     return {'project': 'PyMOL_NGL_transpiler_app'}
 
