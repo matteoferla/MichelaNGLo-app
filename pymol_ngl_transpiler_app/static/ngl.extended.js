@@ -35,6 +35,9 @@ NGL.getStage = function (id) {
         if (id in NGL.stageIds) {
             return NGL.stageIds[id];
         }
+        else if ($('#'+id + ' img').length !== 0) {
+            if (NGL.Debug) {console.log('You have not activated the stage yet!');}
+            NGL.specialOps.load(0);}
         else if (window.stage !== undefined) {
             if (NGL.Debug) {console.log('No stored stage in .stageIds, but there is a window.stage...');}
             return window.stage;
@@ -65,6 +68,7 @@ NGL.specialOps.slowOrient = function (id, view) {
 };
 
 NGL.specialOps.showDomain = function (id, selection, color, view) {
+        if (NGL.debug) {console.log('Show domain '+selection)}
         // Prepare
         NGL.specialOps.postInitialise(); //worst case schenario prevention.
         color = color || "green";
@@ -83,6 +87,7 @@ NGL.specialOps.showDomain = function (id, selection, color, view) {
     };
 
 NGL.specialOps.showResidue = function (id, selection, color, radius, view) {
+        if (NGL.debug) {console.log('Show residues '+selection)}
         // Prepare
         NGL.specialOps.postInitialise(); //worst case schenario prevention.
         var protein = NGL.getStage(id).getComponentByType('structure');
@@ -157,8 +162,7 @@ NGL.specialOps.removeImg = function () {
 		var w=$(img).width();
 		var h=$(img).height();
 		$(img).detach();
-		$(img).detach();
-		$(img).css('width',w).css('height',h);
+		$('#'+myData.id).css('width',w).css('height',h);
     }
 };
 
@@ -194,7 +198,7 @@ NGL.specialOps.load = function (option) {
     if ( (index === myData.current_index)) {
         var protein = NGL.stageIds[myData.id].getComponentByType('structure');
         //if (typeof myData.proteins[index].loadFx === 'function') {myData.proteins[index].loadFx(protein)};
-        return protein
+        return new Promise(function(resolve, reject) {resolve(protein);});
     }
     else {myData.current_index = index}
     // deal with image.
@@ -240,7 +244,7 @@ NGL.specialOps.showTitle = function (id, title) {
                     $(titleEl).html(title).fadeIn( 1000 ).fadeOut(1000);
                 }
 
-}
+};
 
 NGL.specialOps.multiLoader = function (id, proteins, backgroundColor, startIndex) {
     /*
@@ -378,6 +382,11 @@ $(document).ready(function () {
         } else if ($(this).data('load')) { data = $(this).data('load').split(',').map(v => ({name: v, value: v, type: 'rcsb'}));
         } else {data = [];}
         NGL.specialOps.multiLoader($(this).attr('id'), data, backgroudcolor);
-        if ($(this).data('focus') || $(this).data('view')) {NGL.specialOps.prolink(this);}
+        if ($(this).data('focus') || $(this).data('view')) {
+            if ($(this).has('img').length !== 0) {
+                $(this).children('img').on("click", e => setTimeout(() => NGL.specialOps.prolink(this), 500));
+            }
+            else {NGL.specialOps.prolink(this);}
+            }
     });
 });

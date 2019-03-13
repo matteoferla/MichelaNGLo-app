@@ -9,7 +9,8 @@
 
 window.tour = new Tour({
       backdrop: true,
-      steps: [
+    framework: "bootstrap4",
+    steps: [
       {
         element: "h1",
         title: "Aim",

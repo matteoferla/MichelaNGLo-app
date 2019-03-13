@@ -11,6 +11,7 @@
                           <a role="button" class="btn btn-outline-secondary mx-1"  href="https://github.com/matteoferla/PyMOL-to-NGL-transpiler" title="Github repo">   <i class="fab fa-github"></i></a>
                           <a role="button" class="btn btn-outline-secondary mx-1"  href="/clash" title="clash documentation">                                           <i class="far fa-car-crash"></i></a>
                           <a role="button" class="btn btn-outline-secondary mx-1"  href="/markup" title="markup documentation">                                         <i class="far fa-map-marked-alt"></i></a>
+                          <a role="button" class="btn btn-outline-secondary mx-1"  href="/imagetoggle" title="image documentation">                                     <i class="far fa-images"></i>
                           <a role="button" class="btn btn-outline-secondary mx-1"  href="/custom" title="custom mesh converter">                                        <i class="far fa-mortar-pestle"></i></a>
                           <a role="button" class="btn btn-outline-secondary mx-1"  href="/docs" title="help">                                                           <i class="far fa-books"></i></a>
                          '>
