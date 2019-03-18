@@ -6,10 +6,15 @@
 </%doc>
 */
 
-
 window.tour = new Tour({
-      backdrop: true,
     framework: "bootstrap4",
+    debug: false,
+    showProgressBar: false,
+    showProgressText: false,
+    backdrop: true,
+    storage: window.sessionStorage,
+    template: '<div class="popover" role="tooltip"> <div class="arrow"></div> <h3 class="popover-header"></h3> <div class="popover-body"></div> <div class="popover-navigation"> <div class="btn-group"> <button class="btn btn-sm btn-outline-primary" data-role="prev">&laquo; Prev</button> <button class="btn btn-sm btn-primary" data-role="next">Next &raquo;</button> <button class="btn btn-sm btn-outline-primary" data-role="pause-resume" data-pause-text="Pause" data-resume-text="Resume">Pause</button> </div> <button class="btn btn-sm btn-outline-warning" data-role="end">End tour</button> </div> </div>',
+
     steps: [
       {
         element: "h1",
@@ -91,11 +96,7 @@ window.tour = new Tour({
       }
 ]});
 
-tour.init();
-$('.card-title .fa-question').click(function () {
-    // Initialize the tour
-
-    // Start the tour
-    if (tour.ended()) {tour.goTo(0);}
-    tour.start(true);
+$('#tour').click(function () {
+    if (tour.ended()) {tour.restart();}
+    else {tour.start()}
 });

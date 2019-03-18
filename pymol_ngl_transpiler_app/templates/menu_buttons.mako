@@ -18,7 +18,7 @@
                          '>
         <i class="far fa-bars"></i></button>
     % if tour:
-        <button type="button" class="btn btn-outline-secondary my-1" title="Guided tour of the site"><i class="far fa-question"></i></button>
+        <button type="button" class="btn btn-outline-secondary my-1" title="Guided tour of the site" data-toggle="tooltip" id="tour"><i class="far fa-question"></i></button>
     % endif
 
 </div>

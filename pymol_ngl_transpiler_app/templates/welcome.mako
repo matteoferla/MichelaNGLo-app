@@ -27,7 +27,7 @@
 
 <%block name="body">
     <div class="row">
-        <div class='col-12 col-sm-8'>
+        <div class='col-12 col-sm-8 col-xl-9'>
             ### Mission
             <div class="row">
                 <div class="col-4 text-right"  style="margin: auto;">
@@ -55,7 +55,7 @@
 
         </div>
 
-        <div class='col-12 col-sm-4'>
+        <div class='col-12 col-sm-4 col-xl-3'>
             <div id="viewport" style="width:100%; height: 0; padding-bottom: 100%;"></div>
         </div>
 
@@ -89,12 +89,28 @@
             <div class="row">
                 <div class="col-10">
                     <div class="mb-2 p-3 border border-dark rounded-lg border-top-0 border-bottom-0 text-muted">
-                <p>The source code is available at <a href="https://github.com/matteoferla/MichelaNGLo" target="_blank">github.com/matteoferla/MichelaNGLo <i class="far fa-external-link"></i></a>.</p>
+                <p>The source code for this server is available at <a href="https://github.com/matteoferla/MichelaNGLo" target="_blank">github.com/matteoferla/MichelaNGLo <i class="far fa-external-link"></i></a>. The JS file to extend NGL can be found <a href="https://raw.githubusercontent.com/matteoferla/MichelaNGLo/master/pymol_ngl_transpiler_app/static/ngl.extended.js" target="_blank">here <i class="far fa-external-link"></i></a>.</p>
             </div>
                 </div>
 
                 <div class="col-2 text-left"  style="margin: auto;">
                     <h4><i class="fab fa-github"></i> Github</h4>
+                </div>
+
+                <div class="col-2 text-right"  style="margin: auto;">
+                    <h4><i class="far fa-books"></i> Citation</h4>
+                </div>
+            <div class="col-10">
+                    <div class="mb-2 p-3 border border-dark rounded-lg border-top-0 border-bottom-0 text-muted">
+                <p>Please cite:
+                    <ul>
+                        <li>Manuscript not remotely in preparation.</li>
+                        <li>
+                            <a href="https://dx.doi.org/10.1093/bioinformatics/bty419" target="_blank">AS Rose, AR Bradley, Y Valasatava, JM Duarte, A Prlić and PW Rose. NGL viewer: web-based molecular graphics for large complexes. Bioinformatics: bty419, 2018.</a>
+                    </li>
+                    </ul>
+                        </p>
+            </div>
                 </div>
             </div>
 
