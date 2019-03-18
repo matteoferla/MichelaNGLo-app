@@ -23,6 +23,7 @@
     </div>
 </%block>
 
+<%block name="body">
 <div class='row'>
             <div class='col-12 col-sm-6'>
 
@@ -43,7 +44,6 @@
             <div class='col-12 col-sm-6'>
 			<div id="viewport" style="width:100%; height: 0; padding-bottom: 100%;"></div>
 		</div>
-        </div>
 <div class="col-12">
 
                 <h3>Markup</h3>
@@ -173,6 +173,8 @@ NGL.specialOps.multiLoader('viewport', [{type: 'rcsb', value: '1ubq', loadFx: ni
                 <p>A special convention exist to store custom data in <code>data-*</code> attributes. For example, <code>&lt;span id='blaId' data-hello='world'&gt;bla bla&lt;span&gt;</code> appears simply as "bla bla" in the browser, but the JS can access this data, e.g. using JQuery <code>$('#blaId').data('hello')</code> one gets <code>world</code> back.</p>
 
         </div>
+        </div>
+</%block>
 
 <%block name='modals'>
 <%include file='markup_builder_modal.mako'/>
