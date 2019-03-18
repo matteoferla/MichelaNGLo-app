@@ -44,28 +44,7 @@
                           </label>
                           <label class="btn btn-secondary">
                             <input type="radio" name="centroid" id="centroid_custom" value="custom" autocomplete="off">
-                              <span id="centroid_custom_pop"
-                                    title="Custom coordinates <small>(don't close)</small>"
-                                    data-container="body"
-                                    data-toggle="popover"
-                                    data-trigger="click"
-                                    data-position="top"
-                                    data-html="true"
-                                    data-content='
-                                        <div class="row">
-                                        % for axis in ('x','y','z'):
-                                           <div class="col-lg-4">
-                                                <div class="input-group m-1">
-                                                  <div class="input-group-prepend">
-                                                    <span class="input-group-text" id="${axis}-addon">${axis}</span>
-                                                  </div>
-                                                  <input type="number" class="form-control" value=0 aria-label="${axis}" aria-describedby="${axis}-addon" id="${axis}">
-                                                </div>
-                                            </div>
-                                        % endfor
-                                        </div>
-                                            '>Custom
-                              </span>
+                              Custom
                           </label>
                         </div>
                         </div>
@@ -81,6 +60,20 @@
                 <span class="input-group-text" id="scale-addon1">&Aring;</span>
               </div>
             </div>
+            </div>
+            <div class="col-lg-6 mb-3 border rounded collapse" id="centroid_custom_xyz">
+                <div class="row">
+                % for axis in ('x','y','z'):
+                   <div class="col-12 col-xl-4">
+                        <div class="input-group m-1">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text" id="${axis}-addon">${axis}</span>
+                          </div>
+                          <input type="number" class="form-control" value=0 aria-label="${axis}" aria-describedby="${axis}-addon" id="${axis}">
+                        </div>
+                    </div>
+                % endfor
+                </div>
             </div>
 
         </div>
@@ -167,6 +160,15 @@ $('.demo-obj').click(function () {
     $('#demo_modal').modal('hide');
     $('#obj_string').prop('checked',true);
     $('#obj_string').trigger('change');
+});
+
+$('[name="centroid"]').change(function () {
+    console.log($(this).val());
+    if ($(this).val() === 'custom') {
+        $('#centroid_custom_xyz').collapse('show');
+    } else {
+        $('#centroid_custom_xyz').collapse('hide');
+    }
 });
 
 //////////////////////////////////////////////////////////////////////////
