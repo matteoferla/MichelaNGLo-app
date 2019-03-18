@@ -33,9 +33,11 @@
                 <p>Let's look at the structure of GFP. Overall is <span class="prolink" data-toggle="protein" data-target="viewport" data-focus="domain" data-selection="11-228" data-color="lime">a &beta;-barrel</span>,
                     but sports <span class="prolink" data-toggle="protein" data-target="#viewport" data-selection="54-82" data-color="purple">a loop that traverses the core</span>.</p>
                 <p>In this loop, there are <span class="prolink" data-toggle="protein" data-target="#viewport"  data-focus="residue" data-selection="65-67" data-radius="2">three residues, SYG,</span> that mature to form a chromophore.</p>
-                <p>Also, setting the tolerance to really low <span class="prolink" data-toggle="protein" data-target="#viewport"  data-focus="clash" data-selection="29" data-tolerance="0.1">we can see residues spuriously clashing</span>.  </p>
                 <p>The camera can be set to <span class="prolink" href="#viewport" data-toggle="protein" data-view="[13.87245243079792,-18.27360233135557,63.99186261747443,0,-11.069766475366883,63.82311925112967,20.62517100777409,0,-65.62273457879594,-14.629178608334712,10.04847249632254,0,-0.7559999823570251,-65.44000244140625,5.427000045776367,1]" >predefined coordinates</span>.</p>
                 <p>This can be combined to allow <span class="prolink" data-toggle="protein" data-target="#viewport"  data-focus="residue" data-selection="65-67" data-radius="2" data-view="[21.083709695256083,3.2638383176464822,-24.800012660489337,0,-25.012283268399123,3.115199733699885,-20.8541914098467,0,0.28098794552718936,32.40152732655437,4.503127326542097,0,-11.023754117672173,-71.66366796614918,6.221244923015376,1]">selection of a given set of residues, such as the chromophore, but to manually fix an obstructed view</span></p>
+                <p>Also, setting the tolerance to really low <span class="prolink" data-toggle="protein" data-target="#viewport"  data-focus="clash" data-selection="29" data-tolerance="0.1">we can see residues spuriously clashing</span>.  </p>
+                <p>Let's look at <span class="prolink" data-toggle="protein" data-target="viewport" data-focus="surface" data-title="surface">the surface</span>.</p>
+                <p>Also, the B-factors can be seen in tube <span class="prolink" data-toggle="protein" data-target="viewport" data-focus="blur" data-title="B-factors">B-factors</span>.</p>
                 <%include file='markup_builder_btn.mako'/>
             </div>
             <div class='col-12 col-sm-6'>
@@ -47,7 +49,7 @@
                 <h3>Markup</h3>
                 <p>Following Bootstrap, the most common CSS framework, several <code>data-*</code> attributes are proposed and implemented to control what is shown. If you are unfamilar with the terms "attribute" or "element" see <a href="#basics">basics</a>.</p>
     <p>The first link is: <code>&lt;a href='#viewport' data-toggle="protein" data-focus="domain" data-selection="11-228:A" data-color="lime" &gt;a &beta;-barrel&lt;/a&gt;</code>. Actually, it is <code>&lt;span class="prolink" data-target="viewport" &hellip;&gt;&lt;/span&gt;</code> in order to add custom CSS styling (green).</p>
-    <p>The attribute <code>data-toggle="protein"</code> is what tells the browser that the link controls the protein (<a href="#row_toggle">see below for more</a>), <code>data-focus="domain"</code> tells it how to zoom (domain | residue | clash) to use, while <code>data-selection="11-228:A"</code> controls what to zoom into.</p>
+    <p>The attribute <code>data-toggle="protein"</code> is what tells the browser that the link controls the protein (<a href="#row_toggle">see below for more</a>), <code>data-focus="domain"</code> tells it how to zoom (domain | residue | clash | surface) to use, while <code>data-selection="11-228:A"</code> controls what to zoom into.</p>
     <h4>Viewport</h4>
     <p>There are three ways to declare the viewport.</p>
     <ul class="fa-ul">
@@ -80,7 +82,7 @@
             <td><code>data-focus</code></td>
             <td><code>domain</code></td>
             <td>&mdash;</td>
-            <td>To control whether to focus on a large region/domain, on a few residues and their neighbourhood, or on a clash. the attribute <code>data-focus</code> can be used with the choice of terms <code>'domain'</code>, <code>'residue'</code> or <code>'domain'</code> respectively.</td>
+            <td>To control whether to focus on a large region/domain, on a few residues and their neighbourhood, surface, blur-factor or on a clash. the attribute <code>data-focus</code> can be used with the choice of terms <code>'domain'</code> (or <code>'region'</code>), <code>'residue'</code>, <code>'clash'</code>, <code>'bfactor'</code> (or <code>'blur'</code>) or <code>'surface'</code> respectively.</td>
         </tr>
         <tr id="row_selection">
             <td><code>data-selection</code></td>
@@ -91,11 +93,11 @@
         <tr id="row_color">
             <td><code>data-color</code></td>
             <td><code>'green'</code> (focus: domain) | <code>'hotpink'</code> (focus: residue)</td>
-            <td><code>data-focus</code></td>
-            <td>To specify a colour, add the attribute <code>data-color="HTML_color"</code> where "HTML_color" is a valid html colour name or hex code.</td>
+            <td><code>data-focus</code> (except <code>="surface"</code>)</td>
+            <td>To specify a colour, add the attribute <code>data-color="HTML_color"</code> where "HTML_color" is a valid html colour name or hex code. In the case of <code>data-focus="blur"</code>, both <code>data-selection</code> and <code>data-color</code>, if present, control the residues to show.</td>
         </tr>
         <tr id="row_radius">
-            <td><code>data-radius="N"</code></td>
+            <td><code>data-radius</code></td>
             <td><code>'5'</code> (Å)</td>
             <td><code>data-focus='residue'</code> and <code>data-focus='clash'</code></td>
             <td>Used to specify how many &Aring;mstrongs to expand around in residue zooming mode.</td>

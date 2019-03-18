@@ -95,7 +95,7 @@ NGL.specialOps.showResidue = function (id, selection, color, radius, view) {
         radius = radius || 4;
         //selection = typeof selection === "string" ? new NGL.Selection(selection) : selection;
         // Remove all bar cartoon-like representation
-        ['ball+stick', 'contact', 'hyperball', 'licorice','line', 'point','spacefill'].map(function (value) {
+        ['ball+stick', 'contact', 'hyperball', 'licorice','line', 'point','spacefill', 'surface'].map(function (value) {
             protein.stage.getRepresentationsByName(value).forEach(function (o) {
                 protein.removeRepresentation(o);
             }); //.forEach representation
@@ -111,6 +111,12 @@ NGL.specialOps.showResidue = function (id, selection, color, radius, view) {
         var atomSet2 = protein.structure.getAtomSetWithinGroup( atomSet );
         var licoriceRep = protein.addRepresentation( "licorice", { sele: atomSet2.toSeleString()} );
         var hyperRep = protein.addRepresentation( "hyperball", { sele: selection.toString(), color: schemeId} );
+        protein.addRepresentation("contact", {
+            masterModelIndex: 0,
+            weakHydrogenBond: true,
+            maxHbondDonPlaneAngle: 35,
+            sele: atomSet2.toSeleString()
+          });
         if (!! view) {NGL.specialOps.slowOrient(id, view);}
         else {
         protein.autoView(2000);
@@ -154,6 +160,44 @@ NGL.specialOps.showClash = function (id, selection, color, radius, tolerance, vi
             } //end if
         }); //end neigh atom
     }); //end this atom
+};
+
+NGL.specialOps.showSurface = function (id,selection, view) {
+    if (NGL.debug) {console.log('Show surface '+selection)}
+    // Prepare
+    NGL.specialOps.postInitialise(); //worst case schenario prevention.
+    selection = selection || "polymer";
+    var color = 'electrostatic'; //not changeable for now.
+    var protein = NGL.getStage(id).getComponentByType('structure');
+    protein.addRepresentation("surface", { sele: selection, colorScheme: color, colorDomain: [ -0.3, 0.3 ], surfaceType: "av"});
+    if (!! view) {NGL.specialOps.slowOrient(id, view);}
+        else {
+        protein.autoView(2000);
+        protein.autoView(selection, 2000);
+        }
+};
+
+NGL.specialOps.showBlur = function (id,selection, color, radius, view) {
+    if (NGL.debug) {console.log('Show surface '+selection)}
+    // Prepare
+    NGL.specialOps.postInitialise(); //worst case schenario prevention.
+    var protein = NGL.getStage(id).getComponentByType('structure');
+    NGL.getStage(id).removeClashes();
+    protein.removeAllRepresentations();
+  protein.addRepresentation("tube", {
+    sele: "polymer",
+    radiusType: "bfactor",
+    radiusScale: 0.010,
+    color: "bfactor",
+    colorScale: "RdYlBu"
+  });
+  if (selection) {
+      NGL.specialOps.showResidue(id,selection,color,radius,view);
+  }
+  else if (!! view) {NGL.specialOps.slowOrient(id, view);}
+        else {
+        protein.autoView(2000);
+        }
 };
 
 NGL.specialOps.removeImg = function () {
@@ -345,6 +389,12 @@ NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
         }
         else if (focus === 'clash'){
             NGL.specialOps.showClash(id, selection, color, radius, tolerance, view);
+        }
+        else if (focus === 'surface'){
+            NGL.specialOps.showSurface(id, selection, view);
+        }
+        else if ((focus === 'blur') || (focus === 'bfactor')) {
+            NGL.specialOps.showBlur(id,selection, color, radius, view);
         }
         else if (structure !== undefined) {}//change structure and nothing more.
         else {throw 'ValueError: odd data-focus tag.'}
