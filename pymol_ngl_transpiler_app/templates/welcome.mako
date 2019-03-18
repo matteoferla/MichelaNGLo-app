@@ -35,7 +35,7 @@
                 </div>
                 <div class="col-8">
                     <div class="mb-2 p-3 border border-dark rounded-lg border-top-0 border-bottom-0 text-muted">
-                <p>Our aim is to help create NGL views for academic websites, blog posts and supplementary materials for papers with extra functionality such as <span class="prolink" data-toggle="protein" data-target="viewport" data-view="[-18.368176150507537, 74.81398271773811, 53.85689065075363, 0, 2.24223533030926, 55.26199556901072, -76.00112369042608, 0, -92.15567840009014, -13.567107701862422, -12.583763466412949, 0, -12.895500659942627, -26.876500129699707, -2.82450008392334, 1]">guiding the viewers attention</span>.</p>
+                <p>Our aim is to help create NGL views for academic websites, blog posts and supplementary materials for papers with extra functionality such as <span class="prolink" data-toggle="protein" data-title="tada!" data-target="viewport" data-view="[-18.368176150507537, 74.81398271773811, 53.85689065075363, 0, 2.24223533030926, 55.26199556901072, -76.00112369042608, 0, -92.15567840009014, -13.567107701862422, -12.583763466412949, 0, -12.895500659942627, -26.876500129699707, -2.82450008392334, 1]">guiding the viewers attention</span>.</p>
             </div>
                 </div>
             </div>
@@ -113,6 +113,7 @@
 	            protein.addRepresentation( "cartoon", {color: schemeId });
                 var view=[64.19461657851211, 34.58837775693359, -59.31089193592322, 0, 39.37499797163815, 47.972028636740525, 70.59306324960345, 0, 56.24719826644338, -73.0576154030002, 18.27359008394372, 0, -12.895500659942627, -26.876500129699707, -2.82450008392334, 1];
                 protein.stage.animationControls.orient(view, 2000);
+                NGL.specialOps.showTitle('viewport','Please interact with me')
             }
 
             NGL.specialOps.multiLoader('viewport', [{type: 'file', value: 'static/Sal_HisA.pdb', loadFx: pretty_hisA}], 'white')
