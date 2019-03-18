@@ -14,7 +14,7 @@
 <%block name="body">
 <ul class="list-group list-group-flush">
             <li class="list-group-item">
-                <p class="card-text">Please see <a href="https://github.com/matteoferla/PyMOL-to-NGL-transpiler/blob/master/README.md">the Github readme</a> for documentation.</p>
+                <p class="card-text">Please see <a href="https://github.com/matteoferla/PyMOL-to-NGL-transpiler/blob/master/README.md">the Github readme <i class="fas fa-external-link"></i></a> for documentation about how the conversions are done.</p>
                 <form>
                 <!-- mode selector -->
                 <div class="row">
@@ -220,8 +220,8 @@
                             </div>
                         </div>-->
                     </div>
-                    <h3>Technical</h3>
-                    <div class="row"  id="technical_div">
+                    <h3 data-toggle="collapse" data-target="#technical_div .collapse, #technical_div+.collapse" id="technical_div">Technical <i class="far fa-angle-double-down collapse show"></i><i class="far fa-angle-double-up collapse"></i></h3>
+                    <div class="row collapse">
                         <div class="col-xl-4 col-md-6 pb-4">
                                 <div class="input-group mb-3" data-toggle="tooltip"
                                      title="the id of the div that will contain the viewport">

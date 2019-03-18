@@ -486,7 +486,7 @@ class PyMolTranspiler:
         return self
 
     def get_js(self, **settings):
-        code=Template(filename=os.path.join('pymol_ngl_transpiler_app', 'templates', 'output.js.mako'))\
+        code=Template(filename=os.path.join('output_templates', 'output.js.mako'))\
             .render_unicode(structure=self, **settings)
         self.code=code
         return code

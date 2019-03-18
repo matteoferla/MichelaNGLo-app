@@ -77,15 +77,19 @@ Here is a rather funny view in PyMOL and the equivalent snapshot transpiled to N
 ## Where
 The script output a secret temporary page that can be shared, but also a block of code that can be used by the user on their sites.       
 About the latter usage, to use the output code one needs access to the raw HTML. Not necessarily of the whole page as only a small part is fine. For example:
+
 <img src="images/WYSIWYG_editor.png" width="200">
 <img src="images/raw_editor.png" width="200">
+
 In the first case, the HTML code is hidden as one sees what one gets as an end result. In the second case, the HTML code is visible: words between tags such as &lt;b&gt; are not styled. In most cases JS can be added here.
 </div>
 
 ## data-toggle='protein'
 Extra functionality can be optionally added, including the ability to create links that control the protein.
 
-Namely, `<a href='#viewport'>you see this text as a link</a>` is technically called an anchor element and is commonly called a link.
+The full documentation and examples can be found at [ngl.matteoferla.com/markup](https://ngl.matteoferla.com/markup).
+
+Briefly, `<a href='#viewport'>you see this text as a link</a>` is technically called an anchor element and is commonly called a link.
 Like all HTML elements, everything with the within the lesser-than and greater-than symbols controls its behaviour.
 The `href` attribute () tells the browser where to point, either to another page or to an element within the page &mdash;the hash symbol means the elements `id` attribute, its unique name.
 Following JQuery and Bootstrap behaviour, if a `data-toggle='protein'` is added the code will know to change the protein depending on the other tags.

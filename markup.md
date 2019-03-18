@@ -8,6 +8,8 @@ See [ngl.matteoferla.com/markup](ngl.matteoferla.com/markup) for description and
 * NGL.specialOps
 ** NGL.specialOps.showDomain(id, selection, color, view), which focuses stage to show the given selection with the given color
 ** NGL.specialOps.showResidue(id, selection, color, radius, view), which focuses on the selection and their neighbourhood by n radius
+** NGL.specialOps.showBlur(id, selection, color, radius, view), which shows the b-factor putty. With optional residue selection
+** NGL.specialOps.showSurface(id, selection, view), shows the surface
 ** NGL.specialOps.showClash(id, selection, color, radius, tolerance, view) which shows the clashes that selection may have
 ** NGL.specialOps.slowOrient deals with the view if provided for these previous three.
 ** NGL.specialOps.showTitle(id,text) shows the title.
