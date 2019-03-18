@@ -1,7 +1,7 @@
 # PyMOL-to-NGL transpiler
 A script to convert a PyMOL PSE file to a easy to implement NGL.js view.
 
-This is available as the script itself and [a web app (temp URL)](ngl.matteoferla.com).
+This is available as the script itself and [a web app (temp URL)](https://ngl.matteoferla.com).
 
 ## Aim
 
