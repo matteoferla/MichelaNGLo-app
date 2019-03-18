@@ -4,14 +4,14 @@
             <%include file="menu_buttons.mako" args='tour=True'/>
 </%block>
 <%block name="title">
-            PyMOL&rarr;NGL converter and generator
+            MichelaNGLo
 </%block>
 <%block name="subtitle">
-            Generate a NGL view from a PyMOL PSE file or PDB file.
+            Convert a PyMol file to an interactive NGL viewport
 </%block>
 
 
-######## block body
+<%block name="body">
 <ul class="list-group list-group-flush">
             <li class="list-group-item">
                 <p class="card-text">Please see <a href="https://github.com/matteoferla/PyMOL-to-NGL-transpiler/blob/master/README.md">the Github readme</a> for documentation.</p>
@@ -280,6 +280,7 @@
                 </div>
             </li>
         </ul>
+</%block>
 
 ######## other blocks
 <%block name='modals'>

@@ -12,7 +12,7 @@
     <meta name="author" content="Matteo Ferla">
     <link rel="shortcut icon" href="${request.static_url('pymol_ngl_transpiler_app:static/NGL.png')}">
 
-    <title>PyMOL-NGL transpiler</title>
+    <title>MichelaNGLo</title>
     % if bootstrap == 'materials':
         <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.6.1/css/mdb.min.css" rel="stylesheet">
@@ -42,9 +42,24 @@ html {
     min-height: 100%;
     overflow-y:scroll;
 }
+
 body {
   /* Margin bottom by footer height */
     margin-bottom: 60px;
+}
+main {
+    /* bg image*/
+  /* Use "linear-gradient" to add a darken background effect to the image (photographer.jpg). This will make the text easier to read */
+  background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('static/background_blur.png');
+
+  /* Set a specific height */
+  height: 50%;
+
+  /* Position and center the image to scale nicely on all screens */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  position: relative;
 }
 
 pre {
@@ -90,13 +105,8 @@ pre {
     <![endif]-->
 </head>
 <body>
-<br/>
-<br/>
-<br/>
-<br/>
-
 <main role='main' class="container-fluid">
-    <div class="row">
+    <div class="row py-4">
         <div class="col-lg-10 offset-lg-1">
             ${ next.body() }
         </div>
