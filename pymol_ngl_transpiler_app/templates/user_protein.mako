@@ -111,10 +111,9 @@
                     data: {
                         'title': $('#edit_title').val(),
                         'description': $('#edit_description').val(),
-                        'code': $('#code').html(),  //in future I will make an edit code modal.
                         'page': $(location).attr("href").split('/').pop().split('.')[0],  //just in case someone wants to API it...
                         'residues': $('#edit_residues').val(),
-                        'proteinJSON': $('[role="NGL"]').data('protein'),
+                        'proteinJSON': JSON.stringify($('[role="NGL"]').data('proteins')),
                         'backgroundcolor': $('[role="NGL"]').data('backgroundcolor')
                     },
                     success: function (result) {
