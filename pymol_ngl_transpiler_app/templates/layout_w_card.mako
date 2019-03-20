@@ -1,7 +1,11 @@
 <%inherit file="layout.mako"/>
 
+<div class="row p-4">
+    <div class="col-lg-10 offset-lg-1">
+        <%block name="alert"/>
+    </div>
 
-<%block name="alert"/>
+</div>
 
 <div class="row py-4">
         <div class="col-lg-10 offset-lg-1">

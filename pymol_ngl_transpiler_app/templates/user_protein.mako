@@ -6,7 +6,7 @@
 
 <div class='row p-4'>
     <div class='col-9'>
-        <div class='card'>
+        <div class='card shadow'>
             <div class="card-body">
                 <div id="viewport" role="NGL" data-proteins='${proteinJSON}' data-backgroundcolor="${backgroundcolor}"></div>
             </div>
@@ -15,7 +15,7 @@
 
 
     <div class='col-3'>
-        <div class="card" role="tooltip">
+        <div class="card shadow" role="tooltip">
 
             <div class="card-header"><h3 class="card-title">Description</h3></div>
 
