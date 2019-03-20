@@ -3,7 +3,7 @@
 <p>This tab guides you into implementing a NGL view on your website.</p>
 
 #################### raw
-<%include file="../docs_raw.mako"/>
+<%include file="../docs/docs_raw.mako"/>
 
 ##################### viewpoer
 <h4>Viewport</h4>
@@ -18,7 +18,7 @@
 % endif
 
 ###################### cdn
-<%include file="../docs_cdn.mako"/>
+<%include file="../docs/docs_cdn.mako"/>
 
 ##################### data
 % if pdb:

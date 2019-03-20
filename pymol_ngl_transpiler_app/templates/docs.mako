@@ -12,13 +12,13 @@
 
 <%block name="main">
 ############################################################ Raw
-<%include file="docs_raw.mako"/>
+<%include file="docs/docs_raw.mako"/>
 
 ############################################################# CDN
 <include file="docs_cdn.mako"/>
 
 ############################################################# Viewport
-<%include file="docs_viewport.mako"/>
+<%include file="docs/docs_viewport.mako"/>
 
 ############################################################# Guiding links
 <h4>Prolinks</h4>

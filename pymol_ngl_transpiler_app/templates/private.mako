@@ -1,13 +1,17 @@
-<%inherit file="layout.mako"/>
+<%inherit file="layout_w_card.mako"/>
 
-<div class="alert m-5">Password is "protein"</div>
+<%block name="alert">
+<div class="alert alert-info m-5">Password is "protein"</div>
 
-% if status:
+    % if status:
     <div class="alert alert-danger m-5" role="alert" id="alert">
       ${status}
     </div>
 % endif
+</%block>
 
+
+<%block name="body">
 % if admin:
     <div class="card w-100 m-10">
       <div class="card-body">
@@ -38,6 +42,7 @@
   </div>
 </div>
 % endif
+</%block>
 
 
 <%block name="script">

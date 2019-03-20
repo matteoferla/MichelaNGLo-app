@@ -18,7 +18,7 @@
                             <span class="input-group-text" id="inputGroup-sizing-sm">Zoom to </span>
                         </div>
                     <div class="btn-group btn-group-toggle" data-toggle="buttons" id="markup_view_toggle">
-                      % for n in ('domain','residue','clash','auto','default','orientation'):
+                      % for n in ('domain','residue','clash','surface','bfactor','auto','default','orientation'):
                           <label class="btn btn-secondary">
                             <input type="radio" name="markup_zoom" id="${n}" autocomplete="off">${n}
                           </label>
@@ -42,7 +42,7 @@
                   <div class="input-group-prepend">
                     <span class="input-group-text" >Orientation</span>
                   </div>
-                  <textarea class="form-control" aria-label="With textarea" rows="3" placeholder="4x4 matrix or 16x1 array" id="markup_orient" style="font-size: 80%;"></textarea>
+                  <textarea class="form-control" aria-label="With textarea" rows="3" placeholder="4x4 matrix or 16x1 array" id="markup_view" style="font-size: 80%;"></textarea>
                     <div class="input-group-append">
                     <button class="btn btn-info" id="markup_current">Get</button>
                   </div>
@@ -52,7 +52,21 @@
                 </div>
 
                 <div class="col-12" id="results">
-                    <code></code> &mdash;Example: <a></a>
+                    <pre><code></code></pre>
+                    <p><a>Press make first!</a></p>
+                </div>
+                <div class="col-12">
+
+                <p>Note that to the span element links are green in this site because of <code>class="prolink"</code>, which are declared in the stylesheet as:</p>
+                <pre><code>.prolink {
+	color: mediumseagreen;
+}
+
+.prolink:hover {
+	color: seagreen;
+	cursor: pointer;
+	text-decoration: underline;
+}</code></pre>
                 </div>
             </div>
 

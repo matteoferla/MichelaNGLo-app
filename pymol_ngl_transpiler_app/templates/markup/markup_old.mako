@@ -1,5 +1,5 @@
-<%inherit file="layout.mako"/>
-<%namespace file="labels.mako" name="info"/>
+<%inherit file="../layout.mako"/>
+<%namespace file="../labels.mako" name="info"/>
 
 <div class="alert alert-danger py-5 alert-dismissible fade show" role="alert">
   This got revised and this is the old version. For the new see <a href="/markup">old version.</a>
@@ -11,7 +11,7 @@
 <div class="card">
     <div class="card-header">
         <h1 class="card-title">Guiding links
-            <%include file='menu_buttons.mako'/>
+            <%include file="../menu_buttons.mako"/>
         </h1>
         <h3 class="card-subtitle mb-2 text-muted">Construction of HTML anchor tags to guide the users to a residue or region</h3>
     </div>

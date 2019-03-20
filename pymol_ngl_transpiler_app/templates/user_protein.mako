@@ -71,10 +71,10 @@
                     <div class="input-group-prepend">
                         <span class="input-group-text" aria-label="edit_description" ro aria-describedby="description-addon1">Description</span>
                     </div>
-                    <textarea class="form-control" aria-label="With textarea" id="edit_description">${description}</textarea>
+                    <textarea class="form-control" rows=6 aria-label="With textarea" id="edit_description">${description}</textarea>
                 </div>
 
-                <%include file='markup_builder_btn.mako'/>
+                <%include file="markup/markup_builder_btn.mako"/>
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" id="edit_submit">Save changes</button>
@@ -89,14 +89,14 @@
 
 <%include file='about.mako'/>
 <%include file='basics.mako'/>
-<%include file='markup_builder_modal.mako'/>
+<%include file="markup/markup_builder_modal.mako"/>
 
 <%include file="../user/${uuid}.js"/>
 
 <%block name='script'>
     <script type="text/javascript">
         $(document).ready(function () {
-            <%include file='markup_builder_modal.js'/>
+            <%include file="markup/markup_builder_modal.js"/>
 
 
             $('#save').click(function () {
