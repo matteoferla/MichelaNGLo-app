@@ -6,7 +6,7 @@
 </%block>
 
 <%block name="title">
-            Guiding links ("Prolinks")
+            &mdash; Guiding links ("Prolinks")
 </%block>
 
 <%block name="subtitle">
@@ -38,7 +38,7 @@
                 <p>This can be combined to allow <span class="prolink" data-toggle="protein" data-target="#viewport"  data-focus="residue" data-selection="65-67" data-radius="2" data-view="[21.083709695256083,3.2638383176464822,-24.800012660489337,0,-25.012283268399123,3.115199733699885,-20.8541914098467,0,0.28098794552718936,32.40152732655437,4.503127326542097,0,-11.023754117672173,-71.66366796614918,6.221244923015376,1]">selection of a given set of residues, such as the chromophore, but to manually fix an obstructed view</span></p>
                 <p>Also, setting the tolerance to really low <span class="prolink" data-toggle="protein" data-target="#viewport"  data-focus="clash" data-selection="29" data-tolerance="0.1">we can see residues spuriously clashing</span>.  </p>
                 <p>Let's look at <span class="prolink" data-toggle="protein" data-target="viewport" data-focus="surface" data-title="surface">the surface</span>.</p>
-                <p>Also, the B-factors can be seen in tube <span class="prolink" data-toggle="protein" data-target="viewport" data-focus="blur" data-title="B-factors">B-factors</span>.</p>
+                <p class="mb-3">Also, the B-factors can be seen in tube <span class="prolink" data-toggle="protein" data-target="viewport" data-focus="blur" data-title="B-factors">B-factors</span>.</p>
                 <%include file='markup_builder_btn.mako'/>
             </div>
             <div class='col-12 col-sm-6'>
@@ -50,14 +50,6 @@
                 <p>Following Bootstrap, the most common CSS framework, several <code>data-*</code> attributes are proposed and implemented to control what is shown. If you are unfamilar with the terms "attribute" or "element" see <a href="#basics">basics</a>.</p>
     <p>The first link is: <code>&lt;a href='#viewport' data-toggle="protein" data-focus="domain" data-selection="11-228:A" data-color="lime" &gt;a &beta;-barrel&lt;/a&gt;</code>. Actually, it is <code>&lt;span class="prolink" data-target="viewport" &hellip;&gt;&lt;/span&gt;</code> in order to add custom CSS styling (green).</p>
     <p>The attribute <code>data-toggle="protein"</code> is what tells the browser that the link controls the protein (<a href="#row_toggle">see below for more</a>), <code>data-focus="domain"</code> tells it how to zoom (domain | residue | clash | surface) to use, while <code>data-selection="11-228:A"</code> controls what to zoom into.</p>
-    <h4>Viewport</h4>
-    <p>There are three ways to declare the viewport.</p>
-    <ul class="fa-ul">
-        <li><span class="fa-li" ><i class="far fa-scroll-old"></i></span> <b>old way.</b> In JS you load it as the NGL suggests, but keeping the stage object globally declared as <code>stage</code>: <code>window.stage = new NGL.Stage( "viewport",{backgroundColor: "white"}); stage.loadFile('static/gfp.pdb')</code> &mdash; adding <code>stage</code> as a property of <code>window</code> (<i>i.e.</i><code>window.stage = &hellip;</code>) is the same as declaring without <code>var</code> (<i>i.e.</i><code>stage = &hellip;</code>; <i>cf.</i> <code>var stage = &hellip;</code>).</li>
-        <li><span class="fa-li" ><i class="far fa-scroll"></i></span> <b>Modded old way.</b> As above but you add your stage to the object <code>NGL.stageId</code> thusly <code>var id = "viewport"; NGL.stageIds[id] = new NGL.Stage( id,{backgroundColor: "white"}); NGL.stageIds[id].loadFile('static/gfp.pdb')</code></li>
-        <li><span class="fa-li" ><i class="far fa-bolt"></i></span> <b>MultiLoader way.</b> Using the <code>multiLoader</code> function described below (<code>NGL.specialOps.multiLoader('viewport', [{type: 'rcsb', value: '1ubq', loadFx: myFancyLoadFunction}], 'gainsboro')</code>), which allows <code>data-load</code> prolinks to toggle between multiple proteins (pdb strings, custom pdb files or RCSB pdb entries) each with an optional load function.</li>
-        <li><span class="fa-li" ><i class="far fa-robot"></i></span> <b>No JS way.</b> Using the attribute <code>role="NGL"</code> on the viewer div-element in combination with prolink <code>data-*</code> attributes, <i>e.g.</i> <code>&lt;div id="viewport" role="NGL" data-load="1ubq" data-focus="residue" data-selection="30:A" data-view="[&hellip;]"&gt;</code>. If multiple PDB proteins are required, use <code>data-proteins</code> as opposed to load where the value is a comma separated space free list of codes (not array), these can be accessed via <code>data-load=3</code> prolinks as usual (this is less clear than simply specifying prolinks with <code>data-load</code> with a file or PDB code, but has the sole benefit that, data-load='1ubq' will re-load the file even if 1ubq is loaded, while data-load=2 will not if the current index is 2, however in future unique names will be implemented to avoid this drama). Note that the height issue is sorted and that it can be combined like everything else with click-to-enable-NGL images.</li>
-    </ul>
 
     <h4>List of attributes for prolinks</h4>
     <table class="table table-striped">
@@ -141,22 +133,11 @@
 
     <h4>$('..').protein()</h4>
     <p>When the dom loads the links are automatically enabled, however, if new links are added dynamically you have to activate them using <code>$(...).protein()</code>, for example <code>$('[data-toggle="protein"]').protein();</code></p>
-    <h4>myData object and multiLoader</h4>
-    <p>The load ability, which uses the add-on <code>NGL.specialOps</code>, works preferably in combination with the add-on <code>NGL.specialOps.multiLoad</code>,
-                which can initialise the scene and handles such things.</p>
-                <p>The data for load/multiLoader is stored in <code>myData object</code>, which has the property <code>myData.proteins</code>,
-    which is a list of <code>{name: 'unique_name', type: 'rcsb' (default) | 'file' | 'data', value: xxx, 'ext': 'pdb' , loadFx: xxx}</code>.
-    The optional argument loadFx is a function that accepts as argument a NGL protein (component) object and performs requested operations.</p>
-    <p>The MultiLoader and load can handle img elements in the div, namely the case where you start with an image with labels etc and you click on it and it switches to the viewer.</p>
-    <pre><code>
-function nice_ubiquitin (protein) {
-        protein.addRepresentation( "line", {color: ..., sele: ...} );
-        bla bla
-    }
-NGL.specialOps.multiLoader('viewport', [{type: 'rcsb', value: '1ubq', loadFx: nice_ubiquitin}], 'aquamarine')
-//////////////////////////////id/////////array of elements with loadFx//////////////   ////background
-        </code></pre>
-    <p>The <code>data-load</code> can load proteins from the myData.proteins (and run the custom function LoadFx) if an index is provided.</p>
+
+
+    <%include file="docs_viewport.mako"/>
+
+
     <h3 id="note">Note</h3>
                 <p>There are a bunch of underlying functions. They are in the file: <a href="static/ngl.extended.js">file ngl.extended.js</a>, which requires JQuery and NGL, which works as usual*. So at the end of your documents you should have:</p>
                 <pre><code>
@@ -180,25 +161,11 @@ NGL.specialOps.multiLoader('viewport', [{type: 'rcsb', value: '1ubq', loadFx: ni
 <%include file='markup_builder_modal.mako'/>
 </%block>
 <%block name="script">
-    <script type="text/javascript" src="static/ngl.extended.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {
-        // one way to init is:
-        // NGL.specialOps.multiLoader('viewport', [{type: 'rcsb', value: '1ubq', loadFx: nice_ubi}], 'aquamarine')
-        // but let's say we dovn't want the multiloader... You will get a warning and all will work!
-        window.stage = new NGL.Stage( "viewport",{backgroundColor: "white"});
-        NGL.stageIds['vieport'] = stage;
-        stage.loadFile('static/gfp.pdb').then(function (component) {
-            component.addRepresentation("cartoon",{smoothSheet: true});
-            component.autoView();
-            window.protein = component; //it is important to not lose stage or protein if we are to play with it.
-            //stage.compList[0]
+            NGL.specialOps.showTitle('viewport', '<i class="far fa-dna fa-spin"></i> Loading...');
+            NGL.specialOps.multiLoader('viewport', [{type: 'file', value: 'static/gfp.pdb'}]);
         });
-		// Handle window resizing
-        window.addEventListener( "resize", function( event ){stage.handleResize();}, false );
-        }); //ready
-
-
         <%include file='markup_builder_modal.js'/>
     </script>
 </%block>

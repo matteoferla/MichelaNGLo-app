@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="PyMOL-NGL transpiler application">
     <meta name="author" content="Matteo Ferla">
-    <link rel="shortcut icon" href="${request.static_url('pymol_ngl_transpiler_app:static/NGL.png')}">
+    <link rel="shortcut icon" href="static/NGL.png">
 
     <title>MichelaNGLo</title>
     % if bootstrap == 'materials':
@@ -21,7 +21,7 @@
     % endif
 
     <!-- Custom styles for this scaffold -->
-    <link href="${request.static_url('pymol_ngl_transpiler_app:static/theme.css')}" rel="stylesheet">
+    <link href="static/theme.css" rel="stylesheet">
     <!--<link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-LRlmVvLKVApDVGuspQFnRQJjkv0P7/YFrw84YYQtmYG4nK8c+M+NlmYDCv0rKWpG" crossorigin="anonymous">-->
     <link rel="stylesheet" href="https://www.matteoferla.com/Font-Awesome-Pro/css/all.min.css" crossorigin="anonymous">
     <link rel="stylesheet" href="https://www.matteoferla.com/bootstrap-tourist/bootstrap-tourist.css">
@@ -130,6 +130,7 @@ pre {
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.6.1/js/mdb.min.js"></script>
 % endif
 <script src="https://unpkg.com/ngl@2.0.0-dev.34/dist/ngl.js" type="text/javascript"></script>
+<script type="text/javascript" src="static/ngl.extended.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
 
 <script src="https://www.matteoferla.com/bootstrap-tourist/bootstrap-tourist.js"></script>
@@ -137,6 +138,9 @@ pre {
 <script type="text/javascript">
     $('[data-toggle="popover"]').popover();
     $('[data-toggle="tooltip"]').tooltip();
+    $('#menu').on('shown.bs.popover', function () {
+        $('.popover a').hover(function () {$('.popover-header').html($(this).attr('title'))});
+    });
 </script>
 
 </body>

@@ -8,8 +8,7 @@
         <img src="static/ox_logo-01.svg" style="height: 6em; position: absolute;">
         <div style="margin-left: 6em;">
             <h1 class="card-title">
-
-            <%block name="title"/>
+                <span onclick="location.href='/';" style="cursor: pointer;">Michela<span style="font-variant: small-caps;">ngl</span>o</span> <%block name="title"/>
             <%block name="buttons"/>
         </h1>
             <h3 class="card-subtitle mb-2 text-muted"><%block name="subtitle"/></h3>

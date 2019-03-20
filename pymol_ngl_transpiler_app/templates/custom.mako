@@ -3,7 +3,7 @@
             <%include file="menu_buttons.mako" args='tour=False'/>
 </%block>
 <%block name="title">
-            Mesh converter
+            &mdash; Mesh converter
 </%block>
 <%block name="subtitle">
             This tool converts a obj file into a NGL mesh for you
@@ -12,6 +12,7 @@
 #### main.
 <ul class="list-group list-group-flush">
             <li class="list-group-item">
+                <p>A mesh is a series of connected triangles that form a 3D surface. Once you have created or downloaded a mesh and saved it as obj file with triangular faces, you can use this page to convert it to a code for use with NGL.</p>
         <div class='row'>
             ## obj input
             <div class="col-lg-6 mb-3">

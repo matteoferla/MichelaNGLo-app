@@ -1,5 +1,6 @@
 
         $(document).ready(function () {
+        	NGL.specialOps.showTitle('viewport','<i class="far fa-dna fa-spin"></i> Loading...');
     window.myData={current_index: 0, variants: []};
     myData.pdbs = [new Blob( [ `HELIX      1HA ALA A    2  ALA A   11  1                                   9
 ATOM      1  N   ALA A   1      20.045   0.794 -14.848  1.00  0.00           N

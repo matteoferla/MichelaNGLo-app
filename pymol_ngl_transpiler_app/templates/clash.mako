@@ -4,7 +4,7 @@
             <%include file="menu_buttons.mako" args='tour=False'/>
 </%block>
 <%block name="title">
-            Showing clashes
+            &mdash; Clashes
 </%block>
 <%block name="subtitle">
             Some mutations cause a clash, which needs to be shown

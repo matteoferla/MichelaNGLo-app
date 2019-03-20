@@ -13,6 +13,7 @@
 
 <%block name="script">
     <script type="text/javascript">
+        NGL.specialOps.showTitle('viewport','<i class="far fa-dna fa-spin"></i> Loading...');
         window.stage = new NGL.Stage( "viewport",{backgroundColor: "white"});
         window.addEventListener( "resize", function( event ){stage.handleResize();}, false );
         stage.loadFile('rcsb://1ubq', {defaultRepresentation: true}).then(function (o) {

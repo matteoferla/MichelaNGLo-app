@@ -40,9 +40,10 @@ def ajax_convert(request):
                     'image': is_js_true(request.POST['image']),
                     'uniform_non_carbon':is_js_true(request.POST['uniform_non_carbon']),
                     'verbose': False,
-                    'validation': False,
+                    'validation': True,
                     'stick': request.POST['stick'],
-                    'save': request.POST['save']}
+                    'save': request.POST['save'],
+                    'backgroundcolor': 'white'}
 
         # parse data
         if request.POST['mode'] == 'out':
@@ -59,6 +60,7 @@ def ajax_convert(request):
                 else:
                     minor_error = 'Unknown block: ' + block
             trans = PyMolTranspiler(view=view, representation=reps, pdb=request.POST['pdb'], **settings)
+            settings['loadfun'] = trans.get_loadfun_js(viewport=request.POST['viewport_id'], tag_wrapped=True)
         elif request.POST['mode'] == 'file':
             if 'demo_file' in request.POST:
                 filename=demo_file(request) #prevention against attacks
@@ -79,6 +81,14 @@ def ajax_convert(request):
         code = trans.get_html(ngl=request.POST['cdn'], **settings)
         page=str(uuid.uuid4())
         snippet_run=trans.code
+        settings['loadfun'] = trans.get_loadfun_js(viewport=request.POST['viewport_id'])
+        if trans.raw_pdb:
+            settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true, "loadFx": "loadfun"}]'
+            settings['pdb'] = '\n'.join(trans.ss)+'\n'+trans.raw_pdb
+        elif len(trans.pdb) == 4:
+            settings['proteinJSON'] = '[{{"type": "rcsb", "value": "{0}", "loadFx": "loadfun"}}]'.format(trans.pdb)
+        else:
+            settings['proteinJSON'] = '[{{"type": "file", "value": "{0}", "loadFx": "loadfun"}}]'.format(trans.pdb)
         # sharable page
         try:
             make_static_page(request, snippet_run, page)
@@ -86,12 +96,14 @@ def ajax_convert(request):
             page=''
             minor_error='Could not generate sharable static page ({0})'.format(err)
         # return
+
         if minor_error:
             return {'snippet': code, 'error': 'warning', 'error_msg':minor_error, 'error_title':'A minor error arose','validation':trans.validation_text, 'page': page, **settings}
         else:
             return {'snippet': code, 'snippet_run':snippet_run,'validation':trans.validation_text, 'page': page, **settings}
 
     except:
+        print('**************')
         print(traceback.format_exc())
         return {'snippet': traceback.format_exc(), 'snippet_run':'','error_title':'A major error arose', 'error': 'danger','error_msg':'The code failed to run serverside','validation':''}
 

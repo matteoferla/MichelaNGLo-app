@@ -213,6 +213,8 @@ NGL.specialOps.removeImg = function () {
 NGL.specialOps._run_loadFx = function (protein, fx) {
     if (typeof fx === 'function') {
         fx(protein)}
+    else if (typeof fx === 'string') {
+        eval(fx)(protein)}
     else {
         protein.addRepresentation("cartoon", {smoothSheet: true}); protein.autoView();
     }
@@ -263,7 +265,11 @@ NGL.specialOps.load = function (option) {
     }
     else if (myData.proteins[index].type === 'data') {
         var ext = myData.proteins[index].ext || 'pdb';
-        if (typeof myData.proteins[index].value === 'string') {
+        if (!! myData.proteins[index].isVariable) {
+            return NGL.stageIds[myData.id].loadFile(new Blob [eval(myData.proteins[index].value)], { ext: ext }).then(function (protein) {
+            NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);});
+        }
+        else if (typeof myData.proteins[index].value === 'string') {
             return NGL.stageIds[myData.id].loadFile(new Blob [myData.proteins[index].value], { ext: ext }).then(function (protein) {
             NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);});
         } else { //is a blob already
@@ -301,6 +307,8 @@ NGL.specialOps.multiLoader = function (id, proteins, backgroundColor, startIndex
     Do note that the function load returns a pr
      */
     startIndex = startIndex || 0;
+    console.log('starting multiloader');
+    console.log(proteins);
     // check for awkard case it has already been started.
     if (typeof window.myData === 'object') {window.myData.proteins.push(...proteins);}
     else {window.myData={current_index: -1, proteins: proteins, id: id, backgroundColor: backgroundColor || 'white'};}
@@ -413,30 +421,36 @@ $.prototype.protein = function (){
             });
 };
 
-$(document).ready(function () {
-    //activate prolinks
-    $('[data-toggle="protein"]').protein();
-    //activate viewport
-    $('[role="NGL"],[role="proteinViewport"],[role="proteinviewport"],[role="protein_viewport"]').each(function () {
+$.prototype.viewport = function () {
+        if (! $(this).length) {return undefined}
         // fix width:100%; height: 0; padding-bottom: 100%;
         if (($(this).has('img').length === 0) && ($(this).height() === 0)) {
             if ($(this).width() === 0) {$(this).css('width','100%');}
             $(this).height($(this).width());
             $(this).css('padding-bottom','100%');
+            console.log('new viewport sizes:');
             console.log($(this).width());
             console.log($(this).height());
         }
-        var backgroudcolor = $(this).data('backgroudcolor') || 'white';
-        var data;
-        if ($(this).data('proteins')) { data = JSON.parse($(this).data('proteins'));
-        } else if ($(this).data('load')) { data = $(this).data('load').split(',').map(v => ({name: v, value: v, type: 'rcsb'}));
+        if (! $(this).attr('id')) {$(this).attr('id','NGLViewport')}
+        var backgroundcolor = $(this).data('backgroundcolor') || 'white';
+        var data = $(this).data('proteins');
+        if (typeof data == "object") {/*pass*/}
+        else if (typeof data == "string") {data = JSON.parse(data);}
+        else if ($(this).data('load')) { data = $(this).data('load').split(',').map(v => ({name: v, value: v, type: 'rcsb'}));
         } else {data = [];}
-        NGL.specialOps.multiLoader($(this).attr('id'), data, backgroudcolor);
+        NGL.specialOps.multiLoader($(this).attr('id'), data, backgroundcolor);
         if ($(this).data('focus') || $(this).data('view')) {
             if ($(this).has('img').length !== 0) {
                 $(this).children('img').on("click", e => setTimeout(() => NGL.specialOps.prolink(this), 500));
             }
             else {NGL.specialOps.prolink(this);}
             }
-    });
+    };
+
+$(document).ready(function () {
+    //activate prolinks
+    $('[data-toggle="protein"]').protein();
+    //activate viewport
+    $('[role="NGL"],[role="proteinViewport"],[role="proteinviewport"],[role="protein_viewport"]').viewport();
 });

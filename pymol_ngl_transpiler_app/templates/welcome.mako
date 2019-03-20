@@ -3,9 +3,6 @@
 <%block name="buttons">
             <%include file="menu_buttons.mako" args='tour=False'/>
 </%block>
-<%block name="title">
-            MichelaNGLo
-</%block>
 <%block name="subtitle">
             An interactive protein on your website with a few clicks
 </%block>
@@ -121,7 +118,6 @@
 
 
 <%block name="script">
-    <script type="text/javascript" src="static/ngl.extended.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {
             function pretty_hisA(protein) {
@@ -131,8 +127,9 @@
                 protein.stage.animationControls.orient(view, 2000);
                 NGL.specialOps.showTitle('viewport','Please interact with me')
             }
+            NGL.specialOps.showTitle('viewport','<i class="far fa-dna fa-spin"></i> Loading...');
+            NGL.specialOps.multiLoader('viewport', [{type: 'file', value: 'static/Sal_HisA.pdb', loadFx: pretty_hisA}], 'white');
 
-            NGL.specialOps.multiLoader('viewport', [{type: 'file', value: 'static/Sal_HisA.pdb', loadFx: pretty_hisA}], 'white')
         }); //ready
     </script>
 </%block>

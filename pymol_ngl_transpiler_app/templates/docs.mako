@@ -4,11 +4,23 @@
             <%include file="menu_buttons.mako" args='tour=False'/>
 </%block>
 <%block name="title">
-            Documentation
+            &mdash; Documentation
 </%block>
 <%block name="subtitle">
-            ????
+            Details instructions
 </%block>
 
-#### main.
-I need to tidy up first.
+<%block name="main">
+############################################################ Raw
+<%include file="docs_raw.mako"/>
+
+############################################################# CDN
+<include file="docs_cdn.mako"/>
+
+############################################################# Viewport
+<%include file="docs_viewport.mako"/>
+
+############################################################# Guiding links
+<h4>Prolinks</h4>
+<p>Links to guide the visitors ('prolinks') are described <a href="/markup">elsewhere</a>.</p>
+</%block>

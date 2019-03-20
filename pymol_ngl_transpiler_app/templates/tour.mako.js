@@ -13,8 +13,18 @@ window.tour = new Tour({
     showProgressText: false,
     backdrop: true,
     storage: window.sessionStorage,
-    template: '<div class="popover" role="tooltip"> <div class="arrow"></div> <h3 class="popover-header"></h3> <div class="popover-body"></div> <div class="popover-navigation"> <div class="btn-group"> <button class="btn btn-sm btn-outline-primary" data-role="prev">&laquo; Prev</button> <button class="btn btn-sm btn-primary" data-role="next">Next &raquo;</button> <button class="btn btn-sm btn-outline-primary" data-role="pause-resume" data-pause-text="Pause" data-resume-text="Resume">Pause</button> </div> <button class="btn btn-sm btn-outline-warning" data-role="end">End tour</button> </div> </div>',
-
+    template: `<div class="popover" role="tooltip"> 
+                <div class="arrow"></div>
+                <h3 class="popover-header"></h3>
+                <div class="popover-body"></div>
+                <div class="popover-navigation">
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-primary" data-role="prev">&laquo; Prev</button>
+                        <button class="btn btn-sm btn-outline-primary" data-role="next">Next &raquo;</button> 
+                        <button class="btn btn-sm btn-outline-warning" data-role="pause-resume" data-pause-text="Pause" data-resume-text="Resume">Pause</button>
+                    </div>
+                    <button class="btn btn-sm btn-outline-warning" data-role="end">End tour</button>
+                </div> </div>`,
     steps: [
       {
         element: "h1",
