@@ -78,9 +78,10 @@ def ajax_convert(request):
         else:
             return {'snippet': 'Please stop trying to hack the server', 'error_title': 'A major error arose', 'error': 'danger', 'error_msg': 'The code failed to run serverside. Most likely malicius','viewport':settings['viewport']}
         # make output
-        code = trans.get_html(ngl=request.POST['cdn'], **settings)
+        ###code = trans.get_html(ngl=request.POST['cdn'], **settings)
+        code = 1
         page=str(uuid.uuid4())
-        snippet_run=trans.code
+        ##snippet_run=trans.code
         settings['loadfun'] = trans.get_loadfun_js(viewport=request.POST['viewport_id'])
         if trans.raw_pdb:
             settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true, "loadFx": "loadfun"}]'
@@ -91,21 +92,24 @@ def ajax_convert(request):
             settings['proteinJSON'] = '[{{"type": "file", "value": "{0}", "loadFx": "loadfun"}}]'.format(trans.pdb)
         # sharable page
         try:
-            make_static_page(request, snippet_run, page)
+            make_static_page(page, **settings)
         except Exception as err:
+            print('**************')
+            print('Caught error')
+            print(str(err))
             page=''
             minor_error='Could not generate sharable static page ({0})'.format(err)
         # return
 
         if minor_error:
-            return {'snippet': code, 'error': 'warning', 'error_msg':minor_error, 'error_title':'A minor error arose','validation':trans.validation_text, 'page': page, **settings}
+            return {'snippet': True, 'error': 'warning', 'error_msg':minor_error, 'error_title':'A minor error arose','validation':trans.validation_text, 'page': page, **settings}
         else:
-            return {'snippet': code, 'snippet_run':snippet_run,'validation':trans.validation_text, 'page': page, **settings}
+            return {'snippet': True, 'validation':trans.validation_text, 'page': page, **settings}
 
     except:
         print('**************')
         print(traceback.format_exc())
-        return {'snippet': traceback.format_exc(), 'snippet_run':'','error_title':'A major error arose', 'error': 'danger','error_msg':'The code failed to run serverside','validation':''}
+        return {'snippet': False,'error_title':'A major error arose', 'error': 'danger','error_msg':'The code failed to run serverside:<br/><pre><code>'+traceback.format_exc()+'</code></pre>','validation':''}
 
 @view_config(route_name='ajax_custom', renderer="../templates/custom.result.mako")
 def ajax_custom(request):
@@ -167,15 +171,24 @@ def ajax_custom(request):
 @view_config(route_name='edit_user-page', renderer='json')
 def edit(request):
     print(request.POST)
-    make_static_page(request, request.POST['code'], request.POST['page'], request.POST['description'], request.POST['title'], request.POST['residues'])
+    #request, page, settings
+    make_static_page(**request.POST)
     return {'success': 1}
 
 
 
 ##################### dependent methods
-def make_static_page(request, code, page, description='Editable text. press pen to edit.',title='User submitted structure',residues=''):
+def make_static_page(page, description='Editable text. press pen to edit.',title='User submitted structure',residues='', **settings):
+    js = os.path.join('pymol_ngl_transpiler_app', 'user', page + '.js')
+    if (not os.path.isfile(js)):
+        tags='<script type="text/javascript" id="code">{0}</script'
+        if 'pdb' in settings and settings['pdb']:
+            open(js,'w').write(tags.format ('var pdb = `REMARK 666 Note that the indent is important as is the secondary structure def\n{pdb}`;\n{loadfun}'.format(**settings)))
+        else:
+            open(js, 'w').write(tags.format(settings['loadfun']))
     open(os.path.join('pymol_ngl_transpiler_app','user', page+'.html'), 'w', newline='\n').write(
         mako.template.Template(filename=os.path.join('pymol_ngl_transpiler_app','templates','user_protein.mako'),
                                format_exceptions=True,
                                lookup=mako.lookup.TemplateLookup(directories=[os.getcwd()])
-        ).render_unicode(code=code, request=request, description=description, title=title, residues=residues))
+        ).render_unicode(description=description, title=title, uuid=page.split('/')[-1], **settings))
+

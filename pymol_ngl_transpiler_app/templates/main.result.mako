@@ -1,4 +1,4 @@
-<%page args="snippet='', snippet_run='', error='', error_msg='', error_title='', validation='', viewport='viewport', image=False, save='', backgroundcolor='white', loadfun='ERROR (parent)', proteinJSON='ERROR (Parent)', pdb=''"/>
+<%page args="snippet=False, error='', error_msg='', error_title='', validation='', viewport='viewport', image=False, save='', backgroundcolor='white', loadfun='ERROR (parent)', proteinJSON='ERROR (Parent)', pdb=''"/>
 <%namespace file="labels.mako" name="info"/>
 
 <li class="list-group-item" id="results">

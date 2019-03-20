@@ -1,7 +1,7 @@
 <%page args="viewport='error', proteinJSON='ERROR', backgroundcolor='red', image=False, loadfun='ERROR (child)', pdb=''" />
 <div class="row">
     <div class="col-12 col-md-12">
-        <div id="viewport" role="NGL" data-proteins="${proteinJSON}" data-backgroundcolor="${backgroundcolor}">
+        <div id="viewport" role="NGL" data-proteins='${proteinJSON}' data-backgroundcolor="${backgroundcolor}">
             % if image:
         <img src="images/clickmap.jpg" alt="clickmap" width='100%' style='cursor: pointer'>
             % endif

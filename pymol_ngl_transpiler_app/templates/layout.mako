@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ '${request.locale_name}' }}">
+<html lang="en">
 <%
     bootstrap='regular' # regular|materials
 %>
@@ -10,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="PyMOL-NGL transpiler application">
     <meta name="author" content="Matteo Ferla">
-    <link rel="shortcut icon" href="static/NGL.png">
+    <link rel="shortcut icon" href="/static/NGL.png">
 
     <title>MichelaNGLo</title>
     % if bootstrap == 'materials':
@@ -21,7 +21,7 @@
     % endif
 
     <!-- Custom styles for this scaffold -->
-    <link href="static/theme.css" rel="stylesheet">
+    <link href="/static/theme.css" rel="stylesheet">
     <!--<link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-LRlmVvLKVApDVGuspQFnRQJjkv0P7/YFrw84YYQtmYG4nK8c+M+NlmYDCv0rKWpG" crossorigin="anonymous">-->
     <link rel="stylesheet" href="https://www.matteoferla.com/Font-Awesome-Pro/css/all.min.css" crossorigin="anonymous">
     <link rel="stylesheet" href="https://www.matteoferla.com/bootstrap-tourist/bootstrap-tourist.css">
@@ -50,7 +50,7 @@ body {
 main {
     /* bg image*/
   /* Use "linear-gradient" to add a darken background effect to the image (photographer.jpg). This will make the text easier to read */
-  background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('static/background_blur.png');
+  background-image: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('/static/background_blur.png');
 
   /* Set a specific height */
   height: 50%;
@@ -105,12 +105,8 @@ pre {
     <![endif]-->
 </head>
 <body>
-<main role='main' class="container-fluid">
-    <div class="row py-4">
-        <div class="col-lg-10 offset-lg-1">
-            ${ next.body() }
-        </div>
-    </div>
+<main role='main' class="container-fluid p-0">
+    ${ next.body() }
 </main>
 
 <footer class="footer">
@@ -130,7 +126,7 @@ pre {
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.6.1/js/mdb.min.js"></script>
 % endif
 <script src="https://unpkg.com/ngl@2.0.0-dev.34/dist/ngl.js" type="text/javascript"></script>
-<script type="text/javascript" src="static/ngl.extended.js"></script>
+<script type="text/javascript" src="/static/ngl.extended.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
 
 <script src="https://www.matteoferla.com/bootstrap-tourist/bootstrap-tourist.js"></script>

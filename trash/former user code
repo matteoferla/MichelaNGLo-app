@@ -1,0 +1,89 @@
+
+<div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="residueButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="far fa-search"></i> Zoom to a residue
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="residueMenuButton" id='residue'>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-outline-primary w-100 my-1" id="store_view_btn" data-target="#store_view_modal" data-toggle="modal"><i class="far fa-save"></i> Store view</button>
+
+
+
+
+<div class="modal fade" tabindex="-1" role="dialog" id="store_view_modal">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="far fa-pen-alt"></i> Store view</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="view-title-addon1">Short descriptive label</span>
+                    </div>
+                    <input type="text" class="form-control" value="new view" aria-label="Title" aria-describedby="view-title-addon1" id="store_view_title">
+                </div>
+                <p>Code that makes a link that reorients to that view</p>
+                <pre><code id="view_code"></code></pre>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="store_view_submit">Save changes</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Discard</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+            $('#residue').append('<a class="dropdown-item" href="#" id="main_view">main view</a>');
+            $('#main_view').click(function () {
+                load_file();
+                stage.viewerControls.orient(myData.main_view);
+            });
+            if (myData.alt_view) {
+                $('#residue').append('<a class="dropdown-item" href="#" id="alt_view">alt view</a>');
+                $('#alt_view').click(function () {
+                    load_file();
+                    stage.viewerControls.orient(myData.alt_view);
+                });
+            }
+            var residuedex = `${residues}`.split('\n');
+            for (var i = 0; i < residuedex.length; i++) {
+                if (!!residuedex[i]) {
+                    var r = residuedex[i].split(' ');
+                    var label = r[0];
+                    if (r.length > 1) {
+                        label = r.splice(1).join(' ');
+                    }
+                    $('#residues').append('<a class="dropdown-item residue" href="#" data-selection="' + r[0] + '">' + label + '</a>');
+                }
+            }
+            $('.residue').click(function () {
+                load_file();
+                show_residue($(this).data('selection'));
+            });
+
+
+            $('store_view_btn').click(function () {
+                $('#view_code').html("&lt;a href='#' onclick='stage.viewerControls.orient(" + JSON.stringify(stage.viewerControls.getOrientation().elements) + ");'&gt;INSERT TEXT TO DISPLAY HERE&lt;/a&gt;');");
+            });
+
+            $('#store_view_submit').click(function () {
+                var new_view = stage.viewerControls.getOrientation();
+
+                // change for the now.
+                if (!myData.user_views) {
+                    myData.user_views = []
+                }
+                myData.user_views.push(stage.viewerControls.getOrientation());
+                var i = myData.user_views.length - 1;
+                $('#residue').append('<a class="dropdown-item" href="#" id="user_view_' + i.toString() + '">' + $('#store_view_title').val() + '</a>');
+                $('#user_view_' + i.toString()).click(function () {
+                    stage.viewerControls.orient(myData.user_views[i]);
+                });
+                $('#store_view_modal').modal('hide');
+            });

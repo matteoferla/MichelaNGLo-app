@@ -8,7 +8,7 @@
         </button>
       </div>
       <div class="modal-body">
-          <p>This protein view was generated using <a href='http://ngl.matteoferla.com'>PyMol to NGL transpiler</a>.</p>
+          <p>This protein view was generated using <a href='http://ngl.matteoferla.com'>Michela<span style="font-variant: small-caps;">ngl</span>o</a>.</p>
           <p>This web app converts a PyMOL PSE file to an NGL view, allowing it to be shared on the web.
               In fact, NGL is a powerful javascript library (<a href="https://github.com/arose/ngl" target="_blank"><i class="fab fa-github"></i></a>
                                                         <a href="http://nglviewer.org/ngl/" target="_blank"><i class="far fa-popcorn"></i></a>
