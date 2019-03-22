@@ -172,13 +172,21 @@ def ajax_custom(request):
 @view_config(route_name='edit_user-page', renderer='json')
 def edit(request):
     print(request.POST)
-    #request, page, settings
-    make_static_page(**request.POST)
+
+    if request.POST['type'] == 'edit':
+        make_static_page(**request.POST)
+    elif request.POST['type'] == 'delete':
+        os.remove(os.path.join('pymol_ngl_transpiler_app','user',sanitise_URL(request.POST['page'])))
     return {'success': 1}
 
 
-
 ##################### dependent methods
+def sanitise_URL(page):
+    return page.replace('\\','/').split('/')[-1]
+
+def sanitise_HTML(code):
+    return re.sub('<\s?\/?script', '&lt;script', code, re.IGNORECASE)
+
 def make_static_page(page, description='Editable text. press pen to edit.',title='User submitted structure',residues='', **settings):
     js = os.path.join('pymol_ngl_transpiler_app', 'user', page + '.js')
     if (not os.path.isfile(js)):
@@ -187,10 +195,9 @@ def make_static_page(page, description='Editable text. press pen to edit.',title
             open(js,'w').write(tags.format ('var pdb = `REMARK 666 Note that the indent is important as is the secondary structure def\n{pdb}`;\n{loadfun}'.format(**settings)))
         else:
             open(js, 'w').write(tags.format(settings['loadfun']))
-    description = re.sub('<\s?\/?script', '&lt;script', description, re.IGNORECASE)
     open(os.path.join('pymol_ngl_transpiler_app','user', page+'.html'), 'w', newline='\n').write(
         mako.template.Template(filename=os.path.join('pymol_ngl_transpiler_app','templates','user_protein.mako'),
                                format_exceptions=True,
                                lookup=mako.lookup.TemplateLookup(directories=[os.getcwd()])
-        ).render_unicode(description=description, title=title, uuid=page.split('/')[-1], **settings))
+        ).render_unicode(description=sanitise_HTML(description), title=sanitise_HTML(title), uuid=sanitise_URL(page), **settings)) #settings does nothing.
 
