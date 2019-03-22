@@ -266,11 +266,11 @@ NGL.specialOps.load = function (option) {
     else if (myData.proteins[index].type === 'data') {
         var ext = myData.proteins[index].ext || 'pdb';
         if (!! myData.proteins[index].isVariable) {
-            return NGL.stageIds[myData.id].loadFile(new Blob [eval(myData.proteins[index].value.replace(/\W/g,''))], { ext: ext }).then(function (protein) {
+            return NGL.stageIds[myData.id].loadFile(new Blob ([eval(myData.proteins[index].value.replace(/\W/g,'')), { type: 'text/plain'}]), { ext: ext }).then(function (protein) {
             NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);});
         }
         else if (typeof myData.proteins[index].value === 'string') {
-            return NGL.stageIds[myData.id].loadFile(new Blob [myData.proteins[index].value], { ext: ext }).then(function (protein) {
+            return NGL.stageIds[myData.id].loadFile(new Blob ([myData.proteins[index].value, { type: 'text/plain'}]), { ext: ext }).then(function (protein) {
             NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);});
         } else { //is a blob already
             return NGL.stageIds[myData.id].loadFile(myData.proteins[index].value, { ext: ext }).then(function (protein) {
