@@ -133,7 +133,12 @@ $('#submit').click(function () {
     } else if (mode == 'file' && !! demo_pse) {data.append('demo_file',demo_pse);
     } else if (mode == 'file') {    data.append( 'file', valid_value('#upload'));
     } else if (mode == 'pdb') {
-        if (!! $('#upload_pdb')[0].files) {data.append( 'pdb_file', valid_value('#upload_pdb'));}
+        if (!! $('#upload_pdb')[0].files) {
+            if ($('#upload')[0].files[0].size > 5e7) {
+                alert('This file is larger than 50 MB. If you are not attempting a DoS attack, please email Matteo Ferla to process your file.');
+                throw 'DoS attack blocked?';
+            }
+            data.append( 'pdb_file', valid_value('#upload_pdb'));}
         else {data.append( 'pdb', valid_value('#pdb'));}
     } else {throw 'Impossible mode';}
     data.append( 'uniform_non_carbon',$('#uniform_non_carbon').is(':checked'));

@@ -27,9 +27,10 @@
                           <label class="btn btn-secondary active">
                             <input type="radio" name="input_mode" id="input_mode_out" autocomplete="off" value="file" checked> Upload PSE
                           </label>
+                              <!--
                           <label class="btn btn-secondary">
                             <input type="radio" name="input_mode" id="input_mode_pdb" value="pdb" autocomplete="off"> Upload PDB
-                          </label>
+                          </label>-->
                           <label class="btn btn-secondary">
                             <input type="radio" name="input_mode" id="input_mode_file" value="out" autocomplete="off"> Input PyMol output
                           </label>
