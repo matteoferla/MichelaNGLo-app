@@ -214,7 +214,7 @@ NGL.specialOps._run_loadFx = function (protein, fx) {
     if (typeof fx === 'function') {
         fx(protein)}
     else if (typeof fx === 'string') {
-        eval(fx)(protein)}
+        eval(fx.replace(/\W/g,''))(protein)} //prevent XSS
     else {
         protein.addRepresentation("cartoon", {smoothSheet: true}); protein.autoView();
     }
@@ -266,7 +266,7 @@ NGL.specialOps.load = function (option) {
     else if (myData.proteins[index].type === 'data') {
         var ext = myData.proteins[index].ext || 'pdb';
         if (!! myData.proteins[index].isVariable) {
-            return NGL.stageIds[myData.id].loadFile(new Blob [eval(myData.proteins[index].value)], { ext: ext }).then(function (protein) {
+            return NGL.stageIds[myData.id].loadFile(new Blob [eval(myData.proteins[index].value.replace(/\W/g,''))], { ext: ext }).then(function (protein) {
             NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);});
         }
         else if (typeof myData.proteins[index].value === 'string') {
@@ -437,7 +437,7 @@ $.prototype.viewport = function () {
         var data = $(this).data('proteins');
         if (typeof data == "object") {/*pass*/}
         else if (data === 'ERROR') {throw 'The data-protein is attribute is literally ERROR'}
-        else if (typeof data == "string") {data = JSON.parse(data);}
+        else if (typeof data == "string") {data = JSON.parse(data.replace("'",'"'));}
         else if ($(this).data('load')) { data = $(this).data('load').split(',').map(v => ({name: v, value: v, type: 'rcsb'}));
         } else {data = [];}
         NGL.specialOps.multiLoader($(this).attr('id'), data, backgroundcolor);
