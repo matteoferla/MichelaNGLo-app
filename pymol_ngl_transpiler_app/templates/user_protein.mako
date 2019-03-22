@@ -80,7 +80,7 @@
                         'type': 'edit',
                         'title': $('#edit_title').val(),
                         'description': $('#edit_description').val(),
-                        'page': $(location).attr("href").split('/').pop().split('.')[0],  //just in case someone wants to API it...
+                        'page': $(location).attr("href").split('/').pop().split('.')[0],  //just in case someone wants to API it.
                         'residues': $('#edit_residues').val(),
                         'proteinJSON': JSON.stringify($('[role="NGL"]').data('proteins')),
                         'backgroundcolor': $('[role="NGL"]').data('backgroundcolor')
@@ -99,7 +99,8 @@
                         type: 'POST',
                         dataType: 'json',
                         data: {
-                            'type': 'delete'
+                            'type': 'delete',
+                            'page': $(location).attr("href").split('/').pop().split('.')[0]
                         },
                         success: function (result) {
                             window.location.href = '/';

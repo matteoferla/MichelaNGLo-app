@@ -25,9 +25,11 @@
                 <%include file="markup/markup_builder_btn.mako"/>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="edit_submit"><i class="far fa-save"></i> Save changes</button>
-                    <button type="button" class="btn btn-warning" id="edit_delete"><i class="far fa-save"></i> Scrap page</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="far fa-sign-out"></i> Discard changes</button>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-sucess" id="edit_submit"><i class="far fa-save"></i> Save changes</button>
+                        <button type="button" class="btn btn-danger" id="edit_delete"><i class="far fa-save"></i> Scrap page</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="far fa-sign-out"></i> Discard changes</button>
+                    </div>
                 </div>
             </div>
         </div>

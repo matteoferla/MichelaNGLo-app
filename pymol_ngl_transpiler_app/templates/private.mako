@@ -1,4 +1,16 @@
 <%inherit file="layout_w_card.mako"/>
+<%!
+import os
+        %>
+<%block name="buttons">
+            <%include file="menu_buttons.mako" args='tour=False'/>
+</%block>
+<%block name="title">
+            &mdash; Admin console
+</%block>
+<%block name="subtitle">
+            Restricted access.
+</%block>
 
 <%block name="alert">
 <div class="alert alert-info m-5">Password is "protein"</div>
@@ -13,18 +25,11 @@
 
 <%block name="body">
 % if admin:
-    <div class="card w-100 m-10">
-      <div class="card-body">
-        <h5 class="card-title">Admin console</h5>
-          <div class="card-body">
-              <div class="btn-group" role="group" aria-label="Basic example">
-                  <button type="button" class="btn btn-light">Nothing</button>
-                  <button type="button" class="btn btn-light">Nothing</button>
-                  <button type="button" class="btn btn-light">Nothing</button>
-                </div>
-          </div>
-      </div>
-    </div>
+    <ul>
+    %for url in os.listdir('pymol_ngl_transpiler_app/user'):
+        <li><a href="${url}">${url}</a></li>
+    %endfor
+    </ul>
 % else:
     <div class="card text-white bg-danger my-3 w-100">
   <div class="card-header">Log-in required</div>
@@ -51,12 +56,13 @@
 
         function password_ajax() {
             $.post("/admin", {password: $('#password').val()}).done(function (data) {
-                //location.reload(true);
+                location.reload(true);
+                /*
                 window.data = data;
                 $('main').detach();
                 $('body').prepend($(data)[39]);
                 $('#alert').hide(1000);
-                $('#password_send').click(password_ajax);
+                $('#password_send').click(password_ajax);*/
             });
         }
 

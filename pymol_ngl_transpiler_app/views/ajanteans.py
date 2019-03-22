@@ -176,13 +176,14 @@ def edit(request):
     if request.POST['type'] == 'edit':
         make_static_page(**request.POST)
     elif request.POST['type'] == 'delete':
-        os.remove(os.path.join('pymol_ngl_transpiler_app','user',sanitise_URL(request.POST['page'])))
+        os.remove(os.path.join('pymol_ngl_transpiler_app','user',sanitise_URL(request.POST['page'])+'.html'))
+        os.remove(os.path.join('pymol_ngl_transpiler_app', 'user', sanitise_URL(request.POST['page']) + '.js'))
     return {'success': 1}
 
 
 ##################### dependent methods
 def sanitise_URL(page):
-    return page.replace('\\','/').split('/')[-1]
+    return page.replace('\\','/').replace('*','').split('/')[-1]
 
 def sanitise_HTML(code):
     return re.sub('<\s?\/?script', '&lt;script', code, re.IGNORECASE)
