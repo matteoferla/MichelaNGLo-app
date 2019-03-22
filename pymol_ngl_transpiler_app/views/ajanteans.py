@@ -6,6 +6,7 @@ import shutil
 import os
 import mako
 import io
+import re
 
 #from pprint import PrettyPrinter
 #pprint = PrettyPrinter()
@@ -186,6 +187,7 @@ def make_static_page(page, description='Editable text. press pen to edit.',title
             open(js,'w').write(tags.format ('var pdb = `REMARK 666 Note that the indent is important as is the secondary structure def\n{pdb}`;\n{loadfun}'.format(**settings)))
         else:
             open(js, 'w').write(tags.format(settings['loadfun']))
+    description = re.sub('<\s?\/?script', '&lt;script', description, re.IGNORECASE)
     open(os.path.join('pymol_ngl_transpiler_app','user', page+'.html'), 'w', newline='\n').write(
         mako.template.Template(filename=os.path.join('pymol_ngl_transpiler_app','templates','user_protein.mako'),
                                format_exceptions=True,
