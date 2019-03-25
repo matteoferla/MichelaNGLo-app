@@ -177,7 +177,9 @@ def edit(request):
         make_static_page(**request.POST)
     elif request.POST['type'] == 'delete':
         os.remove(os.path.join('pymol_ngl_transpiler_app','user',sanitise_URL(request.POST['page'])+'.html'))
-        os.remove(os.path.join('pymol_ngl_transpiler_app', 'user', sanitise_URL(request.POST['page']) + '.js'))
+        js = sanitise_URL(request.POST['page']) + '.js'
+        if os.path.isfile(js):
+            os.remove(os.path.join('pymol_ngl_transpiler_app', 'user', js))
     return {'success': 1}
 
 

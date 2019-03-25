@@ -1,6 +1,7 @@
 <%inherit file="layout_w_card.mako"/>
 <%!
 import os
+from datetime import datetime
         %>
 <%block name="buttons">
             <%include file="menu_buttons.mako" args='tour=False'/>
@@ -13,9 +14,11 @@ import os
 </%block>
 
 <%block name="alert">
-<div class="alert alert-info m-5">Password is "protein"</div>
+%if not admin:
+    <div class="alert alert-info m-5">Password is "protein"</div>
+%endif
 
-    % if status:
+% if status:
     <div class="alert alert-danger m-5" role="alert" id="alert">
       ${status}
     </div>
@@ -25,9 +28,37 @@ import os
 
 <%block name="body">
 % if admin:
-    <ul>
+    <ul class="list-group">
     %for url in os.listdir('pymol_ngl_transpiler_app/user'):
-        <li><a href="${url}">${url}</a></li>
+        %if '.html' in url:
+        <li class="list-group-item" id="${url.replace('.html','')}">
+            <h4>${url.replace('.html','')}</h4>
+            <div class="row">
+                <div class="col-5">
+                    <p>
+                        <div class="btn-group" role="group">
+                            <a class="btn btn-primary" href="user-structures/${url}">Go to</a>
+                            <button role="button" class="btn btn-danger text-white admin-delete" data-target="${url.replace('.html','')}">Delete</button>
+                        </div>
+                    </p>
+                </div>
+                <div class="col-1" title="This file has a separate uneditable JS to prevent XSS" data-toggle="tooltip">
+                %if os.path.exists(os.path.join('pymol_ngl_transpiler_app','user',url.replace('.html','.js'))):
+                    <i class="fab fa-js-square"></i>
+                %endif
+                </div>
+                <div class="col-6">
+                    <p>${datetime.fromtimestamp(os.stat(os.path.join('pymol_ngl_transpiler_app','user',url)).st_mtime).strftime("%A, %B %d, %Y %I:%M:%S")}</p>
+                    %if os.path.exists(os.path.join('pymol_ngl_transpiler_app','user',url.replace('.html','.js'))):
+                        <p>${int(os.stat(os.path.join('pymol_ngl_transpiler_app','user',url)).st_size)/1e6+int(os.stat(os.path.join('pymol_ngl_transpiler_app','user',url.replace('.html','.js'))).st_size)/1e6} MB</p>
+                    %else:
+                        <p>${int(os.stat(os.path.join('pymol_ngl_transpiler_app','user',url)).st_size)/1e6} MB</p>
+                    %endif
+                </div>
+            </div>
+
+        </li>
+        %endif
     %endfor
     </ul>
 % else:
@@ -65,6 +96,15 @@ import os
                 $('#password_send').click(password_ajax);*/
             });
         }
+
+        $('.admin-delete').click(function () {
+            var target = $(this).data('target');
+            $.post("/edit_user-page", {'type': 'delete','page': $(this).data('target')})
+                    .done(function () {
+                        $('#'+target).hide(2000);
+                    });
+        });
+
 
         $('#password_send').click(password_ajax);
     </script>
