@@ -9,8 +9,9 @@
             data-placement="left"
             data-trigger="focus"
             data-html="true"
-            data-content='<a role="button" class="btn btn-outline-secondary mx-1" href="/" title="Home">                                                            <i class="far fa-home"></i></a>
+            data-content='<a role="button" class="btn btn-outline-secondary mx-1" href="/" title="Home">                                                                <i class="far fa-home"></i></a>
                           <a role="button" class="btn btn-outline-secondary mx-1"  href="/pymol" title="Convert PyMol file">                                            <i class="far fa-hammer"></i></a>
+                          <a role="button" class="btn btn-outline-secondary mx-1"  href="/pdb" title="Prep PDB">                                                        <i class="far fa-wrench"></i></a>
                           <a role="button" class="btn btn-outline-secondary mx-1"  href="/clash" title="Clash documentation">                                           <i class="far fa-car-crash"></i></a>
                           <a role="button" class="btn btn-outline-secondary mx-1"  href="/markup" title="Markup documentation">                                         <i class="far fa-map-marked-alt"></i></a>
                           <a role="button" class="btn btn-outline-secondary mx-1"  href="/imagetoggle" title="Image documentation">                                     <i class="far fa-images"></i>

@@ -99,39 +99,7 @@
                     </div>
                 </div>
 
-                <!-- in via PDB file -->
-                    <div id="in_via_pdb" class="collapse">
-                    <h3>Input via PDB</h3>
-                    <div class="row">
-                        <div class="col-lg-6 mb-3">
-                            <div class="input-group" data-toggle="tooltip" title="Upload your PDB file">
-                              <div class="input-group-prepend">
-                                <span class="input-group-text" id="upload_addon_pdb">Upload PDB (opt.)</span>
-                              </div>
-                              <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="upload_pdb" aria-describedby="upload_addon_pdb" accept=".pdb, .cif">
-                                <label class="custom-file-label" for="upload_pdb">Choose file</label>
-                              </div>
-                            </div>
-                            <div class="invalid-feedback" id="error_upload_pdb">Please upload a valid pdb file.</div>
-                        </div>
-                        <div class="col-xl-4 col-md-6 mb-4">
-                            <div class="input-group" data-toggle="tooltip"
-                                 title="Basically, if you are using a RCSB PDB structure, don't tick this, but give the PDB code. Otherwise, tick this. For more info, press the question mark.">
-                                <div class="input-group-prepend">
-                                    <div class="input-group-text bg-secondary">
-                                        <input type="checkbox" id="pdb_string_pdb"></div>
-                                </div>
-                                <div class="input-group-append">
-                            <span class="input-group-text">
-                                Include PDB data
-                            </span>
-                                    <div class="btn btn-info" data-toggle="modal" data-target="#CDN_modal" >?</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
 
                 <!-- in common -->
                 <div id="in_common">

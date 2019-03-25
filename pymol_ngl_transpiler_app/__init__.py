@@ -15,6 +15,7 @@ def main(global_config, **settings):
     config.add_route('home', '/')
     config.add_route('markup', '/markup')
     config.add_route('custom', '/custom')
+    config.add_route('pdb', '/pdb')
     config.add_route('pymol', '/pymol')
     config.add_route('clash', '/clash')
     config.add_route('imagetoggle', '/imagetoggle')
