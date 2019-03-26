@@ -43,6 +43,7 @@ $('#pdb_string').change(function () {
 //////////////////////////////////////////////////////////////////////////
 // upload button for PSE and PDB
 $('#upload,#upload_id').change(function () {
+    window.demo_pse = '';
     var id=$(this).attr('id');
     var extension = id == 'upload' ? '.pse' : '.pdb';
     var file=$(this).val().split('\\').slice(-1)[0];
@@ -70,7 +71,7 @@ $('#upload,#upload_id').change(function () {
 //control modal demo buttons for pse model
 var demo_pse='';
 $('.demo-pse').click(function () {
-    demo_pse=$(this).data('value');
+    window.demo_pse=$(this).data('value');
     $('#upload+.custom-file-label').html('DEMO: '+demo_pse);
     $('#demo_modal').modal('hide');
     $('#pdb_string').prop('checked',true);
@@ -130,7 +131,7 @@ $('#submit').click(function () {
     data.append( 'mode', mode );
     if        (mode == 'out') {
         data.append('pymol_output', valid_value('#pymol_output'));
-    } else if (mode == 'file' && !! demo_pse) {data.append('demo_file',demo_pse);
+    } else if (mode == 'file' && !! window.demo_pse) {data.append('demo_file',window.demo_pse);
     } else if (mode == 'file') {    data.append( 'file', valid_value('#upload'));
     } else if (mode == 'pdb') {
         if (!! $('#upload_pdb')[0].files) {

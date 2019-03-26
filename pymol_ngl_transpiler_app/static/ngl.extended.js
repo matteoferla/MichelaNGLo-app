@@ -277,6 +277,9 @@ NGL.specialOps.load = function (option) {
             NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);});
         }
     }
+    else if (myData.proteins[index].type === 'none') {
+        myData.current_index = -1;  //pass. Super odd backdoor. Why is it needed? Let's keep it secret in case I think it's too weird.
+    }
     else { //PDB code.
         return NGL.stageIds[myData.id].loadFile('rcsb://'+myData.proteins[index].value.replace('rcsb://','').toLowerCase().slice(0,4)).then(function (protein) {
             NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);});
@@ -313,7 +316,9 @@ NGL.specialOps.multiLoader = function (id, proteins, backgroundColor, startIndex
     if (typeof window.myData === 'object') {window.myData.proteins.push(...proteins);}
     else {window.myData={current_index: -1, proteins: proteins, id: id, backgroundColor: backgroundColor || 'white'};}
     var img = $('#'+id+' img');
-    if (img.length) {img.click(function () {NGL.specialOps.load(startIndex);});}
+    if (img.length) {
+        img.click(function () {NGL.specialOps.load(startIndex);});
+    }
     else {return NGL.specialOps.load(startIndex);}
 };
 
@@ -424,14 +429,17 @@ $.prototype.protein = function (){
 $.prototype.viewport = function () {
         if (! $(this).length) {return undefined}
         // fix width:100%; height: 0; padding-bottom: 100%;
-        if (($(this).has('img').length === 0) && ($(this).height() === 0)) {
-            if ($(this).width() === 0) {$(this).css('width','100%');}
-            $(this).height($(this).width());
+        if ($(this).has('img').length === 0) {
+             if ($(this).width() === 0) {$(this).css('width','100%');}
+             if ($(this).height() === 0) {
+                 $(this).height($(this).width());
             $(this).css('padding-bottom','100%');
             console.log('new viewport sizes:');
             console.log($(this).width());
             console.log($(this).height());
+             }
         }
+        // sort attributes
         if (! $(this).attr('id')) {$(this).attr('id','NGLViewport')}
         var backgroundcolor = $(this).data('backgroundcolor') || 'white';
         var data = $(this).data('proteins');
@@ -440,12 +448,17 @@ $.prototype.viewport = function () {
         else if (typeof data == "string") {data = JSON.parse(data.replace("'",'"'));}
         else if ($(this).data('load')) { data = $(this).data('load').split(',').map(v => ({name: v, value: v, type: 'rcsb'}));
         } else {data = [];}
-        NGL.specialOps.multiLoader($(this).attr('id'), data, backgroundcolor);
+        var promise = NGL.specialOps.multiLoader($(this).attr('id'), data, backgroundcolor);
         if ($(this).data('focus') || $(this).data('view')) {
             if ($(this).has('img').length !== 0) {
                 $(this).children('img').on("click", e => setTimeout(() => NGL.specialOps.prolink(this), 500));
+                //could this be done with a promise?
             }
-            else {NGL.specialOps.prolink(this);}
+            else {
+                var prolink = this;
+                promise.then(function () {
+                    NGL.specialOps.prolink(prolink)}
+                    )}
             }
     };
 

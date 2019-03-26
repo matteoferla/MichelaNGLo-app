@@ -10,7 +10,6 @@ $('#markup_modal').on('shown.bs.modal', function (e) {
   $('#viewport').after('<div id="moved_viewport"></div>');
   $('#modal_viewport_box').append($('#viewport').detach());
   NGL.getStage('viewport').handleResize();
-
     //buttons.
     $('#markup_title').parent().show();
     $('#markup_selection,#markup_color,#markup_radius,#markup_tolerance').each(function () {$(this).parent().hide()});

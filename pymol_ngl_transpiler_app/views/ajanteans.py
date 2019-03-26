@@ -66,10 +66,7 @@ def ajax_convert(request):
             if 'demo_file' in request.POST:
                 filename=demo_file(request) #prevention against attacks
             else:
-                filename=os.path.join('pymol_ngl_transpiler_app', 'temp','{0}.pse'.format(uuid.uuid4()))
-                request.POST['file'].file.seek(0)
-                with open(filename, 'wb') as output_file:
-                    shutil.copyfileobj(request.POST['file'].file, output_file)
+                filename = save_file(request,'pse')
             trans = PyMolTranspiler(file=filename, **settings)
             request.session['file'] = filename
             if 'pdb_string' in request.POST:
@@ -168,13 +165,32 @@ def ajax_custom(request):
     mesh.append({'o_name': o_name, 'triangles': trilist})
     return {'mesh': mesh}
 
+@view_config(route_name='ajax_pdb', renderer="../templates/main.result.mako")
+def ajax_pdb(request):
+    print(request.POST)
+    settings = {'page': str(uuid.uuid4()),
+                'data_other': request.POST['viewcode'].replace('<div', '').replace('</div>', '').replace('<', '').replace('>', ''),
+                'backgroundcolor': 'white', 'validation': None, 'js': None, 'pdb': '', 'loadfun': ''}
+    if request.POST['mode'] == 'code':
+        if len(request.POST['pdb']) == 4:
+            settings['proteinJSON'] = '[{{"type": "rcsb", "value": "{0}"}}]'.format(request.POST['pdb'])
+        else:
+            settings['proteinJSON'] = '[{{"type": "file", "value": "{0}"}}]'.format(request.POST['pdb'])
+    else:
+        settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true}]'
+        filename = save_file(request,'pdb')
+        trans = PyMolTranspiler.load_pdb(file=filename)
+        settings['pdb'] = '\n'.join(trans.ss) + '\n' + trans.raw_pdb
+        settings['js'] = 'external'
+        make_static_js(**settings)
+    make_static_html(**settings)
+    return {'snippet': True, **settings}
 
 @view_config(route_name='edit_user-page', renderer='json')
 def edit(request):
-    print(request.POST)
-
     if request.POST['type'] == 'edit':
-        make_static_page(**request.POST)
+        if (os.path.isfile(os.path.join('pymol_ngl_transpiler_app', 'user', request.POST['page'] + '.js'))):
+            make_static_html(js='external', **request.POST) ##this could be dangerous but I think it is safe.
     elif request.POST['type'] == 'delete':
         os.remove(os.path.join('pymol_ngl_transpiler_app','user',sanitise_URL(request.POST['page'])+'.html'))
         js = sanitise_URL(request.POST['page']) + '.js'
@@ -190,17 +206,35 @@ def sanitise_URL(page):
 def sanitise_HTML(code):
     return re.sub('<\s?\/?script', '&lt;script', code, re.IGNORECASE)
 
-def make_static_page(page, description='Editable text. press pen to edit.',title='User submitted structure',residues='', **settings):
+def make_static_page(page, **settings): #proteinJSON, backgroundcolor, pdb and loadfun + title, page/uuid and description
+    settings['js'] = 'external'
+    settings['data_other'] =''
+    make_static_js(page,**settings)
+    make_static_html(page,**settings)
+
+def save_file(request, extension):
+    filename=os.path.join('pymol_ngl_transpiler_app', 'temp','{0}.{1}'.format(uuid.uuid4(),extension))
+    request.POST['file'].file.seek(0)
+    with open(filename, 'wb') as output_file:
+        shutil.copyfileobj(request.POST['file'].file, output_file)
+    return filename
+
+
+def make_static_html(page, description='Editable text. press pen to edit.',title='User submitted structure', **settings):
+    open(os.path.join('pymol_ngl_transpiler_app', 'user', page + '.html'), 'w', newline='\n').write(
+        mako.template.Template(filename=os.path.join('pymol_ngl_transpiler_app', 'templates', 'user_protein.mako'),
+                               format_exceptions=True,
+                               lookup=mako.lookup.TemplateLookup(directories=[os.getcwd()])
+                               ).render_unicode(description=sanitise_HTML(description),
+                                                title=sanitise_HTML(title),
+                                                uuid=sanitise_URL(page),
+                                                **settings))
+
+def make_static_js(page, **settings):
     js = os.path.join('pymol_ngl_transpiler_app', 'user', page + '.js')
     if (not os.path.isfile(js)):
-        tags='<script type="text/javascript" id="code">{0}</script'
+        tags='<script type="text/javascript" id="code">{0}</script>'
         if 'pdb' in settings and settings['pdb']:
             open(js,'w').write(tags.format ('var pdb = `REMARK 666 Note that the indent is important as is the secondary structure def\n{pdb}`;\n{loadfun}'.format(**settings)))
         else:
             open(js, 'w').write(tags.format(settings['loadfun']))
-    open(os.path.join('pymol_ngl_transpiler_app','user', page+'.html'), 'w', newline='\n').write(
-        mako.template.Template(filename=os.path.join('pymol_ngl_transpiler_app','templates','user_protein.mako'),
-                               format_exceptions=True,
-                               lookup=mako.lookup.TemplateLookup(directories=[os.getcwd()])
-        ).render_unicode(description=sanitise_HTML(description), title=sanitise_HTML(title), uuid=sanitise_URL(page), **settings)) #settings does nothing.
-

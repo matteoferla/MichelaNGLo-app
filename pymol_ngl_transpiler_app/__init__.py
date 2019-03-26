@@ -23,6 +23,7 @@ def main(global_config, **settings):
     config.add_route('sandbox', '/sandbox')
     config.add_route('ajax_convert', '/ajax_convert')
     config.add_route('ajax_custom', '/ajax_custom')
+    config.add_route('ajax_pdb','/ajax_pdb')
     config.add_route('save_pdb', '/save_pdb')
     config.add_route('save_zip', '/save_zip')
     config.add_route('edit_user-page', '/edit_user-page')

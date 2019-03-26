@@ -56,8 +56,9 @@
                     <p><a>Press make first!</a></p>
                 </div>
                 <div class="col-12">
-
-                <p>Note that to the span element links are green in this site because of <code>class="prolink"</code>, which are declared in the stylesheet as:</p>
+                <h6>Details</h6>
+                <p>The difference between the two types of link is that the a-element ("anchor" element) is a regular link,
+                    while the span element is just a span of text with custom styling: for example the protein-controlling elements are green in this site because they are span elements with the extra styling conferred by the attribute <code>class="prolink"</code>. The CSS style of this class is declared in the stylesheet as:</p>
                 <pre><code>.prolink {
 	color: mediumseagreen;
 }

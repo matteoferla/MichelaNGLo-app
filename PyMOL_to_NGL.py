@@ -185,22 +185,37 @@ class PyMolTranspiler:
         self.code=''
         self.raw_pdb=None  #this is set from the instance `prot.raw_pdb = open(file).read()`
         if file:
+            print(file)
             assert '.pse' in file.lower(), 'Only PSE files accepted.'
+            ##orient
             pymol.cmd.load(file)
             v = pymol.cmd.get_view()
+            self.convert_view(v)
             self.fix_structure()
             keys = ('ID', 'chain', 'resi', 'resn', 'name', 'elem', 'reps', 'color')
             myspace = {'data': []} #myspace['data'] is the same as self.atoms
             pymol.cmd.iterate('(all)', "data.append({'ID': ID, 'chain': chain, 'resi': resi, 'resn': resn, 'name':name, 'elem':elem, 'reps':reps, 'color':color, 'ss': ss})", space=myspace)
             self.convert_representation(myspace['data'], **settings)
             self.parse_ss(myspace['data'])
-            self.convert_view(v)
             pymol.cmd.save(file.replace('.pse','')+'.pdb')
             pymol.cmd.remove('(all)')
         if view:
             self.convert_view(view)
         if representation:
             self.convert_representation(representation, **settings)
+
+    @classmethod
+    def load_pdb(cls, file):
+        self = cls()
+        with open(file) as w:
+            self.raw_pdb = w.read()
+        pymol.cmd.load(file)
+        self.fix_structure()
+        keys = ('ID', 'chain', 'resi', 'resn', 'name', 'elem', 'reps', 'color')
+        myspace = {'data': []}  # myspace['data'] is the same as self.atoms
+        pymol.cmd.iterate('(all)', "data.append({'ID': ID, 'chain': chain, 'resi': resi, 'resn': resn, 'name':name, 'elem':elem, 'reps':reps, 'color':color, 'ss': ss})", space=myspace)
+        self.parse_ss(myspace['data'])
+        return self
 
     def fix_structure(self):
         """

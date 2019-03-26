@@ -8,7 +8,7 @@
     <div class='col-9'>
         <div class='card shadow'>
             <div class="card-body">
-                <div id="viewport" role="NGL" data-proteins='${proteinJSON}' data-backgroundcolor="${backgroundcolor}"></div>
+                <div id="viewport" role="NGL" data-proteins='${proteinJSON}' data-backgroundcolor="${backgroundcolor}" ${data_other}></div>
             </div>
         </div>
     </div>
@@ -51,15 +51,16 @@
     </div>
 </div>
 
+<%block name="modals">
 <%include file='edit_modal.mako'/>
-
-
-
 <%include file='about.mako'/>
 <%include file='basics.mako'/>
 <%include file="markup/markup_builder_modal.mako"/>
-
+%if js == 'external':
 <%include file="../user/${uuid}.js"/>
+%endif
+
+</%block>
 
 <%block name='script'>
     <script type="text/javascript">
@@ -80,8 +81,8 @@
                         'type': 'edit',
                         'title': $('#edit_title').val(),
                         'description': $('#edit_description').val(),
-                        'page': $(location).attr("href").split('/').pop().split('.')[0],  //just in case someone wants to API it.
-                        'residues': $('#edit_residues').val(),
+                        'page': $(location).attr("href").split('/').pop().split('.')[0],  //just in case someone wants to API it and for admin console.
+                        'residues': $('#edit_residues').val(), //no longer valid.
                         'proteinJSON': JSON.stringify($('[role="NGL"]').data('proteins')),
                         'backgroundcolor': $('[role="NGL"]').data('backgroundcolor')
                     },
