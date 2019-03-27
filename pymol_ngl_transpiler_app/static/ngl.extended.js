@@ -1,3 +1,4 @@
+NGL.specialOps = {'note': `This is a monkeypatch to allow HTML control of the structure using the markup defined in ngl.matteoferla.com/markup
 /* This script adds to NGL the following...
 
 * NGL.stageIds an object taht stores id: stages
@@ -18,11 +19,11 @@
 ** NGL.Stage.prototype.removeComponentsbyName array version.
 ** NGL.Stage.prototype.removeClashes removes clashes and the rotation.
 * $.prototype.protein to enable a link
-NB. this file ends with `$('[data-toggle="protein"]').protein();` to activate all links.
+NB. this file ends with $('[data-toggle="protein"]').protein(); to activate all links.
 
 proteins is an array of {name: 'unique_name', type: 'rcsb' (default) | 'file' | 'data', value: xxx, 'ext': 'pdb' (default), loadFx: xxx}
 where the optional loadFx is a function that is run on loading.
-*/
+`};
 
 
 NGL.stageIds = {};
@@ -56,8 +57,6 @@ NGL.getStage = function (id) {
 };
 
 ///////////////////////////// NGL.SpecialOps ///////////////
-
-NGL.specialOps = {'note': 'This is a monkeypatch to allow HTML control of the structure using the markup defined in ngl.matteoferla.com/markup'};
 
 NGL.specialOps.slowOrient = function (id, view) {
     //wrapper for a string view.
@@ -198,6 +197,14 @@ NGL.specialOps.showBlur = function (id,selection, color, radius, view) {
         else {
         protein.autoView(2000);
         }
+};
+
+NGL.specialOps.hardReset = function () {  //when the page is faux-refreshed.
+    Object.entries(NGL.stageIds).forEach(([k,v]) => $('#'+k).children().detach());
+    window.myData = undefined;
+    NGL.stageIds = {};
+    window.stage = undefined;
+    console.log('HARD RESET.');
 };
 
 NGL.specialOps.removeImg = function () {
