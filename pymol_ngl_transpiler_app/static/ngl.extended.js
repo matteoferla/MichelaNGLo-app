@@ -25,6 +25,7 @@ proteins is an array of {name: 'unique_name', type: 'rcsb' (default) | 'file' | 
 where the optional loadFx is a function that is run on loading.
 `};
 
+NGL.specialOps.version = '0.3.0';
 
 NGL.stageIds = {};
 
@@ -319,6 +320,8 @@ NGL.specialOps.multiLoader = function (id, proteins, backgroundColor, startIndex
     startIndex = startIndex || 0;
     console.log('starting multiloader');
     console.log(proteins);
+    // prevent body scrolling
+    NGL.specialOps._preventScroll(id);
     // check for awkard case it has already been started.
     if (typeof window.myData === 'object') {window.myData.proteins.push(...proteins);}
     else {window.myData={current_index: -1, proteins: proteins, id: id, backgroundColor: backgroundColor || 'white'};}
@@ -334,7 +337,20 @@ NGL.specialOps.postInitialise = function () {
     if (typeof window.myData === "undefined") {
         console.log('WARNING. initilise the scene with NGL.specialOps.multiLoader!');
         window.myData={current_index: -1, proteins: [], id: 'viewport', backgroundColor: 'white'};
+        NGL.specialOps._preventScroll('viewport');
     }
+};
+
+NGL.specialOps._preventScroll = function (id) {
+    $('#'+id).on( 'mousewheel DOMMouseScroll', function ( e ) {
+            var e0 = e.originalEvent,
+                delta = e0.wheelDelta || -e0.detail;
+            this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+            e.preventDefault();
+        });
+    // fix weid overflow.
+    // something somewhere is adding an overflow hidden??
+    setTimeout(() => $('#'+myData.id).css('overflow','visible'),1000)
 };
 
 ///////////////////////////// NGL.Stage monkeypatching ///////////////
@@ -468,6 +484,7 @@ $.prototype.viewport = function () {
                     )}
             }
     };
+
 
 $(document).ready(function () {
     //activate prolinks

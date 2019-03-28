@@ -47,6 +47,7 @@ body {
   /* Margin bottom by footer height */
     margin-bottom: 60px;
 }
+
 main {
     /* bg image*/
   /* Use "linear-gradient" to add a darken background effect to the image (photographer.jpg). This will make the text easier to read */
