@@ -9,6 +9,7 @@ def main(global_config, **settings):
     my_session_factory = SignedCookieSessionFactory('TIM barrels')
     config.set_session_factory(my_session_factory)
     config.include('pyramid_mako')
+    ######################### Routes ##################################
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_static_view('user-structures', 'user', cache_max_age=3600)
     config.add_static_view('images', '../images', cache_max_age=3600)
