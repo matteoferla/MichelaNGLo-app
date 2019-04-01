@@ -26,7 +26,10 @@ def login_view(request):
             return {'status': 'wrong username'}
     elif action == 'register':
         if not user:
-            new_user = User(name=username, role='basic')
+            if username == 'admin':
+                new_user = User(name=username, role='admin')
+            else:
+                new_user = User(name=username, role='basic')
             new_user.set_password(password)
             request.dbsession.add(new_user)
             return {'status': 'registered', 'name': new_user.name, 'rank': new_user.role}
