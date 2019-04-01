@@ -12,12 +12,15 @@
             <div class="card my-5 shadow">
                 <div class="card-header">
                     <img src="static/ox_logo-01.svg" style="height: 6em; position: absolute;">
-                    <div style="margin-left: 6em;">
+                    <div style="margin-left: 6em;" class="clearfix">
+                        <div class="float-left">
                         <h1 class="card-title">
-                            <span onclick="location.href='/';" style="cursor: pointer;">Michela<span style="font-variant: small-caps;">ngl</span>o</span> <%block name="title"/>
-                        <%block name="buttons"/>
-                    </h1>
+                            <span onclick="location.href='/';" style="cursor: pointer;">Michela<span style="font-variant: small-caps;">ngl</span>o</span>
+                            <%block name="title"/>
+                        </h1>
                         <h3 class="card-subtitle mb-2 text-muted"><%block name="subtitle"/></h3>
+                        </div>
+                        <%block name="buttons"/>
                     </div>
                 </div>
                 <div class="card-body">
@@ -30,3 +33,4 @@
 
 
 <%block name="modals"/>
+<%include file="login/login_modal.mako"/>
