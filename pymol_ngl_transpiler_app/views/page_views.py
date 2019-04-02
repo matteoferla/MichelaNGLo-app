@@ -11,6 +11,7 @@ else:
     os.mkdir(os.path.join('pymol_ngl_transpiler_app','temp'))
 
 @notfound_view_config(renderer="../templates/404.mako")
+@view_config(route_name='admin', renderer='../templates/admin.mako', http_cache=0)
 @view_config(route_name='clash', renderer="../templates/clash.mako")
 @view_config(route_name='custom', renderer="../templates/custom.mako")
 @view_config(route_name='home', renderer="../templates/welcome.mako")
@@ -21,7 +22,7 @@ else:
 @view_config(route_name='pdb', renderer="../templates/pdb.mako")
 def my_view(request):
     user = request.user
-    return {'project': 'PyMOL_NGL_transpiler_app',
+    return {'project': 'Michalanglo',
             'user': user}
 
 
@@ -41,28 +42,3 @@ def save_pdb(request):
 @view_config(route_name='save_zip')
 def save_zip(request):
     raise NotImplementedError
-
-
-@view_config(route_name='admin', renderer='../templates/private.mako', http_cache=0)
-def admin_callable(request):
-    status='This area is not for users. Sorry.'
-    if 'admin' in request.session and request.session['admin']:
-        admin=True
-    else:
-        admin=False
-    if 'password' in request.POST:
-        if request.POST['password'] == password:
-            print('Granted')
-            request.session['admin'] = True
-            admin=True
-            status = 'The password is right. How did you get this message?'
-        else:
-            print('wrong...{}'.format(request.POST['password']))
-            admin = False
-            status='禁 Warning: Password wrong!'
-    else:
-        status=''
-    if admin:
-        return {'admin': True, 'status': ''}
-    else:
-        return {'admin': False, 'status': status}
