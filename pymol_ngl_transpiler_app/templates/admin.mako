@@ -17,29 +17,22 @@
         from pymol_ngl_transpiler_app.models import User
         users = self.context._data['request'].dbsession.query(User).all()
     %>
-    <div class="card w-100 m-10">
-        <div class="card-header">
-                <h3 class="card-title">Admin console</h3>
-            </div>
-      <div class="card-body">
-          <p class="card-text">
+    <p class="card-text">
               There are ${len(users)} regististered users.
-              <ul class="fa-ul">
-                %for u in users:
-                    <li data-user="${u.name}">
-                        <a href="#mod" data-toggle="modal" data-target="#mod" data-user="${u.name}">
-                        <span class="fa-li" >
-                    %if u.role == 'admin':
-                        <i class="far fa-user-crown"></i>
-                    %else:
-                        <i class="far fa-user"></i>
-                    %endif
-                    </span> ${u.name} </a></li>
-                %endfor
-              </ul>
-          </p>
-      </div>
-    </div>
+        <ul class="fa-ul">
+            %for u in users:
+                <li data-user="${u.name}">
+                    <a href="#mod" data-toggle="modal" data-target="#mod" data-user="${u.name}">
+                    <span class="fa-li" >
+                %if u.role == 'admin':
+                    <i class="far fa-user-crown"></i>
+                %else:
+                    <i class="far fa-user"></i>
+                %endif
+                </span> ${u.name} </a></li>
+            %endfor
+        </ul>
+    </p>
 % else:
     <div class="card bg-warning my-3 w-100">
         <div class="card-header"><h5 class="card-title">Restricted</h5></div>

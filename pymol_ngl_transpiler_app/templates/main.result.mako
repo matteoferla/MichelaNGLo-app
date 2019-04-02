@@ -37,10 +37,10 @@
         <div class="tab-pane fade" id="nav-downloads" role="tabpanel" aria-labelledby="nav-downloads-tab">
             <div class="list-group border border-rounded">
                 % if page:
-              <a href="user-structures/${page}.html" class="list-group-item list-group-item-action">
-                <i class="far fa-handshake"></i> Sharable and editable version
-              </a>
-                  % endif
+                  <a href="data/${page}" class="list-group-item list-group-item-action">
+                    <i class="far fa-handshake"></i> Sharable and editable version
+                  </a>
+                % endif
               <a href="#" class="list-group-item list-group-item-action"><i class="far fa-download"></i> Download files</a>
               <a href="#" class="list-group-item list-group-item-action"><i class="far fa-map"></i> Download PDB</a>
             </div>

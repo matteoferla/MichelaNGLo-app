@@ -1,6 +1,6 @@
 <%page args="tour=False"/>
 <div class="float-right d-flex flex-row">
-    #### filled by JS in layout.
+    #### filled by JS in layout.mako
     <span id="user" class="my-2 mr-3"></span>
 <div class="d-flex flex-column" style="width: 42px;">
     <button class="btn btn-outline-secondary my-1" type="button"

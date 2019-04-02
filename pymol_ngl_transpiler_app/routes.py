@@ -2,8 +2,7 @@
 ######################### Routes ##################################
 def includeme(config):
     config.add_static_view('static', 'static', cache_max_age=3600)
-    config.add_static_view('user-structures', 'user', cache_max_age=3600)
-    config.add_static_view('images', '../images', cache_max_age=3600)
+    config.add_static_view('images', 'images', cache_max_age=3600)
     config.add_route('home', '/')
     config.add_route('markup', '/markup')
     config.add_route('custom', '/custom')
@@ -19,5 +18,8 @@ def includeme(config):
     config.add_route('save_pdb', '/save_pdb')
     config.add_route('save_zip', '/save_zip')
     config.add_route('edit_user-page', '/edit_user-page')
+    config.add_route('delete_user-page', '/delete_user-page')
     config.add_route('login', '/login')
+    config.add_route('get', '/get')
     config.add_route('admin', '/admin')
+    config.add_route('userdata', '/data/{id}')

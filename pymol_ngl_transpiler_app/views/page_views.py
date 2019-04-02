@@ -28,10 +28,38 @@ def my_view(request):
 
 @view_config(route_name='markup', renderer="../templates/markup.mako")
 def markup_view(request):
-    settings = {'project': 'PyMOL_NGL_transpiler_app'} #useless for now.
+    settings = {'project': 'Michelanglo', 'user': request.user} #useless for now.
     if request.GET and 'version' in request.GET and request.GET['version'] == 'old':
         return render_to_response("../templates/markup_old.mako",settings, request)
     return settings
+
+from ..pages import Page
+
+@view_config(route_name='userdata', renderer="../templates/user_protein.mako")
+def userdata_view(request):
+    pagename = request.matchdict['id']
+    settings = Page(pagename).load()
+    settings['user'] = request.user
+    user = request.user
+    if user:
+        if user.role == 'admin':
+            settings['editable'] = True
+        elif pagename in user.get_owned_pages():
+            settings['editable'] = True
+        elif pagename in user.get_visited_pages():
+            settings['editable'] = False
+        else:
+            user.add_visited_page(pagename)
+            request.dbsession.add(user)
+            settings['editable'] = False
+            print('visited new page!!!!!')
+            print(user.visited_pages)
+    else:
+        settings['editable'] = False
+    return settings
+
+
+
 
 @view_config(route_name='save_pdb')
 def save_pdb(request):

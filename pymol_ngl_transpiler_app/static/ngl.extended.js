@@ -222,7 +222,10 @@ NGL.specialOps._run_loadFx = function (protein, fx) {
     if (typeof fx === 'function') {
         fx(protein)}
     else if (typeof fx === 'string') {
-        eval(fx.replace(/\W/g,''))(protein)} //prevent XSS
+        var fxname = fx.replace(/\W/g,'');
+        if (window[fxname] !== undefined) {window[fxname](protein)}
+        else {setTimeout((protein, fxname) => NGL.specialOps._run_loadFx(protein, fxname),300)} //ansync issue.
+        } //prevent XSS
     else {
         protein.addRepresentation("cartoon", {smoothSheet: true}); protein.autoView();
     }
@@ -274,9 +277,15 @@ NGL.specialOps.load = function (option) {
     else if (myData.proteins[index].type === 'data') {
         var ext = myData.proteins[index].ext || 'pdb';
         if (!! myData.proteins[index].isVariable) {
-            return NGL.stageIds[myData.id].loadFile(new Blob ([eval(myData.proteins[index].value.replace(/\W/g,'')), { type: 'text/plain'}]), { ext: ext }).then(function (protein) {
-            NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);});
+            var varname = myData.proteins[index].value.replace(/\W/g,'');
+            if (window[varname] !== undefined) {
+                return NGL.stageIds[myData.id].loadFile(new Blob ([window[varname], { type: 'text/plain'}]), { ext: ext }).then(function (protein) {
+                    NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);});
+            } else { //async issue.
+                setTimeout((option) => NGL.specialOps.load, 300);
+            }
         }
+
         else if (typeof myData.proteins[index].value === 'string') {
             return NGL.stageIds[myData.id].loadFile(new Blob ([myData.proteins[index].value, { type: 'text/plain'}]), { ext: ext }).then(function (protein) {
             NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);});

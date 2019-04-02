@@ -61,7 +61,7 @@ def login_view(request):
             request.dbsession.add(target)
             return {'status': 'promoted'}
         else:
-            request.response.status = 400
+            request.response.status = 403
             return {'status': 'access denied'}
     elif action == 'kill':
         if request.user and request.user.role == 'admin': ##only admins have a licence to kill
@@ -69,7 +69,7 @@ def login_view(request):
             request.dbsession.delete(target)
             return {'status': 'deleted'}
         else:
-            request.response.status = 400
+            request.response.status = 403
             return {'status': 'access denied'}
     elif action == 'reset':
         if request.user and request.user.role == 'admin': ##only admins can reset the password
@@ -78,8 +78,8 @@ def login_view(request):
             request.dbsession.add(target)
             return {'status': 'reset'}
         else:
-            request.response.status = 400
+            request.response.status = 403
             return {'status': 'access denied'}
     else:
-        request.response.status = 400
+        request.response.status = 405
         return {'status': 'unknown request'}

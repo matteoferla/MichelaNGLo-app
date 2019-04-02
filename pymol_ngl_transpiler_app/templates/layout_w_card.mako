@@ -15,7 +15,7 @@
                     <div style="margin-left: 6em;" class="clearfix">
                         <div class="float-left">
                         <h1 class="card-title">
-                            <span onclick="location.href='/';" style="cursor: pointer;">Michela<span style="font-variant: small-caps;">ngl</span>o</span>
+                            <span onclick="location.href='/';" style="cursor: pointer;">Michela<span style="font-variant: small-caps; font-weight: bolder;">ngl</span>o</span>
                             <%block name="title"/>
                         </h1>
                         <h3 class="card-subtitle mb-2 text-muted"><%block name="subtitle"/></h3>
@@ -33,4 +33,3 @@
 
 
 <%block name="modals"/>
-<%include file="login/login_modal.mako"/>

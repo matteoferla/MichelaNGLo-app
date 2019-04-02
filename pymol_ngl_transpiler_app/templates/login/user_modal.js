@@ -18,18 +18,32 @@ $('#login-btn,#register-btn,#logout-btn').click( function () {
                 $("#logout-content").show(1000);
                 $("#username-name").text(msg.name);
                 $("#username-rank").text(msg.rank);
+
                 //setTimeout(() => $('#login').modal('hide'),1500);
 
             } else if (action === 'logout') {
                 $("#logout-content").hide(1000);
+                $("#page-content").detach();
                 $("#login-content").show(1000);
             }
             // deal with header in main page
 
-            if (action === 'login') {set_username (msg.name);}
-            else if (action === 'register') {set_username (msg.name,'user-astronaut');}
-            else if (action === 'logout') {set_username ();}
-            else {set_username ('<b>Impossible</b>','user-ninja');}
+            if (action === 'login') {
+                set_username (msg.name, msg.rank);
+                $('#pages-content').detach();
+                $.ajax({url: "/get",
+                    data: {username: $('#username').val(),
+                           item: 'pages'},
+                    method: 'POST'
+                }).done( (msg) => $('#login .modal-body').append(msg));
+
+            }
+            else if (action === 'register') {set_username (msg.name,'new');}
+            else if (action === 'logout') {
+                set_username ();
+                $('#pages-content').detach();
+            }
+            else {set_username ('<b>Impossible</b>','hacker');}
 
             })
         .fail(function (msg) {
@@ -47,3 +61,15 @@ $('#login-btn,#register-btn,#logout-btn').click( function () {
             }
         })
 });
+
+window.deletePage = function (id) {
+$.ajax({
+    url: "/delete_user-page",
+    type: 'POST',
+    dataType: 'json',
+    data: {
+        'type': 'delete',
+        'page': id
+    }
+}).done(()=> $('[data-page="'+id+'"]').detach());
+}

@@ -15,14 +15,12 @@ $("[data-target='#mod']").click(function () {
     window.currentUser = userdata.filter(u => u.name === $(this).data('user'))[0]; //if it crashes there should be error.
     // title
     $('#mod .modal-title').html('View/Edit user <code>'+currentUser.name+'</code>');
-    // content
+    // interact
     var btn = '<buttom role="button" class="btn btn-outline-primary w-100" id="ID"><i class="far ICON"></i> NAME</buttom>';
     $('#mod .modal-body').html('<div class="row"><div class="col-4"></div><div class="col-4"></div><div class="col-4"></div></div>');
     $('#mod .modal-body .col-4').eq(0).append(btn.replace('ID','pass').replace('NAME','Reset pwd').replace('ICON','fa-paint-roller'));
     $('#mod .modal-body .col-4').eq(1).append(btn.replace('ID','kill').replace('NAME','Delete').replace('ICON','fa-skull-crossbones'));
     $('#mod .modal-body').append('<hr/>');
-    $('#mod .modal-body').append('<h6>Visited</h6><p>'+currentUser.visited_pages+'</p>');
-    $('#mod .modal-body').append('<h6>Owned</h6><p>'+currentUser.owned_pages+'</p>');
     if (currentUser.role !== 'admin') {$('#mod .modal-body .col-4').eq(2).append(btn.replace('ID','adminize').replace('NAME','Mk admin').replace('ICON','fa-crown'));}
     $('#adminize').click(function () {
         $.ajax({url: "/login",
@@ -65,9 +63,10 @@ $("[data-target='#mod']").click(function () {
             $('#mod .modal-body').prepend('<p>Password reset to <code>password</code></p>');
         });
     });
+    /// pages
+    $.ajax({url: "/get",
+            data: {username: currentUser.name,
+                   item: 'pages'},
+            method: 'POST'
+        }).done( (msg) => $('#mod .modal-body').append(msg));
 });
-
-$("[data-toggle='user']").click(function () {
-    var li = $(this).parent();
-
-    });
