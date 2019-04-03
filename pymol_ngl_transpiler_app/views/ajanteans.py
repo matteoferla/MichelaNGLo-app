@@ -105,13 +105,12 @@ def ajax_convert(request):
         pagename=str(uuid.uuid4())
         if user:
             user.add_owned_page(pagename)
-            request.dbsession.add(user)
             settings['author'] = [user.name]
         else:
             user = get_trashcan(request)
             user.add_owned_page(pagename)
-            request.dbsession.add(user)
             settings['author'] = ['Anonymous']
+        request.dbsession.add(user)
         ##snippet_run=trans.code
         settings['loadfun'] = trans.get_loadfun_js(viewport=request.POST['viewport_id'])
         if trans.raw_pdb:
@@ -194,6 +193,7 @@ def ajax_custom(request):
 def ajax_pdb(request):
     pagename = str(uuid.uuid4())
     settings = {'data_other': request.POST['viewcode'].replace('<div', '').replace('</div>', '').replace('<', '').replace('>', ''),
+                'page': pagename, 'editable': True,
                 'backgroundcolor': 'white', 'validation': None, 'js': None, 'pdb': '', 'loadfun': ''}
     if request.POST['mode'] == 'code':
         if len(request.POST['pdb']) == 4:
@@ -206,7 +206,15 @@ def ajax_pdb(request):
         trans = PyMolTranspiler.load_pdb(file=filename)
         settings['pdb'] = '\n'.join(trans.ss) + '\n' + trans.raw_pdb
         settings['js'] = 'external'
-        #make_static_js(**settings)
+    if request.user:
+        settings['authors'] = [request.user.name]
+        request.user.add_owned_page(pagename)
+        request.dbsession.add(request.user)
+    else:
+        settings['authors'] = ['anonymous']
+        trashcan = get_trashcan(request)
+        trashcan.add_owned_page(pagename)
+        request.dbsession.add(trashcan)
     Page(pagename).save(settings)
     #make_static_html(**settings)
     return {'snippet': True, **settings}

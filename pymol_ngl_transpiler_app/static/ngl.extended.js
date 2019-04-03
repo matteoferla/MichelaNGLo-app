@@ -403,7 +403,7 @@ NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
     var id = 'viewport';
     if ($(prolink).data('target')) {id = $(prolink).data('target').replace('#','')}
     else if (!! $(prolink).attr('href') && !! $(prolink).attr('href').replace('#','')) { // # alone is not enough
-        id = $(prolink).attr('href');
+        id = $(prolink).attr('href').replace('#','');
     }
     var title = $(prolink).data('title');
     var focus = $(prolink).data('focus') || 'domain'; // residue | domain | clash
