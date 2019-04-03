@@ -1,7 +1,11 @@
-# PyMOL-to-NGL transpiler
-A script to convert a PyMOL PSE file to a easy to implement NGL.js view.
+# Michelaɴɢʟo
+Michelaɴɢʟo is a web app to convert a PyMOL PSE file or PDB file to a easy to implement NGL.js view that can be implemented easily on any site.
 
-This is available as the script itself and [a web app (temp URL)](https://ngl.matteoferla.com).
+The conversion file, `PyMOL_to_NGL.py` and the files in `output_templates` are all that is required to use locally.
+
+[Click here to visit the web app (temp URL)](https://ngl.matteoferla.com).
+
+For the documentation for the web app see [help page](https://ngl.matteoferla.com/docs).
 
 ## Aim
 
@@ -13,13 +17,16 @@ A future possibility is that in collaboration with specific journals this could 
 
 ![process](images/process-01.jpg)
 
-### Transpiler
+# Script
+The following describes the script. For the documentation for the web app, such as forgotten passwords, cookie usage _etc._, see [help page](https://ngl.matteoferla.com/docs).
+
+## Transpiler
 
 The script, and associated web app, gets a PSE file and converts it to a copy-pastable piece of code.
 
 If needed, this piece of code can include the PDB data itself, thus removing the need to store the PDB file somewhere.
 
-### Image
+## Image
 
 Whereas, the most commonly used protein viewing software is PyMol, most researchers render a view and label/draw upon it in Paint/Powerpoint/Photoshop.
 
@@ -61,12 +68,7 @@ For representation see `.convert_reps(reps_string)`, which process the output of
 The source of the NGL code can be changed:
 
     >>> trans.to_html_line(ngl='ngl.js')
-    
-## To do
-* Maybe arrows and labels.
-* Automate the retrieval of PyMOL data: currently text output is parsed. But a wrapper for the application or using the pymol library would be best.
-
-For now, the third party js is naughtly served as a copy without git&ndash;submodul'ing it, because it's a private repo.
+   
 
 ## Example
 Here is a rather funny view in PyMOL and the equivalent snapshot transpiled to NGL (link to [example.html](http://www.well.ox.ac.uk/~matteo/junk/example.html)).
