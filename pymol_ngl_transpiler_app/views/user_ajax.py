@@ -39,6 +39,9 @@ def user_view(request):
             request.response.status = 400
             return {'status': 'wrong username'}
     elif action == 'register':
+        if username in ('guest', 'Anonymous', 'trashcan'): ##blacklisted
+            request.response.status = 403
+            return {'status': 'forbidden'}
         if not user:
             if username == 'admin':
                 new_user = User(name=username, role='admin')

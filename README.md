@@ -217,6 +217,17 @@ The following commands will compile PyMol opensource under Python3.
     #add the module to python
     sudo echo $modules > /usr/lib/python3/dist-packages/pymol.pth
 
+# Webapp installation
+Additionally for the webapp the package needs to be installed and the database started.
+
+    pip3 install -e .
+    alembic -c production.ini revision --autogenerate -m "lets get this party started"
+    alembic -c development.ini upgrade head
+    
+In windows the excecutables will have `.exe` suffixes and are in `Scripts` folder `C:\Users\matteo\AppData\Local\Continuum\anaconda3\Scripts\pip3.exe` say for your regular install, your virtual env will be wherever you put it.
+
+Afterwhich, change the secret in `production.ini` and run the script and made a user called `admin`.
+The users `trashcan` gets generated automatically when a guest makes a view and is blacklisted along with `guest` and `Anonymous`.
 
 ## Licence
 * [PyMOL](https://github.com/schrodinger/pymol-open-source/blob/master/LICENSE) is a trademark of Schrodinger, LLC, and can be used freely.
