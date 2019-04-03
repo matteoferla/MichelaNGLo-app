@@ -20,3 +20,4 @@ coverage
 test
 .sqlite
 .egg-info
+.p
