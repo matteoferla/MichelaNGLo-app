@@ -42,7 +42,7 @@
                 <%include file="markup/markup_builder_btn.mako"/>
             </div>
             <div class='col-12 col-sm-6'>
-			<div id="viewport" style="width:100%; height: 0; padding-bottom: 100%;"></div>
+			<div id="viewport" style="width:100%; height: 0; padding-bottom: 100%; overflow: visible;"></div>
 		</div>
 <div class="col-12">
 

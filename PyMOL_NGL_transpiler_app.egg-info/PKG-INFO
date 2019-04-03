@@ -1,29 +1,13 @@
 Metadata-Version: 2.1
-Name: PyMOL-NGL-transpiler-app
+Name: pymol-ngl-transpiler-app
 Version: 0.0
-Summary: PyMOL_NGL_transpiler_app
+Summary: pymol_ngl_transpiler_app
 Home-page: UNKNOWN
 Author: 
 Author-email: 
 License: UNKNOWN
-Description: PyMOL_NGL_transpiler_app README
-        ==================
+Description: 
         
-        Getting Started
-        ---------------
-        
-        - cd <directory containing this file>
-        
-        - $VENV/bin/pip install -e .
-        
-        - $VENV/bin/pserve development.ini
-        
-        
-        
-        0.0
-        ---
-        
-        -  Initial version
         
 Keywords: web pyramid pylons
 Platform: UNKNOWN

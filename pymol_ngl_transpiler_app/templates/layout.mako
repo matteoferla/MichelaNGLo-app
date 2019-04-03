@@ -8,9 +8,9 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="PyMOL-NGL transpiler application">
+    <meta name="description" content="Michelanglo, PyMOL-NGL transpiler application">
     <meta name="author" content="Matteo Ferla">
-    <link rel="shortcut icon" href="/static/NGL.png">
+    <link rel="icon" href="/static/NGL.png">
 
     <title>MichelaNGLo</title>
     % if bootstrap == 'materials':
@@ -47,6 +47,7 @@ body {
   /* Margin bottom by footer height */
     margin-bottom: 60px;
 }
+
 main {
     /* bg image*/
   /* Use "linear-gradient" to add a darken background effect to the image (photographer.jpg). This will make the text easier to read */
@@ -131,12 +132,34 @@ pre {
 
 <script src="https://www.matteoferla.com/bootstrap-tourist/bootstrap-tourist.js"></script>
 <%block name="script"/>
+<%include file="login/user_modal.mako"/>
 <script type="text/javascript">
     $('[data-toggle="popover"]').popover();
     $('[data-toggle="tooltip"]').tooltip();
     $('#menu').on('shown.bs.popover', function () {
         $('.popover a').hover(function () {$('.popover-header').html($(this).attr('title'))});
     });
+    window.set_username = function (name, role, quietly) {
+    role = role || 'basic';
+    if (! name) {name = '<i>Guest</i>'; role='guest'}
+    var icon = {'basic': 'user', 'friend': 'user-tie', 'guest': 'user-secret', 'admin': 'user-crown', 'new': 'user-astronaut', 'hacker': 'user-ninja', 'trashcan': 'dumpster'}[role];
+    $("#user").html('<span id="user"><a href="#" class="text-secondary" data-toggle="modal" data-target="#login"><i class="far fa-'+icon+'"></i> '+name+'</a></span>');
+    if (! quietly) {
+        $("#user").animate({fontSize: '3em'}, "fast").animate({fontSize: '1em'}, "slow");}
+    };
+
+    //__init__
+    %if user:
+        $('#login-content').hide();
+        $('#logout-content').show();
+        $("#username-name").text("${user.name}");
+        $("#username-rank").text("${user.role}");
+        set_username("${user.name}", "${user.role}", true);
+    %else:
+        set_username(null, null, true);
+    %endif
+
+    <%include file="login/user_modal.js"/>
 </script>
 
 </body>

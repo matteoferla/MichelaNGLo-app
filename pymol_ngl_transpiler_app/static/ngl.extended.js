@@ -25,6 +25,7 @@ proteins is an array of {name: 'unique_name', type: 'rcsb' (default) | 'file' | 
 where the optional loadFx is a function that is run on loading.
 `};
 
+NGL.specialOps.version = '0.3.0';
 
 NGL.stageIds = {};
 
@@ -221,7 +222,10 @@ NGL.specialOps._run_loadFx = function (protein, fx) {
     if (typeof fx === 'function') {
         fx(protein)}
     else if (typeof fx === 'string') {
-        eval(fx.replace(/\W/g,''))(protein)} //prevent XSS
+        var fxname = fx.replace(/\W/g,'');
+        if (window[fxname] !== undefined) {window[fxname](protein)}
+        else {setTimeout((protein, fxname) => NGL.specialOps._run_loadFx(protein, fxname),300)} //ansync issue.
+        } //prevent XSS
     else {
         protein.addRepresentation("cartoon", {smoothSheet: true}); protein.autoView();
     }
@@ -273,9 +277,15 @@ NGL.specialOps.load = function (option) {
     else if (myData.proteins[index].type === 'data') {
         var ext = myData.proteins[index].ext || 'pdb';
         if (!! myData.proteins[index].isVariable) {
-            return NGL.stageIds[myData.id].loadFile(new Blob ([eval(myData.proteins[index].value.replace(/\W/g,'')), { type: 'text/plain'}]), { ext: ext }).then(function (protein) {
-            NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);});
+            var varname = myData.proteins[index].value.replace(/\W/g,'');
+            if (window[varname] !== undefined) {
+                return NGL.stageIds[myData.id].loadFile(new Blob ([window[varname], { type: 'text/plain'}]), { ext: ext }).then(function (protein) {
+                    NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);});
+            } else { //async issue.
+                setTimeout((option) => NGL.specialOps.load, 300);
+            }
         }
+
         else if (typeof myData.proteins[index].value === 'string') {
             return NGL.stageIds[myData.id].loadFile(new Blob ([myData.proteins[index].value, { type: 'text/plain'}]), { ext: ext }).then(function (protein) {
             NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);});
@@ -319,6 +329,8 @@ NGL.specialOps.multiLoader = function (id, proteins, backgroundColor, startIndex
     startIndex = startIndex || 0;
     console.log('starting multiloader');
     console.log(proteins);
+    // prevent body scrolling
+    NGL.specialOps._preventScroll(id);
     // check for awkard case it has already been started.
     if (typeof window.myData === 'object') {window.myData.proteins.push(...proteins);}
     else {window.myData={current_index: -1, proteins: proteins, id: id, backgroundColor: backgroundColor || 'white'};}
@@ -334,7 +346,20 @@ NGL.specialOps.postInitialise = function () {
     if (typeof window.myData === "undefined") {
         console.log('WARNING. initilise the scene with NGL.specialOps.multiLoader!');
         window.myData={current_index: -1, proteins: [], id: 'viewport', backgroundColor: 'white'};
+        NGL.specialOps._preventScroll('viewport');
     }
+};
+
+NGL.specialOps._preventScroll = function (id) {
+    $('#'+id).on( 'mousewheel DOMMouseScroll', function ( e ) {
+            var e0 = e.originalEvent,
+                delta = e0.wheelDelta || -e0.detail;
+            this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+            e.preventDefault();
+        });
+    // fix weid overflow.
+    // something somewhere is adding an overflow hidden??
+    setTimeout(() => $('#'+myData.id).css('overflow','visible'),1000)
 };
 
 ///////////////////////////// NGL.Stage monkeypatching ///////////////
@@ -378,7 +403,7 @@ NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
     var id = 'viewport';
     if ($(prolink).data('target')) {id = $(prolink).data('target').replace('#','')}
     else if (!! $(prolink).attr('href') && !! $(prolink).attr('href').replace('#','')) { // # alone is not enough
-        id = $(prolink).attr('href');
+        id = $(prolink).attr('href').replace('#','');
     }
     var title = $(prolink).data('title');
     var focus = $(prolink).data('focus') || 'domain'; // residue | domain | clash
@@ -468,6 +493,7 @@ $.prototype.viewport = function () {
                     )}
             }
     };
+
 
 $(document).ready(function () {
     //activate prolinks

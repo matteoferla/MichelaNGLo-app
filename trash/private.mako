@@ -1,10 +1,10 @@
-<%inherit file="layout_w_card.mako"/>
+<%inherit file="../pymol_ngl_transpiler_app/templates/layout_w_card.mako"/>
 <%!
 import os
 from datetime import datetime
         %>
 <%block name="buttons">
-            <%include file="menu_buttons.mako" args='tour=False'/>
+            <%include file="../pymol_ngl_transpiler_app/templates/menu_buttons.mako" args='tour=False'/>
 </%block>
 <%block name="title">
             &mdash; Admin console

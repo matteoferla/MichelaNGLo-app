@@ -1,26 +1,50 @@
 from pyramid.view import view_config
+from pyramid.renderers import render_to_response
 import traceback
 from PyMOL_to_NGL import PyMolTranspiler
+from ..pages import Page
+from ..models import User
+from ..trashcan import get_trashcan
 import uuid
 import shutil
 import os
-import mako
 import io
-import re
+import json
 
 #from pprint import PrettyPrinter
 #pprint = PrettyPrinter()
 
 def demo_file(request):
+    """
+    Needed for ajax_convert. Paranoid way to prevent user sending a spurious demo file name (e.g. ~/.ssh/).
+    """
+    demos=os.listdir(os.path.join('pymol_ngl_transpiler_app', 'demo'))
+    if request.POST['demo_file'] in demos:
+        return os.path.join('pymol_ngl_transpiler_app', 'demo', request.POST['demo_file'])
+    else:
+        raise Exception('Non existant demo file requested. Possible attack!')
+def demo_file(request):
+    """
+    Needed for ajax_convert. Paranoid way to prevent user sending a spurious demo file name (e.g. ~/.ssh/).
+    """
     demos=os.listdir(os.path.join('pymol_ngl_transpiler_app', 'demo'))
     if request.POST['demo_file'] in demos:
         return os.path.join('pymol_ngl_transpiler_app', 'demo', request.POST['demo_file'])
     else:
         raise Exception('Non existant demo file requested. Possible attack!')
 
+def save_file(request, extension):
+    filename=os.path.join('pymol_ngl_transpiler_app', 'temp','{0}.{1}'.format(uuid.uuid4(),extension))
+    request.POST['file'].file.seek(0)
+    with open(filename, 'wb') as output_file:
+        shutil.copyfileobj(request.POST['file'].file, output_file)
+    return filename
+
+
 
 @view_config(route_name='ajax_convert', renderer="../templates/main.result.mako")
 def ajax_convert(request):
+    user = request.user
     try:
         minor_error=''
         ## assertions
@@ -78,7 +102,15 @@ def ajax_convert(request):
         # make output
         ###code = trans.get_html(ngl=request.POST['cdn'], **settings)
         code = 1
-        page=str(uuid.uuid4())
+        pagename=str(uuid.uuid4())
+        if user:
+            user.add_owned_page(pagename)
+            settings['author'] = [user.name]
+        else:
+            user = get_trashcan(request)
+            user.add_owned_page(pagename)
+            settings['author'] = ['Anonymous']
+        request.dbsession.add(user)
         ##snippet_run=trans.code
         settings['loadfun'] = trans.get_loadfun_js(viewport=request.POST['viewport_id'])
         if trans.raw_pdb:
@@ -89,20 +121,12 @@ def ajax_convert(request):
         else:
             settings['proteinJSON'] = '[{{"type": "file", "value": "{0}", "loadFx": "loadfun"}}]'.format(trans.pdb)
         # sharable page
-        try:
-            make_static_page(page, **settings)
-        except Exception as err:
-            print('**************')
-            print('Caught error')
-            print(str(err))
-            page=''
-            minor_error='Could not generate sharable static page ({0})'.format(err)
-        # return
-
+        settings['editors'] = [user.name]
+        Page(pagename).save(settings)
         if minor_error:
-            return {'snippet': True, 'error': 'warning', 'error_msg':minor_error, 'error_title':'A minor error arose','validation':trans.validation_text, 'page': page, **settings}
+            return {'snippet': True, 'error': 'warning', 'error_msg':minor_error, 'error_title':'A minor error arose','validation':trans.validation_text, 'page': pagename, **settings}
         else:
-            return {'snippet': True, 'validation':trans.validation_text, 'page': page, **settings}
+            return {'snippet': True, 'validation':trans.validation_text, 'page': pagename, **settings}
 
     except:
         print('**************')
@@ -167,9 +191,9 @@ def ajax_custom(request):
 
 @view_config(route_name='ajax_pdb', renderer="../templates/main.result.mako")
 def ajax_pdb(request):
-    print(request.POST)
-    settings = {'page': str(uuid.uuid4()),
-                'data_other': request.POST['viewcode'].replace('<div', '').replace('</div>', '').replace('<', '').replace('>', ''),
+    pagename = str(uuid.uuid4())
+    settings = {'data_other': request.POST['viewcode'].replace('<div', '').replace('</div>', '').replace('<', '').replace('>', ''),
+                'page': pagename, 'editable': True,
                 'backgroundcolor': 'white', 'validation': None, 'js': None, 'pdb': '', 'loadfun': ''}
     if request.POST['mode'] == 'code':
         if len(request.POST['pdb']) == 4:
@@ -182,59 +206,89 @@ def ajax_pdb(request):
         trans = PyMolTranspiler.load_pdb(file=filename)
         settings['pdb'] = '\n'.join(trans.ss) + '\n' + trans.raw_pdb
         settings['js'] = 'external'
-        make_static_js(**settings)
-    make_static_html(**settings)
+    if request.user:
+        settings['authors'] = [request.user.name]
+        request.user.add_owned_page(pagename)
+        request.dbsession.add(request.user)
+    else:
+        settings['authors'] = ['anonymous']
+        trashcan = get_trashcan(request)
+        trashcan.add_owned_page(pagename)
+        request.dbsession.add(trashcan)
+    Page(pagename).save(settings)
+    #make_static_html(**settings)
     return {'snippet': True, **settings}
 
 @view_config(route_name='edit_user-page', renderer='json')
 def edit(request):
-    if request.POST['type'] == 'edit':
-        if (os.path.isfile(os.path.join('pymol_ngl_transpiler_app', 'user', request.POST['page'] + '.js'))):
-            make_static_html(js='external', **request.POST) ##this could be dangerous but I think it is safe.
-    elif request.POST['type'] == 'delete':
-        os.remove(os.path.join('pymol_ngl_transpiler_app','user',sanitise_URL(request.POST['page'])+'.html'))
-        js = sanitise_URL(request.POST['page']) + '.js'
-        if os.path.isfile(js):
-            os.remove(os.path.join('pymol_ngl_transpiler_app', 'user', js))
-    return {'success': 1}
+    # get ready
+    page = Page(request.POST['page'])
+    user = request.user
+    ownership = user.owned_pages.split(' ')
+    ## cehck permissions
+    if page.identifier not in ownership and not (user and user.role == 'admin'): ## only owners and admins can edit.
+        request.response.status = 403
+        return {'error': 'not authorised'}
+    else:
+        #load data
+        settings = page.load()
+        if not settings:
+            request.response.status = 404
+            return {'error': 'page not found'}
+        #add author if user was an upgraded to editor by the original author. There are three lists: authors (can and have edited, editors can edit, visitors visit.
+        if user.name not in settings['authors']:
+            settings['authors'].append(user.name)
+        # only admins and friends can edit html fully
+        if user.role in ('admin', 'friend'):
+            for key in ('loadfun', 'title', 'description'):
+                if key in request.POST:
+                    settings[key] = request.POST[key]
+        else: # regular users have to be sanitised
+            for key in ('title', 'description'):
+                if key in request.POST:
+                    settings[key] = Page.sanitise_HTML(request.POST[key])
+        #new_editors
+        if 'new_editors' in request.POST and request.POST['new_editors']:
+            for new_editor in json.loads((request.POST['new_editors'])):
+                target = request.dbsession.query(User).filter_by(name=new_editor).one()
+                if target:
+                    target.add_owned_page(page.identifier)
+                    request.dbsession.add(target)
+                    settings['editors'].append(target.name)
+                else:
+                    print('This is impossible...', new_editor, ' does not exist.')
+        #save
+        Page(request.POST['page']).save(settings)
+        return {'success': 1}
 
 
-##################### dependent methods
-def sanitise_URL(page):
-    return page.replace('\\','/').replace('*','').split('/')[-1]
-
-def sanitise_HTML(code):
-    return re.sub('<\s?\/?script', '&lt;script', code, re.IGNORECASE)
-
-def make_static_page(page, **settings): #proteinJSON, backgroundcolor, pdb and loadfun + title, page/uuid and description
-    settings['js'] = 'external'
-    settings['data_other'] =''
-    make_static_js(page,**settings)
-    make_static_html(page,**settings)
-
-def save_file(request, extension):
-    filename=os.path.join('pymol_ngl_transpiler_app', 'temp','{0}.{1}'.format(uuid.uuid4(),extension))
-    request.POST['file'].file.seek(0)
-    with open(filename, 'wb') as output_file:
-        shutil.copyfileobj(request.POST['file'].file, output_file)
-    return filename
+@view_config(route_name='delete_user-page', renderer='json')
+def delete(request):
+    # get ready
+    page = Page(request.POST['page'])
+    user = request.user
+    ownership = user.get_owned_pages()
+    ## cehck permissions
+    if page.identifier not in ownership and not (user and user.role == 'admin'): ## only owners can delete
+        request.response.status = 403
+        return {'status': 'Not owner'}
+    else:
+        page.delete()
+        return {'status': 'success'}
 
 
-def make_static_html(page, description='Editable text. press pen to edit.',title='User submitted structure', **settings):
-    open(os.path.join('pymol_ngl_transpiler_app', 'user', page + '.html'), 'w', newline='\n').write(
-        mako.template.Template(filename=os.path.join('pymol_ngl_transpiler_app', 'templates', 'user_protein.mako'),
-                               format_exceptions=True,
-                               lookup=mako.lookup.TemplateLookup(directories=[os.getcwd()])
-                               ).render_unicode(description=sanitise_HTML(description),
-                                                title=sanitise_HTML(title),
-                                                uuid=sanitise_URL(page),
-                                                **settings))
-
-def make_static_js(page, **settings):
-    js = os.path.join('pymol_ngl_transpiler_app', 'user', page + '.js')
-    if (not os.path.isfile(js)):
-        tags='<script type="text/javascript" id="code">{0}</script>'
-        if 'pdb' in settings and settings['pdb']:
-            open(js,'w').write(tags.format ('var pdb = `REMARK 666 Note that the indent is important as is the secondary structure def\n{pdb}`;\n{loadfun}'.format(**settings)))
+@view_config(route_name='get')
+def get_ajax(request):
+    user = request.user
+    if request.POST['item'] == 'pages':
+        if not user:
+            request.response.status = 403
+            return render_to_response("../templates/404.mako", {'project': 'Michelanglo', 'user': request.user}, request)
+        elif user.role == 'admin':
+            target = request.dbsession.query(User).filter_by(name=request.POST['username']).one()
+            return render_to_response("../templates/login/pages.mako", {'project': 'Michelanglo', 'user': target}, request)
+        elif request.POST['username'] == user.name:
+            return render_to_response("../templates/login/pages.mako", {'project': 'Michelanglo', 'user': request.user}, request)
         else:
-            open(js, 'w').write(tags.format(settings['loadfun']))
+            request.response.status = 403
+            return render_to_response("../templates/404.mako", {'project': 'Michelanglo', 'user': request.user}, request)

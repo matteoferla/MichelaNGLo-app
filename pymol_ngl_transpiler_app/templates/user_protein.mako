@@ -1,14 +1,18 @@
 <%inherit file="layout.mako"/>
 
-<div class="jumbotron">
-    <h1>${title}</h1>
+<div class="jumbotron clearfix">
+    <div class="float-left ml-3">
+        <h1>${title}</h1>
+        <small class="text-muted">The content of this page was edited by ${' and '.join(authors)}. The administrators of this site take no legal responsibility for its content, if you believe this page is in violation of the law, please report it.</small>
+    </div>
+    <%include file="menu_buttons.mako" args='tour=False'/>
 </div>
 
 <div class='row p-4'>
     <div class='col-9'>
         <div class='card shadow'>
             <div class="card-body">
-                <div id="viewport" role="NGL" data-proteins='${proteinJSON}' data-backgroundcolor="${backgroundcolor}" ${data_other}></div>
+                <div id="viewport" role="NGL" data-proteins='${proteinJSON|n}' data-backgroundcolor="${backgroundcolor}" ${data_other|n}></div>
             </div>
         </div>
     </div>
@@ -35,10 +39,11 @@
                 border-width: 30px 30px 30px 0;
                 border-color: transparent white transparent transparent;">
             </div>
-
-                <div class="float-right">
-                    <button type="button" class="btn btn-outline-primary my-1" id="edit_btn" data-target="#edit_modal" data-toggle="modal"><i class="far fa-edit"></i></button>
-                </div>
+                    %if editable:
+                        <div class="float-right">
+                            <button type="button" class="btn btn-outline-primary my-1" id="edit_btn" data-target="#edit_modal" data-toggle="modal"><i class="far fa-edit"></i></button>
+                        </div>
+                    %endif
 
                 <p>${description|n}</p>
                 <hr/>
@@ -52,64 +57,75 @@
 </div>
 
 <%block name="modals">
-<%include file='edit_modal.mako'/>
+%if editable:
+    <%include file='edit_modal.mako'/>
+%endif
 <%include file='about.mako'/>
 <%include file='basics.mako'/>
 <%include file="markup/markup_builder_modal.mako"/>
-%if js == 'external':
-<%include file="../user/${uuid}.js"/>
-%endif
 
 </%block>
 
 <%block name='script'>
-    <script type="text/javascript">
-        $(document).ready(function () {
-            <%include file="markup/markup_builder_modal.js"/>
+<script type="text/javascript">
+    %if pdb:
+var pdb = `REMARK 666 Note that the indent is important as is the secondary structure def
+${pdb|n}`;
+    %endif
 
+${loadfun|n}
 
-            $('#save').click(function () {
-                NGL.getStage('viewport').makeImage({trim: true, antialias: true, transparent: false}).then(NGL.download);
-            });
+$(document).ready(function () {
+    $('#save').click(function () {
+        NGL.getStage('viewport').makeImage({trim: true, antialias: true, transparent: false}).then(NGL.download);
+    });
 
-            $('#edit_submit').click(function () {
-                $.ajax({
-                    url: "/edit_user-page",
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        'type': 'edit',
-                        'title': $('#edit_title').val(),
-                        'description': $('#edit_description').val(),
-                        'page': $(location).attr("href").split('/').pop().split('.')[0],  //just in case someone wants to API it and for admin console.
-                        'residues': $('#edit_residues').val(), //no longer valid.
-                        'proteinJSON': JSON.stringify($('[role="NGL"]').data('proteins')),
-                        'backgroundcolor': $('[role="NGL"]').data('backgroundcolor')
-                    },
-                    success: function (result) {
-                        location.reload();
-                    }
+    %if editable:
+    <%include file="markup/markup_builder_modal.js"/>
 
-                });
-            });
+    $('#edit_submit').click(function () {
 
-            $('#edit_delete').click(function () {
-                if (confirm('Are you sure you want to remove this page?')) {
-                    $.ajax({
-                        url: "/edit_user-page",
-                        type: 'POST',
-                        dataType: 'json',
-                        data: {
-                            'type': 'delete',
-                            'page': $(location).attr("href").split('/').pop().split('.')[0]
-                        },
-                        success: function (result) {
-                            window.location.href = '/';
-                        }
-                    });
+        $.ajax({
+            url: "/edit_user-page",
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                'type': 'edit',
+                'title': $('#edit_title').val(),
+                'description': $('#edit_description').val(),
+                'page': $(location).attr("href").split('/').pop().split('.')[0],  //just in case someone wants to API it and for admin console.
+                'residues': $('#edit_residues').val(), //no longer valid.
+                'proteinJSON': JSON.stringify($('[role="NGL"]').data('proteins')),
+                'backgroundcolor': $('[role="NGL"]').data('backgroundcolor'),
+                'new_editors': JSON.stringify($('.user-editable-state:checked').map((idx, item) => $(item).data('user')).toArray())
+            },
+            success: function (result) {
+                location.reload();
+            }
+
+        });
+    });
+
+    $('#edit_delete').click(function () {
+        if (confirm('Are you sure you want to remove this page?')) {
+            $.ajax({
+                url: "/delete_user-page",
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    'type': 'delete',
+                    'page': $(location).attr("href").split('/').pop().split('.')[0]
+                },
+                success: function (result) {
+                    window.location.href = '/';
                 }
             });
-        }); //ready
+        }
+    });
 
-    </script>
+    %endif
+
+}); //ready
+
+</script>
 </%block>
