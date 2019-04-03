@@ -16,7 +16,6 @@
           <div class="invalid-feedback" id="username_error">The username is invalid</div>
 
     </div>
-
           </div>
           <div class="col-12">
               <div class="input-group mb-3">
@@ -26,7 +25,16 @@
               <input type="password" class="form-control rounded-right" placeholder="*****" aria-label="Password" aria-describedby="password-label" id="password">
               <div class="invalid-feedback" id="password_error">The password is invalid</div>
             </div>
+          </div>
 
+          <div class="col-12" style="display: none;" data-toggle="tooltip" title="Your email is required only if *you* get in contact regarding an account problem.">
+              <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <span class="input-group-text" id="email-label">Email</span>
+              </div>
+              <input type="text" class="form-control rounded-right" placeholder="me@email.com" aria-label="Email" aria-describedby="email-label" id="email">
+              <div class="invalid-feedback" id="email_error">The email is invalid</div>
+            </div>
           </div>
 
       </div>

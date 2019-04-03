@@ -4,10 +4,17 @@ $('#login-btn,#register-btn,#logout-btn').click( function () {
     $('.is-valid').removeClass('is-valid');
     $('.invalid-feedback').hide();
     var action = $(this).attr('id').replace('-btn','');
+    var data = {username: $('#username').val(),
+               password: $('#password').val(),
+               action: action};
+    if (action === 'register') {
+        $('#email').parent().parent().show();
+        if (! $('#email').val()) {return 0}
+        else {data['email'] = $('#email').val();}
+    }
+
     $.ajax({url: "/login",
-            data: {username: $('#username').val(),
-                   password: $('#password').val(),
-                   action: action},
+            data: data,
             method: 'POST'
         })
         .done(function (msg) {
@@ -63,7 +70,8 @@ $('#login-btn,#register-btn,#logout-btn').click( function () {
 });
 
 window.deletePage = function (id) {
-$.ajax({
+    if (confirm('Are you sure you want to remove this page?')) {
+        $.ajax({
     url: "/delete_user-page",
     type: 'POST',
     dataType: 'json',
@@ -72,4 +80,5 @@ $.ajax({
         'page': id
     }
 }).done(()=> $('[data-page="'+id+'"]').detach());
-}
+    }
+};

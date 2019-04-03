@@ -16,6 +16,7 @@
     <%
         from pymol_ngl_transpiler_app.models import User
         users = self.context._data['request'].dbsession.query(User).all()
+        icon = {'basic': 'user', 'friend': 'user-tie', 'guest': 'user-secret', 'admin': 'user-crown', 'new': 'user-astronaut', 'hacker': 'user-ninja', 'trashcan': 'dumpster'}
     %>
     <p class="card-text">
               There are ${len(users)} regististered users.
@@ -24,10 +25,10 @@
                 <li data-user="${u.name}">
                     <a href="#mod" data-toggle="modal" data-target="#mod" data-user="${u.name}">
                     <span class="fa-li" >
-                %if u.role == 'admin':
-                    <i class="far fa-user-crown"></i>
+                %if u.role in icon:
+                    <i class="far fa-${icon[u.role]}"></i>
                 %else:
-                    <i class="far fa-user"></i>
+                    <i class="far fa-user-ninja"></i>
                 %endif
                 </span> ${u.name} </a></li>
             %endfor
@@ -47,7 +48,7 @@
 
 <%block name="modals">
     <div class="modal" tabindex="-1" role="dialog" id="mod">
-      <div class="modal-dialog" role="document">
+      <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">ERROR</h5>

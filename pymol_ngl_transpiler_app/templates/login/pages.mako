@@ -13,6 +13,12 @@
             else:
                 visited = []
         %>
+        ################ admin
+        %if user.role == 'admin':
+            <h6>Admin console</h6>
+            <p><a href="/admin">Click here to go to admin console.</a></p>
+        %endif
+
         ################# owned
         %if owned:
             <h6>Edited pages</h6>

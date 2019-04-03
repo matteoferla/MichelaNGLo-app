@@ -15,7 +15,8 @@ class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     name = Column(Text, nullable=False, unique=True)
-    role = Column(Text, nullable=False) #basic|admin|friend
+    role = Column(Text, nullable=False) #basic|admin|friend|trashcan
+    email = Column(Text)
     owned_pages = Column(Text)  #space separated list as text as array is not valid
     visited_pages = Column(Text)
     password_hash = Column(Text)
@@ -33,6 +34,7 @@ class User(Base):
 
     def _add_page(self, pagename, group='visited_pages'):
         pages = self._get_pages(group)
+        pages.append(pagename)
         setattr(self,group, ' '.join(pages))
         return self
 
@@ -59,4 +61,4 @@ class User(Base):
 
     def _filter_pages(self, pages):
         raw = [Page(pagename) for pagename in pages]
-        return [page for page in raw if page.exists()]
+        return [page.identifier for page in raw if page.exists()]

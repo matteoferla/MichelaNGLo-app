@@ -38,7 +38,8 @@ from ..pages import Page
 @view_config(route_name='userdata', renderer="../templates/user_protein.mako")
 def userdata_view(request):
     pagename = request.matchdict['id']
-    settings = Page(pagename).load()
+    page = Page(pagename)
+    settings = page.load()
     settings['user'] = request.user
     user = request.user
     if user:
@@ -51,8 +52,9 @@ def userdata_view(request):
         else:
             user.add_visited_page(pagename)
             request.dbsession.add(user)
+            settings['visitors'].append(user.name)
+            page.save()
             settings['editable'] = False
-            print('visited new page!!!!!')
             print(user.visited_pages)
     else:
         settings['editable'] = False

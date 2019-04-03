@@ -4,10 +4,12 @@ import traceback
 from PyMOL_to_NGL import PyMolTranspiler
 from ..pages import Page
 from ..models import User
+from ..trashcan import get_trashcan
 import uuid
 import shutil
 import os
 import io
+import json
 
 #from pprint import PrettyPrinter
 #pprint = PrettyPrinter()
@@ -101,9 +103,15 @@ def ajax_convert(request):
         ###code = trans.get_html(ngl=request.POST['cdn'], **settings)
         code = 1
         pagename=str(uuid.uuid4())
-        user.add_owned_page(pagename)
-        request.dbsession.add(user)
-        settings['author'] = [user.name]
+        if user:
+            user.add_owned_page(pagename)
+            request.dbsession.add(user)
+            settings['author'] = [user.name]
+        else:
+            user = get_trashcan(request)
+            user.add_owned_page(pagename)
+            request.dbsession.add(user)
+            settings['author'] = ['Anonymous']
         ##snippet_run=trans.code
         settings['loadfun'] = trans.get_loadfun_js(viewport=request.POST['viewport_id'])
         if trans.raw_pdb:
@@ -210,18 +218,18 @@ def edit(request):
     user = request.user
     ownership = user.owned_pages.split(' ')
     ## cehck permissions
-    if page.identifier not in ownership: ## only owners can edit.
-        request.response.status = 404
-        return render_to_response("../templates/404.mako", {'project': 'Michelanglo', 'user': request.user}, request)
+    if page.identifier not in ownership and not (user and user.role == 'admin'): ## only owners and admins can edit.
+        request.response.status = 403
+        return {'error': 'not authorised'}
     else:
         #load data
         settings = page.load()
         if not settings:
             request.response.status = 404
-            return render_to_response("../templates/404.mako", {'project': 'Michelanglo', 'user': request.user}, request)
-        #add author if user was an upgraded to editor by the original author
-        if user.name not in settings['author']:
-            settings['author'].append(user.name)
+            return {'error': 'page not found'}
+        #add author if user was an upgraded to editor by the original author. There are three lists: authors (can and have edited, editors can edit, visitors visit.
+        if user.name not in settings['authors']:
+            settings['authors'].append(user.name)
         # only admins and friends can edit html fully
         if user.role in ('admin', 'friend'):
             for key in ('loadfun', 'title', 'description'):
@@ -231,6 +239,16 @@ def edit(request):
             for key in ('title', 'description'):
                 if key in request.POST:
                     settings[key] = Page.sanitise_HTML(request.POST[key])
+        #new_editors
+        if 'new_editors' in request.POST and request.POST['new_editors']:
+            for new_editor in json.loads((request.POST['new_editors'])):
+                target = request.dbsession.query(User).filter_by(name=new_editor).one()
+                if target:
+                    target.add_owned_page(page.identifier)
+                    request.dbsession.add(target)
+                    settings['editors'].append(target.name)
+                else:
+                    print('This is impossible...', new_editor, ' does not exist.')
         #save
         Page(request.POST['page']).save(settings)
         return {'success': 1}
@@ -243,7 +261,7 @@ def delete(request):
     user = request.user
     ownership = user.get_owned_pages()
     ## cehck permissions
-    if page.identifier not in ownership: ## only owners can delete
+    if page.identifier not in ownership and not (user and user.role == 'admin'): ## only owners can delete
         request.response.status = 403
         return {'status': 'Not owner'}
     else:

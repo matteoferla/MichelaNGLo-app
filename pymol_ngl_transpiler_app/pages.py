@@ -1,10 +1,15 @@
 import os, re, pickle
 ##################### Page
-# The reason this is not a DB is because the files can get massive and they are easy to query anyway.
+# The reason this is not a DB is because
+# * the PDB files can get massive
+# * the
+# * they are easy to query anyway as they have a uuid
+
 class Page:
     def __init__(self, identifier):
         self.identifier = identifier.replace('\\','/').replace('*','').split('/')[-1]
         self.path = os.path.join('pymol_ngl_transpiler_app', 'user-data', self.identifier + '.p')
+        self.settings = {}
 
     def exists(self):
         if os.path.exists(self.path):
@@ -15,20 +20,22 @@ class Page:
     def load(self):
         if self.exists():
             with open(self.path, 'rb') as fh:
-                settings = pickle.load(fh)
-            return settings
-        else:
-            return {}
+                self.settings  = pickle.load(fh)
+        return self.settings
 
-    def save(self, settings):
+    def save(self, settings=None):
+        if not settings:
+            settings = self.settings
         if 'description' not in settings:
             settings['description'] = 'Editable text. press pen to edit.'
         if 'title' not in settings:
             settings['title'] = 'User submitted structure'
-        for key in ['viewport', 'image', 'uniform_non_carbon', 'verbose', 'validation', 'stick', 'save', 'backgroundcolor', 'author', 'loadfun', 'proteinJSON', 'pdb', 'description', 'title',
-                    'data_other', 'editors']:
-            if key not in settings:
-                settings[key] = ''
+        for fun, keys in ((list, ('editors', 'visitors', 'authors')),
+                      (bool, ('image', 'uniform_non_carbon', 'verbose', 'validation', 'save')),
+                      (str, ('viewport', 'stick', 'backgroundcolor', 'loadfun', 'proteinJSON', 'pdb', 'description', 'title', 'data_other'))):
+            for key in keys:
+                if key not in settings:
+                    settings[key] = fun()
         with open(self.path, 'wb') as fh:
             pickle.dump(settings, fh)
 

@@ -3,7 +3,7 @@
 <div class="jumbotron clearfix">
     <div class="float-left ml-3">
         <h1>${title}</h1>
-        <small class="text-muted">The content of this page was edited by ${' and '.join(author)}. The administrators of this site take no legal responsibility for its content, if you believe this page is in violation of the law, please report it.</small>
+        <small class="text-muted">The content of this page was edited by ${' and '.join(authors)}. The administrators of this site take no legal responsibility for its content, if you believe this page is in violation of the law, please report it.</small>
     </div>
     <%include file="menu_buttons.mako" args='tour=False'/>
 </div>
@@ -84,6 +84,7 @@ $(document).ready(function () {
     <%include file="markup/markup_builder_modal.js"/>
 
     $('#edit_submit').click(function () {
+
         $.ajax({
             url: "/edit_user-page",
             type: 'POST',
@@ -95,7 +96,8 @@ $(document).ready(function () {
                 'page': $(location).attr("href").split('/').pop().split('.')[0],  //just in case someone wants to API it and for admin console.
                 'residues': $('#edit_residues').val(), //no longer valid.
                 'proteinJSON': JSON.stringify($('[role="NGL"]').data('proteins')),
-                'backgroundcolor': $('[role="NGL"]').data('backgroundcolor')
+                'backgroundcolor': $('[role="NGL"]').data('backgroundcolor'),
+                'new_editors': JSON.stringify($('.user-editable-state:checked').map((idx, item) => $(item).data('user')).toArray())
             },
             success: function (result) {
                 location.reload();
@@ -120,6 +122,7 @@ $(document).ready(function () {
             });
         }
     });
+
     %endif
 
 }); //ready

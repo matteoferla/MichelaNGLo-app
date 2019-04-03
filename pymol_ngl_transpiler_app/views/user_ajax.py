@@ -21,7 +21,7 @@ def sanitise_text(text):
 
 
 @view_config(route_name='login', renderer="json")
-def login_view(request):
+def user_view(request):
     action   = request.params['action']
     username = sanitise_text(request.params['username'])
     password = sanitise_text(request.params['password'])
@@ -43,10 +43,13 @@ def login_view(request):
             if username == 'admin':
                 new_user = User(name=username, role='admin')
             else:
-                new_user = User(name=username, role='basic')
+                new_user = User(name=username, role='basic', email=request.params['email'])
             new_user.set_password(password)
             request.dbsession.add(new_user)
-            return {'status': 'registered', 'name': new_user.name, 'rank': new_user.role}
+            user = request.dbsession.query(User).filter_by(name=username).first()
+            headers = remember(request, user.id)
+            request.response.headerlist.extend(headers)
+            return {'status': 'registered', 'name': user.name, 'rank': new_user.role}
         else:
             request.response.status = 400
             return {'status': 'existing username'}
@@ -57,7 +60,7 @@ def login_view(request):
     elif action == 'promote':
         if request.user and request.user.role == 'admin': ##only admins can make admins
             target=request.dbsession.query(User).filter_by(name=username).one()
-            target.role = 'admin'
+            target.role = request.POST['role']
             request.dbsession.add(target)
             return {'status': 'promoted'}
         else:

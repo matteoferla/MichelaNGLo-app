@@ -23,11 +23,15 @@
                 </div>
 
                 <%include file="markup/markup_builder_btn.mako"/>
-
+                <hr/>
+                <%include file="page_users.mako"/>
+                <hr/>
+                <p><input type="checkbox" checked> <small>You declare that the content you are uploading does not contain copyrighted material
+                    and that you are aware that the site admin can delete your page if deemed in breech of any law.</small></p>
                 <div class="modal-footer">
                     <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-sucess" id="edit_submit"><i class="far fa-save"></i> Save changes</button>
-                        <button type="button" class="btn btn-danger" id="edit_delete"><i class="far fa-save"></i> Scrap page</button>
+                        <button type="button" class="btn btn-success" id="edit_submit"><i class="far fa-save"></i> Save changes</button>
+                        <button type="button" class="btn btn-danger" id="edit_delete"><i class="far fa-trash-alt"></i> Scrap page</button>
                         <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="far fa-sign-out"></i> Discard changes</button>
                     </div>
                 </div>
