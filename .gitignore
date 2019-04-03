@@ -19,3 +19,4 @@ Data.fs*
 coverage
 test
 .sqlite
+.egg-info
