@@ -11,7 +11,7 @@
         <div class="col-lg-10 offset-lg-1">
             <div class="card my-5 shadow">
                 <div class="card-header">
-                    <img src="static/ox_logo-01.svg" style="height: 6em; position: absolute;">
+                    <img src="/static/ox_logo-01.svg" style="height: 6em; position: absolute;">
                     <div style="margin-left: 6em;" class="clearfix">
                         <div class="float-left">
                         <h1 class="card-title">

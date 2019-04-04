@@ -37,9 +37,35 @@ from ..pages import Page
 
 @view_config(route_name='userdata', renderer="../templates/user_protein.mako")
 def userdata_view(request):
+
+    def tickup_tries(): #try counter for encryption
+        if 'tries' in request.session:
+            request.session['tries'] = int(request.session['tries']) + 1
+        else:
+            request.session['tries'] = 0  ## first go
+
     pagename = request.matchdict['id']
     page = Page(pagename)
-    settings = page.load()
+    ### deal with encryption
+    if page.is_password_protected() and 'key' in request.params: # encrypted and key given
+        page.key = request.params['key'].encode('utf-8')
+        page.path = page.encrypted_path
+        try:
+            settings = page.load()
+            settings['encryption'] = True
+            settings['encryption_key'] = request.params['key']
+        except ValueError: ##got it wrong
+            tickup_tries()
+            response_settings = {'project': 'Michelanglo', 'user': request.user, 'tries': request.session['tries'], 'page': pagename}
+            return render_to_response("../templates/encrypted.mako", response_settings, request)
+    elif page.is_password_protected() and 'key' not in request.params:  # encrypted and no key given
+        tickup_tries()
+        response_settings = {'project': 'Michelanglo', 'user': request.user, 'tries': request.session['tries'], 'page': pagename}
+        return render_to_response("../templates/encrypted.mako", response_settings, request)
+    else:
+        settings = page.load()
+        settings['encryption'] = False
+    ### add new values
     settings['user'] = request.user
     user = request.user
     if user:
@@ -55,7 +81,6 @@ def userdata_view(request):
             settings['visitors'].append(user.name)
             page.save()
             settings['editable'] = False
-            print(user.visited_pages)
     else:
         settings['editable'] = False
     return settings

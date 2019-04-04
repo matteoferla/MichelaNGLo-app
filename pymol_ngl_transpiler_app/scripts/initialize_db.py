@@ -12,7 +12,7 @@ def setup_models(dbsession):
     editor.set_password('editor')
     dbsession.add(editor)
 
-    basic = models.User(name='basic', role='basic')
+    basic = models.User(name='basic', role='fictional')
     basic.set_password('basic')
     dbsession.add(basic)
 

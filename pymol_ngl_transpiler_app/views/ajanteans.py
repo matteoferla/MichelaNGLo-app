@@ -230,6 +230,10 @@ def edit(request):
         request.response.status = 403
         return {'error': 'not authorised'}
     else:
+        # check if encrypted
+        if page.is_password_protected():
+            page.key = request.POST['encryption_key'].encode('uft-8')
+            page.path = page.encrypted_path
         #load data
         settings = page.load()
         if not settings:
@@ -257,8 +261,19 @@ def edit(request):
                     settings['editors'].append(target.name)
                 else:
                     print('This is impossible...', new_editor, ' does not exist.')
+        #encrypt
+        if not page.is_password_protected() and request.POST['encryption'] == 'true': # to be encrypted
+            page.delete()
+            page.key = request.POST['encryption_key'].encode('utf-8')
+            page.path = page.encrypted_path
+        elif page.is_password_protected() and request.POST['encryption'] == 'false':  #to be dencrypted
+            page.delete()
+            page.key = None
+            page.path = page.unencrypted_path
+        else: # no change
+            pass
         #save
-        Page(request.POST['page']).save(settings)
+        page.save(settings)
         return {'success': 1}
 
 

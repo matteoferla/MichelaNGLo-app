@@ -50,7 +50,7 @@ class User(Base):
         return self._get_pages('owned_pages')
 
     def get_visited_pages(self):
-        return self._get_pages('visited_pages')
+        return list(set(self._get_pages('visited_pages')) - set(self.get_owned_pages()))
 
     def _get_pages(self, group='visited_pages'):
         # for p in [Page(pagename) for pagename in user.owned_pages.split()] if p.exists()
@@ -61,4 +61,26 @@ class User(Base):
 
     def _filter_pages(self, pages):
         raw = [Page(pagename) for pagename in pages]
-        return [page.identifier for page in raw if page.exists()]
+        return [page.identifier for page in raw if page.exists(try_both=True)]
+
+    ############### these methods return not list of string but list of Page instatnces.
+    def _get_loaded_pages(self, group='visited_pages'):
+        pagelist = []
+        if group == 'visited_pages':
+            fun = self.get_visited_pages
+        else:
+            fun = self.get_owned_pages
+        for pagename in fun():
+            page = Page(pagename)
+            if page.is_password_protected():
+                page.settings = {'title': '***********', 'description': 'This page is encrypted.'}
+            else:
+                page.load()
+            pagelist.append(page)
+        return pagelist
+
+    def get_visited_loaded_pages(self):
+        return self._get_loaded_pages(group='visited_pages')
+
+    def get_owned_loaded_pages(self):
+        return self._get_loaded_pages(group='owned_pages')

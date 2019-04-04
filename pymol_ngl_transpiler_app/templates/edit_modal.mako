@@ -26,6 +26,36 @@
                 <hr/>
                 <%include file="page_users.mako"/>
                 <hr/>
+                <div id="security"><a href="#" data-toggle="collapse" data-target="#security .collapse">Security <span class="collapse show"><i class="far fa-chevron-double-down"></i></span>
+                            <span class="collapse"><i class="far fa-chevron-double-up"></i></span></a>
+
+                <div class="collapse">
+                    <p>Currently, the address to your data contains <a href="https://en.wikipedia.org/w/index.php?title=Universally_unique_identifier" target="_blank">a long id, which cannot be guessed (five undecillion combinations) <i class="far fa-external-link"></i></a>.
+                    However, if the server is compromised or the administrator turns evil the data can be seen &mdash;note that this does not apply your password, which cannot be seen as it is stored hashed.
+                        If your data is <i>extremely</i> sensitive, the data can be encrypted serverside. This requires the encryption key each time the data is requested to be viewed. <b>Note that, if you forget the key, the data is lost, so please proceed with care.</b></p>
+                    <div class="input-group">
+                  <div class="input-group-prepend">
+                    <div class="input-group-text">
+                        <input type="checkbox" aria-label="encryption key label" id="encryption"
+                        %if encryption:
+                            checked
+                        %endif
+                            >
+                         &nbsp; use encryption
+                    </div>
+                  </div>
+
+                            <input type="password" class="form-control" aria-label="encryption key" id="encryption_key" autocomplete="new-password"
+                        %if encryption:
+                            value="${encryption_key}"
+                        %else:
+                            placeholder="key"
+                        %endif
+                            >
+                </div>
+                    <div class="valid-feedback" id="encryption_key_error">No key provided</div>
+                </div></div>
+                <hr/>
                 <p><input type="checkbox" checked> <small>You declare that the content you are uploading does not contain copyrighted material
                     and that you are aware that the site admin can delete your page if deemed in breech of any law.</small></p>
                 <div class="modal-footer">

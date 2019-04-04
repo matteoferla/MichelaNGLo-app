@@ -9,9 +9,11 @@ PyMOL_NGL_transpiler_app.egg-info/not-zip-safe
 PyMOL_NGL_transpiler_app.egg-info/requires.txt
 PyMOL_NGL_transpiler_app.egg-info/top_level.txt
 pymol_ngl_transpiler_app/__init__.py
+pymol_ngl_transpiler_app/pages.py
 pymol_ngl_transpiler_app/routes.py
 pymol_ngl_transpiler_app/security.py
 pymol_ngl_transpiler_app/tests.py
+pymol_ngl_transpiler_app/trashcan.py
 pymol_ngl_transpiler_app.egg-info/PKG-INFO
 pymol_ngl_transpiler_app.egg-info/SOURCES.txt
 pymol_ngl_transpiler_app.egg-info/dependency_links.txt

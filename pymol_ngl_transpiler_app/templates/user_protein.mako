@@ -84,7 +84,9 @@ $(document).ready(function () {
     <%include file="markup/markup_builder_modal.js"/>
 
     $('#edit_submit').click(function () {
-
+        if ($('#encryption').prop('checked')) {
+            if (! $('#encryption_key').val) {return 0}
+        }
         $.ajax({
             url: "/edit_user-page",
             type: 'POST',
@@ -97,7 +99,9 @@ $(document).ready(function () {
                 'residues': $('#edit_residues').val(), //no longer valid.
                 'proteinJSON': JSON.stringify($('[role="NGL"]').data('proteins')),
                 'backgroundcolor': $('[role="NGL"]').data('backgroundcolor'),
-                'new_editors': JSON.stringify($('.user-editable-state:checked').map((idx, item) => $(item).data('user')).toArray())
+                'new_editors': JSON.stringify($('.user-editable-state:checked').map((idx, item) => $(item).data('user')).toArray()),
+                'encryption': $('#encryption').prop('checked'),
+                'encryption_key': $('#encryption_key').val()
             },
             success: function (result) {
                 location.reload();
