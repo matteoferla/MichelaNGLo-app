@@ -21,3 +21,6 @@ test
 .sqlite
 .egg-info
 .p
+pymol_ngl_transpiler_app/demo/*.pdb
+pymol_ngl_transpiler_app/user-data/*.p
+pymol_ngl_transpiler_app/user-data/*.ep
