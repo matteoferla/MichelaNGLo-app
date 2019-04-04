@@ -1,8 +1,14 @@
+__doc__ = """
+This file contains only one method (`user_view`).
+data = {'username': 'testdummy',
+        'password': 'crash',
+        'email': 'testdummy@example.com',
+        'action': 'register'}
+action can be login (username and password), logout (nothing), register (also req. `email`), whoami (debug only)
+if the user is admin it can also be promote (req. `role`), kill, reset
+the reply "status" and occasionally "username"
+"""
 from pyramid.view import view_config
-from pyramid.response import Response
-
-from sqlalchemy.exc import DBAPIError
-
 from ..models import User
 
 from pyramid.security import (
@@ -23,11 +29,21 @@ def sanitise_text(text):
 @view_config(route_name='login', renderer="json")
 def user_view(request):
     action   = request.params['action']
-    username = sanitise_text(request.params['username'])
-    password = sanitise_text(request.params['password'])
-    print('login_view', action)
+    if 'username' in request.params:
+        username = sanitise_text(request.params['username'])
+    else:
+        username ='ERROR'
+    if 'password' in request.params:
+        password = sanitise_text(request.params['password'])
+    else:
+        password = ''
     user = request.dbsession.query(User).filter_by(name=username).first()
-    if action == 'login':
+    if action == 'whoami':
+        if user is not None:
+            return {'status': 'verification', 'name': user.name, 'rank': user.role}
+        else:
+            return {'status': 'verification', 'name': 'guest', 'rank': 'guest'}
+    elif action == 'login':
         if user is not None and user.check_password(password):
             headers = remember(request, user.id)
             request.response.headerlist.extend(headers)

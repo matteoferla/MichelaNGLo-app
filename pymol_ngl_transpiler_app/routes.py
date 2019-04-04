@@ -2,7 +2,7 @@
 ######################### Routes ##################################
 def includeme(config):
     config.add_static_view('static', 'static', cache_max_age=3600)
-    config.add_static_view('images', 'images', cache_max_age=3600)
+    config.add_static_view('images', '../images', cache_max_age=3600)
     config.add_route('home', '/')
     config.add_route('markup', '/markup')
     config.add_route('custom', '/custom')

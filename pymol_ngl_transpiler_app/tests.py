@@ -27,3 +27,14 @@ class FunctionalTests(unittest.TestCase):
     def test_root(self):
         res = self.testapp.get('/', status=200)
         self.assertTrue(b'Pyramid' in res.body)
+
+
+
+import requests
+
+def ajacenteanTests(url='http://brc10.well.ox.ac.uk:8088/'):
+    #not a unit test as the server need to be running.
+
+    r = requests.post(url, headers={"content-type": "text"})
+
+

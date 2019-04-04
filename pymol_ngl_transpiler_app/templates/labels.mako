@@ -9,10 +9,10 @@ Specifically, the intended audience are biochemists that may not have any web kn
 #next
 usable='''<p>The script output a secret temporary page that can be shared, but also a block of code that can be used by the user on their sites. About the latter usage, to use the output code one needs access to the raw HTML. Not necessarily of the whole page as only a small part is fine. For example:</p>
 <div class='row'>
-<div class='col-6'><img src="images/WYSIWYG_editor.png" width="100%">
+<div class='col-6'><img src="/images/WYSIWYG_editor.png" width="100%">
 <p>Here the HTML code is hidden as one sees what one gets as an end result</p>
 </div>
-<div class='col-6'><img src="images/raw_editor.png" width="100%">
+<div class='col-6'><img src="/images/raw_editor.png" width="100%">
 <p>Here the HTML code is visible: words between tags such as &lt;b&gt; are not styled. In most cases JS can be added here.</p>
 </div>
 </div>'''
@@ -38,9 +38,9 @@ uniform_non_carbon='''It is unlikely that one purposefully wants a non-carbon el
 image='''<p>Use a static image that when clicked becomes the NGL interactive protein.</p>
 <p>Whereas, the most commonly used protein viewing software is PyMol, most researchers render a view and label/draw upon it in Paint/Powerpoint/Photoshop.</p>
 <p>Consequently, the code allows users to generate code than when a given static image is clicked it results in a NGL viewer div. <a href='http://www.matteoferla.com/LZTR1.html' target='_blank'>See here for an example <i class="far fa-external-link-square"></i></a>.
-The mouse image informing visitors of how to switch can be found <a href="images/clickmap.jpg" download="clickmap.jpg">here</a>.'''
+The mouse image informing visitors of how to switch can be found <a href="/images/clickmap.jpg" download="clickmap.jpg">here</a>.'''
 
-sticks='''<p>The equivalent of PyMOL sticks is liquorice in NGL, however, hyperball looks a lot nicer.</p><img src='images/stick.png' width='100px'><img src='images/sym_stick.png' width='100px'><img src='images/hyperball.png' width='100px'>'''
+sticks='''<p>The equivalent of PyMOL sticks is liquorice in NGL, however, hyperball looks a lot nicer.</p><img src='/images/stick.png' width='100px'><img src='/images/sym_stick.png' width='100px'><img src='/images/hyperball.png' width='100px'>'''
 
 protein='''Here the code is seen in action. Any errors will appear in black &mdash; for example, if you have a chain that has a unicode character, &THORN;, PyMOL will make a mess of it. If you have residues with the same id or more than 500 ligand atoms but no connect map, these will be wrong.'''
 

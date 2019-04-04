@@ -75,7 +75,7 @@ def ajax_convert(request):
                     'verbose': False,
                     'validation': True,
                     'stick': request.POST['stick'],
-                    'save': request.POST['save'],
+                    'save': True,
                     'backgroundcolor': 'white'}
 
         # parse data

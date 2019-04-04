@@ -3,7 +3,7 @@
 from .models import User
 
 def get_trashcan(request):
-    trashcan = request.dbsession.query(User).filter_by(name='trashcan').one()
+    trashcan = request.dbsession.query(User).filter_by(name='trashcan').first()
     if trashcan:
         return trashcan
     else:
