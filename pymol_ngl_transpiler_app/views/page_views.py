@@ -22,8 +22,14 @@ else:
 @view_config(route_name='pdb', renderer="../templates/pdb.mako")
 def my_view(request):
     user = request.user
+    # ?bootstrap=materials is basically for the userdata_view only.
+    if 'bootstrap' in request.params:
+        bootstrap = request.params['bootstrap']
+    else:
+        bootstrap = 4
     return {'project': 'Michalanglo',
-            'user': user}
+            'user': user,
+            'bootstrap': bootstrap}
 
 
 @view_config(route_name='markup', renderer="../templates/markup.mako")
@@ -83,17 +89,31 @@ def userdata_view(request):
             settings['editable'] = False
     else:
         settings['editable'] = False
+    ### extras?
+    if 'remote' in request.params:
+        settings['remote'] = True
+    if 'bootstrap' in request.params:
+        settings['bootstrap'] = request.params['bootstrap']
+    if 'no_user'  in request.params:
+        settings['no_user'] = True
+    else:
+        settings['no_user'] = False
+    if 'no_buttons' in request.params:
+        settings['no_buttons'] = True
+    else:
+        settings['no_buttons'] = False
     return settings
 
 
 
 
-@view_config(route_name='save_pdb')
+@view_config(route_name='save_pdb', renderer='string')
 def save_pdb(request):
-    filename=request.session['file']
-    raise NotImplementedError
-    return FileResponse(filename, content_disposition='attachment; filename="{}"'.format(request.POST['name']))
+    page = Page(request.params['uuid'])
+    if 'key' in request.params:
+        page.key = request.params['key'].encode('utf-8')
+    return page.load()['pdb']
 
-@view_config(route_name='save_zip')
+@view_config(route_name='save_zip', renderer="string")
 def save_zip(request):
     raise NotImplementedError

@@ -3,9 +3,19 @@
 <div class="jumbotron clearfix">
     <div class="float-left ml-3">
         <h1>${title}</h1>
-        <small class="text-muted">The content of this page was edited by ${' and '.join(authors)}. The administrators of this site take no legal responsibility for its content, if you believe this page is in violation of the law, please report it.</small>
+        <small class="text-muted">The content of this page was
+            %if authors:
+                edited by ${' and '.join(authors)} on the ${date}.<br/>
+                The administrators of this site take no legal responsibility for the content of this page, if you believe this page is in violation of the law, please report it.
+            % else:
+                generated on the ${date}.
+            %endif
+             </small>
     </div>
-    <%include file="menu_buttons.mako" args='tour=False'/>
+    % if not no_buttons:
+        <%include file="menu_buttons.mako" args='tour=False'/>
+    % endif
+
 </div>
 
 <div class='row p-4'>
@@ -49,6 +59,13 @@
                 <hr/>
 
                 <button type="button" class="btn btn-outline-success w-100 my-1" id="save"><i class="far fa-camera"></i> Take snapshot</button>
+                % if key:
+                    <a href="/data/${page}?no_user=1&remote=1&no_buttons=1" class="btn btn-outline-success w-100 my-1"  download="page.html"><i class="far fa-download"></i> Download file</a>
+                    <a href="/save_pdb?uuid=${page}" class="btn btn-outline-success w-100 my-1"  download="model.pdb"><i class="far fa-map"></i> Download PDB</a>
+                % else:
+                    <a href="/data/${page}?no_user=1&remote=1&no_buttons=1&key=${key}" class="btn btn-outline-success w-100 my-1"  download="page.html"><i class="far fa-download"></i> Download file</a>
+                    <a href="/save_pdb?uuid=${page}&key=${key}" class="btn btn-outline-success w-100 my-1"  download="model.pdb"><i class="far fa-map"></i> Download PDB</a>
+                % endif
                 <button type="button" class="btn btn-outline-primary w-100 my-1" data-toggle="modal" data-target="#basics"><i class="far fa-cubes"></i> Protein basics</button>
                 <button type="button" class="btn btn-outline-primary w-100 my-1" data-toggle="modal" data-target="#about"><i class="far fa-code"></i> Credits</button>
             </div>
@@ -95,7 +112,7 @@ $(document).ready(function () {
                 'type': 'edit',
                 'title': $('#edit_title').val(),
                 'description': $('#edit_description').val(),
-                'page': $(location).attr("href").split('/').pop().split('.')[0],  //just in case someone wants to API it and for admin console.
+                'page': '${page}',
                 'residues': $('#edit_residues').val(), //no longer valid.
                 'proteinJSON': JSON.stringify($('[role="NGL"]').data('proteins')),
                 'backgroundcolor': $('[role="NGL"]').data('backgroundcolor'),

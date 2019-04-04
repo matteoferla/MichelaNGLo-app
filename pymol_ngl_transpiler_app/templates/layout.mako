@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<%
-    bootstrap='regular' # regular|materials
-%>
+<%page args="bootstrap='4', remote=False, no_user=False"/>
 
 <head>
     <meta charset="utf-8">
@@ -14,8 +12,8 @@
 
     <title>MichelaNGLo</title>
     % if bootstrap == 'materials':
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.6.1/css/mdb.min.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.7.6/css/mdb.min.css" rel="stylesheet">
     % else:
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     % endif
@@ -106,7 +104,10 @@ pre {
     <![endif]-->
 </head>
 <body>
-<main role='main' class="container-fluid p-0">
+<div class="position-absolute w-100 d-flex flex-column p-4" id="toaster">
+</div>
+
+<main role='main' class="container-fluid p-0 w-100 mx-0">
     ${ next.body() }
 </main>
 
@@ -124,42 +125,33 @@ pre {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 % if bootstrap == 'materials':
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.6.1/js/mdb.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.7.6/js/mdb.min.js"></script>
 % endif
 <script src="https://unpkg.com/ngl@2.0.0-dev.34/dist/ngl.js" type="text/javascript"></script>
-<script type="text/javascript" src="/static/ngl.extended.js"></script>
+% if not remote:
+    <script type="text/javascript" src="/static/ngl.extended.js"></script>
+% else:
+    <script type="text/javascript" src="https://www.matteoferla.com/ngl.extended.js"></script>
+% endif
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
 
 <script src="https://www.matteoferla.com/bootstrap-tourist/bootstrap-tourist.js"></script>
 <%block name="script"/>
-<%include file="login/user_modal.mako"/>
+% if not no_user:
+    <%include file="login/user_modal.mako"/>
+% endif
+
 <script type="text/javascript">
     $('[data-toggle="popover"]').popover();
     $('[data-toggle="tooltip"]').tooltip();
     $('#menu').on('shown.bs.popover', function () {
         $('.popover a').hover(function () {$('.popover-header').html($(this).attr('title'))});
     });
-    window.set_username = function (name, role, quietly) {
-    role = role || 'basic';
-    if (! name) {name = '<i>Guest</i>'; role='guest'}
-    var icon = {'basic': 'user', 'friend': 'user-tie', 'guest': 'user-secret', 'admin': 'user-crown', 'new': 'user-astronaut', 'hacker': 'user-ninja', 'trashcan': 'dumpster'}[role];
-    $("#user").html('<span id="user"><a href="#" class="text-secondary" data-toggle="modal" data-target="#login"><i class="far fa-'+icon+'"></i> '+name+'</a></span>');
-    if (! quietly) {
-        $("#user").animate({fontSize: '3em'}, "fast").animate({fontSize: '1em'}, "slow");}
-    };
-
-    //__init__
-    %if user:
-        $('#login-content').hide();
-        $('#logout-content').show();
-        $("#username-name").text("${user.name}");
-        $("#username-rank").text("${user.role}");
-        set_username("${user.name}", "${user.role}", true);
-    %else:
-        set_username(null, null, true);
-    %endif
-
+% if not no_user:
+    <%include file="login/user_icon_bar.js"/>
     <%include file="login/user_modal.js"/>
+    <%include file="toast.js"/>
+% endif
 </script>
 
 </body>

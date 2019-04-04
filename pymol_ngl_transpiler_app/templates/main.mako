@@ -255,14 +255,6 @@
 
 ######## other blocks
 <%block name='modals'>
-<div class="modal" tabindex="-1" role="dialog" id="throbber" style="top:90%; overflow:hidden;">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content bg-warning">
-        <div class="modal-body"> <i class="fas fa-cog fa-spin"></i> Calculations in progress... <br/>Is this the best way to make a snackbar in BS4??</div>
-    </div>
-  </div>
-</div>
-
 
 <div class="modal fade" tabindex="-1" role="dialog" id="CDN_modal">
   <div class="modal-dialog modal-lg" role="document">

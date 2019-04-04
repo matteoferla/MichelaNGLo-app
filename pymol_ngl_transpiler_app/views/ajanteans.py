@@ -45,15 +45,22 @@ def save_file(request, extension):
 @view_config(route_name='ajax_convert', renderer="../templates/main.result.mako")
 def ajax_convert(request):
     user = request.user
+    request.session['status'] = make_msg('Checking data', 'The data has been recieved and is being checked')
     try:
         minor_error=''
         ## assertions
         if not 'pdb_string' in request.POST and not request.POST['pdb']:
-            return {'error': 'danger', 'error_title': 'No PDB code', 'error_msg': 'A PDB code is required to make the NGL viewer show a protein.','snippet':'','validation':''}
+            response = {'error': 'danger', 'error_title': 'No PDB code', 'error_msg': 'A PDB code is required to make the NGL viewer show a protein.','snippet':'','validation':''}
+            request.session['status'] = make_msg(response['error_title'],response['error_msg'],'error','bg-danger')
+            return response
         elif request.POST['mode'] == 'out' and not request.POST['pymol_output']:
-            return {'error': 'danger', 'error_title': 'No PyMOL code', 'error_msg': 'PyMOL code is required to make the NGL viewer show a protein.','snippet':'','validation':''}
+            response={'error': 'danger', 'error_title': 'No PyMOL code', 'error_msg': 'PyMOL code is required to make the NGL viewer show a protein.','snippet':'','validation':''}
+            request.session['status'] = make_msg(response['error_title'], response['error_msg'], 'error', 'bg-danger')
+            return response
         elif request.POST['mode'] == 'file' and not (('demo_file' in request.POST and request.POST['demo_file']) or ('file' in request.POST and request.POST['file'].filename)):
-            return {'error': 'danger', 'error_title': 'No PSE file', 'error_msg': 'A PyMOL file to make the NGL viewer show a protein.','snippet':'','validation':''}
+            response = {'error': 'danger', 'error_title': 'No PSE file', 'error_msg': 'A PyMOL file to make the NGL viewer show a protein.','snippet':'','validation':''}
+            request.session['status'] = make_msg(response['error_title'], response['error_msg'], 'error', 'bg-danger')
+            return response
 
         ## convert booleans and settings
         def is_js_true(value): # booleans get converted into strings in json.
@@ -61,6 +68,7 @@ def ajax_convert(request):
                 return False
             else:
                 return True
+
         settings = {'viewport': request.POST['viewport_id'],#'tabbed': int(request.POST['indent']),
                     'image': is_js_true(request.POST['image']),
                     'uniform_non_carbon':is_js_true(request.POST['uniform_non_carbon']),
@@ -71,6 +79,7 @@ def ajax_convert(request):
                     'backgroundcolor': 'white'}
 
         # parse data
+        request.session['status'] = make_msg('Conversion', 'Conversion in progress')
         if request.POST['mode'] == 'out':
             view = ''
             reps = ''
@@ -102,6 +111,7 @@ def ajax_convert(request):
         # make output
         ###code = trans.get_html(ngl=request.POST['cdn'], **settings)
         code = 1
+        request.session['status'] = make_msg('Permissions', 'Finalising user permissions')
         pagename=str(uuid.uuid4())
         if user:
             user.add_owned_page(pagename)
@@ -112,6 +122,7 @@ def ajax_convert(request):
             settings['author'] = ['Anonymous']
         request.dbsession.add(user)
         ##snippet_run=trans.code
+        request.session['status'] = make_msg('Load function', 'Making load function')
         settings['loadfun'] = trans.get_loadfun_js(viewport=request.POST['viewport_id'])
         if trans.raw_pdb:
             settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true, "loadFx": "loadfun"}]'
@@ -122,7 +133,9 @@ def ajax_convert(request):
             settings['proteinJSON'] = '[{{"type": "file", "value": "{0}", "loadFx": "loadfun"}}]'.format(trans.pdb)
         # sharable page
         settings['editors'] = [user.name]
+        request.session['status'] = make_msg('Saving', 'Storing data for retrieval.')
         Page(pagename).save(settings)
+        request.session['status'] = make_msg('Loading results', 'Conversion is being loaded',condition='complete', color='bg-info')
         if minor_error:
             return {'snippet': True, 'error': 'warning', 'error_msg':minor_error, 'error_title':'A minor error arose','validation':trans.validation_text, 'page': pagename, **settings}
         else:
@@ -307,3 +320,29 @@ def get_ajax(request):
         else:
             request.response.status = 403
             return render_to_response("../templates/404.mako", {'project': 'Michelanglo', 'user': request.user}, request)
+
+@view_config(route_name='task_check', renderer="json")
+def status_check_view(request):
+    """
+    status = {'condition' : request.session['status']['condition'],
+                'title'     : request.session['status']['title'],
+                'body'      : request.session['status']['body'],
+                'color'     : request.session['status']['color']}
+    :param request:
+    :return:
+    """
+    if 'status' not in request.session:
+        print('missing job error')
+        return {'condition' : 'error',
+                'title'     : 'Error',
+                'body'      : 'The requested job was not found.',
+                'color'     : 'bg-warning'}
+    else:
+        return request.session['status']
+
+
+def make_msg(title, body, condition='running', color=''):
+    return {'condition' : condition,
+            'title'     : title,
+            'body'      : body,
+            'color'     : color}

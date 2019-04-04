@@ -1,4 +1,4 @@
-import os, re, pickle
+import os, re, pickle, datetime
 import base64
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
@@ -80,6 +80,10 @@ class Page:
             for key in keys:
                 if key not in settings:
                     settings[key] = fun()
+        # metadata
+        settings['date'] = str(datetime.datetime.now())
+        settings['page'] = self.identifier
+        settings['key'] = self.key # is this wise??
         ## write
         with open(self.path, 'wb') as fh:
             if not self.key:

@@ -21,7 +21,7 @@
         <a class="nav-item nav-link active" id="nav-protein-tab" data-toggle="tab" href="#nav-protein" role="tab" aria-controls="nav-protein" aria-selected="true">Live</a>
         <a class="nav-item nav-link" id="nav-downloads-tab" data-toggle="tab" href="#nav-downloads" role="tab" aria-controls="nav-downloads" aria-selected="false">Shareables</a>
         <a class="nav-item nav-link" id="nav-implement-tab" data-toggle="tab" href="#nav-implement" role="tab" aria-controls="nav-implement" aria-selected="false">Instructions</a>
-        <a class="nav-item nav-link" id="nav-validate-tab" data-toggle="tab" href="#nav-validate" role="tab" aria-controls="nav-validate" aria-selected="false">Validation</a>
+        ##<a class="nav-item nav-link" id="nav-validate-tab" data-toggle="tab" href="#nav-validate" role="tab" aria-controls="nav-validate" aria-selected="false">Validation</a>
         </div>
     </nav>
         <br/>
@@ -41,8 +41,8 @@
                     <i class="far fa-handshake"></i> Sharable and editable version
                   </a>
                 % endif
-              <a href="#" class="list-group-item list-group-item-action"><i class="far fa-download"></i> Download files</a>
-              <a href="#" class="list-group-item list-group-item-action"><i class="far fa-map"></i> Download PDB</a>
+              <a href="/data/${page}?no_user=1&remote=1&no_buttons=1" class="list-group-item list-group-item-action" download="page.html"><i class="far fa-download"></i> Download file</a>
+              <a href="/save_pdb?uuid=${page}" class="list-group-item list-group-item-action" download="model.pdb"><i class="far fa-map"></i> Download PDB</a>
             </div>
       </div>
 
@@ -53,8 +53,7 @@
 
        ### fourth tab: code removed.
 
-
-           % if validation:
+   % if validation and 1==0:
        ### fith tab: validation
            <div class="tab-pane fade" id="nav-validate" role="tabpanel" aria-labelledby="nav-validate-tab">
            <p>This code can be used to validate the orientation in PyMOL (i.e. go full circle)</p>

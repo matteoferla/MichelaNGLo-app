@@ -105,7 +105,7 @@ function valid_value(id){
             $(id).addClass('is-invalid');
             $(id)[0].scrollIntoView();
             $('#error_' + id.replace('#','')).show();
-            $('#throbber').modal('hide');
+            ops.halt()
             },0);
         throw 'Incomplete '+id;
     }
@@ -116,7 +116,6 @@ function valid_value(id){
 // submit for calculation
 $('#submit').click(function () {
     //get ready by cleaning up
-    $('#throbber').modal('show');
     $('#results').remove();
     stage=false;
     $('.is-invalid').removeClass('is-invalid');
@@ -129,19 +128,27 @@ $('#submit').click(function () {
     // deal with the include PDB data which means that the it is not a publically available PDB.
     if ($('#pdb_string').is(':checked')) {data.append( 'pdb', ''); data.append('pdb_string',1)} else {data.append( 'pdb', valid_value('#pdb'));}
     data.append( 'mode', mode );
+    // output mode
     if        (mode == 'out') {
         data.append('pymol_output', valid_value('#pymol_output'));
-    } else if (mode == 'file' && !! window.demo_pse) {data.append('demo_file',window.demo_pse);
-    } else if (mode == 'file') {    data.append( 'file', valid_value('#upload'));
-    } else if (mode == 'pdb') {
-        if (!! $('#upload_pdb')[0].files) {
-            if ($('#upload')[0].files[0].size > 5e7) {
-                alert('This file is larger than 50 MB. If you are not attempting a DoS attack, please email Matteo Ferla to process your file.');
+    }
+    // demo pse mode
+    else if (mode == 'file' && !! window.demo_pse) {
+        data.append('demo_file',window.demo_pse);
+    }
+    // pse upload mode
+    else if (mode == 'file') {
+        data.append( 'file', valid_value('#upload'));
+        if ($('#upload')[0].files[0].size > 5e7) {
+                ops.addToast('startingjob',
+                    'Excessive size',
+                    'This file is larger than 50 MB. If you are not attempting a DoS attack, please email Matteo Ferla to process your file.','bg-danger');
                 throw 'DoS attack blocked?';
-            }
-            data.append( 'pdb_file', valid_value('#upload_pdb'));}
-        else {data.append( 'pdb', valid_value('#pdb'));}
-    } else {throw 'Impossible mode';}
+            } else {ops.addToast('uploading','Uploading','Uploading file in progress.','bg-info');}
+    }
+    // error.
+    else {throw 'Impossible mode';}
+    //finish adding data.
     data.append( 'uniform_non_carbon',$('#uniform_non_carbon').is(':checked'));
     data.append('viewport_id',valid_value('#viewport_id'));
     data.append( 'image',$('#image').is(':checked'));
@@ -157,6 +164,7 @@ $('#submit').click(function () {
     }
     data.append( 'cdn',cdn);
     data.append( 'indent',$('#indent').val());
+    // ajax to ajax_convert
     //{pdb: pdb, uniform_non_carbon: uniform_non_carbon, pymol_output: pymol_output, indent: indent, cdn: cdn}
     $.ajax({
         type: "POST",
@@ -168,11 +176,12 @@ $('#submit').click(function () {
         data:  data
     })
             .done(function (msg) {
-                $('#throbber').modal('hide');
+                ops.addToast('jobcompletion','Conversion complete','The data has been converted successfully.','bg-success');
                 $('.card-body > ul').append(msg);
             })
             .fail(function () {
-                $('#throbber').modal('hide');
-                alert('ERROR');
-            })
+                ops.addToast('jobcompletion','Conversion failed','The data did not convert correctly.','bg-danger');
+            });
+    ops.statusCheck();
+
 });
