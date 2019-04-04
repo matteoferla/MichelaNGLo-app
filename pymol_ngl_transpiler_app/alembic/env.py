@@ -11,7 +11,7 @@ import sys, os
 sys.path.append(os.getcwd())
 
 ## convensions
-from analyser_app.models.meta import Base
+from pymol_ngl_transpiler_app.models.meta import Base
 
 config = context.config
 
