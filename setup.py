@@ -1,3 +1,30 @@
+__docs__ = """
+To install...
+# get python
+sudo apt-get install python3
+# make venv
+sudo apt-get install python3-venv
+python3 -m venv env
+./env/bin/pip install -e .
+# make pymol
+sudo apt-get install python3-dev libglm-dev freeglut3-dev libglew-dev libpng12-dev libfreetype6-dev build-essential libxml++2.6-dev
+sudo apt-get install libpng-dev # if libpng12-dev fails.
+./env/bin/pip install pmw numpy
+
+prefix=env/pymol
+modules=$prefix/modules
+mkdir -p $prefix
+mkdir -p $modules
+
+git clone https://github.com/schrodinger/pymol-open-source.git env/pymol
+cd env/pymol
+sudo ./env/bin/python3 setup.py build install --home=${prefix}/ --install-lib=$modules --install-scripts=$prefix/
+#add the module to python
+#sudo echo $modules > env/lib/python3.6/dist-packages/pymol.pth  #mac
+sudo echo $modules > env/lib/python3.6/site-packages/pymol.pth  #linux
+./env/bin/alembic -c production.ini revision --autogenerate -m "lets get this party started"
+"""
+
 import os
 
 from setuptools import setup, find_packages
@@ -19,7 +46,9 @@ requires = [
     'transaction',
     'zope.sqlalchemy',
     'bcrypt',
-    'numpy'
+    'numpy',
+    'pycrypto',
+    'markdown'
 ]
 
 tests_require = [
