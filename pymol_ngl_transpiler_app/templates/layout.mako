@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<%page args="bootstrap='4', remote=False, no_user=False"/>
+<%page args="bootstrap='4', remote=False, no_user=False, public=True, confidential=False"/>
 
 <head>
     <meta charset="utf-8">
@@ -9,8 +9,11 @@
     <meta name="description" content="Michelanglo, PyMOL-NGL transpiler application">
     <meta name="author" content="Matteo Ferla">
     <link rel="icon" href="/static/NGL.png">
+    %if not public:
+        <meta name="robots" content="none">
+    %endif
 
-    <title>MichelaNGLo</title>
+    <title>Michelanglo</title>
     % if bootstrap == 'materials':
         <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.7.6/css/mdb.min.css" rel="stylesheet">
@@ -95,6 +98,24 @@ pre {
 	text-decoration: underline;
 }
 
+.confidential-ribbon{
+  z-index: 1050;
+  width: 200px;
+  background: #e43;
+  position: fixed;
+  top: 25px;
+  left: -50px;
+  text-align: center;
+  line-height: 50px;
+  letter-spacing: 1px;
+  color: #f0f0f0;
+  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+  box-shadow: 0 0 3px rgba(0,0,0,.3);
+}
+
+
+
     </style>
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -104,6 +125,9 @@ pre {
     <![endif]-->
 </head>
 <body>
+%if confidential:
+    <div class="confidential-ribbon shadow"><i class="far fa-user-secret"></i> Confidential</div>
+%endif
 <div class="position-absolute w-100 d-flex flex-column p-4" id="toaster">
 </div>
 

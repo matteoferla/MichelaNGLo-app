@@ -13,7 +13,7 @@
               In fact, NGL is a powerful javascript library (<a href="https://github.com/arose/ngl" target="_blank"><i class="fab fa-github"></i></a>
                                                         <a href="http://nglviewer.org/ngl/" target="_blank"><i class="far fa-popcorn"></i></a>
                                                         <a href="http://nglviewer.org/ngl/api/manual/index.html" target="_blank"><i class="far fa-book"></i></a>)
-          <p>Documentation links...</p>
+          <p><a href='http://ngl.matteoferla.com/docs'><i class="far fa-books"></i> Read documentation.</a></p>
       </div>
         <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

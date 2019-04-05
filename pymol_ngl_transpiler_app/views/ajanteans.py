@@ -10,19 +10,18 @@ import shutil
 import os
 import io
 import json
+import time
 
 #from pprint import PrettyPrinter
 #pprint = PrettyPrinter()
 
-def demo_file(request):
-    """
-    Needed for ajax_convert. Paranoid way to prevent user sending a spurious demo file name (e.g. ~/.ssh/).
-    """
-    demos=os.listdir(os.path.join('pymol_ngl_transpiler_app', 'demo'))
-    if request.POST['demo_file'] in demos:
-        return os.path.join('pymol_ngl_transpiler_app', 'demo', request.POST['demo_file'])
+## convert booleans and settings
+def is_js_true(value):  # booleans get converted into strings in json.
+    if not value or value == 'false':
+        return False
     else:
-        raise Exception('Non existant demo file requested. Possible attack!')
+        return True
+
 def demo_file(request):
     """
     Needed for ajax_convert. Paranoid way to prevent user sending a spurious demo file name (e.g. ~/.ssh/).
@@ -61,13 +60,6 @@ def ajax_convert(request):
             response = {'error': 'danger', 'error_title': 'No PSE file', 'error_msg': 'A PyMOL file to make the NGL viewer show a protein.','snippet':'','validation':''}
             request.session['status'] = make_msg(response['error_title'], response['error_msg'], 'error', 'bg-danger')
             return response
-
-        ## convert booleans and settings
-        def is_js_true(value): # booleans get converted into strings in json.
-            if not value or value == 'false':
-                return False
-            else:
-                return True
 
         settings = {'viewport': request.POST['viewport_id'],#'tabbed': int(request.POST['indent']),
                     'image': is_js_true(request.POST['image']),
@@ -264,6 +256,8 @@ def edit(request):
             for key in ('title', 'description'):
                 if key in request.POST:
                     settings[key] = Page.sanitise_HTML(request.POST[key])
+        for key in ('public','confidential'):
+            settings[key] = is_js_true(request.POST[key])
         #new_editors
         if 'new_editors' in request.POST and request.POST['new_editors']:
             for new_editor in json.loads((request.POST['new_editors'])):
@@ -332,13 +326,16 @@ def status_check_view(request):
     :return:
     """
     if 'status' not in request.session:
-        print('missing job error')
-        return {'condition' : 'error',
-                'title'     : 'Error',
-                'body'      : 'The requested job was not found.',
-                'color'     : 'bg-warning'}
-    else:
-        return request.session['status']
+        time.sleep(2)
+        if 'status' not in request.session:
+            time.sleep(8)
+            if 'status' not in request.session:
+                print('missing job error??!')
+                return {'condition' : 'error',
+                        'title'     : 'Error',
+                        'body'      : 'The requested job was not found.',
+                        'color'     : 'bg-warning'}
+    return request.session['status']
 
 
 def make_msg(title, body, condition='running', color=''):

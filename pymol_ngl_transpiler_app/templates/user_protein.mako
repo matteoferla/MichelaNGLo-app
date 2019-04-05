@@ -75,7 +75,7 @@
 
 <%block name="modals">
 %if editable:
-    <%include file='edit_modal.mako'/>
+    <%include file='edit_modal/edit_modal.mako'/>
 %endif
 <%include file='about.mako'/>
 <%include file='basics.mako'/>
@@ -99,53 +99,8 @@ $(document).ready(function () {
 
     %if editable:
     <%include file="markup/markup_builder_modal.js"/>
-
-    $('#edit_submit').click(function () {
-        if ($('#encryption').prop('checked')) {
-            if (! $('#encryption_key').val) {return 0}
-        }
-        $.ajax({
-            url: "/edit_user-page",
-            type: 'POST',
-            dataType: 'json',
-            data: {
-                'type': 'edit',
-                'title': $('#edit_title').val(),
-                'description': $('#edit_description').val(),
-                'page': '${page}',
-                'residues': $('#edit_residues').val(), //no longer valid.
-                'proteinJSON': JSON.stringify($('[role="NGL"]').data('proteins')),
-                'backgroundcolor': $('[role="NGL"]').data('backgroundcolor'),
-                'new_editors': JSON.stringify($('.user-editable-state:checked').map((idx, item) => $(item).data('user')).toArray()),
-                'encryption': $('#encryption').prop('checked'),
-                'encryption_key': $('#encryption_key').val()
-            },
-            success: function (result) {
-                location.reload();
-            }
-
-        });
-    });
-
-    $('#edit_delete').click(function () {
-        if (confirm('Are you sure you want to remove this page?')) {
-            $.ajax({
-                url: "/delete_user-page",
-                type: 'POST',
-                dataType: 'json',
-                data: {
-                    'type': 'delete',
-                    'page': $(location).attr("href").split('/').pop().split('.')[0]
-                },
-                success: function (result) {
-                    window.location.href = '/';
-                }
-            });
-        }
-    });
-
+    <%include file="edit_modal/edit_modal.js"/>
     %endif
-
 }); //ready
 
 </script>

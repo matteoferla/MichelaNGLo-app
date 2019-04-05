@@ -18,9 +18,9 @@
         users = self.context._data['request'].dbsession.query(User).all()
         icon = {'basic': 'user', 'friend': 'user-tie', 'guest': 'user-secret', 'admin': 'user-crown', 'new': 'user-astronaut', 'hacker': 'user-ninja', 'trashcan': 'dumpster'}
     %>
-    <p class="card-text">
-              There are ${len(users)} regististered users.
-        <ul class="fa-ul">
+    <p class="card-text">There are ${len(users)} regististered users.</p>
+
+    <ul class="fa-ul">
             %for u in users:
                 <li data-user="${u.name}">
                     <a href="#mod" data-toggle="modal" data-target="#mod" data-user="${u.name}">
@@ -33,7 +33,8 @@
                 </span> ${u.name} </a></li>
             %endfor
         </ul>
-    </p>
+
+
 % else:
     <div class="card bg-warning my-3 w-100">
         <div class="card-header"><h5 class="card-title">Restricted</h5></div>

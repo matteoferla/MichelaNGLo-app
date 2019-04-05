@@ -75,7 +75,7 @@ class Page:
         if 'title' not in settings:
             settings['title'] = 'User submitted structure'
         for fun, keys in ((list, ('editors', 'visitors', 'authors')),
-                      (bool, ('image', 'uniform_non_carbon', 'verbose', 'validation', 'save')),
+                      (bool, ('image', 'uniform_non_carbon', 'verbose', 'validation', 'save', 'public','confidential')),
                       (str, ('viewport', 'stick', 'backgroundcolor', 'loadfun', 'proteinJSON', 'pdb', 'description', 'title', 'data_other'))):
             for key in keys:
                 if key not in settings:
