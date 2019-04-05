@@ -4,7 +4,7 @@ import traceback
 from PyMOL_to_NGL import PyMolTranspiler
 from ..pages import Page
 from ..models import User
-from ..trashcan import get_trashcan
+from ..trashcan import get_trashcan, get_public
 import uuid
 import shutil
 import os
@@ -229,9 +229,8 @@ def edit(request):
     # get ready
     page = Page(request.POST['page'])
     user = request.user
-    ownership = user.owned_pages.split(' ')
     ## cehck permissions
-    if page.identifier not in ownership and not (user and user.role == 'admin'): ## only owners and admins can edit.
+    if not user or not (page.identifier in user.get_owned_pages() or user.role == 'admin'): ## only owners and admins can edit.
         request.response.status = 403
         return {'error': 'not authorised'}
     else:
@@ -256,8 +255,20 @@ def edit(request):
             for key in ('title', 'description'):
                 if key in request.POST:
                     settings[key] = Page.sanitise_HTML(request.POST[key])
-        for key in ('public','confidential'):
-            settings[key] = is_js_true(request.POST[key])
+        settings['confidential'] = is_js_true(request.POST['confidential'])
+        publicised1= 'public' in settings and not settings['public'] and is_js_true(request.POST['public']) #was private public but is now.
+        publicised2= 'public' not in settings and is_js_true(request.POST['public']) #was not decalred but is now.
+        if publicised1 or publicised2:
+            public = get_public(request)
+            public.add_visited_page(page.identifier)
+            request.dbsession.add(public)
+        elif 'public' in settings and settings['public'] and not is_js_true(request.POST['public']):
+                public = get_public(request)
+                public.remove_visited_page(page.identifier)
+                request.dbsession.add(public)
+        else:
+            pass
+        settings['public'] = is_js_true(request.POST['public'])
         #new_editors
         if 'new_editors' in request.POST and request.POST['new_editors']:
             for new_editor in json.loads((request.POST['new_editors'])):

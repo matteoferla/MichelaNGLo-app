@@ -9,6 +9,7 @@ def includeme(config):
     config.add_route('pdb', '/pdb')
     config.add_route('pymol', '/pymol')
     config.add_route('clash', '/clash')
+    config.add_route('gallery', '/gallery')
     config.add_route('imagetoggle', '/imagetoggle')
     config.add_route('docs', '/docs')
     config.add_route('sandbox', '/sandbox')

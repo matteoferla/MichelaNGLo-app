@@ -11,8 +11,12 @@
 
 <%block name="main">
     <%
-        import os
-        for file in os.listdir(os.path.join('pymol'))
+        from pymol_ngl_transpiler_app.trashcan import get_public
+        public = get_public(request)
     %>
-    None made public.
+        <div class="list-group">
+    % for page in public.get_visited_loaded_pages():
+        <a href="/data/${page.identifier}" class="list-group-item list-group-item-action">${page.settings['title']}</a>
+    % endfor
+        </div>
 </%block>

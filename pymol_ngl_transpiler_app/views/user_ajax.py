@@ -55,7 +55,7 @@ def user_view(request):
             request.response.status = 400
             return {'status': 'wrong username'}
     elif action == 'register':
-        if username in ('guest', 'Anonymous', 'trashcan'): ##blacklisted
+        if username in ('guest', 'Anonymous', 'trashcan', 'public'): ##blacklisted
             request.response.status = 403
             return {'status': 'forbidden'}
         if not user:

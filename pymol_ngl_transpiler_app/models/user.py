@@ -84,3 +84,6 @@ class User(Base):
 
     def get_owned_loaded_pages(self):
         return self._get_loaded_pages(group='owned_pages')
+
+    def remove_visited_page(self, page):
+        self.visited_pages.replace(page,'')
