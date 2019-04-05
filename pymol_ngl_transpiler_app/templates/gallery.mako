@@ -6,7 +6,7 @@
             &mdash; Gallery
 </%block>
 <%block name="subtitle">
-            Here are links to several created pages
+            Here are links to created pages flagged as public
 </%block>
 
 <%block name="main">
