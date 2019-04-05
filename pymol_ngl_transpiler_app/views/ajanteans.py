@@ -327,7 +327,7 @@ def status_check_view(request):
     """
     if 'status' not in request.session:
         ## prepare for next time
-        request.session = {'condition' : 'error',
+        request.session['status'] = {'condition' : 'error',
                             'title'     : 'Error',
                             'body'      : 'The requested job was not found.',
                             'color'     : 'bg-warning'}
