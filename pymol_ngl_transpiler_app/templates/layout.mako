@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Michelanglo, PyMOL-NGL transpiler application">
+    <meta name="description" content="Michelanglo, a simple way to create NGL views for webpages and for sharing">
     <meta name="author" content="Matteo Ferla">
     <link rel="icon" href="/static/NGL.png">
     %if not public:
