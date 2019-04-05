@@ -12,6 +12,7 @@ else:
 
 @notfound_view_config(renderer="../templates/404.mako")
 @view_config(route_name='admin', renderer='../templates/admin.mako', http_cache=0)
+@view_config(route_name='gallery', renderer="../templates/gallery.mako")
 @view_config(route_name='clash', renderer="../templates/clash.mako")
 @view_config(route_name='custom', renderer="../templates/custom.mako")
 @view_config(route_name='home', renderer="../templates/welcome.mako")
