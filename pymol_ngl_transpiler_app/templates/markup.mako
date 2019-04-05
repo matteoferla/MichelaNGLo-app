@@ -13,16 +13,6 @@
             Construction of HTML anchor tags to guide the users to a residue or region
 </%block>
 
-
-<%block name="alert">
-    <div class="alert alert-info py-5 alert-dismissible fade show" role="alert">
-      This got revised. for the old see <a href="/markup?version=old">old version.</a>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
-    </div>
-</%block>
-
 <%block name="body">
 <div class='row'>
             <div class='col-12 col-sm-6'>

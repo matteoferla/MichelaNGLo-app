@@ -11,6 +11,7 @@ else:
     os.mkdir(os.path.join('pymol_ngl_transpiler_app','temp'))
 
 @notfound_view_config(renderer="../templates/404.mako")
+@view_config(route_name='markup', renderer="../templates/markup.mako")
 @view_config(route_name='admin', renderer='../templates/admin.mako', http_cache=0)
 @view_config(route_name='gallery', renderer="../templates/gallery.mako")
 @view_config(route_name='clash', renderer="../templates/clash.mako")
@@ -32,13 +33,6 @@ def my_view(request):
             'user': user,
             'bootstrap': bootstrap}
 
-
-@view_config(route_name='markup', renderer="../templates/markup.mako")
-def markup_view(request):
-    settings = {'project': 'Michelanglo', 'user': request.user} #useless for now.
-    if request.GET and 'version' in request.GET and request.GET['version'] == 'old':
-        return render_to_response("../templates/markup_old.mako",settings, request)
-    return settings
 
 from ..pages import Page
 
