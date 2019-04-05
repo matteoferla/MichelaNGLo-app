@@ -55,7 +55,7 @@ $('#results').append('<div class="btn-group mb-3" role="group" aria-label="Use">
 $('#useanchor,#usespan').click(function () {
     var elems=$($('#results').text());
     var wanted = ($(this).attr('id') === 'useanchor') ? elems[0] : elems[2];
-    $('#edit_description').val($('#edit_description').val()+'\n'+wanted);
+    $('#edit_description').val($('#edit_description').val()+'\n'+wanted.outerHTML);
     $('#markup_modal').modal('hide');
 });
 
