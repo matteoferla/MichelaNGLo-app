@@ -326,15 +326,15 @@ def status_check_view(request):
     :return:
     """
     if 'status' not in request.session:
-        time.sleep(2)
-        if 'status' not in request.session:
-            time.sleep(8)
-            if 'status' not in request.session:
-                print('missing job error??!')
-                return {'condition' : 'error',
-                        'title'     : 'Error',
-                        'body'      : 'The requested job was not found.',
-                        'color'     : 'bg-warning'}
+        ## prepare for next time
+        request.session = {'condition' : 'error',
+                            'title'     : 'Error',
+                            'body'      : 'The requested job was not found.',
+                            'color'     : 'bg-warning'}
+        return {'condition' : 'running',
+                'title'     : 'Uploading',
+                'body'      : 'The network is slower that normal.',
+                'color'     : 'bg-warning'}
     return request.session['status']
 
 
