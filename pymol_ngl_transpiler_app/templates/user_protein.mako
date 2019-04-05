@@ -66,8 +66,13 @@
                     <a href="/data/${page}?no_user=1&remote=1&no_buttons=1&key=${key}" class="btn btn-outline-success w-100 my-1"  download="page.html"><i class="far fa-download"></i> Download file</a>
                     <a href="/save_pdb?uuid=${page}&key=${key}" class="btn btn-outline-success w-100 my-1"  download="model.pdb"><i class="far fa-map"></i> Download PDB</a>
                 % endif
+
+
+
+
+                <button type="button" class="btn btn-outline-primary w-100 my-1" id="getimplement"><i class="far fa-code"></i> Implementation code</button>
                 <button type="button" class="btn btn-outline-primary w-100 my-1" data-toggle="modal" data-target="#basics"><i class="far fa-cubes"></i> Protein basics</button>
-                <button type="button" class="btn btn-outline-primary w-100 my-1" data-toggle="modal" data-target="#about"><i class="far fa-code"></i> Credits</button>
+                <button type="button" class="btn btn-outline-primary w-100 my-1" data-toggle="modal" data-target="#about"><i class="far fa-quote-right"></i> Credits</button>
             </div>
         </div>
     </div>
@@ -80,6 +85,8 @@
 <%include file='about.mako'/>
 <%include file='basics.mako'/>
 <%include file="markup/markup_builder_modal.mako"/>
+<%include file='edit_modal/implement_modal.mako'/>
+
 
 </%block>
 
@@ -95,6 +102,20 @@ ${loadfun|n}
 $(document).ready(function () {
     $('#save').click(function () {
         NGL.getStage('viewport').makeImage({trim: true, antialias: true, transparent: false}).then(NGL.download);
+    });
+
+    $('#getimplement').click(function () { //this is available to all in case a guest makes a page.
+        $('#implement_modal .modal-body').html('<p><i class="far fa-dna fa-spin"></i> Data is loading...</p>');
+        $('#implement_modal').modal('show');
+        $.ajax({url: "/get",
+                data: {page: "${page}",
+                    %if key:
+                        key: "${key}",
+                    %endif
+                       item: 'implement'},
+                method: 'POST'
+            }).done( (msg) => {$('#implement_modal .modal-body').html(msg); new ClipboardJS('.clipboard');})
+                .fail((msg) => $('#implement_modal .modal-body').html('<p><i class="far fa-biohazard"></i> An error occurred and has been logged.</p>'));
     });
 
     %if editable:

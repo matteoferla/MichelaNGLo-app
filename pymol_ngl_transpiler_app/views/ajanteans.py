@@ -41,7 +41,7 @@ def save_file(request, extension):
 
 
 
-@view_config(route_name='ajax_convert', renderer="../templates/main.result.mako")
+@view_config(route_name='ajax_convert', renderer="json")
 def ajax_convert(request):
     user = request.user
     request.session['status'] = make_msg('Checking data', 'The data has been recieved and is being checked')
@@ -128,15 +128,13 @@ def ajax_convert(request):
         request.session['status'] = make_msg('Saving', 'Storing data for retrieval.')
         Page(pagename).save(settings)
         request.session['status'] = make_msg('Loading results', 'Conversion is being loaded',condition='complete', color='bg-info')
-        if minor_error:
-            return {'snippet': True, 'error': 'warning', 'error_msg':minor_error, 'error_title':'A minor error arose','validation':trans.validation_text, 'page': pagename, **settings}
-        else:
-            return {'snippet': True, 'validation':trans.validation_text, 'page': pagename, **settings}
-
+        return {'page': pagename}
     except:
         print('**************')
         print(traceback.format_exc())
-        return {'snippet': False,'error_title':'A major error arose', 'error': 'danger','error_msg':'The code failed to run serverside:<br/><pre><code>'+traceback.format_exc()+'</code></pre>','validation':''}
+        request.response.status = 500
+        request.session['status'] = make_msg('A server-side error arose', 'The code failed to run serverside:<br/><pre><code>'+traceback.format_exc()+'</code></pre>','error','bg-danger')
+        return {'error': 'error'}
 
 @view_config(route_name='ajax_custom', renderer="../templates/custom.result.mako")
 def ajax_custom(request):
@@ -194,7 +192,7 @@ def ajax_custom(request):
     mesh.append({'o_name': o_name, 'triangles': trilist})
     return {'mesh': mesh}
 
-@view_config(route_name='ajax_pdb', renderer="../templates/main.result.mako")
+@view_config(route_name='ajax_pdb', renderer="json")
 def ajax_pdb(request):
     pagename = str(uuid.uuid4())
     settings = {'data_other': request.POST['viewcode'].replace('<div', '').replace('</div>', '').replace('<', '').replace('>', ''),
@@ -217,12 +215,14 @@ def ajax_pdb(request):
         request.dbsession.add(request.user)
     else:
         settings['authors'] = ['anonymous']
+        settings['description'] = 'Only <a href="#" class="text-secondary" data-toggle="modal" data-target="#login">logged-in users</a> can edit data pages. This page will be deleted in 24 hours.'
         trashcan = get_trashcan(request)
         trashcan.add_owned_page(pagename)
         request.dbsession.add(trashcan)
     Page(pagename).save(settings)
     #make_static_html(**settings)
-    return {'snippet': True, **settings}
+    print(pagename)
+    return {'page': pagename}
 
 @view_config(route_name='edit_user-page', renderer='json')
 def edit(request):
@@ -302,7 +302,8 @@ def delete(request):
 @view_config(route_name='get')
 def get_ajax(request):
     user = request.user
-    if request.POST['item'] == 'pages':
+    ###### get the user page list.
+    if request.params['item'] == 'pages':
         if not user:
             request.response.status = 403
             return render_to_response("../templates/404.mako", {'project': 'Michelanglo', 'user': request.user}, request)
@@ -314,6 +315,20 @@ def get_ajax(request):
         else:
             request.response.status = 403
             return render_to_response("../templates/404.mako", {'project': 'Michelanglo', 'user': request.user}, request)
+    ####### get the implementation code.
+    elif request.params['item'] == 'implement':
+        ## should non editors be able to see this??
+        page = Page(request.params['page'])
+        if 'key' in request.params:
+            page = Page(request.params['page'], request.params['key'])
+        else:
+            page = Page(request.params['page'])
+        settings = page.load()
+        return render_to_response("../templates/results/implement.mako", settings, request)
+
+
+
+
 
 @view_config(route_name='task_check', renderer="json")
 def status_check_view(request):

@@ -7,8 +7,8 @@
 </p>
 <div class="collapse pl-3 ml-2 border-left">
    <p>Not necessarily of the whole page as only a small part is fine. For example:</p>
-<img src="images/WYSIWYG_editor.png" width="200">
-<img src="images/raw_editor.png" width="200">
+<img src="/images/WYSIWYG_editor.png" width="200">
+<img src="/images/raw_editor.png" width="200">
    <p>In the first case, the HTML code is hidden as one sees what one gets as an end result. In the second case, the HTML code is visible: words between tags such as &lt;b&gt; are not styled. In most cases JS can be added here.</p>
    <p>If it does not work on your site, it may because some information is lost when you added it.</p>
 

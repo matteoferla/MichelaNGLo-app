@@ -43,7 +43,7 @@
                                 <span class="input-group-text" id="upload_addon_pdb">Upload PDB</span>
                               </div>
                               <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="upload_pdb" aria-describedby="upload_addon_pdb" accept=".pdb, .cif">
+                                <input type="file" class="custom-file-input" id="upload_pdb" aria-describedby="upload_addon_pdb" accept=".pdb">
                                 <label class="custom-file-label" for="upload_pdb">Choose file</label>
                               </div>
                             </div>
@@ -154,6 +154,7 @@
         else {data.append('file',$('#upload_pdb')[0].files[0]);}
         data.append('viewcode',$('#viewcode').text()); //needs two to make it list.
         //ajax it.
+        ops.addToast('submitting','Submission','Submission in progress.','bg-info');
         $.ajax({
             type: "POST",
             url: "ajax_pdb",
@@ -162,15 +163,14 @@
             cache: false,
             contentType: false,
             data:  data
-        })
-            .done(function (msg) {
-                $('#throbber').modal('hide');
-                $('.card-body > ul').append(msg);
+        }).done(function (msg) {
+                ops.addToast('jobcompletion','Conversion complete','The data has been converted successfully.','bg-success');
+                console.log(msg);
+                window.location.href = "/data/"+msg.page;
             })
             .fail(function () {
-                $('#throbber').modal('hide');
-                alert('ERROR');
-            })
+                ops.addToast('jobcompletion','Conversion failed','The data did not convert correctly.','bg-danger');
+            });
     });
 
 

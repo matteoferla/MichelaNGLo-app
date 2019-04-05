@@ -177,7 +177,7 @@ $('#submit').click(function () {
     })
             .done(function (msg) {
                 ops.addToast('jobcompletion','Conversion complete','The data has been converted successfully.','bg-success');
-                $('.card-body > ul').append(msg);
+                window.location.href = "/data/"+msg.page;
             })
             .fail(function () {
                 ops.addToast('jobcompletion','Conversion failed','The data did not convert correctly.','bg-danger');
