@@ -97,6 +97,7 @@ def userdata_view(request):
         settings['no_buttons'] = True
     else:
         settings['no_buttons'] = False
+    settings['no_analytics'] = True
     return settings
 
 

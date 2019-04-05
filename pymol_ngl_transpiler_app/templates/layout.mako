@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<%page args="bootstrap='4', remote=False, no_user=False, public=True, confidential=False"/>
+<%page args="bootstrap='4', remote=False, no_user=False, public=True, confidential=False, no_analytics=False"/>
 
 <head>
     <meta charset="utf-8">
@@ -188,6 +188,7 @@ pre {
 % endif
 </script>
 
+% if not no_analytics:
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-66652240-5"></script>
 <script>
@@ -197,6 +198,7 @@ pre {
 
   gtag('config', 'UA-66652240-5');
 </script>
+% endif
 
 
 </body>
