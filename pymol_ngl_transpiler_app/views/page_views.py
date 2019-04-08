@@ -98,6 +98,9 @@ def userdata_view(request):
     else:
         settings['no_buttons'] = False
     settings['no_analytics'] = True
+    if not 'columns_viewport' in settings:
+        settings['columns_viewport'] = 9
+        settings['columns_text'] = 3
     return settings
 
 

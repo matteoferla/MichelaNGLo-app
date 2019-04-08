@@ -1,5 +1,6 @@
 import requests
 
+from warnings import warn
 
 class SiteTests:
 
@@ -20,6 +21,8 @@ class SiteTests:
             print(r.status_code)
             print(r.headers)
             print(r.content)
+        if r.status_code != 200:
+            warn('The site {url} returned a status code {code}. Content: {con}'.format(url=self.url, code = r.status_code, con = r.content))
         return r
 
 #register a user.

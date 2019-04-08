@@ -298,6 +298,10 @@ def edit(request):
             page.path = page.unencrypted_path
         else: # no change
             pass
+        #alter ratio
+        if 'columns_viewport' in request.POST:
+            settings['columns_viewport'] = int(request.POST['columns_viewport'])
+            settings['columns_text'] = int(request.POST['columns_text'])
         #save
         page.save(settings)
         return {'success': 1}
