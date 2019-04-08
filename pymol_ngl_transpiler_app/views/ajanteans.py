@@ -46,7 +46,8 @@ def ajax_convert(request):
     user = request.user
     request.session['status'] = make_msg('Checking data', 'The data has been recieved and is being checked')
     try:
-        minor_error=''
+        minor_error='' #does nothing atm.
+
         ## assertions
         if not 'pdb_string' in request.POST and not request.POST['pdb']:
             response = {'error': 'danger', 'error_title': 'No PDB code', 'error_msg': 'A PDB code is required to make the NGL viewer show a protein.','snippet':'','validation':''}
@@ -61,17 +62,19 @@ def ajax_convert(request):
             request.session['status'] = make_msg(response['error_title'], response['error_msg'], 'error', 'bg-danger')
             return response
 
+        ## set settings
         settings = {'viewport': request.POST['viewport_id'],#'tabbed': int(request.POST['indent']),
                     'image': is_js_true(request.POST['image']),
                     'uniform_non_carbon':is_js_true(request.POST['uniform_non_carbon']),
                     'verbose': False,
                     'validation': True,
-                    'stick': request.POST['stick'],
+                    'stick_format': request.POST['stick_format'],
                     'save': True,
                     'backgroundcolor': 'white'}
 
-        # parse data
+        # parse data dependding on mode.
         request.session['status'] = make_msg('Conversion', 'Conversion in progress')
+        ## case 1: user submitted output
         if request.POST['mode'] == 'out':
             view = ''
             reps = ''
@@ -86,10 +89,12 @@ def ajax_convert(request):
                 else:
                     minor_error = 'Unknown block: ' + block
             trans = PyMolTranspiler(view=view, representation=reps, pdb=request.POST['pdb'], **settings)
-            settings['loadfun'] = trans.get_loadfun_js(viewport=request.POST['viewport_id'], tag_wrapped=True)
+        ## case 2: user uses pse
         elif request.POST['mode'] == 'file':
+            ## case 2b: DEMO mode.
             if 'demo_file' in request.POST:
                 filename=demo_file(request) #prevention against attacks
+            ## case 2a: file mode.
             else:
                 filename = save_file(request,'pse')
             trans = PyMolTranspiler(file=filename, **settings)
@@ -100,8 +105,9 @@ def ajax_convert(request):
                 trans.pdb = request.POST['pdb']
         else:
             return {'snippet': 'Please stop trying to hack the server', 'error_title': 'A major error arose', 'error': 'danger', 'error_msg': 'The code failed to run serverside. Most likely malicius','viewport':settings['viewport']}
-        # make output
-        ###code = trans.get_html(ngl=request.POST['cdn'], **settings)
+
+
+        # deal with user permissions.
         code = 1
         request.session['status'] = make_msg('Permissions', 'Finalising user permissions')
         pagename=str(uuid.uuid4())
@@ -113,9 +119,10 @@ def ajax_convert(request):
             user.add_owned_page(pagename)
             settings['author'] = ['Anonymous']
         request.dbsession.add(user)
-        ##snippet_run=trans.code
+
+        # create output
         request.session['status'] = make_msg('Load function', 'Making load function')
-        settings['loadfun'] = trans.get_loadfun_js(viewport=request.POST['viewport_id'])
+        settings['loadfun'] = trans.get_loadfun_js(tag_wrapped=True, **settings)
         if trans.raw_pdb:
             settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true, "loadFx": "loadfun"}]'
             settings['pdb'] = '\n'.join(trans.ss)+'\n'+trans.raw_pdb
@@ -123,7 +130,8 @@ def ajax_convert(request):
             settings['proteinJSON'] = '[{{"type": "rcsb", "value": "{0}", "loadFx": "loadfun"}}]'.format(trans.pdb)
         else:
             settings['proteinJSON'] = '[{{"type": "file", "value": "{0}", "loadFx": "loadfun"}}]'.format(trans.pdb)
-        # sharable page
+
+        # save sharable page data
         settings['editors'] = [user.name]
         request.session['status'] = make_msg('Saving', 'Storing data for retrieval.')
         Page(pagename).save(settings)

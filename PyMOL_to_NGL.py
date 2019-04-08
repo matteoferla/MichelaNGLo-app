@@ -507,6 +507,7 @@ class PyMolTranspiler:
         return code
 
     def get_loadfun_js(self, **settings):
+
         code = Template(filename=os.path.join('output_templates', 'loadfun.js.mako')) \
             .render_unicode(structure=self, **settings)
         self.code = code

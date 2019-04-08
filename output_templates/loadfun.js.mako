@@ -33,13 +33,13 @@ function loadfun (protein) {
     % endif
     % if structure.sticks:
         var sticks = new NGL.Selection( "${' or '.join(structure.sticks)}" );
-        % if stick == 'sym_licorice':
+        % if stick_format == 'sym_licorice':
         protein.addRepresentation( "licorice", {${color_str} sele: sticks.string, multipleBond: "symmetric"} );
-        % elif stick == 'licorice':
+        % elif stick_format == 'licorice':
         protein.addRepresentation( "licorice", {${color_str}  sele: sticks.string} );
-        % elif stick == 'hyperball':
+        % elif stick_format == 'hyperball':
         protein.addRepresentation( "hyperball", {${color_str}  sele: sticks.string} );
-        % elif stick == 'ball':
+        % elif stick_format == 'ball':
         protein.addRepresentation( "ball+stick", {${color_str}  sele: sticks.string, multipleBond: "symmetric"} );
         % endif
     % endif

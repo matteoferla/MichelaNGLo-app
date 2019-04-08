@@ -152,7 +152,7 @@ $('#submit').click(function () {
     data.append( 'uniform_non_carbon',$('#uniform_non_carbon').is(':checked'));
     data.append('viewport_id',valid_value('#viewport_id'));
     data.append( 'image',$('#image').is(':checked'));
-    data.append('stick',$("input[name='sticks']:checked").val());
+    data.append('stick_format',$("input[name='sticks']:checked").val());
     var snapshot = '';
     if ($('#snapshot').is(':checked')) {
         snapshot = $('#snapshot_id').val();
