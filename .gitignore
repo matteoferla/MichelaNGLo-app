@@ -21,6 +21,8 @@ test
 .sqlite
 .egg-info
 *.egg-info
+PyMOL_NGL_transpiler_app.egg-info/*
+michelanglo_app.egg-info/*
 *.p
 michelanglo_app/demo/*.pdb
 michelanglo_app/user-data/*.p
