@@ -1,5 +1,19 @@
 __docs__ = """
 To install...
+# conda way
+install anaconda...
+
+cd ~/Downloads
+curl -O https://repo.anaconda.com/Anaconda2-2019.03-Linux-x86_64.sh
+sudo sh Anaconda2-2019.03-Linux-x86_64.sh
+conda update conda
+conda create -n env python=3.7 anaconda
+conda activate env
+conda install  -n env -c schrodinger pymol
+
+
+
+# older way.
 # get python
 sudo apt-get install python3
 # make venv
@@ -52,7 +66,8 @@ requires = [
     'numpy',
     'pycrypto',
     'markdown',
-    'db-psycopg2'
+    'psycopg2-binary',
+    'requests'
 ]
 
 tests_require = [
