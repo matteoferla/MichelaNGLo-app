@@ -21,9 +21,9 @@ tests_require = [
     'pytest-cov',
     ]
 
-setup(name='PyMOL_NGL_transpiler_app',
+setup(name='michelanglo_app',
       version='0.0',
-      description='PyMOL_NGL_transpiler_app',
+      description='michelanglo_app',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[
           "Programming Language :: Python",
@@ -44,6 +44,6 @@ setup(name='PyMOL_NGL_transpiler_app',
       install_requires=requires,
       entry_points="""\
       [paste.app_factory]
-      main = pymol_ngl_transpiler_app:main
+      main = michelanglo_app:main
       """,
       )

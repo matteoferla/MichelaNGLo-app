@@ -1,4 +1,4 @@
-PyMOL_NGL_transpiler_app README
+michelanglo_app README
 ==================
 
 Generic cookiecutter with `app.py` made to use instead of using `pserve` as I am not running a venv atm.

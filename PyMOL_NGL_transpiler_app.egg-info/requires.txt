@@ -11,6 +11,8 @@ transaction
 zope.sqlalchemy
 bcrypt
 numpy
+pycrypto
+markdown
 
 [testing]
 WebTest>=1.3.1

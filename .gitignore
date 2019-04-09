@@ -22,6 +22,6 @@ test
 .egg-info
 *.egg-info
 *.p
-pymol_ngl_transpiler_app/demo/*.pdb
-pymol_ngl_transpiler_app/user-data/*.p
-pymol_ngl_transpiler_app/user-data/*.ep
+michelanglo_app/demo/*.pdb
+michelanglo_app/user-data/*.p
+michelanglo_app/user-data/*.ep

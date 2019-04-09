@@ -8,7 +8,7 @@ def store_data(page, settings):
                 'data_other']:
         if key not in settings:
             settings[key] = ''
-    with open(os.path.join('pymol_ngl_transpiler_app', 'user-data', page + '.p'), 'wb') as fh:
+    with open(os.path.join('michelanglo_app', 'user-data', page + '.p'), 'wb') as fh:
         pickle.dump(settings, fh)
 
 
@@ -30,7 +30,7 @@ def delete_data(page):
 
 def full_path_data(page):
     page = sanitise_URL(page)
-    return os.path.join('pymol_ngl_transpiler_app', 'user-data', page + '.p')
+    return os.path.join('michelanglo_app', 'user-data', page + '.p')
 
 
 
@@ -38,13 +38,13 @@ def full_path_data(page):
 
 def old_edit(request):
     if request.POST['type'] == 'edit':
-        if (os.path.isfile(os.path.join('pymol_ngl_transpiler_app', 'user', request.POST['page'] + '.js'))):
+        if (os.path.isfile(os.path.join('michelanglo_app', 'user', request.POST['page'] + '.js'))):
             make_static_html(js='external', **request.POST) ##this could be dangerous but I think it is safe.
     elif request.POST['type'] == 'delete':
-        os.remove(os.path.join('pymol_ngl_transpiler_app','user',sanitise_URL(request.POST['page'])+'.html'))
+        os.remove(os.path.join('michelanglo_app','user',sanitise_URL(request.POST['page'])+'.html'))
         js = sanitise_URL(request.POST['page']) + '.js'
         if os.path.isfile(js):
-            os.remove(os.path.join('pymol_ngl_transpiler_app', 'user', js))
+            os.remove(os.path.join('michelanglo_app', 'user', js))
     return {'success': 1}
 
 
@@ -63,8 +63,8 @@ def make_static_page(page, **settings): #proteinJSON, backgroundcolor, pdb and l
 
 
 def make_static_html(page, description='Editable text. press pen to edit.',title='User submitted structure', **settings):
-    open(os.path.join('pymol_ngl_transpiler_app', 'user', page + '.html'), 'w', newline='\n').write(
-        mako.template.Template(filename=os.path.join('pymol_ngl_transpiler_app', 'templates', 'user_protein.mako'),
+    open(os.path.join('michelanglo_app', 'user', page + '.html'), 'w', newline='\n').write(
+        mako.template.Template(filename=os.path.join('michelanglo_app', 'templates', 'user_protein.mako'),
                                format_exceptions=True,
                                lookup=mako.lookup.TemplateLookup(directories=[os.getcwd()])
                                ).render_unicode(description=sanitise_HTML(description),
@@ -73,7 +73,7 @@ def make_static_html(page, description='Editable text. press pen to edit.',title
                                                 **settings))
 
 def make_static_js(page, **settings):
-    js = os.path.join('pymol_ngl_transpiler_app', 'user', page + '.js')
+    js = os.path.join('michelanglo_app', 'user', page + '.js')
     if (not os.path.isfile(js)):
         tags='<script type="text/javascript" id="code">{0}</script>'
         if 'pdb' in settings and settings['pdb']:

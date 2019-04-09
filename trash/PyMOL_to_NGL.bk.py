@@ -484,7 +484,7 @@ var schemeId = NGL.ColormakerRegistry.addScheme(function (params) {
         return self
 
     def get_js(self, **settings):
-        code=Template(filename=os.path.join('pymol_ngl_transpiler_app', 'templates', 'output.js.mako'),)\
+        code=Template(filename=os.path.join('michelanglo_app', 'templates', 'output.js.mako'),)\
             .render_unicode(structure=self, **settings)
         return code
 
@@ -494,7 +494,7 @@ def test():
     transpiler.pdb = '1UBQ'
     view = ''
     reps = ''
-    data = open(os.path.join('pymol_ngl_transpiler_app','static','pymol_demo.txt')).read().split('PyMOL>')
+    data = open(os.path.join('michelanglo_app','static','pymol_demo.txt')).read().split('PyMOL>')
     for block in data:
         if 'get_view' in block:
             view = block

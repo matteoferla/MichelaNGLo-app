@@ -10,12 +10,10 @@ python3 -m venv env
 sudo apt-get install python3-dev libglm-dev freeglut3-dev libglew-dev libpng12-dev libfreetype6-dev build-essential libxml++2.6-dev
 sudo apt-get install libpng-dev # if libpng12-dev fails.
 ./env/bin/pip install pmw numpy
-
 prefix=env/pymol
 modules=$prefix/modules
 mkdir -p $prefix
 mkdir -p $modules
-
 git clone https://github.com/schrodinger/pymol-open-source.git env/pymol
 cd env/pymol
 sudo ./env/bin/python3 setup.py build install --home=${prefix}/ --install-lib=$modules --install-scripts=$prefix/
@@ -23,6 +21,11 @@ sudo ./env/bin/python3 setup.py build install --home=${prefix}/ --install-lib=$m
 #sudo echo $modules > env/lib/python3.6/dist-packages/pymol.pth  #mac
 sudo echo $modules > env/lib/python3.6/site-packages/pymol.pth  #linux
 ./env/bin/alembic -c production.ini revision --autogenerate -m "lets get this party started"
+
+command for shitedows 7 when venv fails. without the \\ as \ is a special character. God I hate windows.
+C:\\Users\\matteo\\AppData\\Local\\Continuum\\anaconda3\\Scripts\\pip3.exe install -e .
+C:\\Users\\matteo\\AppData\Local\\Continuum\\anaconda3\Scripts\\alembic.exe -c production.ini revision --autogenerate -m "use Users"
+C:\\Users\\matteo\\AppData\Local\\Continuum\\anaconda3\\Scripts\\alembic.exe -c development.ini upgrade head
 """
 
 import os
@@ -30,8 +33,6 @@ import os
 from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
-README = ''
-CHANGES = ''
 
 requires = [
     'plaster_pastedeploy',
@@ -58,10 +59,10 @@ tests_require = [
 ]
 
 setup(
-    name='pymol_ngl_transpiler_app',
+    name='michelanglo_app',
     version='0.0',
-    description='pymol_ngl_transpiler_app',
-    long_description=README + '\n\n' + CHANGES,
+    description='michelanglo_app',
+    long_description=__docs__,
     classifiers=[
         'Programming Language :: Python',
         'Framework :: Pyramid',
@@ -81,7 +82,7 @@ setup(
     install_requires=requires,
     entry_points={
         'paste.app_factory': [
-            'main = pymol_ngl_transpiler_app:main',
+            'main = michelanglo_app:main',
         ],
         'console_scripts': [
             'initialize_analyser_app_db=analyser_app.scripts.initialize_db:main',

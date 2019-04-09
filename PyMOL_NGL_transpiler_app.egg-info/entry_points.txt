@@ -2,5 +2,5 @@
 initialize_analyser_app_db = analyser_app.scripts.initialize_db:main
 
 [paste.app_factory]
-main = pymol_ngl_transpiler_app:main
+main = michelanglo_app:main
 

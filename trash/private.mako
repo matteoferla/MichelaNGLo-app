@@ -1,10 +1,10 @@
-<%inherit file="../pymol_ngl_transpiler_app/templates/layout_w_card.mako"/>
+<%inherit file="michelanglo_app"/>
 <%!
 import os
 from datetime import datetime
         %>
 <%block name="buttons">
-            <%include file="../pymol_ngl_transpiler_app/templates/menu_buttons.mako" args='tour=False'/>
+            <%include file="michelanglo_app" args='tour=False'/>
 </%block>
 <%block name="title">
             &mdash; Admin console
@@ -29,7 +29,7 @@ from datetime import datetime
 <%block name="body">
 % if admin:
     <ul class="list-group">
-    %for url in os.listdir('pymol_ngl_transpiler_app/user'):
+    %for url in os.listdir('michelanglo_app/user'):
         %if '.html' in url:
         <li class="list-group-item" id="${url.replace('.html','')}">
             <h4>${url.replace('.html','')}</h4>
@@ -43,16 +43,16 @@ from datetime import datetime
                     </p>
                 </div>
                 <div class="col-1" title="This file has a separate uneditable JS to prevent XSS" data-toggle="tooltip">
-                %if os.path.exists(os.path.join('pymol_ngl_transpiler_app','user',url.replace('.html','.js'))):
+                %if os.path.exists(os.path.join('michelanglo_app','user',url.replace('.html','.js'))):
                     <i class="fab fa-js-square"></i>
                 %endif
                 </div>
                 <div class="col-6">
-                    <p>${datetime.fromtimestamp(os.stat(os.path.join('pymol_ngl_transpiler_app','user',url)).st_mtime).strftime("%A, %B %d, %Y %I:%M:%S")}</p>
-                    %if os.path.exists(os.path.join('pymol_ngl_transpiler_app','user',url.replace('.html','.js'))):
-                        <p>${int(os.stat(os.path.join('pymol_ngl_transpiler_app','user',url)).st_size)/1e6+int(os.stat(os.path.join('pymol_ngl_transpiler_app','user',url.replace('.html','.js'))).st_size)/1e6} MB</p>
+                    <p>${datetime.fromtimestamp(os.stat(os.path.join('michelanglo_app','user',url)).st_mtime).strftime("%A, %B %d, %Y %I:%M:%S")}</p>
+                    %if os.path.exists(os.path.join('michelanglo_app','user',url.replace('.html','.js'))):
+                        <p>${int(os.stat(os.path.join('michelanglo_app','user',url)).st_size)/1e6+int(os.stat(os.path.join('michelanglo_app','user',url.replace('.html','.js'))).st_size)/1e6} MB</p>
                     %else:
-                        <p>${int(os.stat(os.path.join('pymol_ngl_transpiler_app','user',url)).st_size)/1e6} MB</p>
+                        <p>${int(os.stat(os.path.join('michelanglo_app','user',url)).st_size)/1e6} MB</p>
                     %endif
                 </div>
             </div>

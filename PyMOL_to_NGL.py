@@ -519,7 +519,7 @@ def test():
     transpiler.pdb = '1UBQ'
     view = ''
     reps = ''
-    data = open(os.path.join('pymol_ngl_transpiler_app','static','pymol_demo.txt')).read().split('PyMOL>')
+    data = open(os.path.join('michelanglo_app','static','pymol_demo.txt')).read().split('PyMOL>')
     for block in data:
         if 'get_view' in block:
             view = block
