@@ -26,6 +26,8 @@ command for shitedows 7 when venv fails. without the \\ as \ is a special charac
 C:\\Users\\matteo\\AppData\\Local\\Continuum\\anaconda3\\Scripts\\pip3.exe install -e .
 C:\\Users\\matteo\\AppData\Local\\Continuum\\anaconda3\Scripts\\alembic.exe -c production.ini revision --autogenerate -m "use Users"
 C:\\Users\\matteo\\AppData\Local\\Continuum\\anaconda3\\Scripts\\alembic.exe -c development.ini upgrade head
+also requires to be installed by mouse:
+https://www.enterprisedb.com/downloads/postgres-postgresql-downloads
 """
 
 import os
@@ -49,7 +51,8 @@ requires = [
     'bcrypt',
     'numpy',
     'pycrypto',
-    'markdown'
+    'markdown',
+    'db-psycopg2'
 ]
 
 tests_require = [
@@ -85,7 +88,7 @@ setup(
             'main = michelanglo_app:main',
         ],
         'console_scripts': [
-            'initialize_analyser_app_db=analyser_app.scripts.initialize_db:main',
+            'initialize_michelanglo_app_db=michelanglo_app.scripts.initialize_db:main',
         ],
     },
 )

@@ -12,7 +12,7 @@ def setup_models(dbsession):
     editor.set_password('editor')
     dbsession.add(editor)
 
-    basic = models.User(name='basic', role='fictional')
+    basic = models.User(name='basic', role='spirit')
     basic.set_password('basic')
     dbsession.add(basic)
 
@@ -35,7 +35,7 @@ def main(argv=sys.argv):
         with env['request'].tm:
             dbsession = env['request'].dbsession
             setup_models(dbsession)
-    except OperationalError:
+    except OperationalError as err:
         print('''
 Pyramid is having a problem using your SQL database.  The problem
 might be caused by one of the following things:
@@ -45,5 +45,7 @@ might be caused by one of the following things:
 
 2.  Your database server may not be running.  Check that the
     database server referred to by the "sqlalchemy.url" setting in
-    your "development.ini" file is running.
-            ''')
+    your "production.ini" file is running.
+    
+{err}
+            '''.format(err=err))
