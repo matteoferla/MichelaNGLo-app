@@ -1,6 +1,0 @@
-[console_scripts]
-initialize_analyser_app_db = analyser_app.scripts.initialize_db:main
-
-[paste.app_factory]
-main = michelanglo_app:main
-
