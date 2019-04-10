@@ -1,4 +1,7 @@
-## This is where guest make pages
+## Trashcan and Public aren't real users.
+## Trashcan is the owner of pages made by non guest make pages.
+## Public is a visitor to pages made public.
+## Anonymous and Guest are two other forbidden usernames.
 
 from .models import User
 
@@ -17,7 +20,7 @@ def get_public(request):
     if trashcan:
         return trashcan
     else:
-        #someone deleted the trashcan!
+        #someone deleted the public!
         public = User(name='public', role='public', password_hash='$2b$12$EaadzvGZ3hd60a3dfqTrkOAstBQtzjTXVdG0OFm0O.pTibjK3OIn6')
         request.dbsession.add(public)
         return public
