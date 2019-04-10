@@ -131,10 +131,12 @@ $('#submit').click(function () {
     // output mode
     if        (mode == 'out') {
         data.append('pymol_output', valid_value('#pymol_output'));
+        ops.addToast('submitting','Submitting','Request is being sent.','bg-info');
     }
     // demo pse mode
     else if (mode == 'file' && !! window.demo_pse) {
         data.append('demo_file',window.demo_pse);
+        ops.addToast('submitting','Submitting','Request is being sent.','bg-info');
     }
     // pse upload mode
     else if (mode == 'file') {
@@ -182,6 +184,5 @@ $('#submit').click(function () {
             .fail(function () {
                 ops.addToast('jobcompletion','Conversion failed','The data did not convert correctly.','bg-danger');
             });
-    ops.statusCheck();
-
+    setTimeout(() => ops.statusCheck(), 2000);
 });
