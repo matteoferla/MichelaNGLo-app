@@ -24,7 +24,6 @@
 <h4>Prolinks</h4>
 <p>Links to guide the visitors ('prolinks') are described <a href="/markup">elsewhere</a>.</p>
 
-
 ############################################################# Users
 <%include file="docs/docs_users.mako"/>
 </%block>

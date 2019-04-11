@@ -38,6 +38,6 @@ Pages that were visited.
 Pages are not stored in the database, but as pickled files in user-data as the uuid.                                   
 The class is `Pages` in in `mchelanglo_app/`.
 
-The encryption is done with AES cipher using a SHA256 hash of the key as the AES key.
+The encryption is done with an AES cipher using a SHA256 hash of the key as the AES key.
 As the encryption is done in CBC mode, the randomly chosen IV (kind of like salt) is stored at the front of the encrypted data as commonly done.
 

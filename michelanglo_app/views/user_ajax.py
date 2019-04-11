@@ -7,6 +7,9 @@ data = {'username': 'testdummy',
 action can be login (username and password), logout (nothing), register (also req. `email`), whoami (debug only)
 if the user is admin it can also be promote (req. `role`), kill, reset
 the reply "status" and occasionally "username"
+
+
+The modal that controls it is `login/user_modal.mako`. However the content is controlled by a ajax to `/get` to get the relevant `*_modalcont.mako` (content).
 """
 from pyramid.view import view_config
 from ..models import User
@@ -16,9 +19,10 @@ from pyramid.security import (
     forget,
     )
 
-import re
+import re, os
 
 def sanitise_text(text):
+    ### completely not needed.
     nasty = '[\x00\|\-\*\/\<\>\,\=\<\>\~\!\^\(\)\'\"]'
     value = re.sub(nasty,'', text)
     if len(value) == 0:
@@ -93,8 +97,15 @@ def user_view(request):
         else:
             request.response.status = 403
             return {'status': 'access denied'}
+    elif action == 'change_password':
+        if request.user and request.user.check_password(sanitise_text(request.params['password'])):
+            request.user.set_password(sanitise_text(request.params['newpassword']))
+            request.dbsession.add(request.user)
+        else:
+            request.response.status = 403
+            return {'status': 'wrong password'}
     elif action == 'reset':
-        if request.user and request.user.role == 'admin': ##only admins can reset the password
+        if request.user and request.user.role == 'admin': ##only admins can set password this way.
             target=request.dbsession.query(User).filter_by(name=username).one()
             target.set_password('password')
             request.dbsession.add(target)

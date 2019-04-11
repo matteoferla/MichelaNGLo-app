@@ -325,6 +325,11 @@ def delete(request):
 @view_config(route_name='get')
 def get_ajax(request):
     user = request.user
+    modals = {'register': "../templates/login/register_modalcont.mako",
+            'login': "../templates/login/login_modalcont.mako",
+            'forgot': "../templates/login/forgot_modalcont.mako",
+            'logout': "../templates/login/logout_modalcont.mako",
+            'password': "../templates/login/password_modalcont.mako"}
     ###### get the user page list.
     if request.params['item'] == 'pages':
         if not user:
@@ -338,6 +343,10 @@ def get_ajax(request):
         else:
             request.response.status = 403
             return render_to_response("../templates/404.mako", {'project': 'Michelanglo', 'user': request.user}, request)
+    ####### get the modals
+    elif request.params['item'] in  modals.keys():
+
+        return render_to_response(modals[request.params['item']], {'project': 'Michelanglo', 'user': request.user}, request)
     ####### get the implementation code.
     elif request.params['item'] == 'implement':
         ## should non editors be able to see this??
@@ -348,6 +357,11 @@ def get_ajax(request):
             page = Page(request.params['page'])
         settings = page.load()
         return render_to_response("../templates/results/implement.mako", settings, request)
+    else:
+        request.response.status = 404
+        print('unknown item '+request.params['item'])
+        return render_to_response("../templates/404.mako", {'project': 'Michelanglo', 'user': request.user}, request)
+
 
 
 
