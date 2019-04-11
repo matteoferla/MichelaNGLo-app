@@ -15,7 +15,7 @@
 <%include file="docs/docs_raw.mako"/>
 
 ############################################################# CDN
-<include file="docs_cdn.mako"/>
+<%include file="docs/docs_cdn.mako"/>
 
 ############################################################# Viewport
 <%include file="docs/docs_viewport.mako"/>
@@ -26,5 +26,5 @@
 
 
 ############################################################# Users
-<include file="docs_users.mako"/>
+<%include file="docs/docs_users.mako"/>
 </%block>

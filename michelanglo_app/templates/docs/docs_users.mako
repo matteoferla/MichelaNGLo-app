@@ -11,6 +11,6 @@
     <li>The password is hashed.</li>
     <li>Your email is required only if you get in contact regarding an account problem.</li>
     <li>Your username is visible to the editors of the pages you visit.</li>
-    <li>We can access and edit pages if required to do so.</li>
+    <li>We will access and edit pages if required to do so.</li>
     <li>We will not share this information with third parties for whatever reason.</li>
 </ul>
