@@ -2,15 +2,15 @@ from pyramid.view import view_config
 from pyramid.renderers import render_to_response
 import traceback
 from PyMOL_to_NGL import PyMolTranspiler
-from ..pages import Page
+from michelanglo_app.models.pages import Page
 from ..models import User
-from ..trashcan import get_trashcan, get_public
+from michelanglo_app.models.trashcan import get_trashcan, get_public
 import uuid
 import shutil
 import os
 import io
 import json
-import time
+
 
 #from pprint import PrettyPrinter
 #pprint = PrettyPrinter()

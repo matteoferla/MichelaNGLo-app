@@ -1,7 +1,7 @@
 from pyramid.view import view_config, notfound_view_config
 from pyramid.renderers import render_to_response
 import os
-from pyramid.response import FileResponse
+
 password='protein'
 
 if os.path.isdir(os.path.join('michelanglo_app','temp')):
@@ -34,7 +34,7 @@ def my_view(request):
             'bootstrap': bootstrap}
 
 
-from ..pages import Page
+from michelanglo_app.models.pages import Page
 
 @view_config(route_name='userdata', renderer="../templates/user_protein.mako")
 def userdata_view(request):
@@ -116,3 +116,8 @@ def save_pdb(request):
 @view_config(route_name='save_zip', renderer="string")
 def save_zip(request):
     raise NotImplementedError
+
+
+@view_config(route_name='status', renderer='json')
+def my_view(request):
+    return {'status': 'OK'}

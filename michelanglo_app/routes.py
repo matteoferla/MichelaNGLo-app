@@ -22,6 +22,7 @@ def includeme(config):
     config.add_route('edit_user-page', '/edit_user-page')
     config.add_route('delete_user-page', '/delete_user-page')
     config.add_route('login', '/login')
+    config.add_route('status', '/status')
     config.add_route('get', '/get')
     config.add_route('admin', '/admin')
     config.add_route('userdata', '/data/{id}')

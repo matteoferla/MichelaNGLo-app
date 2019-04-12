@@ -7,7 +7,7 @@ from sqlalchemy import (
 )
 
 from .meta import Base
-from ..pages import Page
+from .pages import Page
 
 
 class User(Base):

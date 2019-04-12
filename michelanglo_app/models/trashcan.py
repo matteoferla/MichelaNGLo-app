@@ -3,7 +3,7 @@
 ## Public is a visitor to pages made public.
 ## Anonymous and Guest are two other forbidden usernames.
 
-from .models import User
+from .user import User
 
 def get_trashcan(request):
     trashcan = request.dbsession.query(User).filter_by(name='trashcan').first()
