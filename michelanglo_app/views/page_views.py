@@ -119,5 +119,5 @@ def save_zip(request):
 
 
 @view_config(route_name='status', renderer='json')
-def my_view(request):
+def status_view(request):
     return {'status': 'OK'}
