@@ -103,9 +103,6 @@ def userdata_view(request):
         settings['columns_text'] = 3
     return settings
 
-
-
-
 @view_config(route_name='save_pdb', renderer='string')
 def save_pdb(request):
     page = Page(request.params['uuid'])

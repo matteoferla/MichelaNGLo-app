@@ -19,9 +19,7 @@
                     <div class="input-group-prepend">
                         <span class="input-group-text" aria-label="edit_description" ro aria-describedby="description-addon1">Description</span>
                     </div>
-                    <textarea class="form-control" rows=6 aria-label="With textarea" id="edit_description">${description}</textarea>
-
-                    <div id="textarea" rows="3" contenteditable="true" class="border" style="height: 5em; resize: vertical;">Hello <code>world</code> froddm Mars.</div>
+                    <div id="edit_description" contenteditable="true" class="form-control border" style="height: 15rem; resize: vertical; overflow: auto;">${description}</div>
                 </div>
 
                 <%include file="../markup/markup_builder_btn.mako"/>
