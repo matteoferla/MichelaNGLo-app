@@ -1,4 +1,4 @@
-from PyMOL_to_NGL import PyMolTranspiler
+from michelanglo_app.transplier import PyMolTranspiler
 
 transpiler = PyMolTranspiler(file='michelanglo_app/demo/1gfl.pse')
 #print(transpiler.get_view())

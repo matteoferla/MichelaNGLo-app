@@ -1,13 +1,18 @@
 # Michelaɴɢʟo
 Michelaɴɢʟo is a web app to convert a PyMOL PSE file or PDB file to a easy to implement NGL.js view that can be implemented easily on any site.
 
-The conversion file, `PyMOL_to_NGL.py` and the files in `output_templates` are all that is required to use locally.
-
 [Click here to visit the web app (temp URL)](https://ngl.matteoferla.com).
 
 For the documentation for the web app see [help page](https://ngl.matteoferla.com/docs).
 
-## Aim
+## Non-Michelaɴɢʟo goodies
+The conversion file, `michelanglo/transpiler.py` and the files in `michelanglo/transpiler_templates` are all that is required to use locally.
+They are in `michelanglo_app` to avoid allowing the app to do a relative import beyond the top-level package (`michelanglo_app`).
+
+The js that allows web content creators to control NGL without using JS is `michelanglo_app/static/ngl.extended.js`, while its documentation is at [ngl.matteoferla.com/markup](https://ngl.matteoferla.com/markup).
+
+
+## Aim of Michelaɴɢʟo
 
 The aim of this app is to provide a way for a user to easily generate a web-ready output that can be pasted into a webpage editor resulting in an iteractive protein view.
 

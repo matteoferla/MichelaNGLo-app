@@ -4,7 +4,7 @@ import traceback
 from ..models.pages import Page
 from ..models.user import User
 from ..models.trashcan import get_trashcan, get_public
-from ...PyMOL_to_NGL import PyMolTranspiler
+from ..transplier import PyMolTranspiler
 import uuid
 import shutil
 import os

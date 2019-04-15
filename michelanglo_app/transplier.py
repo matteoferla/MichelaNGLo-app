@@ -501,14 +501,14 @@ class PyMolTranspiler:
         return self
 
     def get_js(self, **settings):
-        code=Template(filename=os.path.join('output_templates', 'output.js.mako'))\
+        code=Template(filename=os.path.join('michelanglo_app','transpiler_templates', 'output.js.mako'))\
             .render_unicode(structure=self, **settings)
         self.code=code
         return code
 
     def get_loadfun_js(self, **settings):
 
-        code = Template(filename=os.path.join('output_templates', 'loadfun.js.mako')) \
+        code = Template(filename=os.path.join('michelanglo_app','transpiler_templates',  'loadfun.js.mako')) \
             .render_unicode(structure=self, **settings)
         self.code = code
         return code
