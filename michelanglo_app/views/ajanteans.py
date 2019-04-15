@@ -363,10 +363,6 @@ def get_ajax(request):
         return render_to_response("../templates/404.mako", {'project': 'Michelanglo', 'user': request.user}, request)
 
 
-
-
-
-
 @view_config(route_name='task_check', renderer="json")
 def status_check_view(request):
     """

@@ -19,7 +19,7 @@ from pyramid.security import (
     forget,
     )
 
-import re, os
+import re
 
 def sanitise_text(text):
     ### completely not needed.
@@ -32,6 +32,8 @@ def sanitise_text(text):
 
 @view_config(route_name='login', renderer="json")
 def user_view(request):
+    print(__name__, request.headers.__dict__)
+    print(__name__,request.environ)
     action   = request.params['action']
     if 'username' in request.params:
         username = sanitise_text(request.params['username'])
@@ -116,3 +118,6 @@ def user_view(request):
     else:
         request.response.status = 405
         return {'status': 'unknown request'}
+
+
+

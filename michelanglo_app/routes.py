@@ -25,4 +25,5 @@ def includeme(config):
     config.add_route('status', '/status')
     config.add_route('get', '/get')
     config.add_route('admin', '/admin')
+    config.add_route('venus', '/venus')
     config.add_route('userdata', '/data/{id}')
