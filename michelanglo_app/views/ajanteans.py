@@ -1,10 +1,10 @@
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
 import traceback
-from PyMOL_to_NGL import PyMolTranspiler
-from michelanglo_app.models.pages import Page
-from ..models import User
-from michelanglo_app.models.trashcan import get_trashcan, get_public
+from ..models.pages import Page
+from ..models.user import User
+from ..models.trashcan import get_trashcan, get_public
+from ...PyMOL_to_NGL import PyMolTranspiler
 import uuid
 import shutil
 import os
