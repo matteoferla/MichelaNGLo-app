@@ -9,7 +9,7 @@ def backdoor_for_venus(request):
     """
     Two layers of security. A shared environment variable and REMOTE_ADDR 127.0.0.1
     """
-    if request.environ['REMOTE_ADDR'] == '127.0.0.1' and request.params['code'] == os.environ['SECRETCODE']: #it is VENUS
+    if request.environ['REMOTE_ADDR'] in ('127.0.0.1','brc10.well.ox.ac.uk', 'fe80::695d:c288:e51a:b759%11') and request.params['code'] == os.environ['SECRETCODE']: #it is VENUS
         pagename = str(uuid.uuid4())
         settings = {'authors': [request.params['username']],
                     'proteinJSON': '['+request.params['protein']+']',
@@ -26,6 +26,11 @@ def backdoor_for_venus(request):
         requestor = request.dbsession.query(User).filter_by(name=request.params['username']).first()
         requestor.add_owned_page(pagename)
         request.dbsession.add(requestor)
+        print(__name__,pagename)
         return {'status': 'success', 'page': pagename}
     else:
+        print(__name__)
+        print(request.environ['REMOTE_ADDR'])
+        print(request.params['code'])
+        request.response.status = 403
         return {'status': 'stranger danger'}
