@@ -15,6 +15,7 @@ Data.fs*
 .*.sw?
 .sw?
 .idea/
+trash/
 .DS_Store
 coverage
 test
