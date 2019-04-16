@@ -208,9 +208,10 @@ This app requires Python3 compiled Pymol. The best option is using Conda. Otherw
 # Webapp installation
 Additionally for the webapp the package needs to be installed and the database started.
 
+    #use whatever venv or system pip/alembic you want.
     pip3 install -e .
     alembic -c production.ini revision --autogenerate -m "lets get this party started"
-    alembic -c development.ini upgrade head
+    alembic -c production.ini upgrade head
     
 In windows the excecutables will have `.exe` suffixes and are in `Scripts` folder `C:\Users\matteo\AppData\Local\Continuum\anaconda3\Scripts\pip3.exe` say for your regular install, your virtual env will be wherever you put it.
 
