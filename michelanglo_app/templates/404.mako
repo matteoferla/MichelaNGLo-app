@@ -1,8 +1,8 @@
-<%inherit file="layout.mako"/>
+<%inherit file="layout_components/layout.mako"/>
 <div class="card">
     <div class="card-header">
         <h1 class="card-title">PyMOL&rarr;NGL converter and generator
-            <%include file="menu_buttons.mako"/>
+            <%include file="layout_components/menu_buttons.mako"/>
         </h1>
         <h3 class="card-subtitle mb-2 text-muted">404 Error <small>File not found</small></h3>
     </div>

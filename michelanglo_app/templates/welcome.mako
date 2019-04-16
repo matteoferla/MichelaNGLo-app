@@ -1,7 +1,7 @@
-<%namespace file="labels.mako" name="info"/>
-<%inherit file="layout_w_card.mako"/>
+<%namespace file="layout_components/labels.mako" name="info"/>
+<%inherit file="layout_components/layout_w_card.mako"/>
 <%block name="buttons">
-            <%include file="menu_buttons.mako" args='tour=False'/>
+            <%include file="layout_components/menu_buttons.mako" args='tour=False'/>
 </%block>
 <%block name="subtitle">
             An interactive protein on your website with a few clicks

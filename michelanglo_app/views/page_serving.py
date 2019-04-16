@@ -1,40 +1,7 @@
-from pyramid.view import view_config, notfound_view_config
+from pyramid.view import view_config
 from pyramid.renderers import render_to_response
-import os
+from ..models.pages import Page
 
-password='protein'
-
-if os.path.isdir(os.path.join('michelanglo_app','temp')):
-    for file in os.listdir(os.path.join('michelanglo_app','temp')):
-        os.remove(os.path.join('michelanglo_app','temp',file))
-else:
-    os.mkdir(os.path.join('michelanglo_app','temp'))
-
-@notfound_view_config(renderer="../templates/404.mako")
-@view_config(route_name='markup', renderer="../templates/markup.mako")
-@view_config(route_name='admin', renderer='../templates/admin.mako', http_cache=0)
-@view_config(route_name='gallery', renderer="../templates/gallery.mako")
-@view_config(route_name='clash', renderer="../templates/clash.mako")
-@view_config(route_name='custom', renderer="../templates/custom.mako")
-@view_config(route_name='home', renderer="../templates/welcome.mako")
-@view_config(route_name='pymol', renderer="../templates/main.mako")
-@view_config(route_name='docs', renderer="../templates/docs.mako")
-@view_config(route_name='sandbox', renderer="../templates/sandbox.mako")
-@view_config(route_name='imagetoggle', renderer="../templates/image.mako")
-@view_config(route_name='pdb', renderer="../templates/pdb.mako")
-def my_view(request):
-    user = request.user
-    # ?bootstrap=materials is basically for the userdata_view only.
-    if 'bootstrap' in request.params:
-        bootstrap = request.params['bootstrap']
-    else:
-        bootstrap = 4
-    return {'project': 'Michalanglo',
-            'user': user,
-            'bootstrap': bootstrap}
-
-
-from michelanglo_app.models.pages import Page
 
 @view_config(route_name='userdata', renderer="../templates/user_protein.mako")
 def userdata_view(request):
@@ -103,6 +70,8 @@ def userdata_view(request):
         settings['columns_text'] = 3
     return settings
 
+
+
 @view_config(route_name='save_pdb', renderer='string')
 def save_pdb(request):
     page = Page(request.params['uuid'])
@@ -110,11 +79,9 @@ def save_pdb(request):
         page.key = request.params['key'].encode('utf-8')
     return page.load()['pdb']
 
+
+
 @view_config(route_name='save_zip', renderer="string")
 def save_zip(request):
     raise NotImplementedError
 
-
-@view_config(route_name='status', renderer='json')
-def status_view(request):
-    return {'status': 'OK'}

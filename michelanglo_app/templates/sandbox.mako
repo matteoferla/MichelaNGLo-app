@@ -1,4 +1,4 @@
-<%inherit file="layout.mako"/>
+<%inherit file="layout_components/layout.mako"/>
 
 <div class="alert alert-info">Currently testing multiloader</div>
 
@@ -6,7 +6,7 @@
 <div class="card">
     <div class="card-header">
         <h1 class="card-title">Sandbox
-            <%include file='menu_buttons.mako'/>
+            <%include file="layout_components/menu_buttons.mako"/>
         </h1>
         <h3 class="card-subtitle mb-2 text-muted">Super secret</h3>
     </div>

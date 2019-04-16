@@ -172,7 +172,7 @@ pre {
 <script src="https://www.matteoferla.com/bootstrap-tourist/bootstrap-tourist.js"></script>
 <%block name="script"/>
 % if not no_user:
-    <%include file="login/user_modal.mako"/>
+    <%include file="../login/user_modal.mako"/>
 % endif
 
 <script type="text/javascript">
@@ -182,8 +182,8 @@ pre {
         $('.popover a').hover(function () {$('.popover-header').html($(this).attr('title'))});
     });
 % if not no_user:
-    <%include file="login/user_icon_bar.js"/>
-    <%include file="login/user_modal.js"/>
+    <%include file="../login/user_icon_bar.js"/>
+    <%include file="../login/user_modal.js"/>
     <%include file="toast.js"/>
 % endif
 </script>

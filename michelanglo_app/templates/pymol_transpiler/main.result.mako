@@ -1,5 +1,5 @@
 <%page args="snippet=False, error='', error_msg='', error_title='', validation='', viewport='viewport', image=False, save='', backgroundcolor='white', loadfun='ERROR (parent)', proteinJSON='ERROR (Parent)', pdb=''"/>
-<%namespace file="labels.mako" name="info"/>
+<%namespace file="../layout_components/labels.mako" name="info"/>
 
 <li class="list-group-item" id="results">
     #### <div class="float-right"><button type="button" class="btn btn-outline-secondary" id="tour_result"><i class="far fa-question"></i></button></div>
@@ -30,7 +30,7 @@
 
            #### first tab: live
       <div class="tab-pane fade show active" id="nav-protein" role="tabpanel" aria-labelledby="nav-protein-tab">
-           <%include file="results/live.mako" args="viewport=viewport, backgroundcolor=backgroundcolor, image=image, loadfun=loadfun, proteinJSON=proteinJSON, pdb=pdb"/>
+           <%include file="../results/live.mako" args="viewport=viewport, backgroundcolor=backgroundcolor, image=image, loadfun=loadfun, proteinJSON=proteinJSON, pdb=pdb"/>
       </div>
 
             #### second tab: download
@@ -48,7 +48,7 @@
 
         #### third tab: implement
       <div class="tab-pane fade" id="nav-implement" role="tabpanel" aria-labelledby="nav-implement-tab">
-          <%include file="results/implement.mako" args="viewport=viewport, backgroundcolor=backgroundcolor, image=image, loadfun=loadfun, proteinJSON=proteinJSON, pdb=pdb"/>
+          <%include file="../results/implement.mako" args="viewport=viewport, backgroundcolor=backgroundcolor, image=image, loadfun=loadfun, proteinJSON=proteinJSON, pdb=pdb"/>
       </div>
 
        ### fourth tab: code removed.
@@ -78,5 +78,5 @@
 
 
     </script>
-<%include file="about.mako"/>
-<%include file="basics.mako"/>
+<%include file="../userpage_components/about.mako"/>
+<%include file="../userpage_components/basics.mako"/>

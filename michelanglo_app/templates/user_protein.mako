@@ -1,4 +1,4 @@
-<%inherit file="layout.mako"/>
+<%inherit file="layout_components/layout.mako"/>
 
 <div class="jumbotron clearfix">
     <div class="float-left ml-3">
@@ -13,7 +13,7 @@
              </small>
     </div>
     % if not no_buttons:
-        <%include file="menu_buttons.mako" args='tour=False'/>
+        <%include file="layout_components/menu_buttons.mako" args='tour=False'/>
     % endif
 
 </div>
@@ -82,8 +82,8 @@
 %if editable:
     <%include file='edit_modal/edit_modal.mako'/>
 %endif
-<%include file='about.mako'/>
-<%include file='basics.mako'/>
+<%include file="userpage_components/about.mako"/>
+<%include file="userpage_components/basics.mako"/>
 <%include file="markup/markup_builder_modal.mako"/>
 <%include file='edit_modal/implement_modal.mako'/>
 

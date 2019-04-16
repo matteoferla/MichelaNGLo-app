@@ -1,7 +1,7 @@
-<%namespace file="labels.mako" name="info"/>
-<%inherit file="layout_w_card.mako"/>
+<%namespace file="layout_components/labels.mako" name="info"/>
+<%inherit file="layout_components/layout_w_card.mako"/>
 <%block name="buttons">
-            <%include file="menu_buttons.mako" args='tour=True'/>
+            <%include file="layout_components/menu_buttons.mako" args='tour=True'/>
 </%block>
 <%block name="title">
             &mdash; PyMol
@@ -328,8 +328,8 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-        <%include file="main.mako.js"/>
-        <%include file="tour.mako.js"/>
+        <%include file="pymol_transpiler/main.mako.js"/>
+        <%include file="pymol_transpiler/tour.mako.js"/>
         }); //ready
     </script>
 </%block>

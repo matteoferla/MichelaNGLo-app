@@ -11,16 +11,7 @@ import os
 import io
 import json
 
-
-#from pprint import PrettyPrinter
-#pprint = PrettyPrinter()
-
-## convert booleans and settings
-def is_js_true(value):  # booleans get converted into strings in json.
-    if not value or value == 'false':
-        return False
-    else:
-        return True
+from ._common_methods import is_js_true
 
 def demo_file(request):
     """
@@ -144,6 +135,11 @@ def ajax_convert(request):
         request.session['status'] = make_msg('A server-side error arose', 'The code failed to run serverside:<br/><pre><code>'+traceback.format_exc()+'</code></pre>','error','bg-danger')
         return {'error': 'error'}
 
+
+
+
+
+
 @view_config(route_name='ajax_custom', renderer="../templates/custom.result.mako")
 def ajax_custom(request):
     if 'demo_file' in request.POST:
@@ -200,6 +196,11 @@ def ajax_custom(request):
     mesh.append({'o_name': o_name, 'triangles': trilist})
     return {'mesh': mesh}
 
+
+
+
+
+
 @view_config(route_name='ajax_pdb', renderer="json")
 def ajax_pdb(request):
     pagename = str(uuid.uuid4())
@@ -232,135 +233,6 @@ def ajax_pdb(request):
     print(pagename)
     return {'page': pagename}
 
-@view_config(route_name='edit_user-page', renderer='json')
-def edit(request):
-    # get ready
-    page = Page(request.POST['page'])
-    user = request.user
-    ## cehck permissions
-    if not user or not (page.identifier in user.get_owned_pages() or user.role == 'admin'): ## only owners and admins can edit.
-        request.response.status = 403
-        return {'error': 'not authorised'}
-    else:
-        # check if encrypted
-        if page.is_password_protected():
-            page.key = request.POST['encryption_key'].encode('uft-8')
-            page.path = page.encrypted_path
-        #load data
-        settings = page.load()
-        if not settings:
-            request.response.status = 404
-            return {'error': 'page not found'}
-        #add author if user was an upgraded to editor by the original author. There are three lists: authors (can and have edited, editors can edit, visitors visit.
-        if user.name not in settings['authors']:
-            settings['authors'].append(user.name)
-        # only admins and friends can edit html fully
-        if user.role in ('admin', 'friend'):
-            for key in ('loadfun', 'title', 'description'):
-                if key in request.POST:
-                    settings[key] = request.POST[key]
-        else: # regular users have to be sanitised
-            for key in ('title', 'description'):
-                if key in request.POST:
-                    settings[key] = Page.sanitise_HTML(request.POST[key])
-        settings['confidential'] = is_js_true(request.POST['confidential'])
-        publicised1= 'public' in settings and not settings['public'] and is_js_true(request.POST['public']) #was private public but is now.
-        publicised2= 'public' not in settings and is_js_true(request.POST['public']) #was not decalred but is now.
-        if publicised1 or publicised2:
-            public = get_public(request)
-            public.add_visited_page(page.identifier)
-            request.dbsession.add(public)
-        elif 'public' in settings and settings['public'] and not is_js_true(request.POST['public']):
-                public = get_public(request)
-                public.remove_visited_page(page.identifier)
-                request.dbsession.add(public)
-        else:
-            pass
-        settings['public'] = is_js_true(request.POST['public'])
-        #new_editors
-        if 'new_editors' in request.POST and request.POST['new_editors']:
-            for new_editor in json.loads((request.POST['new_editors'])):
-                target = request.dbsession.query(User).filter_by(name=new_editor).one()
-                if target:
-                    target.add_owned_page(page.identifier)
-                    request.dbsession.add(target)
-                    settings['editors'].append(target.name)
-                else:
-                    print('This is impossible...', new_editor, ' does not exist.')
-        #encrypt
-        if not page.is_password_protected() and request.POST['encryption'] == 'true': # to be encrypted
-            page.delete()
-            page.key = request.POST['encryption_key'].encode('utf-8')
-            page.path = page.encrypted_path
-        elif page.is_password_protected() and request.POST['encryption'] == 'false':  #to be dencrypted
-            page.delete()
-            page.key = None
-            page.path = page.unencrypted_path
-        else: # no change
-            pass
-        #alter ratio
-        if 'columns_viewport' in request.POST:
-            settings['columns_viewport'] = int(request.POST['columns_viewport'])
-            settings['columns_text'] = int(request.POST['columns_text'])
-        #save
-        page.save(settings)
-        return {'success': 1}
-
-
-@view_config(route_name='delete_user-page', renderer='json')
-def delete(request):
-    # get ready
-    page = Page(request.POST['page'])
-    user = request.user
-    ownership = user.get_owned_pages()
-    ## cehck permissions
-    if page.identifier not in ownership and not (user and user.role == 'admin'): ## only owners can delete
-        request.response.status = 403
-        return {'status': 'Not owner'}
-    else:
-        page.delete()
-        return {'status': 'success'}
-
-
-@view_config(route_name='get')
-def get_ajax(request):
-    user = request.user
-    modals = {'register': "../templates/login/register_modalcont.mako",
-            'login': "../templates/login/login_modalcont.mako",
-            'forgot': "../templates/login/forgot_modalcont.mako",
-            'logout': "../templates/login/logout_modalcont.mako",
-            'password': "../templates/login/password_modalcont.mako"}
-    ###### get the user page list.
-    if request.params['item'] == 'pages':
-        if not user:
-            request.response.status = 403
-            return render_to_response("../templates/404.mako", {'project': 'Michelanglo', 'user': request.user}, request)
-        elif user.role == 'admin':
-            target = request.dbsession.query(User).filter_by(name=request.POST['username']).one()
-            return render_to_response("../templates/login/pages.mako", {'project': 'Michelanglo', 'user': target}, request)
-        elif request.POST['username'] == user.name:
-            return render_to_response("../templates/login/pages.mako", {'project': 'Michelanglo', 'user': request.user}, request)
-        else:
-            request.response.status = 403
-            return render_to_response("../templates/404.mako", {'project': 'Michelanglo', 'user': request.user}, request)
-    ####### get the modals
-    elif request.params['item'] in  modals.keys():
-
-        return render_to_response(modals[request.params['item']], {'project': 'Michelanglo', 'user': request.user}, request)
-    ####### get the implementation code.
-    elif request.params['item'] == 'implement':
-        ## should non editors be able to see this??
-        page = Page(request.params['page'])
-        if 'key' in request.params:
-            page = Page(request.params['page'], request.params['key'])
-        else:
-            page = Page(request.params['page'])
-        settings = page.load()
-        return render_to_response("../templates/results/implement.mako", settings, request)
-    else:
-        request.response.status = 404
-        print('unknown item '+request.params['item'])
-        return render_to_response("../templates/404.mako", {'project': 'Michelanglo', 'user': request.user}, request)
 
 
 @view_config(route_name='task_check', renderer="json")
@@ -384,6 +256,8 @@ def status_check_view(request):
                 'body'      : 'The network is slower that normal.',
                 'color'     : 'bg-warning'}
     return request.session['status']
+
+
 
 
 def make_msg(title, body, condition='running', color=''):

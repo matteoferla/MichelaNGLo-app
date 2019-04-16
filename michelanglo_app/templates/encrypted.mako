@@ -1,7 +1,7 @@
-<%inherit file="layout_w_card.mako"/>
+<%inherit file="layout_components/layout_w_card.mako"/>
 
 <%block name="buttons">
-            <%include file="menu_buttons.mako" args='tour=False'/>
+            <%include file="layout_components/menu_buttons.mako" args='tour=False'/>
 </%block>
 <%block name="title">
             &mdash; Encrypted page
