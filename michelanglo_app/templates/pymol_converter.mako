@@ -328,8 +328,8 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-        <%include file="pymol_transpiler/main.mako.js"/>
-        <%include file="pymol_transpiler/tour.mako.js"/>
+        <%include file="pymol_converter"/>
+        <%include file="pymol_converter"/>
         }); //ready
     </script>
 </%block>

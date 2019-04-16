@@ -22,11 +22,11 @@ else:
 @view_config(route_name='clash', renderer="../templates/clash.mako")
 @view_config(route_name='custom', renderer="../templates/custom.mako")
 @view_config(route_name='home', renderer="../templates/welcome.mako")
-@view_config(route_name='pymol', renderer="../templates/main.mako")
+@view_config(route_name='pymol', renderer="../templates/pymol_converter.mako")
 @view_config(route_name='docs', renderer="../templates/docs.mako")
 @view_config(route_name='sandbox', renderer="../templates/sandbox.mako")
 @view_config(route_name='imagetoggle', renderer="../templates/image.mako")
-@view_config(route_name='pdb', renderer="../templates/pdb.mako")
+@view_config(route_name='pdb', renderer="../templates/pdb_converter.mako")
 def my_view(request):
     user = request.user
     # ?bootstrap=materials is basically for the userdata_view only.

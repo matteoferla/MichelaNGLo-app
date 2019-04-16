@@ -24,13 +24,13 @@
 
 <%block name="body">
     <div class="row">
-        <div class='col-12 col-sm-8 col-xl-9'>
+        <div class='col-12 col-md-8 col-xl-9'>
             ### Mission
             <div class="row">
-                <div class="col-4 text-right"  style="margin: auto;">
+                <div class="col-4 text-right d-sm-none d-md-block"  style="margin: auto;">
                     <h4><i class="far fa-rocket"></i>&nbsp;Mission</h4>
                 </div>
-                <div class="col-8">
+                <div class="col-12 col-md-8">
                     <div class="mb-2 p-3 border border-dark rounded-lg border-top-0 border-bottom-0 text-muted">
                 <p>Our aim is to help create NGL views for academic websites, blog posts and supplementary materials for papers with extra functionality such as <span class="prolink" data-toggle="protein" data-title="tada!" data-target="viewport" data-view="[-18.368176150507537, 74.81398271773811, 53.85689065075363, 0, 2.24223533030926, 55.26199556901072, -76.00112369042608, 0, -92.15567840009014, -13.567107701862422, -12.583763466412949, 0, -12.895500659942627, -26.876500129699707, -2.82450008392334, 1]">guiding the viewers' attention</span>.</p>
             </div>
@@ -39,12 +39,12 @@
 
             ### NGL
             <div class="row">
-                <div class="col-8">
+                <div class="col-12 col-md-8">
                     <div class="mb-2 p-3 border border-dark rounded-lg border-top-0 border-bottom-0 text-muted">
                 <p>NGL (<a href="http://nglviewer.org/ngl/api/" target="_blank">nglviewer.org <i class="far fa-external-link"></i></a>) is a powerful javascript library that allows the visualisation of protein on websites that was developed by Alex Rose at the PDB. With the tools presented here, it becomes even easier to create great protein represetations on the web.</p>
             </div>
                 </div>
-                <div class="col-4 text-left"  style="margin: auto;">
+                <div class="col-4 text-left d-sm-none d-md-block"  style="margin: auto;">
                     <h4><i class="far fa-cubes"></i> NGL Extended</h4>
                 </div>
             </div>
@@ -61,10 +61,10 @@
 
             ### Simplicity
             <div class="row">
-                <div class="col-2 text-right"  style="margin: auto;">
+                <div class="col-2 text-right d-sm-none d-md-block"  style="margin: auto;">
                     <h4><i class="far fa-wand-magic"></i> Simplicity</h4>
                 </div>
-                <div class="col-10">
+                <div class="col-12 col-md-10">
                     <div class="mb-2 p-3 border border-dark rounded-lg border-top-0 border-bottom-0 text-muted">
                 <p>This app allows the creation fo NGL views without any JS coding with the following features:</p>
                 ${descriptive('/markup', 'fa-map-marked-alt', 'JS-free markup', 'By adding to NGL the power to create and control the protein view with simple to implement HTML tags without any JavaScript')}
@@ -84,20 +84,20 @@
 
             ### Github
             <div class="row">
-                <div class="col-10">
+                <div class="col-12 col-md-10">
                     <div class="mb-2 p-3 border border-dark rounded-lg border-top-0 border-bottom-0 text-muted">
                 <p>The source code for this server is available at <a href="https://github.com/matteoferla/MichelaNGLo" target="_blank">github.com/matteoferla/MichelaNGLo <i class="far fa-external-link"></i></a>. The JS file to extend NGL can be found <a href="https://raw.githubusercontent.com/matteoferla/MichelaNGLo/master/michelanglo_app/static/ngl.extended.js" target="_blank">here <i class="far fa-external-link"></i></a>.</p>
             </div>
                 </div>
 
-                <div class="col-2 text-left"  style="margin: auto;">
+                <div class="col-2 text-left d-sm-none d-md-block"  style="margin: auto;">
                     <h4><i class="fab fa-github"></i> Github</h4>
                 </div>
 
-                <div class="col-2 text-right"  style="margin: auto;">
+                <div class="col-2 text-right d-sm-none d-md-block"  style="margin: auto;">
                     <h4><i class="far fa-books"></i> Citation</h4>
                 </div>
-            <div class="col-10">
+            <div class="col-12 col-md-10">
                     <div class="mb-2 p-3 border border-dark rounded-lg border-top-0 border-bottom-0 text-muted">
                 <p>Please cite:
                     <ul>
