@@ -26,4 +26,7 @@
 
 ############################################################# Users
 <%include file="docs/docs_users.mako"/>
+
+######################################################### Pages
+    <%include file="docs/docs_pages.mako"/>
 </%block>
