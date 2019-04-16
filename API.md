@@ -10,7 +10,9 @@ The action can be `login` (req. `username` and `password`), `logout`, `register`
 The can be `get` or `post`, but in `get` the password will be visible in the apache logs.
 As expected, reply will contain `Set-Cookie` in its header, which obviously means that the `Cookie` field in the header should be set.
 
-See also [https://ngl.matteoferla.com/docs#Users](users section in docs).
+Description of users is in [github.com/matteoferla/MichelaNGLo/data.md](https://github.com/matteoferla/MichelaNGLo/blob/master/data.md).
+
+For a privacy centered description see also [https://ngl.matteoferla.com/docs#Users](users section in docs).
 
 ## Edit
 Conversion are done to the address `ajax_convert`.
