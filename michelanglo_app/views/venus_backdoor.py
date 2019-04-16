@@ -26,11 +26,7 @@ def backdoor_for_venus(request):
         requestor = request.dbsession.query(User).filter_by(name=request.params['username']).first()
         requestor.add_owned_page(pagename)
         request.dbsession.add(requestor)
-        print(__name__,pagename)
         return {'status': 'success', 'page': pagename}
     else:
-        print(__name__)
-        print(request.environ['REMOTE_ADDR'])
-        print(request.params['code'])
         request.response.status = 403
         return {'status': 'stranger danger'}
