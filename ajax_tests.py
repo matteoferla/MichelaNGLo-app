@@ -5,7 +5,7 @@ from warnings import warn
 class SiteTests:
 
     def __init__(self):
-        self.url = 'http://brc10.well.ox.ac.uk:8088/'
+        self.url = 'http://0.0.0.0:8088/'
         self.headers = {'user-agent': 'my-app/0.0.1'}
 
     def test(self, address, data=None, headers=None, verbose=False):
@@ -25,10 +25,10 @@ class SiteTests:
             warn('The site {url} returned a status code {code}. Content: {con}'.format(url=self.url, code = r.status_code, con = r.content))
         return r
 
-#register a user.
+#register a user.exit
 site = SiteTests()
-data = {'username': 'testdummy',
-        'password': 'crash',
+data = {'username': 'crashtest dummy',
+        'password': 'smash!',
         'email': 'testdummy@example.com',
         'action': 'register'} #login, logout, register (req. `email`), whoami (debug only), promote (req. `role`), kill, reset
 print(site.test('login', data=data).content)
