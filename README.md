@@ -203,24 +203,7 @@ The code seems a bit complex when it comes to selections. The most obvious thing
 first, the NGL atom serial does not always map to the same PyMOL atom ID as both try to fix issues in PDB atom id, the second is that having a list of thousands of ids quickly becomes heavy.
 
 ## Python3 compiled Pymol in Ubuntu
-This app requires Python3 compiled Pymol. This is not a simple job on a Linux machine. This is straightforward on a Mac or PC installation, but not on Linux.
-
-The Pro version of PyMol is a 'portable' and I could not make it use Python 3.
-Using `conda install -c schrodinger pymol` with a 3.7 Conda won't work.
-There appearts to be a `python3-pymol` aptitude package for Ubuntu Disco Dingo, but not earlier versions (current stable is Bionic Beaver).
-
-The following commands will compile PyMol opensource under Python3.
-
-    #get all prerequisites
-    sudo apt-get install python3 #or anaconda3
-    sudo apt-get install python3-dev libglm-dev freeglut3-dev libglew-dev libpng12-dev libfreetype6-dev build-essential libxml++2.6-dev
-    pip3 install pmw numpy
-    prefix=/opt/Pymol/
-    modules=$prefix/modules
-    mkdir -p $prefix
-    sudo python3 setup.py build install --home=$prefix --install-lib=$modules --install-scripts=$prefix
-    #add the module to python
-    sudo echo $modules > /usr/lib/python3/dist-packages/pymol.pth
+This app requires Python3 compiled Pymol. The best option is using Conda. Otherwise it needs to be compiled ([instructions](https://blog.matteoferla.com/2019/04/pymol-on-linux-without-conda.html)). 
 
 # Webapp installation
 Additionally for the webapp the package needs to be installed and the database started.
