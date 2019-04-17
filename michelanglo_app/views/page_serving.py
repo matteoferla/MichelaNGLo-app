@@ -14,6 +14,9 @@ def userdata_view(request):
 
     pagename = request.matchdict['id']
     page = Page(pagename)
+    if not page.exists(True):
+        response_settings = {'project': 'Michelanglo', 'user': request.user, 'page': pagename}
+        return render_to_response("../templates/410.mako", response_settings, request)
     ### deal with encryption
     if page.is_password_protected() and 'key' in request.params: # encrypted and key given
         page.key = request.params['key'].encode('utf-8')

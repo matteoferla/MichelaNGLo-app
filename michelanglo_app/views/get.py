@@ -27,8 +27,8 @@ def get_ajax(request):
     ###### get the user page list.
     if request.params['item'] == 'pages':
         if not user:
-            request.response.status = 403
-            return render_to_response("../templates/404.mako", {'project': 'Michelanglo', 'user': request.user}, request)
+            request.response.status = 401
+            return render_to_response("../templates/part_error.mako", {'project': 'Michelanglo', 'error': '401'}, request)
         elif user.role == 'admin':
             target = request.dbsession.query(User).filter_by(name=request.POST['username']).one()
             return render_to_response("../templates/login/pages.mako", {'project': 'Michelanglo', 'user': target}, request)
@@ -36,7 +36,7 @@ def get_ajax(request):
             return render_to_response("../templates/login/pages.mako", {'project': 'Michelanglo', 'user': request.user}, request)
         else:
             request.response.status = 403
-            return render_to_response("../templates/404.mako", {'project': 'Michelanglo', 'user': request.user}, request)
+            return render_to_response("../templates/part_error.mako", {'project': 'Michelanglo', 'error': '403'}, request)
     ####### get the modals
     elif request.params['item'] in  modals.keys():
 
@@ -54,4 +54,4 @@ def get_ajax(request):
     else:
         request.response.status = 404
         print('unknown item '+request.params['item'])
-        return render_to_response("../templates/404.mako", {'project': 'Michelanglo', 'user': request.user}, request)
+        return render_to_response("../templates/part_error.mako", {'project': 'Michelanglo', 'error': '404'}, request)

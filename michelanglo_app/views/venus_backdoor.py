@@ -16,6 +16,8 @@ def backdoor_for_venus(request):
                     'title': request.params['title'],
                     'description': request.params['description'],
                     'page': pagename,
+                    'columns_viewport': 6,
+                    'columns_text': 6,
                     'editable': True, 'backgroundcolor': 'white', 'validation': None, 'js': None, 'pdb': '', 'loadfun': ''
                     }
         Page(pagename).save(settings)
