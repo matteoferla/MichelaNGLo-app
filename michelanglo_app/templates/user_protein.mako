@@ -13,7 +13,7 @@
              </small>
     </div>
     % if not no_buttons:
-        <%include file="layout_components/menu_buttons.mako" args='tour=False'/>
+        <%include file="layout_components/horizontal_menu_buttons.mako" args='tour=False'/>
     % endif
 
 </div>

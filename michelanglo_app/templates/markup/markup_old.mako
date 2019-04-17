@@ -11,7 +11,7 @@
 <div class="card">
     <div class="card-header">
         <h1 class="card-title">Guiding links
-            <%include file="../layout_components/menu_buttons.mako"/>
+            <%include file="vertical_menu_buttons.mako"/>
         </h1>
         <h3 class="card-subtitle mb-2 text-muted">Construction of HTML anchor tags to guide the users to a residue or region</h3>
     </div>

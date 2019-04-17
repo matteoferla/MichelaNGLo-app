@@ -1,5 +1,5 @@
 /*
-<%namespace file="labels.mako" name="info"/>
+<%namespace file="../layout_components/labels.mako" name="info"/>
 <%doc>
  This file is a mako template to make JS. The extension is backwards to avoid tinkering with the default PyCharm editor.
  This file contains the main page's tour.
