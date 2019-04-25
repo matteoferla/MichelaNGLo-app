@@ -11,7 +11,9 @@ import os
 import io
 import json
 
-from ._common_methods import is_js_true
+from ._common_methods import is_js_true, get_username
+import logging
+log = logging.getLogger(__name__)
 
 def demo_file(request):
     """
@@ -35,6 +37,7 @@ def save_file(request, extension):
 @view_config(route_name='ajax_convert', renderer="json")
 def ajax_convert(request):
     user = request.user
+    log.info('Conversion of PyMol requested.')
     request.session['status'] = make_msg('Checking data', 'The data has been recieved and is being checked')
     try:
         minor_error='' #does nothing atm.
@@ -42,14 +45,17 @@ def ajax_convert(request):
         ## assertions
         if not 'pdb_string' in request.POST and not request.POST['pdb']:
             response = {'error': 'danger', 'error_title': 'No PDB code', 'error_msg': 'A PDB code is required to make the NGL viewer show a protein.','snippet':'','validation':''}
+            log.warn(response)
             request.session['status'] = make_msg(response['error_title'],response['error_msg'],'error','bg-danger')
             return response
         elif request.POST['mode'] == 'out' and not request.POST['pymol_output']:
             response={'error': 'danger', 'error_title': 'No PyMOL code', 'error_msg': 'PyMOL code is required to make the NGL viewer show a protein.','snippet':'','validation':''}
+            log.warn(response)
             request.session['status'] = make_msg(response['error_title'], response['error_msg'], 'error', 'bg-danger')
             return response
         elif request.POST['mode'] == 'file' and not (('demo_file' in request.POST and request.POST['demo_file']) or ('file' in request.POST and request.POST['file'].filename)):
             response = {'error': 'danger', 'error_title': 'No PSE file', 'error_msg': 'A PyMOL file to make the NGL viewer show a protein.','snippet':'','validation':''}
+            log.warn(response)
             request.session['status'] = make_msg(response['error_title'], response['error_msg'], 'error', 'bg-danger')
             return response
 
@@ -95,6 +101,7 @@ def ajax_convert(request):
             else:
                 trans.pdb = request.POST['pdb']
         else:
+            log.warn(f'Unknown mode requested by {get_username(request)}.')
             return {'snippet': 'Please stop trying to hack the server', 'error_title': 'A major error arose', 'error': 'danger', 'error_msg': 'The code failed to run serverside. Most likely malicius','viewport':settings['viewport']}
 
 
@@ -129,19 +136,15 @@ def ajax_convert(request):
         request.session['status'] = make_msg('Loading results', 'Conversion is being loaded',condition='complete', color='bg-info')
         return {'page': pagename}
     except:
-        print('**************')
-        print(traceback.format_exc())
+        log.exception('serious error in page creation from PyMol')
         request.response.status = 500
-        request.session['status'] = make_msg('A server-side error arose', 'The code failed to run serverside:<br/><pre><code>'+traceback.format_exc()+'</code></pre>','error','bg-danger')
+        request.session['status'] = make_msg('A server-side error arose', 'The code failed to run serverside.','error','bg-danger')
         return {'error': 'error'}
-
-
-
-
 
 
 @view_config(route_name='ajax_custom', renderer="../templates/custom.result.mako")
 def ajax_custom(request):
+    log.info(f'Mesh conversion requested by {get_username(request)}')
     if 'demo_file' in request.POST:
         filename = demo_file(request)  # prevention against attacks
         fh = open(filename)
@@ -203,6 +206,7 @@ def ajax_custom(request):
 
 @view_config(route_name='ajax_pdb', renderer="json")
 def ajax_pdb(request):
+    log.info(f'PDB page creation requested by {get_username(request)}')
     pagename = str(uuid.uuid4())
     settings = {'data_other': request.POST['viewcode'].replace('<div', '').replace('</div>', '').replace('<', '').replace('>', ''),
                 'page': pagename, 'editable': True,
@@ -229,10 +233,7 @@ def ajax_pdb(request):
         trashcan.add_owned_page(pagename)
         request.dbsession.add(trashcan)
     Page(pagename).save(settings)
-    #make_static_html(**settings)
-    print(pagename)
     return {'page': pagename}
-
 
 
 @view_config(route_name='task_check', renderer="json")

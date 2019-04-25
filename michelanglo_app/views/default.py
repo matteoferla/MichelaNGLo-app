@@ -12,7 +12,8 @@ if os.path.isdir(os.path.join('michelanglo_app','temp')):
 else:
     os.mkdir(os.path.join('michelanglo_app','temp'))
 
-
+import logging
+log = logging.getLogger(__name__)
 
 
 @notfound_view_config(renderer="../templates/404.mako")
@@ -29,6 +30,10 @@ else:
 @view_config(route_name='pdb', renderer="../templates/pdb_converter.mako")
 def my_view(request):
     user = request.user
+    if request.user:
+        log.info(f'{request.matched_route} for {request.user.name}')
+    else:
+        log.info(f'{request.matched_route} for unregistered user')
     # ?bootstrap=materials is basically for the userdata_view only.
     if 'bootstrap' in request.params:
         bootstrap = request.params['bootstrap']

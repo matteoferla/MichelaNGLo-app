@@ -11,6 +11,9 @@ import os
 import io
 import json
 
+import logging
+log = logging.getLogger(__name__)
+from ._common_methods import get_username
 
 #from pprint import PrettyPrinter
 #pprint = PrettyPrinter()
@@ -18,6 +21,9 @@ import json
 
 @view_config(route_name='get')
 def get_ajax(request):
+    def log_it():
+        log.warn(f'{get_username(request)} was refused {request.params["item"]}, code: {request.response.status}')
+
     user = request.user
     modals = {'register': "../templates/login/register_modalcont.mako",
             'login': "../templates/login/login_modalcont.mako",
@@ -28,6 +34,7 @@ def get_ajax(request):
     if request.params['item'] == 'pages':
         if not user:
             request.response.status = 401
+            log_it()
             return render_to_response("../templates/part_error.mako", {'project': 'Michelanglo', 'error': '401'}, request)
         elif user.role == 'admin':
             target = request.dbsession.query(User).filter_by(name=request.POST['username']).one()
@@ -36,6 +43,7 @@ def get_ajax(request):
             return render_to_response("../templates/login/pages.mako", {'project': 'Michelanglo', 'user': request.user}, request)
         else:
             request.response.status = 403
+            log_it()
             return render_to_response("../templates/part_error.mako", {'project': 'Michelanglo', 'error': '403'}, request)
     ####### get the modals
     elif request.params['item'] in  modals.keys():
@@ -53,5 +61,5 @@ def get_ajax(request):
         return render_to_response("../templates/results/implement.mako", settings, request)
     else:
         request.response.status = 404
-        print('unknown item '+request.params['item'])
+        log_it()
         return render_to_response("../templates/part_error.mako", {'project': 'Michelanglo', 'error': '404'}, request)

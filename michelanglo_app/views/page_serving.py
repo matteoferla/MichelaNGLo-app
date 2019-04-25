@@ -2,6 +2,9 @@ from pyramid.view import view_config
 from pyramid.renderers import render_to_response
 from ..models.pages import Page
 
+import logging
+log = logging.getLogger(__name__)
+from ._common_methods import get_username
 
 @view_config(route_name='userdata', renderer="../templates/user_protein.mako")
 def userdata_view(request):
@@ -12,6 +15,7 @@ def userdata_view(request):
         else:
             request.session['tries'] = 0  ## first go
 
+    log.info(f'{get_username(request)} is looking at a page')
     pagename = request.matchdict['id']
     page = Page(pagename)
     if not page.exists(True):
@@ -26,6 +30,7 @@ def userdata_view(request):
             settings['encryption'] = True
             settings['encryption_key'] = request.params['key']
         except ValueError: ##got it wrong
+            log.warn('f{get_username(request)} got the password wrong.')
             tickup_tries()
             response_settings = {'project': 'Michelanglo', 'user': request.user, 'tries': request.session['tries'], 'page': pagename}
             return render_to_response("../templates/encrypted.mako", response_settings, request)

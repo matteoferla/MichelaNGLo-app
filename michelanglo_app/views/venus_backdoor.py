@@ -4,12 +4,18 @@ import os, pickle, uuid
 from ..models.user import User
 from ..models.pages import Page
 
+import logging
+log = logging.getLogger(__name__)
+from ._common_methods import get_username
+
 @view_config(route_name='venus', renderer="json")
 def backdoor_for_venus(request):
     """
     Two layers of security. A shared environment variable and REMOTE_ADDR 127.0.0.1
     """
-    if request.environ['REMOTE_ADDR'] in ('127.0.0.1','brc10.well.ox.ac.uk', 'fe80::695d:c288:e51a:b759%11') and request.params['code'] == os.environ['SECRETCODE']: #it is VENUS
+
+    if request.environ['REMOTE_ADDR'] in ('127.0.0.1') and request.params['code'] == os.environ['SECRETCODE']: #it is VENUS
+        log.info(f'{get_username(request)} made a page with VENUS')
         pagename = str(uuid.uuid4())
         settings = {'authors': [request.params['username']],
                     'proteinJSON': '['+request.params['protein']+']',
@@ -31,4 +37,5 @@ def backdoor_for_venus(request):
         return {'status': 'success', 'page': pagename}
     else:
         request.response.status = 403
+        log.warn(f'{get_username(request)} pretended to be VENUS')
         return {'status': 'stranger danger'}

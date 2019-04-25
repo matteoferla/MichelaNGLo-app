@@ -13,15 +13,22 @@ import json
 
 from ._common_methods import is_js_true
 
+from ._common_methods import get_username
+
+import logging
+log = logging.getLogger(__name__)
+
 
 @view_config(route_name='edit_user-page', renderer='json')
 def edit(request):
+    log.info(f'Page edit requested by {get_username(request)}')
     # get ready
     page = Page(request.POST['page'])
     user = request.user
     ## cehck permissions
     if not user or not (page.identifier in user.get_owned_pages() or user.role == 'admin'): ## only owners and admins can edit.
         request.response.status = 403
+        log.warn(f'{get_username(request)} is not autharised to edit page')
         return {'error': 'not authorised'}
     else:
         # check if encrypted
@@ -32,6 +39,7 @@ def edit(request):
         settings = page.load()
         if not settings:
             request.response.status = 404
+            log.warn(f'{get_username(request)} requested a missing page')
             return {'error': 'page not found'}
         #add author if user was an upgraded to editor by the original author. There are three lists: authors (can and have edited, editors can edit, visitors visit.
         if user.name not in settings['authors']:
@@ -46,9 +54,9 @@ def edit(request):
                 if key in request.POST:
                     settings[key] = Page.sanitise_HTML(request.POST[key])
         settings['confidential'] = is_js_true(request.POST['confidential'])
-        publicised1= 'public' in settings and not settings['public'] and is_js_true(request.POST['public']) #was private public but is now.
-        publicised2= 'public' not in settings and is_js_true(request.POST['public']) #was not decalred but is now.
-        if publicised1 or publicised2:
+        public_from_private= 'public' in settings and not settings['public'] and is_js_true(request.POST['public']) #was private public but is now.
+        public_from_nothing= 'public' not in settings and is_js_true(request.POST['public']) #was not decalred but is now.
+        if public_from_private or public_from_nothing:
             public = get_public(request)
             public.add_visited_page(page.identifier)
             request.dbsession.add(public)
@@ -96,12 +104,14 @@ def edit(request):
 @view_config(route_name='delete_user-page', renderer='json')
 def delete(request):
     # get ready
+    log.info(f'{get_username(request)} is requesting to delete page')
     page = Page(request.POST['page'])
     user = request.user
     ownership = user.get_owned_pages()
     ## cehck permissions
     if page.identifier not in ownership and not (user and user.role == 'admin'): ## only owners can delete
         request.response.status = 403
+        log.warn(f'{get_username(request)} tried but failed to delete page')
         return {'status': 'Not owner'}
     else:
         page.delete()

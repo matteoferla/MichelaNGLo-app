@@ -1,3 +1,7 @@
+############ THIS IS COPY PASTE FROM MICHELANGLO. PLEASE EDIT THAT TOO.
+
+
+
 __doc__ = """
 This file contains only one method (`user_view`).
 data = {'username': 'testdummy',
@@ -14,12 +18,15 @@ The modal that controls it is `login/user_modal.mako`. However the content is co
 from pyramid.view import view_config
 from ..models import User
 
+import logging
+log = logging.getLogger(__name__)
+
 from pyramid.security import (
     remember,
     forget,
     )
 
-import re
+import re, os
 
 def sanitise_text(text):
     ### completely not needed.
@@ -29,11 +36,17 @@ def sanitise_text(text):
         return 'blank'
     return value
 
+def log_reply(fun):
+    def inner(request):
+        reply = fun(request)
+        log.info(str(reply)+f'(code: {request.response.status})')
+        return reply
+    return inner
 
 @view_config(route_name='login', renderer="json")
+@log_reply
 def user_view(request):
-    print(__name__, request.headers.__dict__)
-    print(__name__,request.environ)
+    # sort out inputs
     action   = request.params['action']
     if 'username' in request.params:
         username = sanitise_text(request.params['username'])
@@ -44,6 +57,7 @@ def user_view(request):
     else:
         password = ''
     user = request.dbsession.query(User).filter_by(name=username).first()
+    # deal with inputs.
     if action == 'whoami':
         if user is not None:
             return {'status': 'verification', 'name': user.name, 'rank': user.role}
@@ -118,6 +132,3 @@ def user_view(request):
     else:
         request.response.status = 405
         return {'status': 'unknown request'}
-
-
-
