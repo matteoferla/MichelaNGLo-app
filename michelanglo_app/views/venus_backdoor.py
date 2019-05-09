@@ -14,7 +14,7 @@ def backdoor_for_venus(request):
     Two layers of security. A shared environment variable and REMOTE_ADDR 127.0.0.1
     """
 
-    if request.environ['REMOTE_ADDR'] in ('127.0.0.1') and request.params['code'] == os.environ['SECRETCODE']: #it is VENUS
+    if request.environ['REMOTE_ADDR'] in ('127.0.0.1') and request.params['code'] == os.environ['SECRETCODE'] and 'X-Forwarded-For' not in request.environ: #it is VENUS
         log.info(f'{get_username(request)} made a page with VENUS')
         pagename = str(uuid.uuid4())
         settings = {'authors': [request.params['username']],

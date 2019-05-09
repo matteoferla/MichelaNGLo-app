@@ -67,7 +67,8 @@ requires = [
     'pycrypto',
     'markdown',
     'psycopg2-binary',
-    'requests'
+    'requests',
+    'sentry-sdk'
 ]
 
 tests_require = [
