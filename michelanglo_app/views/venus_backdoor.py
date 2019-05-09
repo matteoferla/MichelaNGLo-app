@@ -37,5 +37,5 @@ def backdoor_for_venus(request):
         return {'status': 'success', 'page': pagename}
     else:
         request.response.status = 403
-        log.warn(f'{get_username(request)} pretended to be VENUS')
+        log.warn(f'{get_username(request)} pretended to be VENUS') #a purposeful attack
         return {'status': 'stranger danger'}
