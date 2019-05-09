@@ -15,6 +15,7 @@ def backdoor_for_venus(request):
     """
 
     if request.environ['REMOTE_ADDR'] in ('127.0.0.1') and request.params['code'] == os.environ['SECRETCODE'] and 'X-Forwarded-For' not in request.environ: #it is VENUS
+        log.error(str(dict(request.environ)))
         log.info(f'{get_username(request)} made a page with VENUS')
         pagename = str(uuid.uuid4())
         settings = {'authors': [request.params['username']],
