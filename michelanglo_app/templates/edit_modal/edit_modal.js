@@ -3,23 +3,33 @@
 window.prolinks = {
     elements: [],
     expandProlinkOnClick: function (number) { //click on one
+        var description = $('#edit_description').html();
+        var i = parseFloat(number)-1;
+        var code = prolinks.elements[i];
+        description = description.replace(new RegExp('[^\\"]\\[([^\\]]*?)\\]\\(.*?(\\w+)\\:prolink_'+number+'.*?\\)','m'), '&lt;$2 '+code+'&gt;$1 &lt;/$2&gt;');
+        prolinks.elements[i] = null;
+        $('#edit_description').html(description);
     },
-    minimiseProlinks: function (description) {
-        promatch = description.match(/&lt;[\s\S]*?data-toggle=\W+protein\W+ [\s\S]*?&gt;[\s\S]*?&lt;\/[\s\S]*?&gt;/gm); //data-toggle=\"protein\"
+    minimiseProlinks: function () {
+        var description = $('#edit_description').html();
+        promatch = description.match(/&lt;.*?data-toggle=\W+protein\W+ .*?&gt;[\s\S]*?&lt;\/.*?&gt;/gm); //data-toggle=\"protein\"
         console.log(promatch);
         if (promatch !== null) {
             promatch.forEach(function (elem, i) {
-                var n = prolinks.addProlink(elem); // n = i+1
                 var elemAsHtml = $('<p>'+elem+'</p>').text();
+                var n = prolinks.addProlink(elemAsHtml); // n = i+1
                 description = description.replace(elem, prolinks.prolink2md(elemAsHtml,n));
             });
         } else {prolinks.elements = [];}
-        return description;
+        $('#edit_description').html(description);
     },
     expandProlinks: function(description) { //expand for submission.
         if (prolinks.elements !== null) {
                 prolinks.elements.forEach(function (code, i) {
-                    description = description.replace(new RegExp('\\[([\\s\\S]*?)\\]\\((\\w+)\\:prolink_'+(i+1)+'\\)','m'), '<$2 '+code+'>$1</$2>')
+                    if (code !== null) {
+                        description = description.replace(new RegExp('[^\\"]\\[([^\\]]*?)\\]\\(.*?(\\w+)\\:prolink_'+(i+1)+'.*?\\)','m'), '<$2 '+code+'>$1</$2>');
+                    }
+
                 });
             } else {prolinks.elements = [];}
         return description;
@@ -29,7 +39,7 @@ window.prolinks = {
         return prolinks.elements.push(code); //the index +1
     },
     prolink2md: function(prolink, number) {
-        return prolink.replace(/<(.*?)>(.*?)<\/(.*?)>/,'[$2]($3:prolink_'+number+')');
+        return prolink.replace(/<(.*?)>(.*?)<\/(.*?)>/,'[$2](<span class="prolink" onclick="prolinks.expandProlinkOnClick('+number+')">$3:prolink_'+number+'</span>)');
     }
 };
 
@@ -38,9 +48,10 @@ $('#edit_submit').click(function () {
     if ($('#encryption').prop('checked')) {
         if (! $('#encryption_key').val) {return 0}
     }
-    var description = $('#edit_description').html();
-    description = description.replace(/<br.*?>/g,'\n\n').replace('&gt;','<').replace('&lt;','>').replace('&amp;','&'); //unescape.
+    var description = $('#edit_description').text(); //changed from html
+    //description = description.replace(/<br.*?>/g,'\n\n').replace(/\n+/gm,'\n\n').replace('&gt;','>').replace('&lt;','<').replace('&amp;','&'); //unescape.
     description = description.replace(/<div>([\s\S]*?)<\/div>/gm, '$1'); //firefox bug.
+    description = description.replace(/<br.*?>/g,'\n\n').replace(/\n+/gm,'\n\n'); //runaway newline bug.
     description = prolinks.expandProlinks(description);
     console.log('new');
     $.ajax({
@@ -84,7 +95,7 @@ $('#edit_delete').click(function () {
 });
 
 //collapse prolinks.
-setTimeout(() => $('#edit_description').html(prolinks.minimiseProlinks($('#edit_description').html())), 500);
+//setTimeout(() => prolinks.minimiseProlinks, 500);
 
 ///////////////////////////MODAL/////////////////////////////////////////////////////////////////////
 //the prolink making modal is shared elsewhere. Here it gets customised.
