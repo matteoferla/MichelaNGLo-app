@@ -185,6 +185,13 @@ pre {
     <%include file="../login/user_icon_bar.js"/>
     <%include file="../login/user_modal.js"/>
     <%include file="toast.js"/>
+    %if not user:
+        if (! localStorage.getItem('cookiesAccepted')) {
+            $('#toaster').append(`<%include file="toast.mako" args="toast_id='acceptCookies', toast_title='Cookies', toast_body='This site uses cookies to manage user authentication in order to allow users to keep track of pages users made and to control editing privileges.', toast_bg='bg-info', toast_autohide='false'"/>`);
+            $('#acceptCookies').toast('show');
+            $('#acceptCookies').on('hide.bs.toast',(event) => localStorage.setItem('cookiesAccepted',true));
+        }
+    %endif
 % endif
 </script>
 
