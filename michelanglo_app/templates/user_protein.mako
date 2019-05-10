@@ -1,4 +1,7 @@
 <%inherit file="layout_components/layout.mako"/>
+<%
+    import markdown
+%>
 
 <div class="jumbotron clearfix">
     <div class="float-left ml-3">
@@ -54,8 +57,7 @@
                             <button type="button" class="btn btn-outline-primary my-1" id="edit_btn" data-target="#edit_modal" data-toggle="modal"><i class="far fa-edit"></i></button>
                         </div>
                     %endif
-
-                <p>${description|n}</p>
+                <p>${markdown.markdown(description)|n}</p>
                 <hr/>
 
                 <button type="button" class="btn btn-outline-success w-100 my-1" id="save"><i class="far fa-camera"></i> Take snapshot</button>

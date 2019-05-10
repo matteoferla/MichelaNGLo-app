@@ -17,9 +17,12 @@
                 </div>
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
-                        <span class="input-group-text" aria-label="edit_description" ro aria-describedby="description-addon1">Description</span>
+                        <span class="input-group-text" aria-label="edit_description" aria-describedby="description-addon1">Description</span>
                     </div>
-                    <div id="edit_description" contenteditable="true" class="form-control border" style="height: 15rem; resize: vertical; overflow: auto;">${description}</div>
+                    <%
+                        escaped_description = description.replace('<br/>','\n').replace('<br>','\n').replace('&','&amp;').replace('>','&gt;').replace('<','&lt;').replace('\n','<br/>')
+                    %>
+                    <div id="edit_description" contenteditable="true" class="form-control border" style="height: 15rem; resize: vertical; overflow: auto; white-space: pre-wrap;">${escaped_description|n}</div>
                 </div>
 
                 <%include file="../markup/markup_builder_btn.mako"/>
