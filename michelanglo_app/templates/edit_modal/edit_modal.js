@@ -4,10 +4,16 @@ window.prolinks = {
     elements: [],
     expandProlinkOnClick: function (number) { //click on one
     },
-    makeProlinkDummy: function (index, element) {
-        return '';
-    },
     minimiseProlinks: function (description) {
+        promatch = description.match(/&lt;[\s\S]*?data-toggle=\W+protein\W+ [\s\S]*?&gt;[\s\S]*?&lt;\/[\s\S]*?&gt;/gm); //data-toggle=\"protein\"
+        console.log(promatch);
+        if (promatch !== null) {
+            promatch.forEach(function (elem, i) {
+                var n = prolinks.addProlink(elem); // n = i+1
+                var elemAsHtml = $('<p>'+elem+'</p>').text();
+                description = description.replace(elem, prolinks.prolink2md(elemAsHtml,n));
+            });
+        } else {prolinks.elements = [];}
         return description;
     },
     expandProlinks: function(description) { //expand for submission.
@@ -77,6 +83,8 @@ $('#edit_delete').click(function () {
     }
 });
 
+//collapse prolinks.
+setTimeout(() => $('#edit_description').html(prolinks.minimiseProlinks($('#edit_description').html())), 500);
 
 ///////////////////////////MODAL/////////////////////////////////////////////////////////////////////
 //the prolink making modal is shared elsewhere. Here it gets customised.
