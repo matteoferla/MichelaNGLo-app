@@ -3,7 +3,7 @@
     import markdown
 %>
 
-<div class="jumbotron clearfix">
+<div class="jumbotron clearfix py-4">
     <div class="float-left ml-3">
         <h1>${title}</h1>
         <small class="text-muted">The content of this page was
