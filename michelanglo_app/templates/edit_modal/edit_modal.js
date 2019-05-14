@@ -52,7 +52,7 @@ $('#edit_submit').click(function () {
     var description = $($('#edit_description')[0].outerHTML.replace(/<br.*?>/g,'\n')).text(); //changed from html
     //description = description.replace(/<br.*?>/g,'\n\n').replace(/\n+/gm,'\n\n').replace('&gt;','>').replace('&lt;','<').replace('&amp;','&'); //unescape.
     description = description.replace(/<div>([\s\S]*?)<\/div>/gm, '$1'); //firefox bug.
-    description = description.replace(/<br.*?>/g,'\n\n').replace(/\n+/gm,'\n\n'); //runaway newline bug.
+    description = description.replace(/<br.*?>/g,'\n\n').replace(/\n\n+/gm,'\n\n'); //runaway newline bug.
     description = prolinks.expandProlinks(description);
     console.log('new');
     $.ajax({
