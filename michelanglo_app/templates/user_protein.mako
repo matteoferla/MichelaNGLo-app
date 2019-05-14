@@ -124,6 +124,19 @@ $(document).ready(function () {
     <%include file="markup/markup_builder_modal.js"/>
     <%include file="edit_modal/edit_modal.js"/>
     %endif
+
+    //move the viewport on scroll.
+    $(window).scroll(function() {
+	    var card = $('#viewport').parent().parent();
+            var currentY = $(window).scrollTop();
+	    var windowY = $(window).innerHeight();
+	    var offsetY = card.offset().top - parseInt(card.css('top')) - 4;
+            if ((currentY > offsetY) && (currentY + windowY > offsetY + card.height())) {
+			$('#viewport').parent().parent().css('top', currentY - offsetY);
+		}
+	    else {$('#viewport').parent().parent().css('top', 0);}
+	});
+
 }); //ready
 
 </script>
