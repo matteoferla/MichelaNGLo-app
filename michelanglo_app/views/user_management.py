@@ -56,19 +56,21 @@ def user_view(request):
         password = sanitise_text(request.params['password'])
     else:
         password = ''
-    user = request.dbsession.query(User).filter_by(name=username).first()
+
+    targetuser = request.dbsession.query(User).filter_by(name=username).first()
+    requestor = request.user
     # deal with inputs.
     if action == 'whoami':
-        if user is not None:
-            return {'status': 'verification', 'name': user.name, 'rank': user.role}
+        if requestor is not None:
+            return {'status': 'verification', 'name': requestor.name, 'rank': requestor.role}
         else:
             return {'status': 'verification', 'name': 'guest', 'rank': 'guest'}
     elif action == 'login':
-        if user is not None and user.check_password(password):
-            headers = remember(request, user.id)
+        if targetuser is not None and targetuser.check_password(password):
+            headers = remember(request, targetuser.id)
             request.response.headerlist.extend(headers)
-            return {'status': 'logged in', 'name': user.name, 'rank': user.role}
-        elif user:
+            return {'status': 'logged in', 'name': targetuser.name, 'rank': targetuser.role}
+        elif targetuser:
             request.response.status = 400
             return {'status': 'wrong password'}
         else:
@@ -78,17 +80,17 @@ def user_view(request):
         if username in ('guest', 'Anonymous', 'trashcan', 'public'): ##blacklisted
             request.response.status = 403
             return {'status': 'forbidden'}
-        if not user:
-            if username == 'admin':
+        if not targetuser:
+            if username == 'admin': #once only.
                 new_user = User(name=username, role='admin')
             else:
                 new_user = User(name=username, role='basic', email=request.params['email'])
             new_user.set_password(password)
             request.dbsession.add(new_user)
-            user = request.dbsession.query(User).filter_by(name=username).first()
-            headers = remember(request, user.id)
+            targetuser = request.dbsession.query(User).filter_by(name=username).first()
+            headers = remember(request, targetuser.id)
             request.response.headerlist.extend(headers)
-            return {'status': 'registered', 'name': user.name, 'rank': new_user.role}
+            return {'status': 'registered', 'name': targetuser.name, 'rank': targetuser.role}
         else:
             request.response.status = 400
             return {'status': 'existing username'}
@@ -97,7 +99,7 @@ def user_view(request):
         request.response.headerlist.extend(headers)
         return {'status': 'logged out'}
     elif action == 'promote':
-        if request.user and request.user.role == 'admin': ##only admins can make admins
+        if requestor and requestor.role == 'admin': ##only admins can make admins
             target=request.dbsession.query(User).filter_by(name=username).one()
             target.role = request.POST['role']
             request.dbsession.add(target)
@@ -106,7 +108,7 @@ def user_view(request):
             request.response.status = 403
             return {'status': 'access denied'}
     elif action == 'kill':
-        if request.user and request.user.role == 'admin': ##only admins have a licence to kill
+        if requestor and requestor.role == 'admin': ##only admins have a licence to kill
             target=request.dbsession.query(User).filter_by(name=username).one()
             request.dbsession.delete(target)
             return {'status': 'deleted'}
@@ -114,14 +116,14 @@ def user_view(request):
             request.response.status = 403
             return {'status': 'access denied'}
     elif action == 'change_password':
-        if request.user and request.user.check_password(sanitise_text(request.params['password'])):
-            request.user.set_password(sanitise_text(request.params['newpassword']))
-            request.dbsession.add(request.user)
+        if requestor and requestor.check_password(sanitise_text(request.params['password'])):
+            requestor.set_password(sanitise_text(request.params['newpassword']))
+            request.dbsession.add(requestor)
         else:
             request.response.status = 403
             return {'status': 'wrong password'}
     elif action == 'reset':
-        if request.user and request.user.role == 'admin': ##only admins can set password this way.
+        if requestor and requestor.role == 'admin': ##only admins can set password this way.
             target=request.dbsession.query(User).filter_by(name=username).one()
             target.set_password('password')
             request.dbsession.add(target)
