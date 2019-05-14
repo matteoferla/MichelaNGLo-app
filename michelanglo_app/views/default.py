@@ -28,9 +28,10 @@ log = logging.getLogger(__name__)
 @view_config(route_name='imagetoggle', renderer="../templates/image.mako")
 @view_config(route_name='pdb', renderer="../templates/pdb_converter.mako")
 def my_view(request):
+    user = request.user
     log.info(f'page {request.matched_route.name} for {get_username(request)}')
+    # up the log status if its illegal
     if request.matched_route.name == 'admin':
-        user = request.user
         if not user or (user and user.role != 'admin'):
             log.warn(f'Non admin user ({get_username(request)}) attempted to view admin page')
     # ?bootstrap=materials is basically for the userdata_view only.
@@ -38,6 +39,7 @@ def my_view(request):
         bootstrap = request.params['bootstrap']
     else:
         bootstrap = 4
+    # done
     return {'project': 'Michalanglo',
             'user': user,
             'bootstrap': bootstrap}

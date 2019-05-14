@@ -17,7 +17,10 @@
         from michelanglo_app.models import User
         users = self.context._data['request'].dbsession.query(User).all()
         icon = {'basic': 'user', 'friend': 'user-tie', 'guest': 'user-secret', 'admin': 'user-crown', 'new': 'user-astronaut', 'hacker': 'user-ninja', 'trashcan': 'dumpster'}
+        log = open('michelanglo_app.log','r').read() #for some fucked up reason, templates are in root.
+
     %>
+    <h3>Users</h3>
     <p class="card-text">There are ${len(users)} regististered users.</p>
 
     <ul class="fa-ul">
@@ -33,6 +36,10 @@
                 </span> ${u.name} </a></li>
             %endfor
         </ul>
+    <h3>Request log</h3>
+    <div style="height: 70vh; overflow: scroll;">
+        <pre><code>${log}</code></pre>
+    </div>
 
 
 % else:
