@@ -253,8 +253,8 @@ def status_check_view(request):
                             'body'      : 'The requested job was not found.',
                             'color'     : 'bg-warning'}
         return {'condition' : 'running',
-                'title'     : 'Uploading',
-                'body'      : 'The network is slower that normal.',
+                'title'     : 'Starting',
+                'body'      : 'The job is about to start.',
                 'color'     : 'bg-warning'}
     return request.session['status']
 
