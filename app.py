@@ -1,11 +1,19 @@
 from waitress import serve
-from pyramid.paster import get_app
-import os
+from pyramid.paster import get_app, setup_logging
+import os, argparse
 
-# custom `app.py` made to use instead of using `pserve` as I am not running a venv atm.
-
-if 'SQL_URL' in os.environ:  # postgres in production!
-    app = get_app('production.ini', 'main', options={'sql_url':os.environ['SQL_URL']})
+# custom `app.py` due to os.environs...
+parser = argparse.ArgumentParser()
+parser.add_argument('--d', action='store_true', help='run in dev mode')
+if parser.parse_args().d:
+    print('*'*10)
+    print('RUNNING IN DEV MODE')
+    print('*' * 10)
+    configfile = 'development.ini'
 else:
-    app = get_app('development.ini', 'main')
+    configfile = 'production.ini'
+
+setup_logging(configfile)
+app = get_app(configfile, 'main', options={'sql_url': os.environ['SQL_URL']})
 serve(app, host='0.0.0.0', port=8088, threads=50)
+

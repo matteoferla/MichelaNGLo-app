@@ -1,7 +1,6 @@
 from pyramid.view import view_config, notfound_view_config
 import os
-
-password='protein'
+from ._common_methods import get_username
 
 
 
@@ -29,11 +28,11 @@ log = logging.getLogger(__name__)
 @view_config(route_name='imagetoggle', renderer="../templates/image.mako")
 @view_config(route_name='pdb', renderer="../templates/pdb_converter.mako")
 def my_view(request):
-    user = request.user
-    if request.user:
-        log.info(f'{request.matched_route} for {request.user.name}')
-    else:
-        log.info(f'{request.matched_route} for unregistered user')
+    log.info(f'page {request.matched_route.name} for {get_username(request)}')
+    if request.matched_route.name == 'admin':
+        user = request.user
+        if not user or (user and user.role != 'admin'):
+            log.warn(f'Non admin user ({get_username(request)}) attempted to view admin page')
     # ?bootstrap=materials is basically for the userdata_view only.
     if 'bootstrap' in request.params:
         bootstrap = request.params['bootstrap']
