@@ -9,20 +9,23 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="input-group mb-3">
+                <div class="input-group mb-3" data-toggle="tooltip" title="This is the title of the page and will appear both as the title of the browser tab and as the header at the top of the page.">
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="title-addon1">Title</span>
                     </div>
                     <input type="text" class="form-control" value="${title}" aria-label="Title" aria-describedby="title-addon1" id="edit_title">
                 </div>
-                <div class="input-group mb-3">
+                <div class="input-group mb-3" data-toggle="tooltip" title="This is the description text in markdown format (same as Reddit, GitHub and others, for more see one of the many guides).">
                     <div class="input-group-prepend">
                         <span class="input-group-text" aria-label="edit_description" aria-describedby="description-addon1">Description</span>
                     </div>
                     <%
                         escaped_description = description.replace('<br/>','\n').replace('<br>','\n').replace('&','&amp;').replace('>','&gt;').replace('<','&lt;').replace('\n','<br/>')
                     %>
-                    <div id="edit_description" contenteditable="true" class="form-control border" style="height: 15rem; resize: vertical; overflow: auto; white-space: pre-wrap;">${escaped_description|n}</div>
+
+                    <div id="edit_description"
+                         contenteditable="true"
+                         class="form-control border" style="height: 15rem; resize: vertical; overflow: auto; white-space: pre-wrap;">${escaped_description|n}</div>
                 </div>
 
                 <%include file="../markup/markup_builder_btn.mako"/>

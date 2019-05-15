@@ -2,8 +2,11 @@
 <%
     import markdown
 %>
-
-<div class="jumbotron clearfix py-4">
+<div class="jumbotron clearfix py-4"
+%if confidential:
+    style="padding-left: 6rem;"
+%endif
+>
     <div class="float-left ml-3">
         <h1>${title}</h1>
         <small class="text-muted">The content of this page was

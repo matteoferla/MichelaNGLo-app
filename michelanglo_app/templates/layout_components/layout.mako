@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<%page args="bootstrap='4', remote=False, no_user=False, public=True, confidential=False, no_analytics=False"/>
+<%page args="bootstrap='4', remote=False, no_user=False, public=True, confidential=False, no_analytics=False, title='Michelaɴɢʟo'"/>
 
 <head>
     <meta charset="utf-8">
@@ -13,7 +13,7 @@
         <meta name="robots" content="none">
     %endif
 
-    <title>Michelanglo</title>
+    <title>${title}</title>
     % if bootstrap == 'materials':
         <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.7.6/css/mdb.min.css" rel="stylesheet">
