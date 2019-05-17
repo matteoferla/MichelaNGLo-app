@@ -11,16 +11,30 @@
             data-placement="left"
             data-trigger="focus"
             data-html="true"
-            data-content='<a role="button" class="btn btn-outline-secondary mx-1" href="/" title="Home">                                                                <i class="far fa-home"></i></a>
-                          <a role="button" class="btn btn-outline-secondary mx-1"  href="/pymol" title="Convert PyMol file">                                            <i class="far fa-hammer"></i></a>
-                          <a role="button" class="btn btn-outline-secondary mx-1"  href="/pdb" title="Prep PDB">                                                        <i class="far fa-wrench"></i></a>
-                          <a role="button" class="btn btn-outline-secondary mx-1"  href="/clash" title="Clash documentation">                                           <i class="far fa-car-crash"></i></a>
-                          <a role="button" class="btn btn-outline-secondary mx-1"  href="/markup" title="Markup documentation">                                         <i class="far fa-map-marked-alt"></i></a>
-                          <a role="button" class="btn btn-outline-secondary mx-1"  href="/imagetoggle" title="Image documentation">                                     <i class="far fa-images"></i>
-                          <a role="button" class="btn btn-outline-secondary mx-1"  href="/custom" title="Custom mesh converter">                                        <i class="far fa-mortar-pestle"></i></a>
-                          <a role="button" class="btn btn-outline-secondary mx-1"  href="/docs" title="Help">                                                           <i class="far fa-books"></i></a>
-                          <a role="button" class="btn btn-outline-secondary mx-1"  href="/gallery" title="Gallery">                                                     <i class="far fa-palette"></i></a>
-                          <a role="button" class="btn btn-outline-secondary mx-1"  href="https://github.com/matteoferla/PyMOL-to-NGL-transpiler" title="Github repo">   <i class="fab fa-github"></i></a>
+            data-content='<div class="list-group list-group-flush">
+                            <%
+                            data = (('Home','/','far fa-home'),
+                               ('Convert PyMol file','/pymol','far fa-hammer'),
+                               ('Convert PDB file','/pdb','far fa-wrench'),
+                               ('Convert custom mesh','/custom','far fa-mortar-pestle'),
+                               ('Primary documentation','/docs','far fa-books'),
+                               ('Markup documentation','/markup','far fa-map-marked-alt'),
+                               ('Clash documentation','/clash','far fa-car-crash'),
+                               ('Image documentation','/imagetoggle','far fa-images'),
+                               ('Gallery','/gallery','far fa-palette'),
+                               ('Github repo','https://github.com/matteoferla/PyMOL-to-NGL-transpiler','fab fa-github')
+                               )
+                            %>
+                            %for txt, link, ico in data:
+
+                                %if current_page in link or (current_page == 'home' and link == '/'):
+                                        <a role="button" class="list-group-item list-group-item-dark"><i class="${ico}"></i> ${txt}</a>
+                                %else:
+                                        <a role="button" class="list-group-item list-group-item-action" href="${link}"><i class="${ico}"></i> ${txt}</a>
+                                %endif
+
+                            %endfor
+                            </div>
                          '>
         <i class="far fa-bars"></i></button>
     % if tour:

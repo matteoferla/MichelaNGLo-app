@@ -1,7 +1,7 @@
 <%namespace file="layout_components/labels.mako" name="info"/>
 <%inherit file="layout_components/layout_w_card.mako"/>
 <%block name="buttons">
-            <%include file="layout_components/horizontal_menu_buttons.mako" args='tour=True'/>
+            <%include file="layout_components/vertical_menu_buttons.mako" args='tour=True'/>
 </%block>
 <%block name="title">
             &mdash; PyMol
@@ -14,7 +14,6 @@
 <%block name="body">
 <ul class="list-group list-group-flush">
             <li class="list-group-item">
-                <p class="card-text">Please see <a href="https://github.com/matteoferla/PyMOL-to-NGL-transpiler/blob/master/README.md">the Github readme <i class="fas fa-external-link"></i></a> for documentation about how the conversions are done.</p>
                 <form>
                 <!-- mode selector -->
                 <div class="row">
@@ -68,7 +67,7 @@
                         <div class="col-lg-6 mb-3">
                             <div class="input-group" data-toggle="tooltip" title="Upload your PyMOL PSE file">
                               <div class="input-group-prepend">
-                                <span class="input-group-text" id="upload_addon">Upload PSE</span>
+                                <span class="input-group-text" id="upload_addon">Upload PSE file</span>
                               </div>
                               <div class="custom-file">
                                 <input type="file" class="custom-file-input" id="upload" aria-describedby="upload_addon" accept=".pse">
@@ -238,6 +237,10 @@
                         </div><!--NGL-->
                     </div>
                 </div>
+
+                <!--footnote-->
+                <p class="card-text">Please see <a href="https://github.com/matteoferla/PyMOL-to-NGL-transpiler/blob/master/README.md">the Github readme <i class="fas fa-external-link"></i></a> for documentation about how the conversions are done.</p>
+
                 </form>
 
 

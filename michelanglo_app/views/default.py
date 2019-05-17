@@ -29,14 +29,16 @@ log = logging.getLogger(__name__)
 @view_config(route_name='pdb', renderer="../templates/pdb_converter.mako")
 def my_view(request):
     user = request.user
-    if request.matched_route is not None:
-        log.info(f'page {request.matched_route.name} for {get_username(request)}')
+    if request.matched_route is None:
+        log.warn(f'Could not match {request.url} for {get_username(request)}')
+        page = '404'
+        # up the log status if its illegal
+    elif request.matched_route.name == 'admin' and (not user or (user and user.role != 'admin')):
+        log.warn(f'Non admin user ({get_username(request)}) attempted to view admin page')
+        page = request.matched_route.name
     else:
-        log.warn(f'Could not match {request.current_route_url} for {get_username(request)}')
-    # up the log status if its illegal
-    if request.matched_route.name == 'admin':
-        if not user or (user and user.role != 'admin'):
-            log.warn(f'Non admin user ({get_username(request)}) attempted to view admin page')
+        log.info(f'page {request.matched_route.name} for {get_username(request)}')
+        page = request.matched_route.name
     # ?bootstrap=materials is basically for the userdata_view only.
     if 'bootstrap' in request.params:
         bootstrap = request.params['bootstrap']
@@ -45,7 +47,8 @@ def my_view(request):
     # done
     return {'project': 'Michalanglo',
             'user': user,
-            'bootstrap': bootstrap}
+            'bootstrap': bootstrap,
+            'current_page': page}
 
 
 @view_config(route_name='status', renderer='json')

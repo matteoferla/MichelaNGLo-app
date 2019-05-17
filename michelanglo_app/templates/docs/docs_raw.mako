@@ -1,3 +1,4 @@
+<%namespace file="../layout_components/common_methods.mako" import="copy_btn"/>
 <h4>Raw HTML mode</h4>
 <div id="raw_html">
     <p>First, you can only use the code if you have a website that you can edit as raw HTML. Otherwise, you can only share links or zipped html files.</p>
@@ -14,7 +15,8 @@
 
    <p>Try adding to your page:</p>
 
-   <pre><code>I am definitely in the correct HTML editor mode as this is &lt;b&gt;enboldened&lt;/b&gt; and this is &lt;span id='blue'&gt;blue&lt;/span&gt;.&lt;script type="text/javascript"&gt;document.getElementById("blue").style.color = "blue";&lt;/script&gt;&lt;</code></pre>
+   <pre>${copy_btn('test_code')}<code id="test_code">I am definitely in the correct HTML editor mode as this is &lt;b&gt;enboldened&lt;/b&gt; and this is &lt;span id='blue'&gt;blue&lt;/span&gt;.
+&lt;script type="text/javascript"&gt;document.getElementById("blue").style.color = "blue";&lt;/script&gt;</code></pre>
 
    <p>And view it.</p>
    <ul>

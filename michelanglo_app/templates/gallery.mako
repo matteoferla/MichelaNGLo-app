@@ -1,6 +1,6 @@
 <%inherit file="layout_components/layout_w_card.mako"/>
 <%block name="buttons">
-            <%include file="layout_components/horizontal_menu_buttons.mako" args='tour=False'/>
+            <%include file="layout_components/vertical_menu_buttons.mako" args='tour=False'/>
 </%block>
 <%block name="title">
             &mdash; Gallery

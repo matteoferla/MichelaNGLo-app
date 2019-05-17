@@ -19,7 +19,7 @@
              </small>
     </div>
     % if not no_buttons:
-        <%include file="layout_components/horizontal_menu_buttons.mako" args='tour=False'/>
+        <%include file="layout_components/vertical_menu_buttons.mako" args='tour=False'/>
     % endif
 
 </div>
@@ -62,23 +62,28 @@
                     %endif
                 <p>${markdown.markdown(description)|n}</p>
                 <hr/>
+                <button type="button" class="btn btn-outline-primary w-100 my-1" id="getimplement"><i class="far fa-code"></i> Implementation code</button>
 
-                <button type="button" class="btn btn-outline-success w-100 my-1" id="save"><i class="far fa-camera"></i> Take snapshot</button>
+                <button type="button" class="btn btn-outline-success w-100 my-1" id="save"><i class="far fa-camera"></i> Save image</button>
                 % if key:
-                    <a href="/data/${page}?no_user=1&remote=1&no_buttons=1" class="btn btn-outline-success w-100 my-1"  download="page.html"><i class="far fa-download"></i> Download file</a>
+                    <a href="/data/${page}?no_user=1&remote=1&no_buttons=1" class="btn btn-outline-success w-100 my-1"  download="page.html"><i class="far fa-download"></i> Download html file</a>
                     <a href="/save_pdb?uuid=${page}" class="btn btn-outline-success w-100 my-1"  download="model.pdb"><i class="far fa-map"></i> Download PDB</a>
                 % else:
-                    <a href="/data/${page}?no_user=1&remote=1&no_buttons=1&key=${key}" class="btn btn-outline-success w-100 my-1"  download="page.html"><i class="far fa-download"></i> Download file</a>
-                    <a href="/save_pdb?uuid=${page}&key=${key}" class="btn btn-outline-success w-100 my-1"  download="model.pdb"><i class="far fa-map"></i> Download PDB</a>
+                    <a href="/data/${page}?no_user=1&remote=1&no_buttons=1&key=${key}" class="btn btn-outline-success w-100 my-1"  download="page.html"><i class="far fa-download"></i> Download html file</a>
+                    <a href="/save_pdb?uuid=${page}&key=${key}" class="btn btn-outline-success w-100 my-1"  download="model.pdb"><i class="far fa-map"></i> Download PDB file</a>
                 % endif
 
 
 
 
-                <button type="button" class="btn btn-outline-primary w-100 my-1" id="getimplement"><i class="far fa-code"></i> Implementation code</button>
-                <button type="button" class="btn btn-outline-primary w-100 my-1" data-toggle="modal" data-target="#basics"><i class="far fa-cubes"></i> Protein basics</button>
-                <button type="button" class="btn btn-outline-primary w-100 my-1" data-toggle="modal" data-target="#about"><i class="far fa-quote-right"></i> Credits</button>
-            </div>
+
+                ###<button type="button" class="btn btn-outline-primary w-100 my-1" data-toggle="modal" data-target="#basics"><i class="far fa-cubes"></i> Protein basics</button>
+
+                %if remote:
+                    <button type="button" class="btn btn-outline-primary w-100 my-1" data-toggle="modal" data-target="#about"><i class="far fa-quote-right"></i> Credits</button>
+
+                %endif
+                </div>
         </div>
     </div>
 </div>
