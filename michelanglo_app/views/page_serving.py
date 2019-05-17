@@ -82,6 +82,7 @@ def userdata_view(request):
     if not 'columns_viewport' in settings:
         settings['columns_viewport'] = 9
         settings['columns_text'] = 3
+    settings['current_page'] = 'NOT A MENU OPTION....'
     return settings
 
 
