@@ -140,6 +140,15 @@ $(document).ready(function () {
 	    else {$('#viewport').parent().parent().css('top', 0);}
 	});
 
+
+    %if not no_user:
+        ###user mode is on.
+        %if freelyeditable and not user:
+            $('#toaster').append(`<%include file="layout_components/toast.mako" args="toast_id='pleaseLogin', toast_title='Page editing', toast_body='This page can be edited by anyone with the link. However, to prevent vandalism you have to be signed in.', toast_bg='bg-info', toast_autohide='false'"/>`);
+            $('#pleaseLogin').toast('show');
+        %endif
+    %endif
+
 }); //ready
 
 </script>

@@ -42,10 +42,16 @@ def userdata_view(request):
         settings = page.load()
         settings['encryption'] = False
     ### add new values
+    if 'freelyeditable' not in settings:
+        settings['freelyeditable'] = True
     settings['user'] = request.user
     user = request.user
     if user:
-        if user.role == 'admin':
+        if settings['freelyeditable']:
+            settings['editable'] = True
+            user.add_visited_page(pagename)
+            settings['visitors'].append(user.name)
+        elif user.role == 'admin':
             settings['editable'] = True
         elif pagename in user.get_owned_pages():
             settings['editable'] = True

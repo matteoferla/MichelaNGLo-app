@@ -1,4 +1,19 @@
 <div id="page_users">
+    <div class="custom-control custom-switch">
+          <input type="checkbox" class="custom-control-input user-editable-state" id="freelyeditable"
+                %if freelyeditable:
+                    checked
+                %endif
+                    >
+          <label class="custom-control-label" for="freelyeditable">Any registered user with the link can edit it.</label>
+        </div>
+    <div class="invalid-feedback" id="freelyeditable_error">Public pages cannot be freely edited.</div>
+
+    <div id="authorlist"
+    %if freelyeditable:
+        style="display: none;"
+    %endif
+    >
     <p>This is the list of users that have edited, could edit or cannot edit the page.</p>
 <ul class="fa-ul">
 %for author in authors:
@@ -19,4 +34,5 @@
     % endif
 %endfor
     </ul>
+    </div>
 </div>

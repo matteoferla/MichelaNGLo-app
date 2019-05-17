@@ -65,6 +65,7 @@ $('#edit_submit').click(function () {
             'description': description,
             'page': '${page}',
             'residues': $('#edit_residues').val(), //no longer valid.
+            'freelyeditable': $('#freelyeditable').prop('checked'),
             'proteinJSON': JSON.stringify($('[role="NGL"]').data('proteins')),
             'backgroundcolor': $('[role="NGL"]').data('backgroundcolor'),
             'new_editors': JSON.stringify($('.user-editable-state:checked').map((idx, item) => $(item).data('user')).toArray()),
@@ -123,11 +124,26 @@ $('#public').change(function () {
     if ($(this).prop('checked')) {
         $('#encryption').prop('checked', false);
         $('#confidential').prop('checked', false);
+        $('#freelyeditable').prop('checked', false);
     }
 });
 
 $('#encryption').change(function () {
     if ($(this).prop('checked')) {
         $('#public').prop('checked', false);
+    }
+});
+
+$('#freelyeditable').change(function() {
+    if ($(this).prop('checked')) {
+        if ($('#public').prop('checked')) {
+            $('#freelyeditable_error').show();
+            setTimeout(()=> $('#freelyeditable_error').hide(1000), 3000);
+            $('#freelyeditable').prop('checked',false);
+        } else {
+            $('#authorlist').hide(1000);
+        }
+    } else {
+        $('#authorlist').show(1000);
     }
 });

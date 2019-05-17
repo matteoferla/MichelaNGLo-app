@@ -29,7 +29,10 @@ log = logging.getLogger(__name__)
 @view_config(route_name='pdb', renderer="../templates/pdb_converter.mako")
 def my_view(request):
     user = request.user
-    log.info(f'page {request.matched_route.name} for {get_username(request)}')
+    if request.matched_route is not None:
+        log.info(f'page {request.matched_route.name} for {get_username(request)}')
+    else:
+        log.warn(f'Could not match {request.current_route_url} for {get_username(request)}')
     # up the log status if its illegal
     if request.matched_route.name == 'admin':
         if not user or (user and user.role != 'admin'):

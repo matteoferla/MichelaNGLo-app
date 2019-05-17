@@ -25,22 +25,22 @@ def edit(request):
     # get ready
     page = Page(request.POST['page'])
     user = request.user
+    # check if encrypted
+    if page.is_password_protected():
+        page.key = request.POST['encryption_key'].encode('uft-8')
+        page.path = page.encrypted_path
+    # load data
+    settings = page.load()
+    if not settings:
+        request.response.status = 404
+        log.warn(f'{get_username(request)} requested a missing page')
+        return {'error': 'page not found'}
     ## cehck permissions
-    if not user or not (page.identifier in user.get_owned_pages() or user.role == 'admin'): ## only owners and admins can edit.
+    if not user or not (page.identifier in user.get_owned_pages() or user.role == 'admin' or settings['freelyeditable']): ## only owners and admins can edit.
         request.response.status = 403
         log.warn(f'{get_username(request)} is not autharised to edit page')
         return {'error': 'not authorised'}
     else:
-        # check if encrypted
-        if page.is_password_protected():
-            page.key = request.POST['encryption_key'].encode('uft-8')
-            page.path = page.encrypted_path
-        #load data
-        settings = page.load()
-        if not settings:
-            request.response.status = 404
-            log.warn(f'{get_username(request)} requested a missing page')
-            return {'error': 'page not found'}
         #add author if user was an upgraded to editor by the original author. There are three lists: authors (can and have edited, editors can edit, visitors visit.
         if user.name not in settings['authors']:
             settings['authors'].append(user.name)
@@ -67,7 +67,11 @@ def edit(request):
         else:
             pass
         settings['public'] = is_js_true(request.POST['public'])
-        #new_editors
+        if not settings['public']:
+            settings['freelyeditable'] = is_js_true(request.POST['freelyeditable'])
+        else:
+            settings['freelyeditable'] = False
+            #new_editors
         if 'new_editors' in request.POST and request.POST['new_editors']:
             for new_editor in json.loads((request.POST['new_editors'])):
                 target = request.dbsession.query(User).filter_by(name=new_editor).one()
