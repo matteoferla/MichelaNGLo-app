@@ -275,7 +275,7 @@ NGL.specialOps.load = function (option, noLoadFun) {
     //new model. Force reset
     if (myData.proteins[index].type === 'file') {
         return NGL.stageIds[myData.id].loadFile(myData.proteins[index].value).then(function (protein) {
-                if (customView === undefined) {NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);} else {customView();}
+                iif (noLoadFun === false || noLoadFun === undefined) {NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);}
             });
 
     }
