@@ -43,7 +43,7 @@ def userdata_view(request):
         settings['encryption'] = False
     ### add new values
     if 'freelyeditable' not in settings:
-        settings['freelyeditable'] = True
+        settings['freelyeditable'] = False
     settings['user'] = request.user
     user = request.user
     if user:
