@@ -275,7 +275,7 @@ NGL.specialOps.load = function (option, noLoadFun) {
     //new model. Force reset
     if (myData.proteins[index].type === 'file') {
         return NGL.stageIds[myData.id].loadFile(myData.proteins[index].value).then(function (protein) {
-                iif (noLoadFun === false || noLoadFun === undefined) {NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);}
+                if (noLoadFun === false || noLoadFun === undefined) {NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);}
             });
 
     }
@@ -448,7 +448,7 @@ NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
         else if ((focus === 'blur') || (focus === 'bfactor')) {
             NGL.specialOps.showBlur(id,selection, color, radius, view);
         }
-        else if (structure !== undefined) { console.log('Please specify reset or auto or other');}//pass
+        else if (structure !== undefined) { console.log('Please add view=reset if you are changing structure as its too ambiguous otherwise.');}
         else {throw 'ValueError: odd data-focus tag.'}
     }
     // action!
