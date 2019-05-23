@@ -29,4 +29,7 @@
 
 ######################################################### Pages
     <%include file="docs/docs_pages.mako"/>
+
+######################################################### Pages
+    <%include file="docs/docs_api.mako"/>
 </%block>

@@ -9,7 +9,7 @@ from ._common_methods import get_username
 @view_config(route_name='userdata', renderer="../templates/user_protein.mako")
 def userdata_view(request):
 
-    def tickup_tries(): #try counter for encryption
+    def tickup_tries(): #try counter for encryption. currently doesn't have a time out because I am not sure w
         if 'tries' in request.session:
             request.session['tries'] = int(request.session['tries']) + 1
         else:
@@ -83,6 +83,10 @@ def userdata_view(request):
         settings['columns_viewport'] = 9
         settings['columns_text'] = 3
     settings['current_page'] = 'NOT A MENU OPTION....'
+    #API hack.
+    if 'mode' in request.params and request.params['mode']:
+        settings['user'] = get_username(request) #user isn't json serialisable
+        return render_to_response("json", settings, request)
     return settings
 
 
