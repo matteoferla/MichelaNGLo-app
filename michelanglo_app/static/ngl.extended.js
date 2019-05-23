@@ -462,14 +462,14 @@ $.prototype.protein = function (){
 $.prototype.viewport = function () {
         if (! $(this).length) {return undefined}
         // fix width:100%; height: 0; padding-bottom: 100%;
+        console.log('old viewport sizes:'+$(this).width()+'x'+$(this).height());
         if ($(this).has('img').length === 0) {
              if ($(this).width() === 0) {$(this).css('width','100%');}
              if ($(this).height() === 0) {
-                 $(this).height($(this).width());
-            $(this).css('padding-bottom','100%');
-            console.log('new viewport sizes:');
-            console.log($(this).width());
-            console.log($(this).height());
+                 var h = Math.min( $(this).width(), window.innerHeight - $(this).offset().top - 4 );
+                 $(this).height(h);
+                 //$(this).css('padding-bottom','100%');
+                 console.log('new viewport sizes:'+$(this).width()+'x'+$(this).height());
              }
         }
         // sort attributes
@@ -496,7 +496,7 @@ $.prototype.viewport = function () {
     };
 
 
-$(document).ready(function () {
+$(document).ready(function(){ //
     //activate prolinks
     $('[data-toggle="protein"]').protein();
     //activate viewport
