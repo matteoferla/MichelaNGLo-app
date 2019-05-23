@@ -219,12 +219,16 @@ NGL.specialOps.removeImg = function () {
 };
 
 NGL.specialOps._run_loadFx = function (protein, fx) {
+    console.log(protein);
+    console.log(fx);
     if (typeof fx === 'function') {
         fx(protein)}
     else if (typeof fx === 'string') {
         var fxname = fx.replace(/\W/g,'');
-       if (window[fxname] !== undefined) {window[fxname](protein)}
-       else {setTimeout((protein, fxname) => NGL.specialOps._run_loadFx(protein, fxname),300)} //ansync issue.
+       if (window[fxname] !== undefined) {
+           setTimeout(() => window[fxname](protein),100)}
+       else {
+           setTimeout(() => NGL.specialOps._run_loadFx(protein, fxname),500)} //ansync issue.
        } //prevent XSS
     else {
         protein.addRepresentation("cartoon", {smoothSheet: true}); protein.autoView();

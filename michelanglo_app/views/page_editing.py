@@ -46,7 +46,7 @@ def edit(request):
             settings['authors'].append(user.name)
         # only admins and friends can edit html fully
         if user.role in ('admin', 'friend'):
-            for key in ('loadfun', 'title', 'description'):
+            for key in ('loadfun', 'title', 'description','pdb'):
                 if key in request.POST:
                     settings[key] = request.POST[key]
         else: # regular users have to be sanitised
@@ -96,6 +96,8 @@ def edit(request):
         if 'columns_viewport' in request.POST:
             settings['columns_viewport'] = int(request.POST['columns_viewport'])
             settings['columns_text'] = int(request.POST['columns_text'])
+        if 'proteinJSON' in request.POST:
+            settings['proteinJSON'] = request.POST['proteinJSON']
         #save
         page.save(settings)
         return {'success': 1}

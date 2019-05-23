@@ -2,7 +2,7 @@ from pyramid.view import view_config
 from pyramid.renderers import render_to_response
 from ..models.pages import Page
 
-import logging
+import logging, json
 log = logging.getLogger(__name__)
 from ._common_methods import get_username
 
@@ -84,8 +84,10 @@ def userdata_view(request):
         settings['columns_text'] = 3
     settings['current_page'] = 'NOT A MENU OPTION....'
     #API hack.
-    if 'mode' in request.params and request.params['mode']:
+    if 'mode' in request.params and request.params['mode'] == 'json':
         settings['user'] = get_username(request) #user isn't json serialisable
+        print('pageserve', 'request', type(settings['proteinJSON']))
+        settings['proteinJSON'] = settings['proteinJSON'] #json.dumps() #because this is done badly.
         return render_to_response("json", settings, request)
     return settings
 
