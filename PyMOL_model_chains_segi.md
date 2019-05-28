@@ -34,9 +34,11 @@ However, with structures of over 100 chains, running out of letters is the last 
 * segments (`segi`) are ignored &mdash;too ambiguous
 * Blank chain (`chain ''`) peptides are given a chain letter
 * Multiple `objects:molecule` in a view are collapsed into a single object with unique chain letters.
+* Only the first `model`/`state` is taken.
 
 Whereas NGL handles multiple `polypeptide` components, the selection are specific to these, making it impossible to select across different components.
 
+If any of this is no good for you, see the method `fix_structure` in `transpiler.py`.
 
 
 

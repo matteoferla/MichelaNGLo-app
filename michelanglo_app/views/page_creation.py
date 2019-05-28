@@ -200,10 +200,6 @@ def ajax_custom(request):
     return {'mesh': mesh}
 
 
-
-
-
-
 @view_config(route_name='ajax_pdb', renderer="json")
 def ajax_pdb(request):
     log.info(f'PDB page creation requested by {get_username(request)}')

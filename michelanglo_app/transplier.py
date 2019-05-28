@@ -182,6 +182,7 @@ class PyMolTranspiler:
         self.lines=[]
         self.sticks=[]
         self.colors=[]
+        self.distances=[] #and h-bonds...
         self.ss=[]
         self.code=''
         self.raw_pdb=None  #this is set from the instance `prot.raw_pdb = open(file).read()`
@@ -240,12 +241,13 @@ class PyMolTranspiler:
                         else:
                             raise NotImplementedError()
                     list_of_coordinates = obj[5][2][0][1]
+                    current_distances = []
                     for pi in range(0, len(list_of_coordinates), 6):
                         coord_A = list_of_coordinates[pi:pi + 3]
                         coord_B = list_of_coordinates[pi + 3:pi + 6]
-                        id_A = self.get_atom_id_of_coords(coord_A)
-                        id_B = self.get_atom_id_of_coords(coord_B)
-                        print(id_A, id_B)
+                        current_distances.append({'atom_A': self.get_atom_id_of_coords(coord_A),
+                                                  'atom_B': self.get_atom_id_of_coords(coord_B)})
+                    self.distances.append({'pairs': current_distances, 'color': obj[5][0][2]})
             pymol.cmd.save(file.replace('.pse','')+'.pdb')
             pymol.cmd.remove('(all)')
         if view:
@@ -326,8 +328,6 @@ class PyMolTranspiler:
         for on in pymol.cmd.get_names_of_type('object:molecule'):
             if on != 'mike_combined':
                 pymol.cmd.delete(on)
-
-
 
     def convert_view(self, view, **settings):
         """

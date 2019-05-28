@@ -51,6 +51,15 @@ function loadfun (protein) {
     var surf = new NGL.Selection( "${' or '.join(structure.surface)}" );
     protein.addRepresentation( "surface", {${color_str} sele: surf.string} );
     % endif
+    %if structure.distances:
+        %for d in structure.distances:
+    protein.addRepresentation( "distance", { atomPair: [
+                %for p in d['pairs']:
+    ["${p['atom_A'].resi}:${p['atom_A'].chain}.${p['atom_A'].name}","${p['atom_B'].resi}:${p['atom_B'].chain}.${p['atom_B'].name}"],
+                %endfor
+    ], colorValue: ${structure.swatch[d['color']].hex} } );
+        %endfor
+    %endif
 
     //orient
     stage.viewerControls.orient((new NGL.Matrix4).fromArray(${structure.m4.reshape(16, ).tolist()}));

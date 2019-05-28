@@ -5,6 +5,8 @@ Michelaɴɢʟo is a web app to convert a PyMOL PSE file or PDB file to a easy to
 
 For the documentation for the web app see [help page](https://ngl.matteoferla.com/docs).
 
+For more details about data stored see also [data](data.md).
+
 ## Non-Michelaɴɢʟo goodies
 The conversion file, `michelanglo/transpiler.py` and the files in `michelanglo/transpiler_templates` are all that is required to use locally.
 They are in `michelanglo_app` to avoid allowing the app to do a relative import beyond the top-level package (`michelanglo_app`).
@@ -142,6 +144,7 @@ Additionally, there are
 
 ### Notes on PSE side
 A Pse is encoded, so there is no way to read it except with Pymol. But Pymol can reveal it's secrets.
+
 ### Orientation
 I was driven spare with converting the orientation. It simply was a question of inverting the sign on the $\vec{x}$ and $\vec{z}$ of the rotational matrix, multiplying it by the absolute of the scale and adding the origin of rotation's position with inverted sign.
 For more see [my notes on the conversion of the view](notes_on_view_conversion.md)
@@ -197,6 +200,9 @@ NGL does not assign secondary structure. Therefore, if not specified everything 
 <img src="images/unsheeted.png" width="200">
 
 The script `SS.py` can generate this in PDB file via PyMol. However, the generated `SHEET` definition is not as it ought to be, as it gives out mulitple separate strands as opposed to a single multistrand sheet &mdash;It works though, so who cares? 
+
+### Multiple objects
+[PyMOL_model_chains_segi](PyMOL_model_chains_segi.md)
 
 ### Complicated?
 The code seems a bit complex when it comes to selections. The most obvious thing to do is to just have a list of the atoms with a given color and representation. However, this has two problems:
