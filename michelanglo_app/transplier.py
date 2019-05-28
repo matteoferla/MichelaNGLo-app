@@ -153,8 +153,9 @@ class PyMolTranspiler:
                      ('hassium', 5383, (0.9019607901573181, 0.0, 0.18039216101169586)), ('meitnerium', 5384, (0.9215686321258545, 0.0, 0.14901961386203766)),
                      ('deuterium', 5385, (0.8999999761581421, 0.8999999761581421, 0.8999999761581421)), ('lonepair', 5386, (0.5, 0.5, 0.5)),
                      ('pseudoatom', 5387, (0.8999999761581421, 0.8999999761581421, 0.8999999761581421))])
+    _iterate_cmd = "data.append({'ID': ID,  'segi': segi, 'chain': chain, 'resi': resi, 'resn': resn, 'name':name, 'elem':elem, 'reps':reps, 'color':color, 'ss': ss})"
 
-    def __init__(self, file=None, verbose=False, validation=False, view=None, representation=None, pdb='', **settings):
+    def __init__(self, file=None, verbose=False, validation=False, view=None, representation=None, pdb='', skip_disabled=True, **settings):
         """
         Converter
         :param: file: filename of PSE file.
@@ -192,11 +193,49 @@ class PyMolTranspiler:
             v = pymol.cmd.get_view()
             self.convert_view(v)
             self.fix_structure()
-            keys = ('ID', 'chain', 'resi', 'resn', 'name', 'elem', 'reps', 'color')
-            myspace = {'data': []} #myspace['data'] is the same as self.atoms
-            pymol.cmd.iterate('(all)', "data.append({'ID': ID, 'chain': chain, 'resi': resi, 'resn': resn, 'name':name, 'elem':elem, 'reps':reps, 'color':color, 'ss': ss})", space=myspace)
-            self.convert_representation(myspace['data'], **settings)
-            self.parse_ss(myspace['data'])
+            for obj_name in pymol.cmd.get_names():
+                obj = pymol.cmd.get_session(obj_name)['names'][0]
+                """
+                https://pymolwiki.org/index.php/Get_session
+                0 => name
+                1 => obj or sele?
+                2 => enabled?
+                3 => reps
+                4 => obj_type
+                5 => obj_data... complicated.
+                6 => group_name
+                """
+                if obj[4] == 1: #equivalent to pymol.cmd.get_type(obj_name) == 'object:molecule':
+                    if obj[1]:
+                        continue #PyMOL selection has no value.
+                    if obj[2] == 0: # PyMOL disabled
+                        if skip_disabled:
+                            continue
+                        else:
+                            raise NotImplementedError()
+                    """ the attr names in get_model differ slightly from the ones iterate gives.
+                     as raw pymol output needs to  be an option and
+                     the reps variable differs from flags (not even sure they are the same)
+                     the get_model way has been depracated, even though iterate seems more barbarous.
+                     here is the old code:
+                    data = [{'ID': atom.id,
+                             'chain': atom.chain,
+                             'resi': atom.resi, #resi_number is int, but has offset issues?
+                             'resn': atom.resn, #3letter
+                             'name': atom.name,
+                             'elem': atom.symbol,
+                             'reps': atom.flags,
+                             'color': atom.color_code,
+                             'segi': atom.segi}
+                            for atom in pymol.cmd.get_model(obj_name)]
+                    """
+                    myspace = {'data': []}  # myspace['data'] is the same as self.atoms
+                    pymol.cmd.iterate(obj_name, self._iterate_cmd, space=myspace)
+                    self.convert_representation(myspace['data'], **settings)
+                    self.parse_ss(myspace['data'])
+                elif obj[4] == 4:# pymol.cmd.get_type(obj_name) == 'object:measurement'
+                    coords = obj[5][2][0][1]
+
             pymol.cmd.save(file.replace('.pse','')+'.pdb')
             pymol.cmd.remove('(all)')
         if view:
@@ -211,9 +250,9 @@ class PyMolTranspiler:
             self.raw_pdb = w.read()
         pymol.cmd.load(file)
         self.fix_structure()
-        keys = ('ID', 'chain', 'resi', 'resn', 'name', 'elem', 'reps', 'color')
-        myspace = {'data': []}  # myspace['data'] is the same as self.atoms
-        pymol.cmd.iterate('(all)', "data.append({'ID': ID, 'chain': chain, 'resi': resi, 'resn': resn, 'name':name, 'elem':elem, 'reps':reps, 'color':color, 'ss': ss})", space=myspace)
+        myspace = {'data': []}
+        # myspace['data'] is the same as self.atoms, which is "kind of the same" as pymol.cmd.get_model('..').atoms
+        pymol.cmd.iterate('(all)', cls._iterate_cmd, space=myspace)
         self.parse_ss(myspace['data'])
         return self
 
@@ -273,7 +312,7 @@ class PyMolTranspiler:
             return self.m4
 
     def convert_representation(self, represenation, **settings):
-        """iterate all, ID,chain,resi, resn,name, elem,reps, color,ss
+        """iterate all, ID, segi, chain,resi, resn,name, elem,reps, color, ss
         reps seems to be a binary number. controlling the following
         * 0th bit: sticks
         * 7th bit: line
@@ -282,7 +321,7 @@ class PyMolTranspiler:
         """
         if isinstance(represenation,str):
             text=represenation
-            headers=('ID','chain','resi', 'resn', 'name', 'elem','reps', 'color') # gets ignored if iterate> like is present
+            headers=('ID','segi','chain','resi', 'resn', 'name', 'elem','reps', 'color') # gets ignored if iterate> like is present
             for line in text.split('\n'):
                 if not line:
                     continue
