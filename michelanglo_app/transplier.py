@@ -285,11 +285,10 @@ class PyMolTranspiler:
 
     def fix_structure(self):
         """
-        Fix any issues with structure.
+        Fix any issues with structure. see pymol_model_chain_segi.md for more.
         empty chain issue.
         :return:
         """
-        print('fix strcutire top')
         # This really ought to a class and this half-breed. But get new letter returns a letter not in old_chains
         old_chains = list()
 
@@ -307,21 +306,17 @@ class PyMolTranspiler:
         # Only latin-1 is okay in NGL. Any character above U+00FF will be rendered as the last two bytes. (U+01FF will be U+00FF say)
         #non-ascii are not okay in PyMol
         for on in pymol.cmd.get_names(enabled_only=1):
-            print('fix strcutire',on)
             # pymol.cmd.get_names_of_type('object:molecule') does not handle enabled.
             if pymol.cmd.get_type(on) == 'object:molecule':
                 o = pymol.cmd.get_model(on)
                 if o:
                     chains = set([atom.chain for atom in o.atom])
-                    print('fix strcutire', str(chains), str(old_chains))
                     for c in chains:
                         if not c: # missing chain ID is still causing issues.
                             new_chain = get_new_letter()
-                            print('fix strcutire',new_chain)
                             pymol.cmd.alter(f"{on} and chain ''", f'chain="{new_chain}"')
                         elif c in old_chains:
                             new_chain = get_new_letter()
-                            print('fix strcutire', new_chain)
                             pymol.cmd.alter(f"{on} and chain {c}", f'chain="{new_chain}"')
                         else:
                             old_chains.append(c)
