@@ -234,14 +234,41 @@ class PyMolTranspiler:
                     self.convert_representation(myspace['data'], **settings)
                     self.parse_ss(myspace['data'])
                 elif obj[4] == 4:# pymol.cmd.get_type(obj_name) == 'object:measurement'
-                    coords = obj[5][2][0][1]
-
+                    if obj[2] == 0: # PyMOL disabled
+                        if skip_disabled:
+                            continue
+                        else:
+                            raise NotImplementedError()
+                    list_of_coordinates = obj[5][2][0][1]
+                    for pi in range(0, len(list_of_coordinates), 6):
+                        coord_A = list_of_coordinates[pi:pi + 3]
+                        coord_B = list_of_coordinates[pi + 3:pi + 6]
+                        id_A = self.get_atom_id_of_coords(coord_A)
+                        id_B = self.get_atom_id_of_coords(coord_B)
+                        print(id_A, id_B)
             pymol.cmd.save(file.replace('.pse','')+'.pdb')
             pymol.cmd.remove('(all)')
         if view:
             self.convert_view(view)
         if representation:
             self.convert_representation(representation, **settings)
+
+    @classmethod
+    def get_atom_id_of_coords(cls, coord):
+        """
+        Returns the pymol atom object correspondng to coord. "Needed" for distance.
+        :param coord: [x, y, z] vector
+        :return: atom
+        """
+        for on in pymol.cmd.get_names(enabled_only=1): #pymol.cmd.get_names_of_type('object:molecule') does not handle enabled.
+            if pymol.cmd.get_type(on) == 'object:molecule':
+                o = pymol.cmd.get_model(on)
+                if o:
+                    for atom in o.atom:
+                        if all([atom.coord[i] == c for i,c in enumerate(coord)]):
+                            return atom
+        else:
+            return None
 
     @classmethod
     def load_pdb(cls, file):
@@ -252,18 +279,58 @@ class PyMolTranspiler:
         self.fix_structure()
         myspace = {'data': []}
         # myspace['data'] is the same as self.atoms, which is "kind of the same" as pymol.cmd.get_model('..').atoms
-        pymol.cmd.iterate('(all)', cls._iterate_cmd, space=myspace)
+        pymol.cmd.iterate('(all)', self._iterate_cmd, space=myspace)
         self.parse_ss(myspace['data'])
         return self
 
     def fix_structure(self):
         """
         Fix any issues with structure.
+        empty chain issue.
         :return:
         """
-        pymol.cmd.alter("chain ''", 'chain="Z"') #missing chain ID is still causing issues.
+        print('fix strcutire top')
+        # This really ought to a class and this half-breed. But get new letter returns a letter not in old_chains
+        old_chains = list()
+
+        def get_new_letter():
+            possible = iter('ABCDEFGHIJKLMNOPQRSTUVWXYZ' +
+                            'abcdefghijklmnopqrstuvwxyz')
+                           # 'ßÞÐÅÆØ' + 'ÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ' +
+                           # 'àáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ')
+            new = next(possible)
+            while new in old_chains:
+                new = next(possible)
+            old_chains.append(new)
+            return new
+        # whereas a chain can be called ?, it causes problems. So these are strictly JS \w characters.
+        # Only latin-1 is okay in NGL. Any character above U+00FF will be rendered as the last two bytes. (U+01FF will be U+00FF say)
+        #non-ascii are not okay in PyMol
+        for on in pymol.cmd.get_names(enabled_only=1):
+            print('fix strcutire',on)
+            # pymol.cmd.get_names_of_type('object:molecule') does not handle enabled.
+            if pymol.cmd.get_type(on) == 'object:molecule':
+                o = pymol.cmd.get_model(on)
+                if o:
+                    chains = set([atom.chain for atom in o.atom])
+                    print('fix strcutire', str(chains), str(old_chains))
+                    for c in chains:
+                        if not c: # missing chain ID is still causing issues.
+                            new_chain = get_new_letter()
+                            print('fix strcutire',new_chain)
+                            pymol.cmd.alter(f"{on} and chain ''", f'chain="{new_chain}"')
+                        elif c in old_chains:
+                            new_chain = get_new_letter()
+                            print('fix strcutire', new_chain)
+                            pymol.cmd.alter(f"{on} and chain {c}", f'chain="{new_chain}"')
+                        else:
+                            old_chains.append(c)
+        pymol.cmd.alter("all", "segi=''") # not needed. NGL does not recognise segi. Currently writtten to ignore it.
         pymol.cmd.sort('all')
-        return self
+        pymol.cmd.create('mike_combined','enabled',1) #the 1 means that only the first "state" = model is used.
+        for on in pymol.cmd.get_names_of_type('object:molecule'):
+            if on != 'mike_combined':
+                pymol.cmd.delete(on)
 
 
 
