@@ -26,7 +26,7 @@
                                )
                             %>
                             %for txt, link, ico in menu_opts:
-                                %if current_page in link or (current_page == 'home' and link == '/'):
+                                %if (link and current_page in link) or (current_page == 'home' and link == '/'):
                                         <a role="button" class="list-group-item list-group-item-dark"><i class="${ico}"></i> ${txt}</a>
                                 %else:
                                         <a role="button" class="list-group-item list-group-item-action" href="${link}"><i class="${ico}"></i> ${txt}</a>
