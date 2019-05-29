@@ -29,6 +29,7 @@
                 </div>
 
                 <%include file="../markup/markup_builder_btn.mako"/>
+                <button type="button" class="btn btn-outline-info mb-2" data-toggle="modal" data-target="#combine_modal"><i class="far fa-paperclip"></i> Add additional model</button>
                 <hr/>
                 <%include file="page_users.mako"/>
                 <hr/>

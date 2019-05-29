@@ -96,6 +96,7 @@
 <%include file="userpage_components/basics.mako"/>
 <%include file="markup/markup_builder_modal.mako"/>
 <%include file='edit_modal/implement_modal.mako'/>
+<%include file='edit_modal/combine_modal.mako'/>
 
 
 </%block>
@@ -152,6 +153,15 @@ $(document).ready(function () {
             $('#toaster').append(`<%include file="layout_components/toast.mako" args="toast_id='pleaseLogin', toast_title='Page editing', toast_body='This page can be edited by anyone with the link. However, to prevent vandalism you have to be signed in.', toast_bg='bg-info', toast_autohide='false'"/>`);
             $('#pleaseLogin').toast('show');
         %endif
+
+        window.combinePage = function (uuid) {
+           window.prompt("sometext","defaultText");
+        };
+
+        window.copyJSPage = function (uuid) {
+             window.prompt("Name to call the function. ","defaultText");
+        };
+
     %endif
 
 }); //ready
