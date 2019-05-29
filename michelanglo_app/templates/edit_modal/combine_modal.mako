@@ -19,12 +19,40 @@
                         visited = user.get_visited_loaded_pages()
                     %>
                         <ul class="list-group">
-                        %for page in owned:
+                            <li class="list-group-item list-group-item-dark">
+                                <div class="row">
+                                    <div class="col-12 col-md-5">
+                                        Page Title
+                                    </div>
+                                    <div class="col-4 col-md-2 offset-md-1">
+                                        Add protein and representation
+                                </div>
+                                    <div class="col-4 col-md-2">
+                                        Add representation only
+                                    </div>
+                                    <div class="col-4 col-md-2">
+                                        Delete this page
+                                    </div>
+                                </div>
+                            </li>
+                        %for page in owned+visited:
                             <li class="list-group-item">
-                                <a href="/data/${page.identifier}">${page.settings['title']}</a>
-                                <button class="btn btn-danger btn-sm float-right py-0" onclick="combinePage('${page.identifier}')"><i class="far fa-paperclip"></i> Add protein and representation</button>
-                                <button class="btn btn-danger btn-sm float-right py-0" onclick="copyJSPage('${page.identifier}')"><i class="far fa-clipboard"></i> Add representation only</button>
-                                <button class="btn btn-danger btn-sm float-right py-0" onclick="deletePage('${page.identifier}')"><i class="far fa-trash-alt"></i> Delete this page</button>
+                                <div class="row">
+                                    <div class="col-12 col-md-5">
+                                        <a href="/data/${page.identifier}">${page.settings['title']}</a>
+                                    </div>
+                                    <div class="col-4 col-md-2 offset-md-1">
+                                        <button class="btn btn-primary w-100" onclick="combinePage('${page.identifier}')"><i class="far fa-paperclip"></i></button>
+                                </div>
+                                    <div class="col-4 col-md-2">
+                                        <button class="btn btn-primary w-100" onclick="copyJSPage('${page.identifier}')"><i class="far fa-clipboard"></i></button>
+                                    </div>
+                                    %if page in owned:
+                                        <div class="col-4 col-md-2">
+                                         <button class="btn btn-danger w-100" onclick="deletePage('${page.identifier}')"><i class="far fa-trash-alt"></i></button>
+                                        </div>
+                                    %endif
+                                </div>
                             </li>
                         %endfor
                         </ul>

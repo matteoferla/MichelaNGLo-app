@@ -76,7 +76,7 @@ $('#edit_submit').click(function () {
         }
         })
         .done((msg) => location.reload())
-        .fail((xhr) => ops.addToast('userpageerror','Error '+xhr.statusCode,'An error occured.'));
+        .fail((xhr) => ops.addToast('userpageerror','Error '+xhr.status,'An error occured. '+xhr.responseJSON));
 });
 
 $('#edit_delete').click(function () {
@@ -88,11 +88,15 @@ $('#edit_delete').click(function () {
             data: {
                 'type': 'delete',
                 'page': $(location).attr("href").split('/').pop().split('.')[0]
-            },
-            success: function (result) {
-                window.location.href = '/';
             }
-        });
+
+        }).done(() => window.location.href = '/')
+          .fail(function (msg) {
+            console.log('Fail!');
+            if (msg.responseJSON) {
+                ops.addToast('failure','Error '+msg.status,msg.responseJSON.status,'bg-warning')
+            } else {ops.addToast('failure','Error '+msg.status,'Server side error','bg-warning')}
+          });
     }
 });
 

@@ -431,13 +431,13 @@ NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
         else if (view === 'reset') { //special view case.
             NGL.specialOps._run_loadFx(NGL.getStage(id).getComponentByType('structure'), myData.proteins[myData.currentIndex].loadFx);
         }
-        else if ((!! view) && (! selection)) {  //view, no selection.
-            NGL.specialOps.slowOrient(id, view);
-        }
-        else if ((view !== 'auto') && view.match(/^\w+$/) !== null) { //not auto but different custom fx.
+        else if ((!! view) && (view !== 'auto') && (typeof view === "string") && (view.match(/^\w+$/) !== null)) { //not auto but different custom fx.
             if (typeof window[view] === 'function') {
                 window[view](NGL.getStage(id).getComponentByType('structure'));
             }
+        }
+        else if ((!! view) && (! selection)) {  //view, no selection.
+            NGL.specialOps.slowOrient(id, view);
         }
         else if (focus === 'residue'){
             NGL.specialOps.showResidue(id, selection, color, radius, view);

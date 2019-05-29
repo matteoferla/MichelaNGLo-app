@@ -9,7 +9,7 @@ import uuid
 import shutil
 import os
 import io
-import json
+import json, re
 
 from ._common_methods import is_js_true
 
@@ -102,10 +102,71 @@ def edit(request):
         page.save(settings)
         return {'success': 1}
 
-
-
-
-
+@view_config(route_name='combine_user-page', renderer='json')
+def combined(request):
+    log.info(f'{get_username(request)} is requesting to merge page')
+    if any([k not in request.params for k in ('target_page','donor_page','task','name')]):
+        request.response.status = 403
+        log.warn(f'{get_username(request)} malformed request')
+        return {'error': 'malformed request: target_page, donor_page and task are required'}
+    target_page = Page(request.params['target_page'])
+    donor_page = Page(request.params['donor_page'])
+    task = Page(request.params['task'])
+    name = request.params['name']
+    user = request.user
+    if not user:
+        request.response.status = 403
+        log.warn(f'{get_username(request)} is not autharised to edit page')
+        return {'error': 'unregistered'}
+    ownership = user.get_owned_pages()
+    ## check permissions
+    if target_page.identifier not in ownership and not user.role == 'admin':  ## only owners can edit
+        #to do sort corner case of settings['freelyeditable']
+        request.response.status = 403
+        log.warn(f'{get_username(request)} tried but failed to delete page')
+        return {'status': 'Not owner'}
+    #do stuff
+    for page, role in ((target_page,'target'), (donor_page,'donor')):
+        # check if encrypted
+        if page.is_password_protected():
+            page.key = request.POST[f'{role}_encryption_key'].encode('uft-8')
+            page.path = page.encrypted_path
+        page.load()
+        if not page.settings:
+            request.response.status = 404
+            log.warn(f'{get_username(request)} requested a missing {role} page')
+            return {'error': f'{role} page not found'}
+    #common
+    if re.match('^\w+$', name) == None:
+        request.response.status = 400
+        log.warn(f'{get_username(request)} wanted to add a function name that was not alphanumeric.')
+        return {'error': f'function name is not alphanumeric.'}
+    #fun
+    target_page.settings['loadfun'] += '\n' + donor_page.settings['loadfun'].replace('function loadfun', f'function loadfun{name}') + '\n'
+    # copies only the method
+    if task == 'method':
+        target_page.settings['description'] += f'\nView from from {donor_page.identifier} added as {name}.' + \
+                                               f'E.g. <span class="prolink" data-target="#viewport" data-toggle="protein" data-view="{name}">Show to new view</span>'
+    else: #both
+        #proteinJSON
+        addenda = json.loads(donor_page.settings['proteinJSON'])
+        alteranda = json.loads(target_page.settings['proteinJSON'])
+        addenda[0]['loadFx'] = f'loadfun{name}'
+        addenda[0]['value'] = f'pdb{name}'
+        target_page.settings['proteinJSON'] = json.dumps(alteranda + addenda)
+        #pdb
+        if addenda[0]['type'] == 'data':
+            if 'pdb' in target_page.settings and target_page.settings['pdb']:
+                if isinstance(target_page.settings['pdb'],str): #backwards compatibiity hack
+                    target_page.settings['pdb'] = [('pdb', target_page.settings['pdb'])]
+            else:
+                target_page.settings['pdb'] = []
+            target_page.settings['pdb'].append((f'pdb{name}', donor_page.settings['pdb']))
+        #loadfun
+        target_page.settings['description'] += f'\nPage data from {donor_page.identifier} added as {name}.'+\
+                                               f'E.g. <span class="prolink" data-target="#viewport" data-toggle="protein" data-load="{name}" data-view="reset">Show new protein</span>'
+    target_page.save()
+    return {'status': 'success'}
 
 @view_config(route_name='delete_user-page', renderer='json')
 def delete(request):
@@ -113,9 +174,13 @@ def delete(request):
     log.info(f'{get_username(request)} is requesting to delete page')
     page = Page(request.POST['page'])
     user = request.user
+    if not user:
+        request.response.status = 403
+        log.warn(f'{get_username(request)} is not autharised to edit page')
+        return {'error': 'not authorised'}
     ownership = user.get_owned_pages()
     ## cehck permissions
-    if page.identifier not in ownership and not (user and user.role == 'admin'): ## only owners can delete
+    if page.identifier not in ownership and user.role != 'admin': ## only owners can delete
         request.response.status = 403
         log.warn(f'{get_username(request)} tried but failed to delete page')
         return {'status': 'Not owner'}

@@ -103,9 +103,14 @@
 
 <%block name='script'>
 <script type="text/javascript">
-    %if pdb:
+    %if isinstance(pdb,str):
 var pdb = `REMARK 666 Note that the indent is important as is the secondary structure def
 ${pdb|n}`;
+    %elif isinstance(pdb,list):
+        %for n,seq in pdb:
+var ${n} = `REMARK 666 Note that the indent is important as is the secondary structure def
+${seq|n}`;
+        %endfor
     %endif
 
 ${loadfun|n}
@@ -154,13 +159,7 @@ $(document).ready(function () {
             $('#pleaseLogin').toast('show');
         %endif
 
-        window.combinePage = function (uuid) {
-           window.prompt("sometext","defaultText");
-        };
-
-        window.copyJSPage = function (uuid) {
-             window.prompt("Name to call the function. ","defaultText");
-        };
+        <%include file="edit_modal/combine.js"/>
 
     %endif
 
