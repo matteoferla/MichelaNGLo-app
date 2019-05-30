@@ -139,7 +139,7 @@ def ajax_convert(request):
         log.exception('serious error in page creation from PyMol')
         request.response.status = 500
         request.session['status'] = make_msg('A server-side error arose', 'The code failed to run serverside.','error','bg-danger')
-        return {'error': 'error'}
+        return {'status': 'error'}
 
 
 @view_config(route_name='ajax_custom', renderer="../templates/custom.result.mako")

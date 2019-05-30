@@ -34,12 +34,12 @@ def edit(request):
     if not settings:
         request.response.status = 404
         log.warn(f'{get_username(request)} requested a missing page')
-        return {'error': 'page not found'}
+        return {'status': 'page not found'}
     ## cehck permissions
     if not user or not (page.identifier in user.get_owned_pages() or user.role == 'admin' or settings['freelyeditable']): ## only owners and admins can edit.
         request.response.status = 403
         log.warn(f'{get_username(request)} is not autharised to edit page')
-        return {'error': 'not authorised'}
+        return {'status': 'not authorised'}
     else:
         #add author if user was an upgraded to editor by the original author. There are three lists: authors (can and have edited, editors can edit, visitors visit.
         if user.name not in settings['authors']:
@@ -108,7 +108,7 @@ def combined(request):
     if any([k not in request.params for k in ('target_page','donor_page','task','name')]):
         request.response.status = 403
         log.warn(f'{get_username(request)} malformed request')
-        return {'error': 'malformed request: target_page, donor_page and task are required'}
+        return {'status': 'malformed request: target_page, donor_page and task are required'}
     target_page = Page(request.params['target_page'])
     donor_page = Page(request.params['donor_page'])
     task = Page(request.params['task'])
@@ -117,7 +117,7 @@ def combined(request):
     if not user:
         request.response.status = 403
         log.warn(f'{get_username(request)} is not autharised to edit page')
-        return {'error': 'unregistered'}
+        return {'status': 'unregistered'}
     ownership = user.get_owned_pages()
     ## check permissions
     if target_page.identifier not in ownership and not user.role == 'admin':  ## only owners can edit
@@ -135,12 +135,12 @@ def combined(request):
         if not page.settings:
             request.response.status = 404
             log.warn(f'{get_username(request)} requested a missing {role} page')
-            return {'error': f'{role} page not found'}
+            return {'status': f'{role} page not found'}
     #common
     if re.match('^\w+$', name) == None:
         request.response.status = 400
         log.warn(f'{get_username(request)} wanted to add a function name that was not alphanumeric.')
-        return {'error': f'function name is not alphanumeric.'}
+        return {'status': f'function name is not alphanumeric.'}
     #fun
     target_page.settings['loadfun'] += '\n' + donor_page.settings['loadfun'].replace('function loadfun', f'function loadfun{name}') + '\n'
     # copies only the method
@@ -177,7 +177,7 @@ def delete(request):
     if not user:
         request.response.status = 403
         log.warn(f'{get_username(request)} is not autharised to edit page')
-        return {'error': 'not authorised'}
+        return {'status': 'not authorised'}
     ownership = user.get_owned_pages()
     ## cehck permissions
     if page.identifier not in ownership and user.role != 'admin': ## only owners can delete
