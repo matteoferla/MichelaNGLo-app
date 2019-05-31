@@ -1,7 +1,7 @@
-<%inherit file="layout_components/layout_w_card.mako"/>
+<%inherit file="../layout_components/layout_w_card.mako"/>
 
 <%block name="buttons">
-            <%include file="layout_components/vertical_menu_buttons.mako" args='tour=False'/>
+            <%include file="../layout_components/vertical_menu_buttons.mako" args='tour=False'/>
 </%block>
 
 <%block name="title">
@@ -22,18 +22,18 @@
                     <li>make sure that the image is added with only a <code>&lt;img src="&hellip;" &hellip;&gt;</code> tag, without a wrapping anchor element or positioning div as happens in the WordPress editor</li>
                     <li>The viewer will have the same dimensions as the image &mdash;the example has <code>width='100%'</code> attribute to rescale the image to occupy the available space to it.</li>
                     <li>The user needs to know that it can be clicked adding the attribute <code>style='cursor: pointer'</code>, will change the cursor to a <span style='cursor: pointer; text-decoration-style: dotted;'>pointer</span></li>
-                    <li>The viewport div can be activated without JS by using the <code>role='NGL'</code> attribute or by using the multiLoader (see <a href="markup">markup</a>). Example of the former is <code>&lt;div role="NGL" data-load="1gfl" data-view="[3.14, &hellip]"&gt;&lt;img src="gfp.jpg" width="100%" style="cursor: pointer"&gt;&lt;div&gt;</code> </li>
+                    <li>The viewport div can be activated without JS by using the <code>role='NGL'</code> attribute or by using the multiLoader (see <a href="/docs/markup">markup</a>). Example of the former is <code>&lt;div role="NGL" data-load="1gfl" data-view="[3.14, &hellip]"&gt;&lt;img src="gfp.jpg" width="100%" style="cursor: pointer"&gt;&lt;div&gt;</code> </li>
                 </ul>
                 </div>
             <div class='col-12 col-sm-6'>
                 <p>This is an image that was annotated. Clicking will switch it to NGL.</p>
-                <div id="viewport"><img src="static/gfp.jpg" alt="LZTR1" width='100%' style='cursor: pointer'> </div>
+                <div id="viewport"><img src="/static/gfp.jpg" alt="LZTR1" width='100%' style='cursor: pointer'> </div>
 		</div>
 </div>
 
 <%block name="script">
 
-    <script type="text/javascript" src="static/ngl.extended.js"></script>
+    <script type="text/javascript" src="/static/ngl.extended.js"></script>
     <script type="text/javascript">
         function myView (protein) {
             var nonCmap = {"N": "0x3333ff", "O": "0xff4c4c", "H": "0xe5e5e5", "S": "0xe5c53f"};

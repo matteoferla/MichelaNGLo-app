@@ -4,15 +4,12 @@ def includeme(config):
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_static_view('images', '../images', cache_max_age=3600)
     config.add_route('home', '/')
-    config.add_route('markup', '/markup')
     config.add_route('custom', '/custom')
     config.add_route('pdb', '/pdb')
     config.add_route('pymol', '/pymol')
-    config.add_route('clash', '/clash')
     config.add_route('gallery', '/gallery')
-    config.add_route('imagetoggle', '/imagetoggle')
-    config.add_route('docs', '/docs')
-    config.add_route('sandbox', '/sandbox')
+    config.add_route('docs', '/docs/{id}')
+    config.add_route('main_docs', '/docs')
     config.add_route('ajax_convert', '/ajax_convert')
     config.add_route('ajax_custom', '/ajax_custom')
     config.add_route('ajax_pdb', '/ajax_pdb')
@@ -29,3 +26,10 @@ def includeme(config):
     config.add_route('admin', '/admin')
     config.add_route('venus', '/venus')
     config.add_route('userdata', '/data/{id}')
+
+
+    #previously existent routes... deadlink possible:
+    #config.add_route('sandbox', '/sandbox')
+    #config.add_route('clash', '/clash')
+    #config.add_route('imagetoggle', '/imagetoggle')
+    #config.add_route('markup', '/markup')

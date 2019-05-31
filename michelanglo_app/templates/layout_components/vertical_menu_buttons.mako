@@ -18,9 +18,6 @@
                                ('Convert PDB file','/pdb','far fa-wrench'),
                                ('Convert custom mesh','/custom','far fa-mortar-pestle'),
                                ('Primary documentation','/docs','far fa-books'),
-                               ('Markup documentation','/markup','far fa-map-marked-alt'),
-                               ('Clash documentation','/clash','far fa-car-crash'),
-                               ('Image documentation','/imagetoggle','far fa-images'),
                                ('Gallery','/gallery','far fa-palette'),
                                ('Github repo','https://github.com/matteoferla/PyMOL-to-NGL-transpiler','fab fa-github')
                                )

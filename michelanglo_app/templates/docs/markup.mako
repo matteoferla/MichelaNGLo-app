@@ -1,8 +1,8 @@
-<%namespace file="layout_components/labels.mako" name="info"/>
-<%inherit file="layout_components/layout_w_card.mako"/>
+<%namespace file="../layout_components/labels.mako" name="info"/>
+<%inherit file="../layout_components/layout_w_card.mako"/>
 
 <%block name="buttons">
-            <%include file="layout_components/vertical_menu_buttons.mako" args='tour=False'/>
+            <%include file="../layout_components/vertical_menu_buttons.mako" args='tour=False'/>
 </%block>
 
 <%block name="title">
@@ -29,7 +29,7 @@
                 <p>Also, setting the tolerance to really low <span class="prolink" data-toggle="protein" data-target="#viewport"  data-focus="clash" data-selection="29" data-tolerance="0.1">we can see residues spuriously clashing</span>.  </p>
                 <p>Let's look at <span class="prolink" data-toggle="protein" data-target="viewport" data-focus="surface" data-title="surface">the surface</span>.</p>
                 <p class="mb-3">Also, the B-factors can be seen in tube <span class="prolink" data-toggle="protein" data-target="viewport" data-focus="blur" data-title="B-factors">B-factors</span>.</p>
-                <%include file="markup/markup_builder_btn.mako"/>
+                <%include file="../markup/markup_builder_btn.mako"/>
             </div>
             <div class='col-12 col-sm-6'>
 			<div id="viewport" style="width:100%; height: 0; padding-bottom: 100%; overflow: visible;"></div>
@@ -125,7 +125,7 @@
     <p>When the dom loads the links are automatically enabled, however, if new links are added dynamically you have to activate them using <code>$(...).protein()</code>, for example <code>$('[data-toggle="protein"]').protein();</code></p>
 
 
-    <%include file="docs/docs_viewport.mako"/>
+    <%include file="docs_viewport.mako"/>
 
 
     <h3 id="note">Note</h3>
@@ -148,15 +148,15 @@
 </%block>
 
 <%block name='modals'>
-<%include file="markup/markup_builder_modal.mako"/>
+<%include file="../markup/markup_builder_modal.mako"/>
 </%block>
 <%block name="script">
     <script type="text/javascript">
         $(document).ready(function () {
             NGL.specialOps.showTitle('viewport', '<i class="far fa-dna fa-spin"></i> Loading...');
-            NGL.specialOps.multiLoader('viewport', [{type: 'file', value: 'static/gfp.pdb'}]);
+            NGL.specialOps.multiLoader('viewport', [{type: 'file', value: '/static/gfp.pdb'}]);
         });
-        <%include file="markup/markup_builder_modal.js"/>
+        <%include file="../markup/markup_builder_modal.js"/>
     </script>
 </%block>
 

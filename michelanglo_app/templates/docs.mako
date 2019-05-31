@@ -11,25 +11,13 @@
 </%block>
 
 <%block name="main">
-############################################################ Raw
-<%include file="docs/docs_raw.mako"/>
 
-############################################################# CDN
-<%include file="docs/docs_cdn.mako"/>
+<ul class="list-group">
+    <a class="list-group-item list-group-item-action" href="/docs/markup">HTML markup documentation ("prolinks")</a>
+    <a class="list-group-item list-group-item-action" href="/docs/clash">Clash documentation</a>
+    <a class="list-group-item list-group-item-action" href="/docs/image">Imagetoggle documentation</a>
+    <a class="list-group-item list-group-item-action" href="/docs/implementations">Generic instructions on implementing a view</a>
+    <a class="list-group-item list-group-item-action" href="/docs/api">API documentation</a>
+</ul>
 
-############################################################# Viewport
-<%include file="docs/docs_viewport.mako"/>
-
-############################################################# Guiding links
-<h4>Prolinks</h4>
-<p>Links to guide the visitors ('prolinks') are described <a href="/markup">elsewhere</a>.</p>
-
-############################################################# Users
-<%include file="docs/docs_users.mako"/>
-
-######################################################### Pages
-    <%include file="docs/docs_pages.mako"/>
-
-######################################################### Pages
-    <%include file="docs/docs_api.mako"/>
 </%block>
