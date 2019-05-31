@@ -63,3 +63,25 @@ def get_ajax(request):
         request.response.status = 404
         log_it()
         return render_to_response("../templates/part_error.mako", {'project': 'Michelanglo', 'error': '404'}, request)
+
+@view_config(route_name='get_pages', renderer='json')
+def get_pages(request):
+    """
+    Get pages for API purposes
+    :param request:
+    :return:
+    """
+    user = request.user
+    log.info(f'{get_username(request)} request API view of pages')
+    data = {}
+    if not user:
+        data['owned']='not logged in'
+        data['visited'] = 'not logged in'
+        data['error'] = 'not logged in'
+    else:
+        data['owned'] = user.get_owned_pages()
+        data['visited'] = user.get_visited_pages()
+    data['public'] = request.dbsession.query(User).filter_by(name='public').one().get_owned_pages()
+    return data
+
+

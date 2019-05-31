@@ -19,6 +19,9 @@ r = mike.post(base_url+'/login', data=data)
 </pre>
 <p>If you are somehow struggling with cookies or what to check if you are logged in the payload <code>{'action': 'whoami'}</code> to <code>/login</code>, will reply with your username.</p>
 
+<h5>Get uuid of your pages</h5>
+<code>get_pages</code> returns a dictionary of arrays of uuid of your pages, with keys 'owned', 'visited' and 'public'. Note that if not logged in, you get the following error: <code>{"owned": "not logged in", "visited": "not logged in", "error": "not logged in", "public": []}</code>
+
 <h5>Get protein page as json</h5>
 <p>Adding <code>mode: json</code> to the request for a protein page will return a json, either as a post or get request (you can try the latter in your browser by adding <code>?mode=json</code>).
 If you are using an encrypted page you can <b>only</b> get the data back by providing <code>key: password</code>.
