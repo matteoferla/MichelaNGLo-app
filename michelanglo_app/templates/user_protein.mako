@@ -24,8 +24,15 @@
 
 </div>
 
+<%
+    if location_viewport == 'left':
+        part_order = ['order-1','order-2']
+    else:
+        part_order = ['order-2','order-1']
+%>
+
 <div class='row p-4'>
-    <div class='col-${columns_viewport}'>
+    <div class='col-${columns_viewport} ${part_order[0]}'>
         <div class='card shadow'>
             <div class="card-body">
                 <div id="viewport" role="NGL" data-proteins='${proteinJSON|n}' data-backgroundcolor="${backgroundcolor}" ${data_other|n}></div>
@@ -34,14 +41,14 @@
     </div>
 
 
-    <div class='col-${columns_text}'>
+    <div class='col-${columns_text} ${part_order[1]}'>
         <div class="card shadow" role="tooltip">
 
             <div class="card-header"><h3 class="card-title">Description</h3></div>
 
             <div class="card-body">
 
-
+            %if location_viewport == 'left':
             <div style="left:-30px; top: 80px; position: absolute; width: 0; z-index:1000;
                 height: 0;
                 border-style: solid;
@@ -55,6 +62,23 @@
                 border-width: 30px 30px 30px 0;
                 border-color: transparent white transparent transparent;">
             </div>
+            %else:
+            <div style="right:-30px; top: 80px; position: absolute; width: 0; z-index:1000;
+                height: 0;
+                border-style: solid;
+                border-width: 30px 0px 30px 30px;
+                border-color: transparent transparent transparent rgba(0, 0, 0, 0.125);">
+            </div>
+
+            <div style="right:-29px; top: 80px; position: absolute; width: 0; z-index:1000;
+                height: 0;
+                border-style: solid;
+                border-width: 30px 0px 30px 30px;
+                border-color: transparent transparent transparent white;">
+            </div>
+
+            %endif
+
                     %if editable:
                         <div class="float-right">
                             <button type="button" class="btn btn-outline-primary my-1" id="edit_btn" data-target="#edit_modal" data-toggle="modal"><i class="far fa-edit"></i></button>

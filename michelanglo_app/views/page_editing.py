@@ -96,6 +96,8 @@ def edit(request):
         if 'columns_viewport' in request.POST:
             settings['columns_viewport'] = int(request.POST['columns_viewport'])
             settings['columns_text'] = int(request.POST['columns_text'])
+        if 'location_viewport' in request.POST:
+            settings['location_viewport'] = request.POST['location_viewport']
         if 'proteinJSON' in request.POST:
             settings['proteinJSON'] = request.POST['proteinJSON']
         #save

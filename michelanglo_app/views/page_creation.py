@@ -67,7 +67,10 @@ def ajax_convert(request):
                     'validation': True,
                     'stick_format': request.POST['stick_format'],
                     'save': True,
-                    'backgroundcolor': 'white'}
+                    'backgroundcolor': 'white',
+                    'location_viewport': 'left',
+                    'columns_viewport': 9,
+                    'columns_text': 3}
 
         # parse data dependding on mode.
         request.session['status'] = make_msg('Conversion', 'Conversion in progress')

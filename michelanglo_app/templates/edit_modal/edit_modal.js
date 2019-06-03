@@ -63,6 +63,9 @@ $('#edit_submit').click(function () {
             'type': 'edit',
             'title': $('#edit_title').val(),
             'description': description,
+            'columns_viewport': $('#columns_viewport').val(),
+            'columns_text': 12 - parseInt($('#columns_viewport').val()),
+            'location_viewport': $('[name="location_viewport"]:checked').val(),
             'page': '${page}',
             'residues': $('#edit_residues').val(), //no longer valid.
             'freelyeditable': $('#freelyeditable').prop('checked'),

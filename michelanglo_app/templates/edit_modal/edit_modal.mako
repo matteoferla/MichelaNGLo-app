@@ -28,6 +28,37 @@
                          class="form-control border" style="height: 15rem; resize: vertical; overflow: auto; white-space: pre-wrap;">${escaped_description|n}</div>
                 </div>
 
+                <div class="row">
+                    <div class="col-12 col-lg-6">
+                        <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="columns_viewport_label">Viewport size</span>
+                    </div>
+                    <div class="border rounded-right px-3 py-1">
+                        <input type="range" min="1" max="12" value="9" step="1" class="custom-range" id="columns_viewport">
+                    </div>
+                </div>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="location_viewport_label">Viewport location</span>
+                            </div>
+                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                              <label class="btn btn-secondary active">
+                                <input type="radio" name="location_viewport" id="location_viewport_left" autocomplete="off" checked value="left"><i class="far fa-caret-square-left"></i>&nbsp; Left
+                              </label>
+                              <label class="btn btn-secondary">
+                                <input type="radio" name="location_viewport" id="location_viewport_right" autocomplete="off" value="right"> Right <i class="far fa-caret-square-right"></i>
+                              </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
                 <%include file="../markup/markup_builder_btn.mako"/>
                 <button type="button" class="btn btn-outline-info mb-2" data-toggle="modal" data-target="#combine_modal"><i class="far fa-paperclip"></i> Add additional model</button>
                 <hr/>

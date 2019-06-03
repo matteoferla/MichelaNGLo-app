@@ -82,6 +82,8 @@ def userdata_view(request):
     if not 'columns_viewport' in settings:
         settings['columns_viewport'] = 9
         settings['columns_text'] = 3
+    if not 'location_viewport' in settings:
+        settings['location_viewport'] = 'left'
     settings['current_page'] = 'NOT A MENU OPTION....'
     #API hack.
     if 'mode' in request.params and request.params['mode'] == 'json':
