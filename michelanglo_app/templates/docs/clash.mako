@@ -11,6 +11,11 @@
 </%block>
 
 #### main.
+
+
+    <%include file="docs_nav.mako"/>
+
+
 <div class='row'>
 <div class='col-8'>
     <h3>Demo</h3>

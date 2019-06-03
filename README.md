@@ -96,7 +96,7 @@ In the first case, the HTML code is hidden as one sees what one gets as an end r
 ## data-toggle='protein'
 Extra functionality can be optionally added, including the ability to create links that control the protein.
 
-The full documentation and examples can be found at [ngl.matteoferla.com/markup](https://ngl.matteoferla.com/markup).
+The full documentation and examples can be found at [ngl.matteoferla.com/docs/markup](https://ngl.matteoferla.com/docs/markup).
 
 Briefly, `<a href='#viewport'>you see this text as a link</a>` is technically called an anchor element and is commonly called a link.
 Like all HTML elements, everything with the within the lesser-than and greater-than symbols controls its behaviour.

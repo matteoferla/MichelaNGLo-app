@@ -13,6 +13,8 @@
 
 <%block name="main">
 
+    <%include file="docs_nav.mako"/>
+
 <h4>Step one: get cookie</h4>
 <p>A post request to <code>/login</code> with the parameters <code>{'username': 'xxxx', 'password': 'xxxx', 'action': 'login'}</code>, will reply with a response with <code>Set-Cookie</code>, which you will add to your request headers as <code>Cookie</code> as normal.</p>
 

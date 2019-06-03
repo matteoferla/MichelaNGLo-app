@@ -12,6 +12,9 @@
 
 <%block name="main">
 
+    <%include file="docs_nav.mako"/>
+
+
 <p>This is a generalised instructions for implementing a view from Michelanglo on your site. For the code specific to your generated view see your pages and click the button "implement" on the side.</p>
 
 ############################################################ Raw

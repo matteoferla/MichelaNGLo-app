@@ -12,6 +12,9 @@
 </%block>
 
 <%block name="main">
+    <%include file="docs_nav.mako"/>
+
+
     ############################################################# Users
     <%include file="docs_users.mako"/>
 
