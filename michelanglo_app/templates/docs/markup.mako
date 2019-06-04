@@ -19,7 +19,7 @@
 
 
 <div class='row'>
-            <div class='col-12 col-sm-6'>
+            <div class='col-12 col-sm-6 mb-2'>
 
                 <h3>Aims</h3>
                 <p>This system to control the protein without any JS coding.</p>

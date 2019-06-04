@@ -3,58 +3,84 @@ document.execCommand('insertBrOnReturn', false, true);
 
 window.prolinks = {
     elements: [],
-    expandProlinkOnClick: function (number) { //click on one
-        var description = $('#edit_description').html();
-        var i = parseFloat(number)-1;
-        var code = prolinks.elements[i];
-        description = description.replace(new RegExp('[^\\"]\\[([^\\]]*?)\\]\\(.*?(\\w+)\\:prolink_'+number+'.*?\\)','m'), '&lt;$2 '+code+'&gt;$1 &lt;/$2&gt;');
+    _expandProlink: (description, code, number) => {
+        //case 1 the span clicky thing is still there
+        description = description.replace(
+            new RegExp('<span class=\\W+prolink\\W+ onclick=\\W+prolinks\\.expandProlinkOnClick\\('+number+'\\)\\W+>'+
+                '@[Pp]rolink[#_]?'+number+'<\\/span>\\[(.*?)\]','m'),
+            code.fore+'$1'+code.aft);
+        //case 2 the span thing is not there.
+        description = description.replace(new RegExp('@[Pp]rolink[#_]?'+number+'\\[(.*?)\\]','m'), code.fore+'$1'+code.aft);
+        return description;
+    }
+    ,
+    expandProlinkOnClickOLD: (number) => {
+        let description = $('#edit_description').html();
+        let i = parseFloat(number)-1;
+        let code = prolinks.elements[i];
+        description = prolinks._expandProlink(description, code, number);
         prolinks.elements[i] = null;
         $('#edit_description').html(description);
     },
-    minimiseProlinks: function () {
-        var description = $('#edit_description').html();
-        promatch = description.match(/&lt;.*?data-toggle=\W+protein\W+ .*?&gt;[\s\S]*?&lt;\/.*?&gt;/gm); //data-toggle=\"protein\"
-        console.log(promatch);
-        if (promatch !== null) {
-            promatch.forEach(function (elem, i) {
-                var elemAsHtml = $('<p>'+elem+'</p>').text();
-                var n = prolinks.addProlink(elemAsHtml); // n = i+1
-                description = description.replace(elem, prolinks.prolink2md(elemAsHtml,n));
-            });
-        } else {prolinks.elements = [];}
-        $('#edit_description').html(description);
+    expandProlinkOnClick: (number) => {
+        let value = prompt("Edit the string if desired", prolinks.elements[number-1].fore);
+        if (value !== null) {prolinks.elements[number-1].fore = value;}
     },
-    expandProlinks: function(description) { //expand for submission.
+    expandProlinks: (description) => {
+        //on save
+        description = description || $('#edit_description').html();
         if (prolinks.elements !== null) {
                 prolinks.elements.forEach(function (code, i) {
                     if (code !== null) {
-                        description = description.replace(new RegExp('[^\\"]\\[([^\\]]*?)\\]\\(.*?(\\w+)\\:prolink_'+(i+1)+'.*?\\)','m'), '<$2 '+code+'>$1</$2>');
+                        description = prolinks._expandProlink(description, code, i+1);
                     }
 
                 });
             } else {prolinks.elements = [];}
         return description;
     },
-    addProlink: function(prolink) {
-        var code  = prolink.replace(/<.*? (.*?)>.*?<\/.*?>/,'$1');
-        return prolinks.elements.push(code); //the index +1
+    minimiseProlinks: () => {
+        // on load
+        let description = $('#edit_description').html();
+        /*
+        "Editable text. press pen to edit. &lt;span class=\"prolink\" data-target=\"#viewport\" data-toggle=\"protein\" data-focus=\"undefined\"&gt;Try me as a span-element&lt;/span&gt;"
+        */
+        let promatch = description.match(/&lt;.*?data-toggle=\\?\"protein\"\\? .*?&gt;[\s\S]*?&lt;\/.*?&gt;/gm);
+        if (promatch !== null) {
+            promatch.forEach(function (elem, i) {
+                let elemAsHtml = $('<p>'+elem+'</p>').text();
+                let n = prolinks.addProlink(elemAsHtml); // n = i+1
+                description = description.replace(elem, prolinks.prolink2md(elemAsHtml,n));
+            });
+        } else {prolinks.elements = [];}
+        $('#edit_description').html(description);
     },
-    prolink2md: function(prolink, number) {
-        return prolink.replace(/<(.*?)>(.*?)<\/(.*?)>/,'[$2](<span class="prolink" onclick="prolinks.expandProlinkOnClick('+number+')">$3:prolink_'+number+'</span>)');
-    }
+    addProlink: (prolink) => prolinks.elements.push({
+                    fore: prolink.replace(/(<.*?>).*?<\/.*?>/,'$1'),
+                    aft: prolink.replace(/<.*?>.*?(<\/.*?>)/,'$1'),
+                    original: prolink
+                }),
+    prolink2md: (prolink, number) => prolink.replace(
+                /<.*?>(.*?)<\/.*?>/,
+                '<span class="prolink" onclick="prolinks.expandProlinkOnClick('+number+')">@Prolink#'+number+'</span>[$1]'
+            )
 };
 
 // buttons
 $('#edit_submit').click(function () {
+    try {
+    ops.addToast('informare','Data submission','Your request is being processed','bg-info');
     if ($('#encryption').prop('checked')) {
-        if (! $('#encryption_key').val) {return 0}
-    }
+    if (! $('#encryption_key').val) {return 0}
+}
+    // convert description to markdown.
     var description = $($('#edit_description')[0].outerHTML.replace(/<br.*?>/g,'\n')).text(); //changed from html
     //description = description.replace(/<br.*?>/g,'\n\n').replace(/\n+/gm,'\n\n').replace('&gt;','>').replace('&lt;','<').replace('&amp;','&'); //unescape.
     description = description.replace(/<div>([\s\S]*?)<\/div>/gm, '$1'); //firefox bug.
     description = description.replace(/<br.*?>/g,'\n\n').replace(/\n\n+/gm,'\n\n'); //runaway newline bug.
     description = prolinks.expandProlinks(description);
-    console.log('new');
+    //console.log('new');
+
     $.ajax({
         url: "/edit_user-page",
         type: 'POST',
@@ -80,6 +106,11 @@ $('#edit_submit').click(function () {
         })
         .done((msg) => location.reload())
         .fail((xhr) => ops.addToast('userpageerror','Error '+xhr.status,'An error occured. '+xhr.responseJSON));
+
+    }
+    catch (e) {
+        ops.addToast('errare','Clientside error',e.message,'bg-danger');
+    }
 });
 
 $('#edit_delete').click(function () {
@@ -104,7 +135,10 @@ $('#edit_delete').click(function () {
 });
 
 //collapse prolinks.
-//setTimeout(() => prolinks.minimiseProlinks, 500);
+$('#edit_modal').on('show.bs.modal', prolinks.minimiseProlinks);
+//reset values the stupid way
+$('#edit_modal').on('hide.bs.modal', ()=> window.location.reload());
+
 
 ///////////////////////////MODAL/////////////////////////////////////////////////////////////////////
 //the prolink making modal is shared elsewhere. Here it gets customised.
@@ -114,15 +148,73 @@ $('#results').append('<div class="btn-group mb-3" role="group" aria-label="Use">
                     '  <button type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close" data-target="#markup_modal">Cancel</button>\n' +
                     '</div>');
 
+$('#markup_modal_btn').on('click', e => {
+    window.currentRange = document.getSelection().getRangeAt(0);
+});
+
 $('#useanchor,#usespan').click(function () {
-    var elems=$($('#results').text());
-    var wanted = ($(this).attr('id') === 'useanchor') ? elems[0].outerHTML : elems[2].outerHTML;
-    var i = prolinks.addProlink(wanted);
-    addenda = prolinks.prolink2md(wanted, i);
-    var d = $('#edit_description');
-    d.html(d.html()+'\n'+addenda);
+    $('#markup_calculate').trigger('click');
+    let elems=$($('#results').text());
+    let wanted = ($(this).attr('id') === 'useanchor') ? elems[0].outerHTML : elems[2].outerHTML;
+    let n = prolinks.addProlink(wanted);
+    let addenda = prolinks.prolink2md(wanted, n);
+    if (window.currentRange.toString().length > 0) {
+        addenda = addenda.replace(/Try me as .*?element/,window.currentRange.toString());
+    } else {
+        addenda = addenda.replace(/Try me as .*?element/,'a custom message');
+    }
+
+    window.currentRange.deleteContents();
+    window.currentRange.insertNode( $('<span>'+addenda+'</span>')[0] );
+    //let d = $('#edit_description');
+    //d.html(d.html()+'\n'+addenda);
+    //$('[data-toggle="tooltip"]').tooltip();
     $('#markup_modal').modal('hide');
-    $('[data-toggle="tooltip"]').tooltip();
+});
+
+$('#formatting button').click(e => {
+    let id = e.target.id || e.target.parentElement.id; //scope madness
+    if (id === 'formatting_help') {$('#formatting_help_modal').modal('show'); return 0;}
+    let current = document.getSelection().getRangeAt(0);
+    let content = current.toString();
+    current.deleteContents();
+    switch(id) {
+      case 'formatting_bold':
+        current.insertNode( $('<b>**'+content+'**</b>')[0] );
+        break;
+      case 'formatting_italic':
+        current.insertNode( $('<i>_'+content+'_</i>')[0] );
+        break;
+      case 'formatting_link':
+        current.insertNode( $('<span style="text-decoration: underline; color: blue;">['+content+'](https://URL)</span>')[0] );
+        break;
+      case 'formatting_h3':
+        current.insertNode( $('<h3>### '+content+'    </h3>')[0] );
+        break;
+      case 'formatting_h4':
+        current.insertNode( $('<h4>#### '+content+'      </h4>')[0] );
+        break;
+      case 'formatting_sub':
+        current.insertNode( $('<sub>_{'+content+'}</sub>')[0] );
+        break;
+      case 'formatting_super':
+        current.insertNode( $('<super>^{'+content+'}</super>')[0] );
+        break;
+      case 'formatting_list':
+        current.insertNode( $('<p>* '+content)[0]+'</p>');
+        break;
+      case 'formatting_list-ol':
+        current.insertNode( $('<p>1. '+content)[0]+'</p>');
+        break;
+        case 'formatting_code':
+        current.insertNode( $('<code>`'+content)[0]+'`</code>');
+        break;
+        case 'formatting_quote':
+        current.insertNode( $('<blockquote> > '+content)[0]+'</blockquote>');
+        break;
+      default:
+        current.insertNode( $('<a>Error</a>')[0] );
+    }
 });
 
 //////////////////////////SECURITY///////////////////////////////////////////////////
