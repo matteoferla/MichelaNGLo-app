@@ -11,7 +11,7 @@ For more details about data stored see also [data](data.md).
 The conversion file, `michelanglo/transpiler.py` and the files in `michelanglo/transpiler_templates` are all that is required to use locally.
 They are in `michelanglo_app` to avoid allowing the app to do a relative import beyond the top-level package (`michelanglo_app`).
 
-The js that allows web content creators to control NGL without using JS is `michelanglo_app/static/ngl.extended.js`, while its documentation is at [ngl.matteoferla.com/markup](https://ngl.matteoferla.com/markup).
+The js that allows web content creators to control NGL without using JS is `michelanglo_app/static/ngl.extended.js`, while its documentation is at [ngl.matteoferla.com/docs/markup](https://ngl.matteoferla.com/docs/markup).
 
 
 ## Aim of Michelaɴɢʟo
