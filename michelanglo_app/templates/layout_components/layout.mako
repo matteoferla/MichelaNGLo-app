@@ -168,7 +168,7 @@ pre {
 % if not remote:
     <script type="text/javascript" src="/static/ngl.extended.js"></script>
 % else:
-    <script type="text/javascript" src="https://www.matteoferla.com/ngl.extended.js"></script>
+    <script type="text/javascript" src="https://michelanglo.sgc.ox.ac.uk/michelanglo.js"></script>
 % endif
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
 
