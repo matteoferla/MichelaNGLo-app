@@ -119,13 +119,6 @@
   </div>
 </div>
 
-<div class="modal" tabindex="-1" role="dialog" id="throbber" style="top:90%; overflow:hidden;">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content bg-warning">
-        <div class="modal-body"> <i class="fas fa-cog fa-spin"></i> Calculations in progress... <br/>Is this the best way to make a snackbar in BS4??</div>
-    </div>
-  </div>
-</div>
 </%block>
 
 <%block name="script">
@@ -182,6 +175,7 @@ function valid_value(id){
             $(id)[0].scrollIntoView();
             $('#error_' + id.replace('#','')).show();
             $('#throbber').modal('hide');
+            ops.addToast('errorate','Invalid',id+' is invalid','bg-warning');
             },0);
         throw 'Incomplete '+id;
     }
@@ -192,7 +186,7 @@ function valid_value(id){
 // submit for calculation
 $('#submit').click(function () {
     //get ready by cleaning up
-    $('#throbber').modal('show');
+    ops.addToast('gogo','<i class="fas fa-cog fa-spin"></i> Calculations in progress','Results shown shortly');
     $('#results').remove();
     stage=false;
     $('.is-invalid').removeClass('is-invalid');
@@ -218,12 +212,11 @@ $('#submit').click(function () {
         data:  data
     })
             .done(function (msg) {
-                $('#throbber').modal('hide');
+                ops.addToast('complete','Complete','Job compled successfully','bg-info');
                 $('.card-body > ul').append(msg);
             })
-            .fail(function () {
-                $('#throbber').modal('hide');
-                alert('ERROR');
+            .fail(function (xhr) {
+                ops.addToast('error','Error','Serverside error','bg-danger');
             })
 });
 

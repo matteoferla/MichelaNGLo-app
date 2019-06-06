@@ -88,7 +88,7 @@ def userdata_view(request):
     #API hack.
     if 'mode' in request.params and request.params['mode'] == 'json':
         settings['user'] = get_username(request) #user isn't json serialisable
-        print('pageserve', 'request', type(settings['proteinJSON']))
+        #print('pageserve', 'request', type(settings['proteinJSON']))
         settings['proteinJSON'] = settings['proteinJSON'] #json.dumps() #because this is done badly.
         return render_to_response("json", settings, request)
     return settings

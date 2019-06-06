@@ -11,6 +11,8 @@ import os
 import io
 import json
 
+PyMolTranspiler.tmp = os.path.join('michelanglo_app', 'temp')
+
 from ._common_methods import is_js_true, get_username
 import logging
 log = logging.getLogger(__name__)
@@ -154,52 +156,19 @@ def ajax_custom(request):
     else:
         request.POST['file'].file.seek(0)
         fh = io.StringIO(request.POST['file'].file.read().decode("utf8"), newline=None)
-    mesh = []
-    o_name = ''
-    scale_factor = 0
-    vertices = []
-    trilist = []
-    sum_centroid = [0,0,0]
-    min_size = [0,0,0]
-    max_size = [0,0,0]
-    centroid = [0, 0, 0]
-    for row in fh:
-        if row[0] == 'o':
-            if o_name:
-                mesh.append({'o_name':o_name,'triangles':trilist})
-                vertices = []
-                trilist = []
-                scale_factor = 0
-                sum_centroid = [0,0,0]
-                min_size = [0,0,0]
-                max_size = [0,0,0]
-            o_name = row.rstrip().replace('o ','')
-        elif row[0] == 'v':
-            vertex = [float(e) for e in row.split()[1:]]
-            vertices.append(vertex)
-            for ax in range(3):
-                sum_centroid[ax] += vertex[ax]
-                min_size[ax] = min(min_size[ax], vertex[ax])
-                max_size[ax] = max(max_size[ax], vertex[ax])
-        elif row[0] == 'f':
-            if scale_factor == 0: #first face.27.7  24.5
-                # euclid = sum([(max_size[ax]-min_size[ax])**2 for ax in range(3)])**0.5
-                scale_factor = float(request.POST['scale']) / max([abs(max_size[ax] - min_size[ax]) for ax in range(3)])
-                if request.POST['centroid'] == 'origin':
-                    centroid = [sum_centroid[ax]/len(vertices) for ax in range(3)]
-                elif request.POST['centroid'] == 'unaltered':
-                    centroid = [0, 0, 0]
-                elif request.POST['centroid'] == 'custom':
-                    origin = request.POST['origin'].split(',')
-                    centroid = [sum_centroid[ax] / len(vertices) - float(origin[ax])/scale_factor  for ax in range(3)]  #the user gives scaled origin!
-                else:
-                    raise ValueError('Invalid request')
-
-            new_face = [e.split('/')[0] for e in row.split()[1:]]
-            if (len(new_face) != 3):
-                pass
-            trilist.extend([int((vertices[int(i) - 1][ax]-centroid[ax])*scale_factor*100)/100 for i in new_face[0:3] for ax in range(3)])
-    mesh.append({'o_name': o_name, 'triangles': trilist})
+    if 'scale' in request.POST:
+        scale = float(request.POST['scale'])
+    else:
+        scale = 0
+    if 'centroid' in request.POST and request.POST['centroid'] in ('unaltered','origin','center'):
+        centroid_mode = request.POST['centroid']
+    else:
+        centroid_mode = 'unaltered'
+    if 'origin' in request.POST and request.POST['centroid'] == 'origin':
+        origin = request.POST['origin'].split(',')
+    else:
+        origin = None
+    mesh = PyMolTranspiler.convert_mesh(fh, scale, centroid_mode, origin)
     return {'mesh': mesh}
 
 

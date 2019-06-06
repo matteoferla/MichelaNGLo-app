@@ -47,6 +47,10 @@ function loadfun (protein) {
     var cartoon = new NGL.Selection( "${' or '.join(structure.cartoon)}" );
     protein.addRepresentation( "cartoon", {${color_str}  sele: cartoon.string, smoothSheet: true} );
     % endif
+    % if structure.putty:
+    var putty = new NGL.Selection( "${' or '.join(structure.putty)}" );
+    protein.addRepresentation( "tube", {${color_str}  sele: putty.string, radiusType: "bfactor", radiusScale: 0.05,} );
+    % endif
     % if structure.surface:
     var surf = new NGL.Selection( "${' or '.join(structure.surface)}" );
     protein.addRepresentation( "surface", {${color_str} sele: surf.string} );
@@ -59,6 +63,18 @@ function loadfun (protein) {
                 %endfor
     ], colorValue: ${structure.swatch[d['color']].hex} } );
         %endfor
+    %endif
+    %if structure.mesh:
+        let shape = new NGL.Shape("shape");
+        %for meshgroup in structure.mesh:
+
+            let refmesh=${meshgroup['triangles']};
+            let meshBuffer = new NGL.MeshBuffer( {
+                position: new Float32Array(refmesh),
+                color: new Float32Array(Array(refmesh.length).fill(1).map(function (v,i) {return i % 3 ? 0 : 1}))});
+            shape.addBuffer(meshBuffer);
+        %endfor
+        stage.addComponentFromObject(shape).addRepresentation("buffer");
     %endif
 
     //orient

@@ -4,7 +4,7 @@
     <h3>${obj['o_name']}</h3>
         <pre class="p-2"><div class="float-right"><a href="#snippet${i}" data-clipboard-target="#snippet" id="copy_snippet${i}">Copy</a></div><code id="snippet${i}">${obj['triangles']}</code>
                 </pre>
-        <div id="viewport${i}" style="width:100%; height: 0; padding-bottom: 100%;"></div>
+        <div id="viewport${i}" style="width:30%; min-width: 200px; height: 0; padding-bottom: 100%; "></div>
 % endfor
 </li>
 

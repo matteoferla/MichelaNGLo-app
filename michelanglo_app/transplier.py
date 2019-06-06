@@ -74,6 +74,7 @@ class PyMolTranspiler:
     For views see `.convert_view(view_string)`, which processes the output of PyMOL command `set_view`
     For representation see `.convert_reps(reps_string)`, which process the output of PyMOL command `iterate 1UBQ, print resi, resn,name,ID,reps`
     """
+    tmp = os.getcwd() #temp folder.
     swatch = ColorSwatch([('white', 0, (1.0, 1.0, 1.0)), ('black', 1, (0.0, 0.0, 0.0)), ('blue', 2, (0.0, 0.0, 1.0)), ('green', 3, (0.0, 1.0, 0.0)), ('red', 4, (1.0, 0.0, 0.0)),
                      ('cyan', 5, (0.0, 1.0, 1.0)), ('yellow', 6, (1.0, 1.0, 0.0)), ('dash', 7, (1.0, 1.0, 0.0)), ('magenta', 8, (1.0, 0.0, 1.0)),
                      ('salmon', 9, (1.0, 0.6000000238418579, 0.6000000238418579)), ('lime', 10, (0.5, 1.0, 0.5)), ('slate', 11, (0.5, 0.5, 1.0)), ('hotpink', 12, (1.0, 0.0, 0.5)),
@@ -153,7 +154,7 @@ class PyMolTranspiler:
                      ('hassium', 5383, (0.9019607901573181, 0.0, 0.18039216101169586)), ('meitnerium', 5384, (0.9215686321258545, 0.0, 0.14901961386203766)),
                      ('deuterium', 5385, (0.8999999761581421, 0.8999999761581421, 0.8999999761581421)), ('lonepair', 5386, (0.5, 0.5, 0.5)),
                      ('pseudoatom', 5387, (0.8999999761581421, 0.8999999761581421, 0.8999999761581421))])
-    _iterate_cmd = "data.append({'ID': ID,  'segi': segi, 'chain': chain, 'resi': resi, 'resn': resn, 'name':name, 'elem':elem, 'reps':reps, 'color':color, 'ss': ss})"
+    _iterate_cmd = "data.append({'ID': ID,  'segi': segi, 'chain': chain, 'resi': resi, 'resn': resn, 'name':name, 'elem':elem, 'reps':reps, 'color':color, 'ss': ss, 'cartoon': cartoon})"
 
     def __init__(self, file=None, verbose=False, validation=False, view=None, representation=None, pdb='', skip_disabled=True, **settings):
         """
@@ -179,6 +180,7 @@ class PyMolTranspiler:
         self.notes = ''
         self.atoms = []
         self.cartoon=[]
+        self.putty = [] #tube
         self.lines=[]
         self.sticks=[]
         self.colors=[]
@@ -186,14 +188,17 @@ class PyMolTranspiler:
         self.ss=[]
         self.code=''
         self.raw_pdb=None  #this is set from the instance `prot.raw_pdb = open(file).read()`
+        self.mesh = []
         if file:
-            print(file)
+            #print(file)
             assert '.pse' in file.lower(), 'Only PSE files accepted.'
             ##orient
             pymol.cmd.load(file)
             v = pymol.cmd.get_view()
             self.convert_view(v)
             self.fix_structure()
+            names_for_mesh_route = [] #this is for a last ditch attempt.
+            ### sort the pymol objetcs into relevant methods
             for obj_name in pymol.cmd.get_names():
                 obj = pymol.cmd.get_session(obj_name)['names'][0]
                 """
@@ -206,50 +211,79 @@ class PyMolTranspiler:
                 5 => obj_data... complicated.
                 6 => group_name
                 """
-                if obj[4] == 1: #equivalent to pymol.cmd.get_type(obj_name) == 'object:molecule':
+                #pymol.cmd.get_type(obj_name) equivalents in comments
+                if obj[4] == 1: #object:molecule
                     if obj[1]:
                         continue #PyMOL selection has no value.
                     if obj[2] == 0: # PyMOL disabled
                         if skip_disabled:
-                            continue
+                            pymol.cmd.delete(obj_name)
                         else:
                             raise NotImplementedError()
-                    """ the attr names in get_model differ slightly from the ones iterate gives.
-                     as raw pymol output needs to  be an option and
-                     the reps variable differs from flags (not even sure they are the same)
-                     the get_model way has been depracated, even though iterate seems more barbarous.
-                     here is the old code:
-                    data = [{'ID': atom.id,
-                             'chain': atom.chain,
-                             'resi': atom.resi, #resi_number is int, but has offset issues?
-                             'resn': atom.resn, #3letter
-                             'name': atom.name,
-                             'elem': atom.symbol,
-                             'reps': atom.flags,
-                             'color': atom.color_code,
-                             'segi': atom.segi}
-                            for atom in pymol.cmd.get_model(obj_name)]
-                    """
-                    myspace = {'data': []}  # myspace['data'] is the same as self.atoms
-                    pymol.cmd.iterate(obj_name, self._iterate_cmd, space=myspace)
-                    self.convert_representation(myspace['data'], **settings)
-                    self.parse_ss(myspace['data'])
-                elif obj[4] == 4:# pymol.cmd.get_type(obj_name) == 'object:measurement'
+                    else:#enabled
+                        """ the attr names in get_model differ slightly from the ones iterate gives.
+                         as raw pymol output needs to  be an option and
+                         the reps variable differs from flags (not even sure they are the same)
+                         the get_model way has been depracated, even though iterate seems more barbarous.
+                         here is the old code:
+                        data = [{'ID': atom.id,
+                                 'chain': atom.chain,
+                                 'resi': atom.resi, #resi_number is int, but has offset issues?
+                                 'resn': atom.resn, #3letter
+                                 'name': atom.name,
+                                 'elem': atom.symbol,
+                                 'reps': atom.flags,
+                                 'color': atom.color_code,
+                                 'segi': atom.segi}
+                                for atom in pymol.cmd.get_model(obj_name)]
+                        """
+                        myspace = {'data': []}  # myspace['data'] is the same as self.atoms
+                        pymol.cmd.iterate(obj_name, self._iterate_cmd, space=myspace)
+                        self.convert_representation(myspace['data'], **settings)
+                        self.parse_ss(myspace['data'])
+                        pymol.cmd.delete(obj_name)
+                elif obj[4] == 2: #object:map
+                    names_for_mesh_route.append(obj_name)
+                elif obj[4] == 3: #object:mesh
+                    names_for_mesh_route.append(obj_name)
+                elif obj[4] == 4: #'object:measurement'
                     if obj[2] == 0: # PyMOL disabled
                         if skip_disabled:
-                            continue
+                            pymol.cmd.delete(obj_name)
                         else:
                             raise NotImplementedError()
-                    list_of_coordinates = obj[5][2][0][1]
-                    current_distances = []
-                    for pi in range(0, len(list_of_coordinates), 6):
-                        coord_A = list_of_coordinates[pi:pi + 3]
-                        coord_B = list_of_coordinates[pi + 3:pi + 6]
-                        current_distances.append({'atom_A': self.get_atom_id_of_coords(coord_A),
-                                                  'atom_B': self.get_atom_id_of_coords(coord_B)})
-                    self.distances.append({'pairs': current_distances, 'color': obj[5][0][2]})
-            pymol.cmd.save(file.replace('.pse','')+'.pdb')
+                    else:
+                        list_of_coordinates = obj[5][2][0][1]
+                        current_distances = []
+                        for pi in range(0, len(list_of_coordinates), 6):
+                            coord_A = list_of_coordinates[pi:pi + 3]
+                            coord_B = list_of_coordinates[pi + 3:pi + 6]
+                            current_distances.append({'atom_A': self.get_atom_id_of_coords(coord_A),
+                                                      'atom_B': self.get_atom_id_of_coords(coord_B)})
+                        self.distances.append({'pairs': current_distances, 'color': obj[5][0][2]})
+                        pymol.cmd.delete(obj_name)
+                elif obj[4] == 5: # no idea
+                    continue
+                elif obj[4] == 6: #object:cgo
+                    names_for_mesh_route.append(obj_name)
+                elif obj[4] == 7: #object:surface
+                    names_for_mesh_route.append(obj_name)
+                elif obj[4] == 12: # object:group
+                    continue
+            pdbfile = os.path.join(self.tmp, os.path.split(file)[1].replace('.pse','.pdb'))
+            pymol.cmd.save(pdbfile)
+            print(pymol.cmd.get_names())
+            if names_for_mesh_route and 1==0: ##TODO reimplement
+                """
+                This secion has an issue with the alibi transformation.
+                The coordinate vectors need to be moved by the camera movement probably.
+                """
+                objfile = os.path.join(self.tmp, os.path.split(file)[1].replace('.pse','.obj'))
+                pymol.cmd.save(objfile)
+                self.mesh = PyMolTranspiler.convert_mesh(open(objfile,'r'))
+                os.remove(objfile)
             pymol.cmd.remove('(all)')
+            pymol.cmd.delete('(all)')
         if view:
             self.convert_view(view)
         if representation:
@@ -333,6 +367,14 @@ class PyMolTranspiler:
         """
         Converts a Pymol `get_view` output to a NGL M4 matrix.
         If the output is set to string, the string will be a JS command that will require the object stage to exist.
+
+        fog and alpha not implemented.
+        pymol.cmd.get("field_of_view"))
+        pymol.cmd.get("fog_start")
+        slab
+        near = pymolian[11] + pymolian[15]
+        far = pymolian[11] + pymolian[16]
+
         :param view: str or tuple
         :return: np 4x4 matrix or a NGL string
         """
@@ -383,7 +425,7 @@ class PyMolTranspiler:
         """
         if isinstance(represenation,str):
             text=represenation
-            headers=('ID','segi','chain','resi', 'resn', 'name', 'elem','reps', 'color') # gets ignored if iterate> like is present
+            headers=('ID','segi','chain','resi', 'resn', 'name', 'elem','reps', 'color', 'cartoon') # gets ignored if iterate> like is present
             for line in text.split('\n'):
                 if not line:
                     continue
@@ -402,6 +444,11 @@ class PyMolTranspiler:
         lines = []
         cartoon = []
         surface = []
+        putty = []
+        #putty override.
+        for atom in self.atoms:
+            if atom['name'] == 'CA' and atom['cartoon'] == 7:
+                putty.append('{resi}:{chain}'.format_map(atom))
         for atom in self.atoms:
             reps = list(reversed("{0:0>8b}".format(int(atom['reps']))))
             # sticks
@@ -411,7 +458,9 @@ class PyMolTranspiler:
                 if reps[7] == '1':  # lines.
                     lines.append('{resi}:{chain}.{name}'.format_map(atom))
                 if reps[5] == '1':  # cartoon. special case...
-                    cartoon.append('{resi}:{chain}'.format_map(atom))
+                    sel = '{resi}:{chain}'.format_map(atom)
+                    if sel not in putty:
+                        cartoon.append(sel)
                 if reps[2] == '1':
                     surface.append('{resi}:{chain}'.format_map(atom))
             else:
@@ -423,7 +472,9 @@ class PyMolTranspiler:
                     cartoon.append('{resi}'.format_map(atom))
                 if reps[2] == '1':
                     surface.append('{resi}'.format_map(atom))
+        # todo... add selection reduction
         self.cartoon = list(set(cartoon))
+        self.putty = putty
         self.sticks = sticks
         self.lines = lines
         self.surface = surface
@@ -455,6 +506,7 @@ class PyMolTranspiler:
             e = l[i]
             #if l[i-1] == ....
         return ' or '.join(l)
+
 
     def get_reps(self, inner_tabbed=1, stick='sym_licorice', **settings):  # '^'+atom['chain']
         warn('This method will be removed soon.', DeprecationWarning)
@@ -614,6 +666,71 @@ class PyMolTranspiler:
         self.code = code
         return code
 
+    @classmethod
+    def convert_mesh(cls,fh, scale=0, centroid_mode='unaltered', origin=None):
+        """
+        Given a fh or iterable of strings, return a mesh, with optional transformations.
+        Note color will be lost.
+        Only accepts trianglular meshes!
+        :param fh: file handle
+        :param scale: 0 do nothing. else Angstrom size
+        :param centroid_mode: unaltered | origin | center
+        :param origin: if centroid_mode is origin get given a 3d vector.
+        :return: {'o_name': object_name, 'triangles': mesh triangles}
+        """
+        mesh = []
+        o_name = ''
+        scale_factor = 0
+        vertices = []
+        trilist = []
+        sum_centroid = [0, 0, 0]
+        min_size = [0, 0, 0]
+        max_size = [0, 0, 0]
+        centroid = [0, 0, 0]
+        for row in fh:
+            if row[0] == 'o':
+                if o_name:
+                    mesh.append({'o_name': o_name, 'triangles': trilist})
+                    vertices = []
+                    trilist = []
+                    scale_factor = 0
+                    sum_centroid = [0, 0, 0]
+                    min_size = [0, 0, 0]
+                    max_size = [0, 0, 0]
+                o_name = row.rstrip().replace('o ', '')
+            elif row[0] == 'v':
+                vertex = [float(e) for e in row.split()[1:]]
+                vertices.append(vertex)
+                for ax in range(3):
+                    sum_centroid[ax] += vertex[ax]
+                    min_size[ax] = min(min_size[ax], vertex[ax])
+                    max_size[ax] = max(max_size[ax], vertex[ax])
+            elif row[0] == 'f':
+                if not scale:
+                    scale_factor = 1
+                elif scale_factor == 0:  # first face.27.7  24.5
+                    # euclid = sum([(max_size[ax]-min_size[ax])**2 for ax in range(3)])**0.5
+                    scale_factor = scale / max(
+                        [abs(max_size[ax] - min_size[ax]) for ax in range(3)])
+                    if centroid_mode == 'origin':
+                        centroid = [sum_centroid[ax] / len(vertices) for ax in range(3)]
+                    elif centroid_mode == 'unaltered':
+                        centroid = [0, 0, 0]
+                    elif centroid_mode == 'custom':
+                        #origin = request.POST['origin'].split(',')
+                        centroid = [sum_centroid[ax] / len(vertices) - float(origin[ax]) / scale_factor for ax in
+                                    range(3)]  # the user gives scaled origin!
+                    else:
+                        raise ValueError('Invalid request')
+                new_face = [e.split('/')[0] for e in row.split()[1:]]
+                if (len(new_face) != 3):
+                    pass
+                trilist.extend(
+                    [int((vertices[int(i) - 1][ax] - centroid[ax]) * scale_factor * 100) / 100 for i in new_face[0:3]
+                     for ax in range(3)])
+        mesh.append({'o_name': o_name, 'triangles': trilist})
+        print(mesh)
+        return mesh
 
 def test():
     transpiler = PyMolTranspiler(verbose=True, validation=False)
