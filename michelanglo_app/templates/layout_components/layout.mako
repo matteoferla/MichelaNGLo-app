@@ -166,7 +166,7 @@ pre {
 % endif
 <script src="https://unpkg.com/ngl@2.0.0-dev.34/dist/ngl.js" type="text/javascript"></script>
 % if not remote:
-    <script type="text/javascript" src="/static/ngl.extended.js"></script>
+    <script type="text/javascript" src="/static/michelanglo.js"></script>
 % else:
     <script type="text/javascript" src="https://michelanglo.sgc.ox.ac.uk/michelanglo.js"></script>
 % endif
