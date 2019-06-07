@@ -1,7 +1,9 @@
 <%namespace file="layout_components/labels.mako" name="info"/>
 <%inherit file="layout_components/layout_w_card.mako"/>
 <%block name="buttons">
+            <div>
             <%include file="layout_components/vertical_menu_buttons.mako" args='tour=False'/>
+            </div>
 </%block>
 <%block name="subtitle">
             An interactive protein on your website with a few clicks
@@ -22,114 +24,181 @@
 
 </%def>
 
+<%def name="card(place, title, text)">
+    <div class="card shadow" style="height: 250px;">
+              <div class="card-header">
+                <h5 class="card-title">${title|n}</h5>
+              </div>
+              <div class="card-body">
+                  <div class="arrow-${place}"></div>
+
+                <p class="card-text">${text|n}</p>
+              </div>
+            </div>
+</%def>
+
+<%def name="flipcard(place, first_card, second_card)">
+    <div class="flip-card">
+      <div class="flip-card-inner">
+        <div class="flip-card-front">
+          ${card(place, *first_card)|n}
+        </div>
+        <div class="flip-card-back">
+          ${card(place, *second_card)|n}
+        </div>
+      </div>
+    </div>
+</%def>
+
 <%block name="body">
     <div class="row">
-        <div class='col-12 col-md-8 col-xl-9'>
-            ### Mission
-            <div class="row">
-                <div class="col-4 text-right d-sm-none d-md-block"  style="margin: auto;">
-                    <h4><i class="far fa-rocket"></i>&nbsp;Mission</h4>
-                </div>
-                <div class="col-12 col-md-8">
-                    <div class="mb-2 p-3 border border-dark rounded-lg border-top-0 border-bottom-0 text-muted">
-                <p>Our aim is to help create NGL views for academic websites, blog posts and supplementary materials for papers with extra functionality such as <span class="prolink" data-toggle="protein" data-title="tada!" data-target="viewport" data-view="[-18.368176150507537, 74.81398271773811, 53.85689065075363, 0, 2.24223533030926, 55.26199556901072, -76.00112369042608, 0, -92.15567840009014, -13.567107701862422, -12.583763466412949, 0, -12.895500659942627, -26.876500129699707, -2.82450008392334, 1]">guiding the viewers' attention</span>.</p>
-            </div>
-                </div>
-            </div>
-
-            ### NGL
-            <div class="row">
-                <div class="col-12 col-md-8">
-                    <div class="mb-2 p-3 border border-dark rounded-lg border-top-0 border-bottom-0 text-muted">
-                <p>NGL (<a href="http://nglviewer.org/ngl/api/" target="_blank">nglviewer.org <i class="far fa-external-link"></i></a>) is a powerful javascript library that allows the visualisation of protein on websites that was developed by Alex Rose at the PDB. With the tools presented here, it becomes even easier to create great protein represetations on the web.</p>
-            </div>
-                </div>
-                <div class="col-4 text-left d-sm-none d-md-block"  style="margin: auto;">
-                    <h4><i class="far fa-cubes"></i> NGL Extended</h4>
-                </div>
-            </div>
-
+        <div class="col-12 col-md-2 col-xl-3">
+            ${flipcard("right",('title','text'),('title','text'))}
 
         </div>
+        <div class='col-12 col-md-8 col-xl-6' id="viewarium">
+            <!-- ############################################ -->
+            <div id="viewport"></div>
+            <div class="d-flex justify-content-center">
+            <button type="button" class="btn btn-outline-secondary border-0" id="pause"><i class="far fa-pause"></i></button>
+            <button type="button" class="btn btn-outline-secondary border-0" id="resume" style="display: none;"><i class="far fa-play"></i></button>
+                %for i in range(4):
+                    <button type="button" class="btn btn-outline-secondary border-0" id="frame${i}"><i class="far fa-circle"></i></button>
 
-        <div class='col-12 col-sm-4 col-xl-3'>
-            <div id="viewport" style="width:100%; height: 0; padding-bottom: 100%;"></div>
+                %endfor
+            </div>
+            <!-- ############################################ -->
         </div>
-
-
-        <div class="col-12 my-3">
-
-            ### Simplicity
-            <div class="row">
-                <div class="col-2 text-right d-sm-none d-md-block"  style="margin: auto;">
-                    <h4><i class="far fa-wand-magic"></i> Simplicity</h4>
-                </div>
-                <div class="col-12 col-md-10">
-                    <div class="mb-2 p-3 border border-dark rounded-lg border-top-0 border-bottom-0 text-muted">
-                <p>This app allows the creation fo NGL views without any JS coding with the following features:</p>
-                ${descriptive('/markup', 'fa-map-marked-alt', 'JS-free markup', 'By adding to NGL the power to create and control the protein view with simple to implement HTML tags without any JavaScript')}
-                ${descriptive('/pymol', 'fa-hammer', 'PyMOL file conversion', 'Convert a PyMol PSE file to a NGL view that can be shared or its code copy-pasted.')}
-                ${descriptive('/clash', 'fa-car-crash', 'Show clashes', 'Expanding upon NGL by adding the ability to show clashes.')}
-                ${descriptive('/imagetoggle', 'fa-images', 'Image to NGL toggling', 'Adding the fuctionality of toggling from an annotated static image to an NGL view.')}
-                ${descriptive('/custom', 'fa-mortar-pestle', 'custom mesh conversion', 'Converting a 3D file to a mesh in NGL allowing you to have anything from a giant question mark or pair of scissors to a T-Rex in your protein')}
-
-                <p class="pt-2">For more details in general, see the <a href="/docs">documentation</a>.</p>
-
-                    </div>
-                </div>
-            </div>
-
-            <h4></h4>
-
-
-            ### Github
-            <div class="row">
-                <div class="col-12 col-md-10">
-                    <div class="mb-2 p-3 border border-dark rounded-lg border-top-0 border-bottom-0 text-muted">
-                <p>The source code for this server is available at <a href="https://github.com/matteoferla/MichelaNGLo" target="_blank">github.com/matteoferla/MichelaNGLo <i class="far fa-external-link"></i></a>. The JS file to extend NGL can be found <a href="https://raw.githubusercontent.com/matteoferla/MichelaNGLo/master/michelanglo_app/static/ngl.extended.js" target="_blank">here <i class="far fa-external-link"></i></a>.</p>
-            </div>
-                </div>
-
-                <div class="col-2 text-left d-sm-none d-md-block"  style="margin: auto;">
-                    <h4><i class="fab fa-github"></i> Github</h4>
-                </div>
-
-                <div class="col-2 text-right d-sm-none d-md-block"  style="margin: auto;">
-                    <h4><i class="far fa-books"></i> Citation</h4>
-                </div>
-            <div class="col-12 col-md-10">
-                    <div class="mb-2 p-3 border border-dark rounded-lg border-top-0 border-bottom-0 text-muted">
-                <p>Please cite:
-                    <ul>
-                        <li>Manuscript not remotely in preparation.</li>
-                        <li>
-                            <a href="https://dx.doi.org/10.1093/bioinformatics/bty419" target="_blank">AS Rose, AR Bradley, Y Valasatava, JM Duarte, A Prlić and PW Rose. NGL viewer: web-based molecular graphics for large complexes. Bioinformatics: bty419, 2018.</a>
-                    </li>
-                    </ul>
-                        </p>
-            </div>
-                </div>
-            </div>
-
+        <div class="col-12 col-md-2 col-xl-3">
+            ${flipcard("left",('title','text'),('title','text'))}
         </div>
     </div>
-
 </%block>
 
 
 <%block name="script">
     <script type="text/javascript">
+
+
+        let mustard = '#ffcc66';
+
+        window.descriptions = [{
+                                title_left: '<i class="far fa-rocket"></i> No JavaScript coding required',
+                                text_left: 'Create interactive protein views from a PyMOL PSE file or a PDB code/file',
+                                title_right: "No JavaScript coding required",
+                                text_right: "Create links to control the protein views",
+                                id: '#frame0 i',
+                                view: () => NGL.specialOps.showDomain('viewport', '*', mustard, [41.29294830639554, 22.248845321357074, -38.15151059779185, 0, 25.32782096795833, 30.857828961827977, 45.40872532497881, 0, 36.18080104201877, -46.99403932937292, 11.754418842671718, 0, -10.200858175132803, -24.766561885907656, -2.229398340052575, 1])
+                            },
+                            {
+                                title_left: 'Implement',
+                                text_left: 'Either follow the easy instructions to implement the view on your website',
+                                title_right: "Share",
+                                text_right: "or edit and share the pages you create.",
+                                id: '#frame1 i',
+                                view: ()=>NGL.specialOps.showDomain('viewport','*','teal',[ 41.29294830639554, 22.248845321357074, -38.15151059779185, 0, 25.32782096795833, 30.857828961827977, 45.40872532497881, 0, 36.18080104201877, -46.99403932937292, 11.754418842671718, 0, -10.200858175132803, -24.766561885907656, -2.229398340052575, 1 ])
+                            },
+                            {
+                                title_left: '3',
+                                text_left: '3',
+                                title_right: "3",
+                                text_right: "3",
+                                id: '#frame2 i',
+                                view: ()=>NGL.specialOps.showDomain('viewport','*','lightcoral', [-18.368176150507537, 74.81398271773811, 53.85689065075363, 0, 2.24223533030926, 55.26199556901072, -76.00112369042608, 0, -92.15567840009014, -13.567107701862422, -12.583763466412949, 0, -12.895500659942627, -26.876500129699707, -2.82450008392334, 1])
+                            },
+                            {
+                                title_left: '4',
+                                text_left: '4',
+                                title_right: "4",
+                                text_right: "4",
+                                id: '#frame3 i',
+                                view: ()=>NGL.specialOps.showDomain('viewport','*','lime', [-18.368176150507537, 74.81398271773811, 53.85689065075363, 0, 2.24223533030926, 55.26199556901072, -76.00112369042608, 0, -92.15567840009014, -13.567107701862422, -12.583763466412949, 0, -12.895500659942627, -26.876500129699707, -2.82450008392334, 1])
+                            }
+        ];
+
+
+        //standard width/height are not great with popovers.
+        let vp=$('#viewport');
+        let h = Math.min( vp.width(), window.innerHeight - vp.offset().top - 48*2 - 8 - 5 - $('footer').height() );
+        vp.height(h);
+        window.addEventListener( "resize", function( event ) {
+            let vp=$('#viewport');
+            let h = Math.min( vp.width(), window.innerHeight - vp.offset().top - 48*2 - 8 - 5 - $('footer').height() );
+            vp.height(h);
+        });
+
+
+        /*
+        $('#leftpopover1').popover({
+                                placement: "left",
+                                container: '#viewarium',
+                                boundariesElement: "scrollParent",
+                                title: "No JavaScript coding required",
+                                animation: true,
+                                content: "Create interactive protein views from a PyMOL PSE file or a PDB code/file"
+                              });
+
+         */
+
         $(document).ready(function () {
+            if (window.innerWidth < 576) { //mobile.
+                //$('#viewarium [data-toggle="popover"]').attr("data-placement","bottom");
+            }
+
             function pretty_hisA(protein) {
-                var schemeId = NGL.ColormakerRegistry.addSelectionScheme([["lightcoral", "*"]]);
-	            protein.addRepresentation( "cartoon", {color: schemeId });
-                var view=[64.19461657851211, 34.58837775693359, -59.31089193592322, 0, 39.37499797163815, 47.972028636740525, 70.59306324960345, 0, 56.24719826644338, -73.0576154030002, 18.27359008394372, 0, -12.895500659942627, -26.876500129699707, -2.82450008392334, 1];
-                protein.stage.animationControls.orient(view, 2000);
-                NGL.specialOps.showTitle('viewport','Please interact with me')
+                descriptions.view[2]();
+                NGL.specialOps.showTitle('viewport','Please interact with me');
+                $('#frame0 i').removeClass('fa-circle').addClass('fa-dot-circle');
             }
             NGL.specialOps.showTitle('viewport','<i class="far fa-dna fa-spin"></i> Loading...');
             NGL.specialOps.multiLoader('viewport', [{type: 'file', value: 'static/Sal_HisA.pdb', loadFx: pretty_hisA}], 'white');
 
+            // start
+            window.tick = false; //front or back?
+            window.tock = 0; //description
+
+
+            $('.flip-card-back').hide();
+
+            window.time_fn = () => {
+                tick = ! tick; //is back basically
+                tock = (tock + 1) % descriptions.length;
+                flip_fn(descriptions[tock]);
+            };
+
+            window.flip_fn = (frame) => {
+                let rota = ['rotateX(0deg)', 'rotateX(180deg)'];
+                frame.view();
+                let cards_title =  tock ? $('.flip-card-back .card-title') : $('.flip-card-front .card-title');
+                let cards_text =  tock ? $('.flip-card-back .card-text') : $('.flip-card-front .card-text');
+                cards_title.first().html(frame.title_left);
+                cards_title.last().html(frame.title_right);
+                cards_text.first().html(frame.text_left);
+                cards_text.last().html(frame.text_right);
+                $('.flip-card-inner').css('transition','transform 1s');
+                $('.flip-card-inner').css('transform','rotateX(90deg)');
+                setTimeout(()=>{$('.flip-card-inner > div').toggle(); $('.flip-card-inner').css('transform',rota[tick % 2])}, 1000);
+                $('.fa-dot-circle').removeClass('fa-dot-circle').addClass('fa-circle');
+                $(frame.id).removeClass('fa-circle').addClass('fa-dot-circle');
+            };
+            window.timer = setInterval(time_fn,5000);
+            [0,1,2,3,4].forEach((i)=> $('#frame'+i).click((e) => {
+                $('#pause').trigger('click');
+                tick = ! tick; //is back basically
+                tock = i;
+                flip_fn(descriptions[tock]);
+                time_fn();
+            }));
+
+
+
+
+
+
         }); //ready
+
+        $('#pause').click((e) => {clearInterval(window.timer); $('#resume').show(); $('#pause').hide();});
+        $('#resume').click((e) => {window.timer = setInterval(time_fn,5000); $('#resume').hide(); $('#pause').show();});
+
     </script>
 </%block>

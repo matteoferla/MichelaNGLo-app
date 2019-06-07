@@ -4,6 +4,7 @@ def includeme(config):
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_static_view('images', '../images', cache_max_age=3600)
     config.add_route('home', '/')
+    config.add_route('home_text', '/verbose')
     config.add_route('custom', '/custom')
     config.add_route('pdb', '/pdb')
     config.add_route('pymol', '/pymol')
