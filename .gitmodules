@@ -1,0 +1,6 @@
+[submodule "michelanglo_app/static/ThirdParty/bootstrap-tourist"]
+	path = michelanglo_app/static/ThirdParty/bootstrap-tourist
+	url = https://github.com/IGreatlyDislikeJavascript/bootstrap-tourist
+[submodule "michelanglo_app/static/ThirdParty/Font-Awesome-Pro"]
+	path = michelanglo_app/static/ThirdParty/Font-Awesome-Pro
+	url = https://github.com/FortAwesome/Font-Awesome-Pro.git
