@@ -251,13 +251,11 @@ The `data-load` can load proteins from the myData.proteins (and run the custom f
 
 ### Note
 
-There are a bunch of underlying functions. They are in the file: [file ngl.extended.js](https://github.com/matteoferla/MichelaNGLo/blob/master/michelanglo_app/static/ngl.extended.js), which requires JQuery and NGL, which works as usual*. So at the end of your documents you should have:
+There are a bunch of underlying functions. They are in the file: [file michelanglo.js](https://github.com/matteoferla/MichelaNGLo/blob/master/michelanglo_app/static/michelanglo.js), which requires JQuery and NGL, which works as usual*. So at the end of your documents you should have:
 
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/ngl@2.0.0-dev.34/dist/ngl.js" type="text/javascript"></script>
-    <script src="https://www.matteoferla.com/ngl.extended.js" type="text/javascript"></script>
-
-There is no official CDN for `ngl.extended.js`, but if you are checking this out, you can sneakily use the last address, but please do not use it in production.
+    <script src="https://michelanglo.sgc.ox.ac.uk/michelanglo.js" type="text/javascript"></script>
 
 ∗One issue is holding onto the stage object in JS. Therefore the stage is added as follows: `NGL.stageIds['viewport'] = new Stage( ...`. However, a better feature is using the `NGL.specialOps.multiLoad`, which handles it.
 

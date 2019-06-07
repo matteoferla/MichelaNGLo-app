@@ -47,37 +47,12 @@
             <div class="card-header"><h3 class="card-title">Description</h3></div>
 
             <div class="card-body">
-
             %if location_viewport == 'left':
-            <div style="left:-30px; top: 80px; position: absolute; width: 0; z-index:1000;
-                height: 0;
-                border-style: solid;
-                border-width: 30px 30px 30px 0;
-                border-color: transparent rgba(0, 0, 0, 0.125) transparent transparent;">
-            </div>
-
-            <div style="left:-29px; top: 80px; position: absolute; width: 0; z-index:1000;
-                height: 0;
-                border-style: solid;
-                border-width: 30px 30px 30px 0;
-                border-color: transparent white transparent transparent;">
-            </div>
+                <div class="arrow-left"></div>
             %else:
-            <div style="right:-30px; top: 80px; position: absolute; width: 0; z-index:1000;
-                height: 0;
-                border-style: solid;
-                border-width: 30px 0px 30px 30px;
-                border-color: transparent transparent transparent rgba(0, 0, 0, 0.125);">
-            </div>
-
-            <div style="right:-29px; top: 80px; position: absolute; width: 0; z-index:1000;
-                height: 0;
-                border-style: solid;
-                border-width: 30px 0px 30px 30px;
-                border-color: transparent transparent transparent white;">
-            </div>
-
+                <div class="arrow-right"></div>
             %endif
+
 
                     %if editable:
                         <div class="float-right">

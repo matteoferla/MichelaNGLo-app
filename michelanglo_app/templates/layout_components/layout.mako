@@ -24,8 +24,8 @@
     <!-- Custom styles for this scaffold -->
     <link href="/static/theme.css" rel="stylesheet">
     <!--<link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-LRlmVvLKVApDVGuspQFnRQJjkv0P7/YFrw84YYQtmYG4nK8c+M+NlmYDCv0rKWpG" crossorigin="anonymous">-->
-    <link rel="stylesheet" href="https://www.matteoferla.com/Font-Awesome-Pro/css/all.min.css" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://www.matteoferla.com/bootstrap-tourist/bootstrap-tourist.css">
+    <link rel="stylesheet" href="/static/ThirdParty/Font-Awesome-Pro/css/all.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/ThirdParty/bootstrap-tourist/bootstrap-tourist.css">
     <style>
 
 .footer {
@@ -130,8 +130,8 @@ pre {
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
-      <script src="//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-      <script src="//oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
     <![endif]-->
 </head>
 
@@ -172,7 +172,7 @@ pre {
 % endif
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
 
-<script src="https://www.matteoferla.com/bootstrap-tourist/bootstrap-tourist.js"></script>
+<script src="/static/ThirdParty/bootstrap-tourist/bootstrap-tourist.js"></script>
 <%block name="script"/>
 % if not no_user:
     <%include file="../login/user_modal.mako"/>

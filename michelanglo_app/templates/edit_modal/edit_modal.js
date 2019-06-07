@@ -79,6 +79,9 @@ $('#edit_submit').click(function () {
     description = description.replace(/<div>([\s\S]*?)<\/div>/gm, '$1'); //firefox bug.
     description = description.replace(/<br.*?>/g,'\n\n').replace(/\n\n+/gm,'\n\n'); //runaway newline bug.
     description = prolinks.expandProlinks(description);
+    // @fa[icon-name]
+    description = description.replace(/@fa\[(.*?)\]/gi,'<i class="far fa-$1"></i>')
+
     //console.log('new');
 
     $.ajax({
