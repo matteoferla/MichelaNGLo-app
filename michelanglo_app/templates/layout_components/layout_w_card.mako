@@ -1,11 +1,12 @@
 <%inherit file="layout.mako"/>
 
+% if self.alert and self.alert() != '':
 <div class="row p-4">
     <div class="col-lg-10 offset-lg-1">
         <%block name="alert"/>
     </div>
-
 </div>
+% endif
 
 <div class="row py-4">
         <div class="col-lg-10 offset-lg-1">
