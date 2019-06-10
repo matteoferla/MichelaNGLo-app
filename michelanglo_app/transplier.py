@@ -198,6 +198,7 @@ class PyMolTranspiler:
             self.convert_view(v)
             self.fix_structure()
             names_for_mesh_route = [] #this is for a last ditch attempt.
+            names_not_mesh = []
             ### sort the pymol objetcs into relevant methods
             for obj_name in pymol.cmd.get_names():
                 obj = pymol.cmd.get_session(obj_name)['names'][0]
@@ -217,7 +218,7 @@ class PyMolTranspiler:
                         continue #PyMOL selection has no value.
                     if obj[2] == 0: # PyMOL disabled
                         if skip_disabled:
-                            pymol.cmd.delete(obj_name)
+                            names_not_mesh.append(obj_name)
                         else:
                             raise NotImplementedError()
                     else:#enabled
@@ -241,7 +242,7 @@ class PyMolTranspiler:
                         pymol.cmd.iterate(obj_name, self._iterate_cmd, space=myspace)
                         self.convert_representation(myspace['data'], **settings)
                         self.parse_ss(myspace['data'])
-                        pymol.cmd.delete(obj_name)
+                        names_not_mesh.append(obj_name)
                 elif obj[4] == 2: #object:map
                     names_for_mesh_route.append(obj_name)
                 elif obj[4] == 3: #object:mesh
@@ -249,7 +250,7 @@ class PyMolTranspiler:
                 elif obj[4] == 4: #'object:measurement'
                     if obj[2] == 0: # PyMOL disabled
                         if skip_disabled:
-                            pymol.cmd.delete(obj_name)
+                            names_not_mesh.append(obj_name)
                         else:
                             raise NotImplementedError()
                     else:
@@ -261,7 +262,6 @@ class PyMolTranspiler:
                             current_distances.append({'atom_A': self.get_atom_id_of_coords(coord_A),
                                                       'atom_B': self.get_atom_id_of_coords(coord_B)})
                         self.distances.append({'pairs': current_distances, 'color': obj[5][0][2]})
-                        pymol.cmd.delete(obj_name)
                 elif obj[4] == 5: # no idea
                     continue
                 elif obj[4] == 6: #object:cgo
@@ -272,7 +272,7 @@ class PyMolTranspiler:
                     continue
             pdbfile = os.path.join(self.tmp, os.path.split(file)[1].replace('.pse','.pdb'))
             pymol.cmd.save(pdbfile)
-            print(pymol.cmd.get_names())
+            pymol.cmd.delete('all')
             if names_for_mesh_route and 1==0: ##TODO reimplement
                 """
                 This secion has an issue with the alibi transformation.
