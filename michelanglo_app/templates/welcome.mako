@@ -137,18 +137,18 @@
             view: ()=>NGL.specialOps.showDomain('viewport','97-103 or 197-203 or 166-172 or 124-132','teal',[ 49.337653376809236, 32.898090475626475, 11.796951351474945, 0, 26.819403807907317, -48.72454809722087, 23.712748701316123, 0, 22.409194486192025, -14.11702924275698, -54.35249715239321, 0, -10.200858175132803, -24.766561885907656, -2.229398340052575, 1])
         },
         {
-            title_left: '3',
-            text_left: '3',
-            title_right: "3",
-            text_right: "3",
+            title_left: '<i class="far fa-bolt"></i> NGL powered',
+            text_left: 'NGL (<a href="http://nglviewer.org/ngl/api/" target="_blank">nglviewer.org <i class="far fa-external-link"></i></a>) is a powerful javascript library that allows the visualisation of protein on websites that was developed by Alex Rose at the PDB. With the tools presented here, it becomes even easier to create great protein represetations on the web.',
+            title_right: '<i class="fab fa-github"></i> Open source',
+            text_right: 'The source code for this server is available at <a href="https://github.com/matteoferla/MichelaNGLo" target="_blank">github.com/matteoferla/MichelaNGLo <i class="far fa-external-link"></i></a>. The JS file to extend NGL (<a href="https://raw.githubusercontent.com/matteoferla/MichelaNGLo/master/michelanglo_app/static/michelanglo.js" target="_blank">michelanglo.js</a>) can be WHAT.</a>.',
             id: '#frame2 i',
             view: ()=>NGL.specialOps.showDomain('viewport','*','lightcoral', [-18.368176150507537, 74.81398271773811, 53.85689065075363, 0, 2.24223533030926, 55.26199556901072, -76.00112369042608, 0, -92.15567840009014, -13.567107701862422, -12.583763466412949, 0, -12.895500659942627, -26.876500129699707, -2.82450008392334, 1])
         },
         {
-            title_left: '4',
-            text_left: '4',
+            title_left: '<i class="far fa-books"></i> Citations',
+            text_left: '<span class="text-danger">Unpublished.</span><br/><a href="https://dx.doi.org/10.1093/bioinformatics/bty419" target="_blank">AS Rose, AR Bradley, Y Valasatava, JM Duarte, A Prlić and PW Rose. NGL viewer: web-based molecular graphics for large complexes. Bioinformatics: bty419, 2018. <i class="far fa-external-link"></i></a>',
             title_right: "4",
-            text_right: "4",
+            text_right: '<a href="/docs">Documentation</a>',
             id: '#frame3 i',
             view: ()=>NGL.specialOps.showResidue('viewport','5:A','lime')
         }
