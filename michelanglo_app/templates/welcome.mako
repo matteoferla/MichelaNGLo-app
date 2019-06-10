@@ -100,6 +100,7 @@
                 cards_title.last().html(this.title_right);
                 cards_text.first().html(this.text_left);
                 cards_text.last().html(this.text_right);
+                cards_text.find('[data-toggle="protein"]').protein(); //activate prolinks if any.
                 return this;
             };
             this.flipCards = (tick) => {
@@ -120,20 +121,20 @@
         let mustard = '#ffcc66';
         window.descriptions = [
         {
-            title_left: '<i class="far fa-rocket"></i> No JavaScript coding required',
-            text_left: 'Create interactive protein views from a PyMOL PSE file or a PDB code/file',
-            title_right: "No JavaScript coding required",
-            text_right: "Create links to control the protein views",
+            title_left: '<i class="far fa-rocket"></i> Easy and fast',
+            text_left: 'Create interactive protein views from <a href="/pymol">a PyMOL PSE file</a> or <a href="/pymol">a PDB code/file</a>',
+            title_right: '<i class="far fa-map-marked-alt"></i> Control',
+            text_right: 'Create <span class="prolink" data-toggle="protein" data-focus="residue" data-selection="210:A">links</span> to control the protein views',
             id: '#frame0 i',
             view: () => NGL.specialOps.showDomain('viewport', '*', mustard, [41.29294830639554, 22.248845321357074, -38.15151059779185, 0, 25.32782096795833, 30.857828961827977, 45.40872532497881, 0, 36.18080104201877, -46.99403932937292, 11.754418842671718, 0, -10.200858175132803, -24.766561885907656, -2.229398340052575, 1])
         },
         {
-            title_left: 'Implement',
+            title_left: '<i class="far fa-code"></i> Implement',
             text_left: 'Either follow the easy instructions to implement the view on your website',
-            title_right: "Share",
-            text_right: "or edit and share the pages you create.",
+            title_right: '<i class="far fa-globe-europe"></i> Share',
+            text_right: "or edit and share the pages you create. (<a href='/data/40190892-2727-4373-9240-a1761d310db1'>Example</a>)",
             id: '#frame1 i',
-            view: ()=>NGL.specialOps.showDomain('viewport','*','teal',[ 41.29294830639554, 22.248845321357074, -38.15151059779185, 0, 25.32782096795833, 30.857828961827977, 45.40872532497881, 0, 36.18080104201877, -46.99403932937292, 11.754418842671718, 0, -10.200858175132803, -24.766561885907656, -2.229398340052575, 1 ])
+            view: ()=>NGL.specialOps.showDomain('viewport','97-103 or 197-203 or 166-172 or 124-132','teal',[ 49.337653376809236, 32.898090475626475, 11.796951351474945, 0, 26.819403807907317, -48.72454809722087, 23.712748701316123, 0, 22.409194486192025, -14.11702924275698, -54.35249715239321, 0, -10.200858175132803, -24.766561885907656, -2.229398340052575, 1])
         },
         {
             title_left: '3',
@@ -149,7 +150,7 @@
             title_right: "4",
             text_right: "4",
             id: '#frame3 i',
-            view: ()=>NGL.specialOps.showDomain('viewport','*','lime', [-18.368176150507537, 74.81398271773811, 53.85689065075363, 0, 2.24223533030926, 55.26199556901072, -76.00112369042608, 0, -92.15567840009014, -13.567107701862422, -12.583763466412949, 0, -12.895500659942627, -26.876500129699707, -2.82450008392334, 1])
+            view: ()=>NGL.specialOps.showResidue('viewport','5:A','lime')
         }
         ].map((e) => new Descriptor(e));
 

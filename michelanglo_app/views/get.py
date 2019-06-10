@@ -75,7 +75,7 @@ def get_pages(request):
     log.info(f'{get_username(request)} request API view of pages')
     data = {}
     if not user:
-        data['owned']='not logged in'
+        data['owned'] = 'not logged in'
         data['visited'] = 'not logged in'
         data['error'] = 'not logged in'
     else:
