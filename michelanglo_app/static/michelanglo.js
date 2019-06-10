@@ -179,17 +179,18 @@ NGL.specialOps.showSurface = function (id,selection, view) {
         }
 };
 
-NGL.specialOps.showBlur = function (id,selection, color, radius, view) {
+NGL.specialOps.showBlur = function (id,selection, color, radius, view, scale) {
     if (NGL.debug) {console.log('Show surface '+selection)}
     // Prepare
     NGL.specialOps.postInitialise(); //worst case schenario prevention.
     var protein = NGL.getStage(id).getComponentByType('structure');
     NGL.getStage(id).removeClashes();
     protein.removeAllRepresentations();
+    scale = scale || 0.010;
   protein.addRepresentation("tube", {
     sele: "polymer",
     radiusType: "bfactor",
-    radiusScale: 0.010,
+    radiusScale: scale,
     color: "bfactor",
     colorScale: "RdYlBu"
   });

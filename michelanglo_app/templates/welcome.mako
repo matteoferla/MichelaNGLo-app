@@ -145,12 +145,12 @@
             view: ()=>NGL.specialOps.showDomain('viewport','*','lightcoral', [-18.368176150507537, 74.81398271773811, 53.85689065075363, 0, 2.24223533030926, 55.26199556901072, -76.00112369042608, 0, -92.15567840009014, -13.567107701862422, -12.583763466412949, 0, -12.895500659942627, -26.876500129699707, -2.82450008392334, 1])
         },
         {
-            title_left: '<i class="far fa-books"></i> Citations',
+            title_left: '<i class="far fa-quote-left"></i> Citations',
             text_left: '<span class="text-danger">Unpublished.</span><br/><a href="https://dx.doi.org/10.1093/bioinformatics/bty419" target="_blank">AS Rose, AR Bradley, Y Valasatava, JM Duarte, A Prlić and PW Rose. NGL viewer: web-based molecular graphics for large complexes. Bioinformatics: bty419, 2018. <i class="far fa-external-link"></i></a>',
-            title_right: "4",
-            text_right: '<a href="/docs">Documentation</a>',
+            title_right: '<i class="far fa-books"></i> More',
+            text_right: 'See <a href="/docs">Documentation</a>',
             id: '#frame3 i',
-            view: ()=>NGL.specialOps.showResidue('viewport','5:A','lime')
+            view: ()=>NGL.specialOps.showSurface('viewport')
         }
         ].map((e) => new Descriptor(e));
 
@@ -185,7 +185,7 @@
 
             window.timer = setInterval(time_fn,5000);
             //buttons
-            [0,1,2,3,4].forEach((i)=> $('#frame'+i).click((e) => {
+            (new Array(descriptions.length)).fill(0).forEach((v,i)=> $('#frame'+i).click((e) => {
                 $('#pause').trigger('click');
                 tick = ! tick; //is back
                 tock = i;
