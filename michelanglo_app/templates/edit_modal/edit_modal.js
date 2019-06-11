@@ -207,14 +207,16 @@ $('#formatting button').click(e => {
         current.insertNode( $('<p>* '+content)[0]+'</p>');
         break;
       case 'formatting_list-ol':
-        current.insertNode( $('<p>1. '+content)[0]+'</p>');
+        current.insertNode( $('<p>1. '+content+'</p>')[0]);
         break;
         case 'formatting_code':
-        current.insertNode( $('<code>`'+content)[0]+'`</code>');
+        current.insertNode( $('<code>`'+content+'`</code>')[0]);
         break;
         case 'formatting_quote':
-        current.insertNode( $('<blockquote> > '+content)[0]+'</blockquote>');
+        current.insertNode( $('<blockquote> > '+content+'</blockquote>')[0]);
         break;
+        case 'greek':
+        alert('To insert greek letters into HTML write &xxxx; where xxx is the name of the letter. If the first letter is upper it will be uppercase. e.g. &alpha; > α, while &Alpha; > Α')
       default:
         current.insertNode( $('<a>Error</a>')[0] );
     }

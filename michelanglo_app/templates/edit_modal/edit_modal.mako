@@ -26,9 +26,11 @@
                           <button type="button" class="btn btn-outline-secondary" id="formatting_list"><i class="far fa-list"></i></button>
                           <button type="button" class="btn btn-outline-secondary" id="formatting_list-ol"><i class="far fa-list-ol"></i></button>
                           <button type="button" class="btn btn-outline-secondary" id="formatting_quote"><i class="far fa-quote-left"></i></button>
+                            <!--
                           <button type="button" class="btn btn-outline-secondary" id="formatting_sub"><i class="far fa-subscript"></i></button>
                           <button type="button" class="btn btn-outline-secondary" id="formatting_super"><i class="far fa-superscript"></i></button>
-                          <button type="button" class="btn btn-outline-secondary" id="formatting_super"><i class="far fa-superscript"></i></button>
+                          -->
+                          <button type="button" class="btn btn-outline-secondary" id="formatting_greek">&alpha;</button>
                           <button type="button" class="btn btn-outline-secondary" id="formatting_help"><i class="far fa-question"></i></button>
                         </div>
                         <%include file="../markup/markup_builder_btn.mako"/>

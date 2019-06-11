@@ -93,7 +93,7 @@ NGL.specialOps.showResidue = function (id, selection, color, radius, view) {
         var protein = NGL.getStage(id).getComponentByType('structure');
         // corner case that there is no cartoon.
         if (protein.reprList.length === 0) {
-            protein.addRepresentation( "cartoon", {color: NGL.ColormakerRegistry.addSelectionScheme([[color, selection],["white", "*"]]), smoothSheet: true})}
+            protein.addRepresentation( "cartoon", {color: NGL.ColormakerRegistry.addSelectionScheme([["white", "*"]]), smoothSheet: true})}
         // defaults
         color = color || "hotpink";
         radius = radius || 4;
