@@ -102,7 +102,8 @@ def ajax_convert(request):
             trans = PyMolTranspiler(file=filename, **settings)
             request.session['file'] = filename
             if 'pdb_string' in request.POST:
-                trans.raw_pdb = open(filename.replace('.pse','.pdb')).read()
+                with open(os.path.join(trans.tmp, os.path.split(filename)[1].replace('.pse','.pdb'))) as fh:
+                    trans.raw_pdb = fh.read()
             else:
                 trans.pdb = request.POST['pdb']
         else:
@@ -124,11 +125,12 @@ def ajax_convert(request):
         request.dbsession.add(user)
 
         # create output
+        settings['pdb'] = []
         request.session['status'] = make_msg('Load function', 'Making load function')
         settings['loadfun'] = trans.get_loadfun_js(tag_wrapped=True, **settings)
         if trans.raw_pdb:
             settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true, "loadFx": "loadfun"}]'
-            settings['pdb'] = '\n'.join(trans.ss)+'\n'+trans.raw_pdb
+            settings['pdb'] = [('pdb', '\n'.join(trans.ss)+'\n'+trans.raw_pdb)] #note that this used to be a string,
         elif len(trans.pdb) == 4:
             settings['proteinJSON'] = '[{{"type": "rcsb", "value": "{0}", "loadFx": "loadfun"}}]'.format(trans.pdb)
         else:
@@ -178,7 +180,7 @@ def ajax_pdb(request):
     pagename = str(uuid.uuid4())
     settings = {'data_other': request.POST['viewcode'].replace('<div', '').replace('</div>', '').replace('<', '').replace('>', ''),
                 'page': pagename, 'editable': True,
-                'backgroundcolor': 'white', 'validation': None, 'js': None, 'pdb': '', 'loadfun': ''}
+                'backgroundcolor': 'white', 'validation': None, 'js': None, 'pdb': [], 'loadfun': ''}
     if request.POST['mode'] == 'code':
         if len(request.POST['pdb']) == 4:
             settings['proteinJSON'] = '[{{"type": "rcsb", "value": "{0}"}}]'.format(request.POST['pdb'])
@@ -188,7 +190,7 @@ def ajax_pdb(request):
         settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true}]'
         filename = save_file(request,'pdb')
         trans = PyMolTranspiler.load_pdb(file=filename)
-        settings['pdb'] = '\n'.join(trans.ss) + '\n' + trans.raw_pdb
+        settings['pdb'] = [('pdb', '\n'.join(trans.ss)+'\n'+trans.raw_pdb)]
         settings['js'] = 'external'
     if request.user:
         settings['authors'] = [request.user.name]

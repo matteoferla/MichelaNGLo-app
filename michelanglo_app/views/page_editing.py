@@ -189,3 +189,65 @@ def delete(request):
     else:
         page.delete()
         return {'status': 'success'}
+
+@view_config(route_name='mutate', renderer='json')
+def mutate(request):
+    #''page', 'key'?, 'chain', 'mutations'
+    log.info(f'{get_username(request)} is making mutants page')
+    if not all([k in request.params for k in ('page','model','chain','mutations')]):
+        request.response.status = 400
+        return {'status': f'Missing field ({[k for k in ("page model chain mutations".split()) if k not in request.params]})'}
+    page = Page(request.params['page'])
+    user = request.user
+    if not user:
+        request.response.status = 403
+        log.warn(f'{get_username(request)} is not autharised to edit page')
+        return {'status': 'not authorised'}
+    ownership = user.get_owned_pages()
+    ## cehck permissions
+    if page.identifier not in ownership and user.role != 'admin':  ## only owners can delete/mutate
+        request.response.status = 403
+        log.warn(f'{get_username(request)} tried but failed to mutate page')
+        return {'status': 'Not owner'}
+    else:
+        if 'key' in request.params:
+            page.key = request.params['key'].encode('utf-8')
+        settings = page.load()
+        #protein = settings['pdb'][]
+        model = int(request.params['model'])
+        chain = request.params['chain']
+        mutations = request.params['mutations'].split()
+        all_protein_data = json.loads(settings['proteinJSON'])
+        protein_data = json.loads(settings['proteinJSON'])[model]
+        filename = os.path.join('michelanglo_app', 'temp', f'{page.identifier}.mut.pdb')
+        if protein_data['type'] == 'data':
+            if protein_data['isVariable'] == 'true':
+                seq = [p[1] for p in settings['pdb'] if p[0] == protein_data['value']][0]
+            else:
+                seq = protein_data['value']
+            with open(filename, 'w') as fh:
+                fh.write(seq)
+            PyMolTranspiler.mutate_file(filename, filename, mutations, chain)
+        elif protein_data['type'] == 'rcsb':
+            PyMolTranspiler.mutate_code(protein_data['value'], filename, mutations, chain)
+        else:
+            request.response.status = 406
+            return {'status','cannot create mutations from URL for security reasons'}
+        with open(filename, 'r') as fh:
+            seq = fh.read()
+        new_variable = f"mutant_{model}"
+        all_protein_data.append({"type": "data",
+                                 "value": new_variable,
+                                 "isVariable": "true"})
+        settings['proteinJSON'] = json.dumps(all_protein_data)
+        settings['pdb'].append((new_variable, seq))
+        new_model = len(all_protein_data) - 1
+        settings['description'] += f'Protein variants generated for model #{model} as model #{new_model}.\n\n'
+        common = '<span class="prolink" data-toggle="protein" data-hetero="true"'
+        for mutant in mutations:
+            n = re.search("(\d+)", mutant).group(1)
+            settings['description'] += f'* __{mutant}__ '+\
+                                       f'({common}  data-focus="residue" data-title="{mutant} wild type" data-load="{model} " data-selection="{n}:{chain}">wild type</span>'+\
+                                       f'/{common}  data-focus="clash" data-title="{mutant} mutant" data-load="{new_model} " data-selection="{n}:{chain}">mutant</span>)\n'
+        page.save(settings)
+        return {'status': 'success'}

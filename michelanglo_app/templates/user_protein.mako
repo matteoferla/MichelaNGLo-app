@@ -96,6 +96,7 @@
 <%include file="markup/markup_builder_modal.mako"/>
 <%include file='edit_modal/implement_modal.mako'/>
 <%include file='edit_modal/combine_modal.mako'/>
+<%include file='edit_modal/mutate_modal.mako'/>
 
 
 </%block>
@@ -159,7 +160,7 @@ $(document).ready(function () {
         %endif
 
         <%include file="edit_modal/combine.js"/>
-
+        <%include file="edit_modal/mutate_modal.js"/>
     %endif
 
 }); //ready

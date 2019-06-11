@@ -10,6 +10,7 @@ conda update conda
 conda create -n env python=3.7 anaconda
 conda activate env
 conda install  -n env -c schrodinger pymol
+conda install -c conda-forge biopython
 
 
 

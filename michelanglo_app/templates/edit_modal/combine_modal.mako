@@ -12,6 +12,7 @@
                     Additionally, functions for specific representations can be run via prolinks using the attribute <code>data-view="nameOfFunction"</code>.<br/>
                     In order to implement either of these, generate another page and combine it here.<br/>
                     Note that editing the JS in blocked for regular users (due to security concerns), please speak to the site admin if you would like to alter your permissions.
+                    Also note that this page will refresh in order for the changes to be made.
                 </p>
                 %if user:
                     <%

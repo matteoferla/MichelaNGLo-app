@@ -12,7 +12,7 @@ __license__ = "Cite me!"
 __copyright__ = 'GNU'
 __version__ = "0"
 
-import argparse, os, csv
+import argparse, os, csv, re
 from pprint import PrettyPrinter
 from collections import defaultdict
 pprint = PrettyPrinter().pprint
@@ -36,6 +36,8 @@ else:
     __main__.pymol_argv = ['pymol', '-qc']
 import pymol
 pymol.finish_launching()
+
+from Bio.Data.IUPACData import protein_letters_1to3 as p1to3
 
 
 ###############################################################
@@ -318,6 +320,42 @@ class PyMolTranspiler:
         pymol.cmd.iterate('(all)', self._iterate_cmd, space=myspace)
         self.parse_ss(myspace['data'])
         return self
+
+
+    @staticmethod
+    def _mutante(outfile, mutations, chain):
+        pymol.cmd.wizard("mutagenesis")
+        pymol.cmd.do("refresh_wizard")
+        for mutant in mutations:
+            n = re.search("(\d+)", mutant).group(1)
+            if re.match("\w{3}d+\w{3}", mutant):  # 3 letter Arg
+                f = re.match("\w{3}d+(\w{3})", mutant).group(1).upper()
+            else:  # 1 letter R
+                f = p1to3[mutant[-1]].upper()
+            pymol.cmd.get_wizard().set_mode(f)
+            print('*'*10,f"{chain}/{n}/")
+            pymol.cmd.get_wizard().do_select(f"{chain}/{n}/")
+            pymol.cmd.get_wizard().apply()
+            #m = pymol.cmd.get_model(f"resi {n} and name CA").atom
+            #if m:
+            #    pass
+            #    # assert f == m[0].resn, f'Something is not right {r} has a {m[0].atom}'
+        pymol.cmd.save(outfile)
+        pymol.cmd.delete('(all)')
+
+    @classmethod
+    def mutate_code(cls, code, outfile, mutations, chain):
+        pymol.cmd.delete('(all)')
+        pymol.cmd.fetch(code)
+        cls._mutante(outfile, mutations, chain)
+        return 1
+
+    @classmethod
+    def mutate_file(cls, infile, outfile, mutations, chain):
+        pymol.cmd.delete('(all)')
+        pymol.cmd.load(infile)
+        cls._mutante(outfile, mutations, chain)
+        return 1
 
     def fix_structure(self):
         """

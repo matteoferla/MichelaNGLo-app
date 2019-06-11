@@ -23,6 +23,7 @@ def includeme(config):
     config.add_route('login', '/login')
     config.add_route('status', '/status')
     config.add_route('get', '/get')
+    config.add_route('mutate', '/mutate')
     config.add_route('get_pages', '/get_pages')
     config.add_route('admin', '/admin')
     config.add_route('venus', '/venus')

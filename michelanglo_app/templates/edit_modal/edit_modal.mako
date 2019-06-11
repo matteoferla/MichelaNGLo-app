@@ -17,7 +17,7 @@
                 </div>
 
                 <div class="row">
-                    <div class="offset-2 col-9">
+                    <div class="offset-1 col-11">
                         <div class="btn-group" role="group" aria-label="formatting" id="formatting">
                           <button type="button" class="btn btn-outline-secondary" id="formatting_h3"><i class="far fa-h3"></i></button>
                           <button type="button" class="btn btn-outline-secondary" id="formatting_bold"><i class="far fa-bold"></i></button>
@@ -35,6 +35,7 @@
                         </div>
                         <%include file="../markup/markup_builder_btn.mako"/>
                         <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#combine_modal"><i class="far fa-paperclip"></i> Add additional model</button>
+                        <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#mutate_modal"><i class="far fa-biohazard"></i> Make mutations</button>
 
                     </div>
                     </div>
