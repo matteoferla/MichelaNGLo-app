@@ -91,6 +91,10 @@ NGL.specialOps.showResidue = function (id, selection, color, radius, view) {
         // Prepare
         NGL.specialOps.postInitialise(); //worst case schenario prevention.
         var protein = NGL.getStage(id).getComponentByType('structure');
+        // corner case that there is no cartoon.
+        if (protein.reprList.length === 0) {
+            protein.addRepresentation( "cartoon", {color: NGL.ColormakerRegistry.addSelectionScheme([[color, selection],["white", "*"]]), smoothSheet: true})}
+        // defaults
         color = color || "hotpink";
         radius = radius || 4;
         //selection = typeof selection === "string" ? new NGL.Selection(selection) : selection;
@@ -455,7 +459,7 @@ NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
         else if ((focus === 'blur') || (focus === 'bfactor')) {
             NGL.specialOps.showBlur(id,selection, color, radius, view);
         }
-        else if (structure !== undefined) { console.log('Please add view=reset if you are changing structure as its too ambiguous otherwise.');}
+        else if (structure !== undefined) { console.log('Please add view-reset if you are changing structure as its too ambiguous otherwise.');}
         else {throw 'ValueError: odd data-focus tag.'}
     }
     // action!
