@@ -138,9 +138,12 @@ NGL.specialOps.showClash = function (id, selection, color, radius, tolerance, vi
     // Find what clashes...
     protein.structure.getView(new NGL.Selection(selection.toString())).eachAtom(function (atom) {
     protein.structure.eachAtom(function (neighbour) {
-        if ((atom.distanceTo(neighbour) < atom.vdw + neighbour.vdw - tolerance) &&
-            (!atom.hasBondTo(neighbour))                          //they are bonded so must be fine.
-            && (atom.residueIndex !== neighbour.residueIndex)) { //self clashes are fine.
+        if ([atom.distanceTo(neighbour) < atom.vdw + neighbour.vdw - tolerance, //distance is too close
+            ! atom.hasBondTo(neighbour),  //they are not bonded.
+            atom.residueIndex !== neighbour.residueIndex, //they are not intra-residue
+            ! (atom.atomname === 'C' && neighbour.atomname === 'N' && parseInt(atom.residueIndex) === parseInt(neighbour.residueIndex)-1), // not a C-N bond at C-term
+            ! (atom.atomname === 'N' && neighbour.atomname === 'C' && parseInt(atom.residueIndex)-1 === parseInt(neighbour.residueIndex)), // not a C-N bond at N-term
+            ].every((s)=>!! s)) {
                 var position = [atom.x / 2 + neighbour.x / 2, atom.y / 2 + neighbour.y / 2, atom.z / 2 + neighbour.z / 2];
                 if (NGL.Debug) {
                     console.log('Clash between ' + atom.atomname + ' of residue (' + atom.vdw.toString() + ' &Aring;) ' + atom.residueIndex + ' and ' +
