@@ -38,6 +38,14 @@
                     </div>
                 </div>
                 %endfor
+                <div class="col-12 col-md-6 mb-2">
+                    <div class="border rounded bg-light p-2">
+                        <div     class="custom-control custom-switch">
+                          <input class="custom-control-input"  id="markup_hetero" type="checkbox" >
+                          <label class="custom-control-label" for="markup_hetero">Show ligands </label>
+                        </div>
+                    </div>
+                </div>
                 <div class="input-group mb-2 mx-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text" >Orientation</span>

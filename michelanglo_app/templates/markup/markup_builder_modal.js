@@ -1,3 +1,6 @@
+const show_input = (element) => $(element).parent().parent().show();
+const hide_input = (element) => $(element).parent().parent().hide();
+
 $('#markup_modal').on('hide.bs.modal', function (e) {
     $('#moved_viewport').before($('#viewport').detach());
     $('#viewport').after('<div id=""></div>');
@@ -12,7 +15,7 @@ $('#markup_modal').on('shown.bs.modal', function (e) {
   NGL.getStage('viewport').handleResize();
     //buttons.
     $('#markup_title').parent().show();
-    $('#markup_selection,#markup_color,#markup_radius,#markup_tolerance').each(function () {$(this).parent().hide()});
+    $('#markup_selection,#markup_color,#markup_radius,#markup_tolerance').each(function () {hide_input(this)});
     $('#markup_view_toggle label').click(function (){
         $('#markup_view_toggle label').each(function () {$(this).removeClass('btn-success').addClass('btn-secondary');});
         $(this).removeClass('btn-secondary').addClass('btn-success');
@@ -20,16 +23,16 @@ $('#markup_modal').on('shown.bs.modal', function (e) {
     //make stuff toggle
     $('[name="markup_zoom"]').change(function () {
         $('#markup_selection,#markup_color,#markup_radius,#markup_tolerance,#markup_view').each(function () {
-            $(this).parent().hide();
+            hide_input(this);
             $(this).val('')});
             $('#markup_view').attr('placeholder','optional 16x1 array');
-        if ($(this).attr('id') === 'domain') {$('#markup_selection,#markup_color,#markup_view').each(function () {$(this).parent().show()});}
-        else if ($(this).attr('id') === 'residue') {$('#markup_selection,#markup_color,#markup_radius,#markup_view').each(function () {$(this).parent().show()});}
-        else if ($(this).attr('id') === 'clash') {$('#markup_selection,#markup_color,#markup_radius,#markup_tolerance,#markup_view').each(function () {$(this).parent().show()});}
-        else if ($(this).attr('id') === 'orientation') {$('#markup_view').each(function () {$(this).parent().show()});
+        if ($(this).attr('id') === 'domain') {$('#markup_selection,#markup_color,#markup_view').each(function () {show_input(this)});}
+        else if ($(this).attr('id') === 'residue') {$('#markup_selection,#markup_color,#markup_radius,#markup_view').each(function () {show_input(this)});}
+        else if ($(this).attr('id') === 'clash') {$('#markup_selection,#markup_color,#markup_radius,#markup_tolerance,#markup_view').each(function () {show_input(this)});}
+        else if ($(this).attr('id') === 'orientation') {$('#markup_view').each(function () {show_input(this)});
                                                         $('#markup_view').attr('placeholder','16x1 array or the keywords "auto" or "reset"');}
-        else if ($(this).attr('id') === 'bfactor') {$('#markup_selection,#markup_color,#markup_radius,#markup_view').each(function () {$(this).parent().show()});}
-        else if ($(this).attr('id') === 'surface') {$('#markup_view').each(function () {$(this).parent().show()});}
+        else if ($(this).attr('id') === 'bfactor') {$('#markup_selection,#markup_color,#markup_radius,#markup_view').each(function () {show_input(this)});}
+        else if ($(this).attr('id') === 'surface') {$('#markup_view').each(function () {show_input(this)});}
 
         //
     });
@@ -45,7 +48,11 @@ $('#markup_modal').on('shown.bs.modal', function (e) {
             if (!! value) {return c+'data-'+key+'="'+value+'" '}
             else {return c}
         },'');
+    if ($('#markup_hetero').prop('checked')) {
+        attributes += 'data-hetero=true ';
+    }
     var mode = $('[name="markup_zoom"]:checked').attr('id');
+    let code;
     if (mode === 'default') {
         code = 'data-view="reset"';
     }

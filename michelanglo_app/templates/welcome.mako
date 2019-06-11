@@ -121,10 +121,10 @@
         let mustard = '#ffcc66';
         window.descriptions = [
         {
-            title_left: '<i class="far fa-rocket"></i> Easy and fast',
+            title_left: '<i class="far fa-rocket"></i> Quick and easy',
             text_left: 'Create interactive protein views from <a href="/pymol">a PyMOL PSE file</a> or <a href="/pymol">a PDB code/file</a>',
             title_right: '<i class="far fa-map-marked-alt"></i> Control',
-            text_right: 'Create <span class="prolink" data-toggle="protein" data-focus="residue" data-selection="210:A">links</span> to control the protein views',
+            text_right: 'Create <span class="prolink" data-toggle="protein" data-focus="residue" data-selection="210:A" data-hetero=true>links</span> to control the protein views',
             id: '#frame0 i',
             view: () => NGL.specialOps.showDomain('viewport', '*', mustard, [41.29294830639554, 22.248845321357074, -38.15151059779185, 0, 25.32782096795833, 30.857828961827977, 45.40872532497881, 0, 36.18080104201877, -46.99403932937292, 11.754418842671718, 0, -10.200858175132803, -24.766561885907656, -2.229398340052575, 1])
         },

@@ -113,7 +113,7 @@ NGL.specialOps.showResidue = function (id, selection, color, radius, view) {
         var atomSet = protein.structure.getAtomSetWithinSelection( selector , parseFloat(radius) );
         // expand selection to complete groups
         var atomSet2 = protein.structure.getAtomSetWithinGroup( atomSet );
-        var licoriceRep = protein.addRepresentation( "licorice", { sele: atomSet2.toSeleString()+ ' and not '+selection.toString()} );
+        var licoriceRep = protein.addRepresentation( "licorice", { sele: atomSet2.toSeleString()+ ' and not ('+selection.toString()+' and not (.C or .N)'} );
         var hyperRep = protein.addRepresentation( "hyperball", { sele: selection.toString(), color: schemeId} );
         protein.addRepresentation("contact", {
             masterModelIndex: 0,
@@ -427,6 +427,7 @@ NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
     }
     var title = $(prolink).data('title');
     var focus = $(prolink).data('focus'); // residue | domain | clash
+    var hetero = $(prolink).data('hetero') || false;
 
     // title.
     NGL.specialOps.showTitle(id, title);
@@ -464,6 +465,8 @@ NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
         }
         else if (structure !== undefined) { console.log('Please add view-reset if you are changing structure as its too ambiguous otherwise.');}
         else {throw 'ValueError: odd data-focus tag.'}
+        // hetero flag is a hack.
+        if (!! hetero) {NGL.getStage(id).getComponentByType('structure').addRepresentation( "licorice", {colorScheme: "element", multipleBond: "symmetric", sele: "hetero"})}
     }
     // action!
     if (structure !== undefined) {

@@ -101,6 +101,12 @@
             <td>shows a temporary title, which is actually a label element with a for attribute pointing to the viewport id. Consequently if one wanted to override it's location one could add <code>&lt;label for="viewport">&lt;/label></code> where desired.</td>
         </tr>
         <tr>
+            <td><code>data-hetero</code></td>
+            <td><code>false</code></td>
+            <td>All</td>
+            <td>If true, will display hetero atoms (ligands), including waters. They will be displayed with element colours in licorice style with double bonds shown.</td>
+        </tr>
+        <tr>
             <td><code>data-load</code></td>
             <td>&mdash;</td>
             <td></td>
