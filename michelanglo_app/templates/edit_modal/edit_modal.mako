@@ -82,11 +82,11 @@
                             <div class="input-group-append">
                             <span class="input-group-text" id="image_label">Use image</span>
                           </div>
-                          <input id="image" type="text" class="form-control" placeholder="No image" aria-label="None" aria-describedby="image_label">
                           %if image:
                           <input id="image" type="text" class="form-control"  val="${image}"  aria-label="None" aria-describedby="image_label">
+                          % else:
+                          <input id="image" type="text" class="form-control" placeholder="No image" aria-label="None" aria-describedby="image_label">
                           %endif
-                          >
                         </div>
                     </div>
                 </div>
