@@ -155,7 +155,7 @@ $('#submit').click(function () {
                 window.location.href = "/data/"+msg.page;
             })
             .fail(function () {
-                ops.addToast('jobcompletion','Conversion failed','The data did not convert correctly.','bg-danger');
+                ops.addToast('jobcompletion','Conversion issue','The server is unsure about something.','bg-warning');
             });
     setTimeout(() => ops.statusCheck(), 2000);
 });

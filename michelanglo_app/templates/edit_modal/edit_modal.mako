@@ -52,7 +52,7 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-12 col-lg-6">
+                    <div class="col-12 col-xl-4 col-lg-6">
                         <div class="input-group mb-3">
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="columns_viewport_label">Viewport size</span>
@@ -62,7 +62,7 @@
                     </div>
                 </div>
                     </div>
-                    <div class="col-12 col-lg-6">
+                    <div class="col-12 col-xl-4 col-lg-6">
                         <div class="input-group mb-3">
                             <div class="input-group-prepend">
                                 <span class="input-group-text" id="location_viewport_label">Viewport location</span>
@@ -75,6 +75,18 @@
                                 <input type="radio" name="location_viewport" id="location_viewport_right" autocomplete="off" value="right"> Right <i class="far fa-caret-square-right"></i>
                               </label>
                             </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-xl-4 col-lg-6">
+                        <div class="input-group mb-3" data-toggle="toolip" title="To use an image add a URL point to that image. Note, we will not host images here.">
+                            <div class="input-group-append">
+                            <span class="input-group-text" id="image_label">Use image</span>
+                          </div>
+                          <input id="image" type="text" class="form-control" placeholder="No image" aria-label="None" aria-describedby="image_label">
+                          %if image:
+                          <input id="image" type="text" class="form-control"  val="${image}"  aria-label="None" aria-describedby="image_label">
+                          %endif
+                          >
                         </div>
                     </div>
                 </div>

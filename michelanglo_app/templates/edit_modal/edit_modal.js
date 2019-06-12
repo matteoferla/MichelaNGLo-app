@@ -95,6 +95,7 @@ $('#edit_submit').click(function () {
             'columns_viewport': $('#columns_viewport').val(),
             'columns_text': 12 - parseInt($('#columns_viewport').val()),
             'location_viewport': $('[name="location_viewport"]:checked').val(),
+            'image': $('#image').val(),
             'page': '${page}',
             'residues': $('#edit_residues').val(), //no longer valid.
             'freelyeditable': $('#freelyeditable').prop('checked'),

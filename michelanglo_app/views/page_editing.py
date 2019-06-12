@@ -100,6 +100,9 @@ def edit(request):
             settings['location_viewport'] = request.POST['location_viewport']
         if 'proteinJSON' in request.POST:
             settings['proteinJSON'] = request.POST['proteinJSON']
+        if 'image' in request.POST:
+            print(__file__, __name__, request.POST['image'])
+            settings['image'] = request.POST['image']
         #save
         page.save(settings)
         return {'success': 1}
