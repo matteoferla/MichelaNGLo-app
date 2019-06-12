@@ -71,20 +71,17 @@ window.tour = new Tour({
       {
         element: "#pdb",
         title: "PDB address",
-        content: `${info.attr.pdb|n}`,
-        placement: "top"
+        content: `${info.attr.pdb|n}`
       },
       {
         element: "#uniform_non_carbon",
         title: "Correct color error for non-carbons",
-        content: `${info.attr.uniform_non_carbon|n}`,
-        placement: "top"
+        content: `${info.attr.uniform_non_carbon|n}`
       },
       {
         element: "#image",
         title: "Static image on load",
-        content: `${info.attr.image|n}`,
-        placement: "top"
+        content: `${info.attr.image|n}`
       },
       {
         element: "#sticks_sym_licorice",

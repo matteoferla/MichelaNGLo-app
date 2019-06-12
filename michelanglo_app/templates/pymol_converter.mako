@@ -9,62 +9,45 @@
 <%block name="subtitle">
             Convert a PyMol file to an interactive NGL viewport
 </%block>
+<%def name="checkbox(title, label, id, append=None, is_checked=False, justify_right=False)">
+    <div
+        %if justify_right:
+            class="input-group justify-content-end"
+        %else:
+            class="input-group"
+        %endif
+        data-toggle="tooltip" title="${title|n}">
+      <div class="input-group-prepend">
+        <div class="input-group-text
+        % if not append:
+                rounded-right
+        % endif
+        ">
+          <div class="custom-control custom-switch">
+              <input type="checkbox" id="${id}" class="custom-control-input"
+                     %if is_checked:
+                         checked
+                     %endif
+                    >
+                <label class="custom-control-label" for="${id}">${label}</label>
 
+              </div>
+            </div>
+        </div>
+        %if append:
+            <div class="input-group-append">
+                ${append|n}
+            </div>
+        %endif
+      </div>
+</%def>
 
 <%block name="body">
 <ul class="list-group list-group-flush">
             <li class="list-group-item">
                 <form>
-                <!-- mode selector -->
-                <div class="row">
-                    <div class="col-lg-8 mb-3">
-                        <div class="input-group" data-toggle="tooltip" title="Choose input method">
-                          <div class="input-group-prepend">
-                            <span class="input-group-text" id="input_mode-addon">Mode </span>
-                          </div>
-                          <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                          <label class="btn btn-secondary active">
-                            <input type="radio" name="input_mode" id="input_mode_out" autocomplete="off" value="file" checked> Upload PSE
-                          </label>
-                              <!--
-                          <label class="btn btn-secondary">
-                            <input type="radio" name="input_mode" id="input_mode_pdb" value="pdb" autocomplete="off"> Upload PDB
-                          </label>-->
-                          <label class="btn btn-secondary">
-                            <input type="radio" name="input_mode" id="input_mode_file" value="out" autocomplete="off"> Input PyMol output
-                          </label>
-                        </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- in via out -->
-                <div id="in_via_out" class="collapse">
-                    <h3>Input via PyMOL output</h3>
-                    <p>To generate the pyMOL ouput use the commands in PyMOL:</p>
-                        <pre><code>iterate all, ID,chain,resi, resn,name, elem,reps, color</code></pre><p>and</p><pre><code>get_view</code></pre>
-                    <p>Then copy-paste the whole output here.</p>
-                        <div class="row">
-                            <div class="col-md-12 pb-4">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">PyMOL output</span>
-                                    </div>
-                                    <textarea class="form-control" aria-label="With textarea" id="pymol_output" rows="6" required></textarea>
-                                    <div class="input-group-append">
-                                        <button type="button" class="btn btn-info" id="demo">Demo</button>
-                                    </div>
-                                </div>
-                                <div class="invalid-feedback" id="error_pymol_output">Please paste a valid output.</div>
-                            </div>
-                        </div>
-                </div>
-
-                <!-- in via PSE file -->
-                <div id="in_via_file" class="collapse show">
-                    <h3>Input via PyMol</h3>
                     <div class="row">
-                        <div class="col-lg-6 mb-3">
+                        <div class="col-xl-4 col-lg-6 mb-3">
                             <div class="input-group" data-toggle="tooltip" title="Upload your PyMOL PSE file">
                               <div class="input-group-prepend">
                                 <span class="input-group-text" id="upload_addon">Upload PSE file</span>
@@ -79,69 +62,24 @@
                             </div>
                             <div class="invalid-feedback" id="error_upload">Please upload a valid pse file.</div>
                         </div>
-                        <div class="col-xl-4 col-md-6 mb-4">
-                            <div class="input-group" data-toggle="tooltip"
-                                 title="Basically, if you are using a PSE based on a RCSB PDB structure, don't tick this, but give the PDB code. Otherwise, tick this. For more info, press the question mark.">
-                                <div class="input-group-prepend">
-                                    <div class="input-group-text bg-secondary">
-                                        <input type="checkbox" id="pdb_string"></div>
-                                </div>
-                                <div class="input-group-append">
-                            <span class="input-group-text">
-                                Include PDB data
-                            </span>
-                                    <div class="btn btn-info" data-toggle="modal" data-target="#CDN_modal" >?</div>
-                                </div>
-                            </div>
+                        <div class="col-xl-3 col-lg-4 col-md-6 mb-3">
+                            ${checkbox(info.attr.pdb_string, "Include PDB data", "pdb_string", '<div class="btn btn-info" data-toggle="modal" data-target="#CDN_modal" >?</div>', justify_right=True)}
+
                         </div>
-
-                    </div>
-                </div>
-
-
-
-                <!-- in common -->
-                <div id="in_common">
-                    <div class="row">
-                        <div class="col-xl-4 col-md-6 pb-4">
+                        <div class="col-xl-2 col-lg-3 col-md-6 mb-3">
                                 <div class="input-group mb-3" data-toggle="tooltip"
                                      title="${info.attr.pdb|n}">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">PDB code/name</span>
                                     </div>
-                                    <input type="text" class="form-control" id="pdb" value="1UBQ" required>
+                                    <input type="text" class="form-control rounded-right" id="pdb" value="1UBQ" required>
                                     <div class="invalid-feedback" id="error_pdb">No PDB code</div>
                                 </div>
                             </div>
-                        <div class="col-xl-4 col-md-6 mb-4">
-                            <div class="input-group" data-toggle="tooltip"
-                                 title="${info.attr.uniform_non_carbon|n}">
-                                <div class="input-group-prepend">
-                                    <div class="input-group-text bg-secondary">
-                                        <input type="checkbox" id="uniform_non_carbon"></div>
-                                </div>
-                                <div class="input-group-append">
-                            <span class="input-group-text">
-                                Uniform non carbons
-                            </span>
-                                </div>
-                            </div>
+                        <div class="col-xl-2 col-lg-3 col-md-6 mb-4">
+                            ${checkbox(info.attr.uniform_non_carbon, "Uniform non carbons", "uniform_non_carbon", append=None, is_checked=True)}
                         </div>
-                        <div class="col-xl-3 col-md-6 mb-4">
-                            <div class="input-group" data-toggle="tooltip"
-                                 title="Use a static image that when clicked becomes the NGL interactive protein">
-                                <div class="input-group-prepend">
-                                    <div class="input-group-text bg-secondary">
-                                        <input type="checkbox" id="image"></div>
-                                </div>
-                                <div class="input-group-append">
-                            <span class="input-group-text">
-                                Static image
-                            </span>
-                                </div>
-                            </div>
-                        </div><!--image-->
-                        <div class="col-xl-7 col-md-8 mb-4">
+                        <div class="col-xl-5 col-lg-6 col-md-8 mb-4">
                             <div class="input-group" data-toggle="tooltip" data-html="true"
                                  title="${info.attr.sticks|n}">
                                 <div class="input-group-prepend">
@@ -161,82 +99,8 @@
                             </div>
                         </div><!--sticks-->
 
-
-
-                        <!--<div class="col-xl-4 col-md-6 pb-4">
-                            <div class="input-group" data-toggle="tooltip"
-                                 title="This is just a stylistic thing...">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text">Indent</span>
-                                </div>
-                                <div class="input-group-append">
-                                    <span class="input-group-text bg-white rounded-right"><input type="range" list="tickmarks" id="indent" min="0" max="10" value="0"></span>
-                                    <datalist id="tickmarks">
-                                        <option value="0" label="0">
-                                        <option value="1">
-                                        <option value="2">
-                                        <option value="3">
-                                        <option value="4">
-                                        <option value="5" label="5">
-                                        <option value="6">
-                                        <option value="7">
-                                        <option value="8">
-                                        <option value="9">
-                                        <option value="10" label="10">
-                                    </datalist>
-                                </div>
-                            </div>
-                        </div>-->
                     </div>
-                    <!--
-                    <h3 data-toggle="collapse" data-target="#technical_div .collapse, #technical_div+.collapse" id="technical_div">Technical <i class="far fa-angle-double-down collapse show"></i><i class="far fa-angle-double-up collapse"></i></h3>
-                    -->
-                    <div class="row collapse">
-                        <div class="col-xl-4 col-md-6 pb-4">
-                                <div class="input-group mb-3" data-toggle="tooltip"
-                                     title="the id of the div that will contain the viewport">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text">Viewport id</span>
-                                    </div>
-                                    <input type="text" class="form-control" id="viewport_id" value="viewport" required>
-                                    <div class="invalid-feedback" id="error_pdb">No id</div>
-                                </div>
-                            </div><!--viewport-->
-                        <div class="col-xl-5 col-md-6 mb-4">
-                            <div class="input-group" data-toggle="tooltip"
-                                 title="Add a 'take snapshop' function. To do this a button is required with a given id.">
-                                <div class="input-group-prepend">
-                                    <div class="input-group-text bg-secondary">
-                                        <input type="checkbox" id="snapshot" checked></div>
-                                    <span class="input-group-text">
-                                Snapshot
-                            </span>
-                                </div>
-                                <div class="input-group-append">
-                                    <input type="text" class="form-control" id="snapshot_id" value="saveBtn">
-                                </div>
-                            </div>
-                        </div><!--snap-->
-                        <div class="col-xl-12 col-md-12 mb-4">
-                            <div class="input-group" data-toggle="tooltip"
-                                 title="The output can contain an script element pointing to a ngl.js source. Disable the checkbox to not have one or alter the address.">
-                                <div class="input-group-prepend">
-                                    <div class="input-group-text">NGL Address</div>
 
-                                </div>
-                                <div class="input-group-text bg-secondary rounded-0">
-                                    <input type="checkbox" id="cdn_bool" checked>
-                                </div>
-                                <input type="text" class="form-control" id="cdn" value="https://unpkg.com/ngl@0.10.4/dist/ngl.js">
-                                ### https://cdn.rawgit.com/arose/ngl/v0.10.4-1/dist/ngl.js
-                                <div class="input-group-append">
-                                    <div class="btn btn-info" data-toggle="modal" data-target="#CDN_modal" >?</div>
-
-                                </div>
-                            </div>
-                        </div><!--NGL-->
-                    </div>
-                </div>
 
                 <!--footnote-->
                 <p class="card-text">Please see <a href="https://github.com/matteoferla/PyMOL-to-NGL-transpiler/blob/master/README.md">the Github readme <i class="fas fa-external-link"></i></a> for documentation about how the conversions are done.</p>

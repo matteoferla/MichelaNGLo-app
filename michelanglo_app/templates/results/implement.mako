@@ -15,7 +15,7 @@
 % if image:
    <pre>${copy_btn('viewport_code')}<code id="viewport_code">&lt;div id="${viewport}" role="NGL" data-proteins='${proteinJSON}' data-backgroundcolor="${backgroundcolor}">&lt;img src="path/to_your_image.jpg" width="200px">&lt;/div></code></pre>
 % else:
-   <pre><${copy_btn('viewport_code')}<code id="viewport_code">&lt;div id="${viewport}" role="NGL" data-proteins='${proteinJSON}' data-backgroundcolor="${backgroundcolor}">&lt;/div></code></pre>
+   <pre>${copy_btn('viewport_code')}<code id="viewport_code">&lt;div id="${viewport}" role="NGL" data-proteins='${proteinJSON}' data-backgroundcolor="${backgroundcolor}">&lt;/div></code></pre>
    <p>Optionally add <code>width="200px"</code> if you don't want it 100% width.</p>
 % endif
 
@@ -39,7 +39,7 @@ Below these add the following to all the custom representation and view of the p
 <pre style="overflow: scroll; height: 5.5rem;">${copy_btn('fun_code')}<code id="fun_code">&lt;script type="text/javascript"&gt;${loadfun}&lt;/script&gt;</code></pre>
 
 <h4>Multiple representations</h4>
-<p>If you want to have multiple representations or protein, triggerable with a <a href="/markup">guiding link</a>, simply upload a new PyMol file and combine the <code>data-proteins</code> attribute, change the name of the second function in both the <code>data-proteins</code> attribute and its declaration block.</p>
+<p>If you want to have multiple representations or protein, triggerable with a <a href="/docs/markup">guiding link</a>, simply upload a new PyMol file and combine the <code>data-proteins</code> attribute, change the name of the second function in both the <code>data-proteins</code> attribute and its declaration block.</p>
 
 
 <!--

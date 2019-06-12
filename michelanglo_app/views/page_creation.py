@@ -62,8 +62,8 @@ def ajax_convert(request):
             return response
 
         ## set settings
-        settings = {'viewport': request.POST['viewport_id'],#'tabbed': int(request.POST['indent']),
-                    'image': is_js_true(request.POST['image']),
+        settings = {'viewport': 'viewport',#'tabbed': int(request.POST['indent']),
+                    'image': None,
                     'uniform_non_carbon':is_js_true(request.POST['uniform_non_carbon']),
                     'verbose': False,
                     'validation': True,

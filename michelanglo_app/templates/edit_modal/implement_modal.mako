@@ -1,3 +1,5 @@
+### This page gets filled via ajax call. See templates/results/implement.mako"
+
 <div class="modal fade" tabindex="-1" role="dialog" id="implement_modal">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">

@@ -9,21 +9,7 @@
 //housekeeping
 $('[data-toggle="tooltip"]').tooltip();
 
-//toggle swtich to control teh mode.
-$('[name="input_mode"]').on('change', function() {
-  if($(this).val() === "file") {
-    $('#in_via_file').collapse('show');
-    $('#in_via_out,#in_via_pdb').collapse('hide');
-  } else if($(this).val() === "out") {
-    $('#in_via_out').collapse('show');
-    $('#in_via_file,#in_via_pdb').collapse('hide');
-  } else if($(this).val() === "pdb") {
-      $('#in_via_pdb').collapse('show');
-      $('#in_via_out,#in_via_file').collapse('hide');
-  } else {
-      alert('No idea why I thought I needed a third.')
-  }
-});
+
 //////////////////////////////////////////////////////////////////////////
 //control the resolt of ticking the pdb data in the code checkbutton
 $('#pdb_string').change(function () {
@@ -124,7 +110,7 @@ $('#submit').click(function () {
 
     data = new FormData();
     // determine mode
-    var mode=$("input[name='input_mode']:checked").val();
+    var mode='file'; //no longer need
     // deal with the include PDB data which means that the it is not a publically available PDB.
     if ($('#pdb_string').is(':checked')) {data.append( 'pdb', ''); data.append('pdb_string',1)} else {data.append( 'pdb', valid_value('#pdb'));}
     data.append( 'mode', mode );
@@ -152,20 +138,7 @@ $('#submit').click(function () {
     else {throw 'Impossible mode';}
     //finish adding data.
     data.append( 'uniform_non_carbon',$('#uniform_non_carbon').is(':checked'));
-    data.append('viewport_id',valid_value('#viewport_id'));
-    data.append( 'image',$('#image').is(':checked'));
     data.append('stick_format',$("input[name='sticks']:checked").val());
-    var snapshot = '';
-    if ($('#snapshot').is(':checked')) {
-        snapshot = $('#snapshot_id').val();
-    }
-    data.append('save',snapshot);
-    var cdn = '';
-    if ($('#cdn_bool').is(':checked')) {
-        cdn = $('#cdn').val();
-    }
-    data.append( 'cdn',cdn);
-    data.append( 'indent',$('#indent').val());
     // ajax to ajax_convert
     //{pdb: pdb, uniform_non_carbon: uniform_non_carbon, pymol_output: pymol_output, indent: indent, cdn: cdn}
     $.ajax({

@@ -98,16 +98,6 @@ pre {
 	text-decoration: underline;
 }
 
-.clipboard {
-    color: orchid;
-}
-
-.clipboard:hover {
-    color: darkorchid;
-	cursor: pointer;
-	text-decoration: underline;
-}
-
 .confidential-ribbon{
   z-index: 1050;
   width: 200px;

@@ -21,7 +21,6 @@
     % if not no_buttons:
         <%include file="layout_components/vertical_menu_buttons.mako" args='tour=False'/>
     % endif
-
 </div>
 
 <%
@@ -35,7 +34,11 @@
     <div class='col-${columns_viewport} ${part_order[0]}'>
         <div class='card shadow'>
             <div class="card-body">
-                <div id="viewport" role="NGL" data-proteins='${proteinJSON|n}' data-backgroundcolor="${backgroundcolor}" ${data_other|n}></div>
+                <div id="viewport" role="NGL" data-proteins='${proteinJSON|n}' data-backgroundcolor="${backgroundcolor}" ${data_other|n}>
+                    %if image:
+                        <img src="${image}" class="w-100"/>
+                    %endif
+                </div>
             </div>
         </div>
     </div>
@@ -71,16 +74,9 @@
                     <a href="/data/${page}?no_user=1&remote=1&no_buttons=1&key=${key}" class="btn btn-outline-success w-100 my-1"  download="page.html"><i class="far fa-download"></i> Download html file</a>
                     <a href="/save_pdb?uuid=${page}&key=${key}" class="btn btn-outline-success w-100 my-1"  download="model.pdb"><i class="far fa-map"></i> Download PDB file</a>
                 % endif
-
-
-
-
-
                 ###<button type="button" class="btn btn-outline-primary w-100 my-1" data-toggle="modal" data-target="#basics"><i class="far fa-cubes"></i> Protein basics</button>
-
                 %if remote:
                     <button type="button" class="btn btn-outline-primary w-100 my-1" data-toggle="modal" data-target="#about"><i class="far fa-quote-right"></i> Credits</button>
-
                 %endif
                 </div>
         </div>
@@ -120,19 +116,7 @@ $(document).ready(function () {
         NGL.getStage('viewport').makeImage({trim: true, antialias: true, transparent: false}).then(NGL.download);
     });
 
-    $('#getimplement').click(function () { //this is available to all in case a guest makes a page.
-        $('#implement_modal .modal-body').html('<p><i class="far fa-dna fa-spin"></i> Data is loading...</p>');
-        $('#implement_modal').modal('show');
-        $.ajax({url: "/get",
-                data: {page: "${page}",
-                    %if key:
-                        key: "${key}",
-                    %endif
-                       item: 'implement'},
-                method: 'POST'
-            }).done( (msg) => {$('#implement_modal .modal-body').html(msg); new ClipboardJS('.clipboard');})
-                .fail((msg) => $('#implement_modal .modal-body').html('<p><i class="far fa-biohazard"></i> An error occurred and has been logged.</p>'));
-    });
+    <%include file="edit_modal/implement_modal.js"/>
 
     %if editable:
     <%include file="markup/markup_builder_modal.js"/>
