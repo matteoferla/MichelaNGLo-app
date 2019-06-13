@@ -16,7 +16,7 @@
         %else:
             class="input-group"
         %endif
-        data-toggle="tooltip" title="${title|n}">
+        data-toggle="tooltip" title="${title|n}" data-html="true" >
       <div class="input-group-prepend">
         <div class="input-group-text
         % if not append:
@@ -67,10 +67,10 @@
 
                         </div>
                         <div class="col-xl-2 col-lg-3 col-md-6 mb-3">
-                                <div class="input-group mb-3" data-toggle="tooltip"
+                                <div class="input-group mb-3" data-toggle="tooltip" data-html="true"
                                      title="${info.attr.pdb|n}">
                                     <div class="input-group-prepend">
-                                        <span class="input-group-text">PDB code/name</span>
+                                        <span class="input-group-text">PDB code</span>
                                     </div>
                                     <input type="text" class="form-control rounded-right" id="pdb" value="1UBQ" required>
                                     <div class="invalid-feedback" id="error_pdb">No PDB code</div>
