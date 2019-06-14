@@ -8,6 +8,14 @@ ops.addToast = function (id, title, body, bg) {
 
     };
 
+ops.addErrorToast = (xhr) => {if (!! xhr.responseJSON) {
+                                            ops.addToast('userpageerror','Error '+xhr.status,'An error occured.'+xhr.responseJSON.status, 'bg-danger');
+                                                }
+                                        else {
+                                            ops.addToast('userpageerror','Error '+xhr.status,'An unknown error occured.', 'bg-danger');
+                                        }
+                                 };
+
 ops.halt = function () {
     clearTimeout(ops.timer);
     $('#analyse').removeAttr('disabled');

@@ -47,7 +47,6 @@ def get_ajax(request):
             return render_to_response("../templates/part_error.mako", {'project': 'Michelanglo', 'error': '403'}, request)
     ####### get the modals
     elif request.params['item'] in  modals.keys():
-
         return render_to_response(modals[request.params['item']], {'project': 'Michelanglo', 'user': request.user}, request)
     ####### get the implementation code.
     elif request.params['item'] == 'implement':

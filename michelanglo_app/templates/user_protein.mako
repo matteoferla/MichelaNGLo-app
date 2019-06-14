@@ -12,7 +12,7 @@
         <small class="text-muted">The content of this page was
             %if authors:
                 edited by ${' and '.join(authors)} on the ${date}.<br/>
-                The administrators of this site take no legal responsibility for the content of this page, if you believe this page is in violation of the law, please report it.
+                The administrators of this site take no legal responsibility for the content of this page, if you believe this page is in violation of the law, <a href="#" id="report">please report it</a>.
             % else:
                 generated on the ${date}.
             %endif
@@ -145,6 +145,19 @@ $(document).ready(function () {
 
         <%include file="edit_modal/combine.js"/>
         <%include file="edit_modal/mutate_modal.js"/>
+
+
+
+        $('#report').click((event) => $.ajax({url: "/msg",
+                                            data: {'text': prompt("Reason for flagging?", "Data breach"),
+                                                    page: "${page}"
+                                                  },
+                                            method: 'POST'
+                                        })
+                        .done((msg) => ops.addToast('userreportedgood','Reported','Thank you! The site admin will look at the page shortly.', 'bg-success'))
+                        .fail(ops.addErrorToast)
+                    ); //click.
+
     %endif
 
 }); //ready

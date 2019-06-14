@@ -6,7 +6,17 @@
     </button>
   </div>
   <div class="modal-body">
-      <p>Email the site admin (<a href="mailto:matteo@well.ox.ac.uk">matteo@well.ox.ac.uk</a> with the email you registered with to request your password to be reset.</p>
+      <p>Enter the email you registered and the site admin will email you manually to verify before resetting your password.</p>
+      <div class="input-group mb-3">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="email_label">email address</span>
+          </div>
+          <input type="text" class="form-control" placeholder="email@email.com" aria-label="email address" aria-describedby="email_label" id="email">
+          <div class="input-group-append" id="button-addon4">
+        <button class="btn btn-outline-secondary" type="button" onclick="doModalAction('forgot')">Submit</button>
+  </div>
+        </div>E
+      <div class="invalid-feedback" id="email_error">The email is invalid</div>
 
   </div>
   <div class="modal-footer">

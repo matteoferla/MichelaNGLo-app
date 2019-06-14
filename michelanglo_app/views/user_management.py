@@ -16,6 +16,7 @@ the reply "status" and occasionally "username"
 The modal that controls it is `login/user_modal.mako`. However the content is controlled by a ajax to `/get` to get the relevant `*_modalcont.mako` (content).
 """
 from pyramid.view import view_config
+from ._common_methods import notify_admin
 from ..models import User
 
 import logging
@@ -77,23 +78,22 @@ def user_view(request):
             request.response.status = 400
             return {'status': 'wrong username'}
     elif action == 'register':
-        if username in ('guest', 'Anonymous', 'trashcan', 'public'): ##blacklisted
+        if targetuser:
+            request.response.status = 409
+            return {'status': 'existing username'}
+        elif username in ('guest', 'Anonymous', 'trashcan', 'public'): ##blacklisted
             request.response.status = 403
             return {'status': 'forbidden'}
-        if not targetuser:
+        else:
             if username == 'admin': #once only.
                 new_user = User(name=username, role='admin')
             else:
                 new_user = User(name=username, role='basic', email=request.params['email'])
             new_user.set_password(password)
             request.dbsession.add(new_user)
-            targetuser = request.dbsession.query(User).filter_by(name=username).first()
-            headers = remember(request, targetuser.id)
+            headers = remember(request, new_user.id)
             request.response.headerlist.extend(headers)
-            return {'status': 'registered', 'name': targetuser.name, 'rank': targetuser.role}
-        else:
-            request.response.status = 400
-            return {'status': 'existing username'}
+            return {'status': 'registered', 'name': new_user.name, 'rank': new_user.role}
     elif action == 'logout':
         headers = forget(request)
         request.response.headerlist.extend(headers)
@@ -131,6 +131,19 @@ def user_view(request):
         else:
             request.response.status = 403
             return {'status': 'access denied'}
+    elif action == 'forgot':
+        if 'email' in request.params:
+            email = str(request.params['email'])
+            targetuser = request.dbsession.query(User).filter_by(email=email).first()
+            if targetuser:
+                if notify_admin(f' {targetuser.name} ({email}) has requested a password reset.'):
+                    return {'status': 'request sent'}
+                else:
+                    request.response.status = 503
+                    return {'status': 'message could not be sent. Please email manually'}
+            else:
+                request.response.status = 403
+                return {'status': 'Unrecognised email address'}
     else:
         request.response.status = 405
         return {'status': 'unknown request'}

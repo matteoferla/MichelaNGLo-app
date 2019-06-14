@@ -51,6 +51,16 @@ window.doModalAction = function (action) {
             data['email'] = $('#email').val();
         }
     }
+    else if (action === 'forgot') {
+        let email = $('#email').val();
+        if ((!! email) && (email.search('@')>1)) {
+            data = {'email':email, 'action': action};
+        } else {
+            $('#email_error').show();
+            $('#email').addClass('is-invalid');
+            return 0;
+        }
+    }
     else if (action === 'change_password') {
         if ($('#neopassword').val() !== $('#eupassword').val()) {
             $('#eupassword_error').show();
@@ -117,7 +127,14 @@ window.doModalAction = function (action) {
                     $('#username').addClass('is-invalid');
                     $('#username_error').html('The username already exists.');
                     $('#username_error').show();
+                } else if (msg.responseJSON.status === 'Unrecognised email address') {
+                    $('#email').addClass('is-invalid');
+                    $('#email_error').html('email does not match');
+                    $('#email_error').show();
                 }
-            }
+                else { ops.addToast('userpageerror','Error '+msg.status,'An error occured.'+msg.responseJSON.status);}
+
+                }
+            else {ops.addToast('userpageerror','Error '+msg.status,'An unknown error occured.');}
         })
 }

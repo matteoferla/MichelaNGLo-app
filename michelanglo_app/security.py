@@ -13,6 +13,8 @@ class MyAuthenticationPolicy(AuthTktAuthenticationPolicy):
 
 def get_user(request):
     user_id = request.unauthenticated_userid
+    if user_id == 'None': ## this only happens on dev. No idea why.
+        user_id = None
     if user_id is not None:
         user = request.dbsession.query(User).get(user_id)
         return user
