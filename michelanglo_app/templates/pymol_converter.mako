@@ -76,7 +76,7 @@
                                     <div class="invalid-feedback" id="error_pdb">No PDB code</div>
                                 </div>
                             </div>
-                        <div class="col-xl-2 col-lg-3 col-md-6 mb-4">
+                        <div class="col-xl-3 col-lg-3 col-md-6 mb-4">
                             ${checkbox(info.attr.uniform_non_carbon, "Uniform non carbons", "uniform_non_carbon", append=None, is_checked=True)}
                         </div>
                         <div class="col-xl-6 col-lg-6 col-md-8 mb-4">
