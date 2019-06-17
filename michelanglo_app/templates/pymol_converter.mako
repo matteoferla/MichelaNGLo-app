@@ -47,7 +47,7 @@
             <li class="list-group-item">
                 <form>
                     <div class="row">
-                        <div class="col-xl-4 col-lg-6 mb-3">
+                        <div class="col-xl-5 col-lg-6 mb-3">
                             <div class="input-group" data-toggle="tooltip" title="Upload your PyMOL PSE file">
                               <div class="input-group-prepend">
                                 <span class="input-group-text" id="upload_addon">Upload PSE file</span>
@@ -66,7 +66,7 @@
                             ${checkbox(info.attr.pdb_string, "Include PDB data", "pdb_string", '<div class="btn btn-info" data-toggle="modal" data-target="#CDN_modal" >?</div>', justify_right=True)}
 
                         </div>
-                        <div class="col-xl-2 col-lg-3 col-md-6 mb-3">
+                        <div class="col-xl-3 col-lg-3 col-md-6 mb-3">
                                 <div class="input-group mb-3" data-toggle="tooltip" data-html="true"
                                      title="${info.attr.pdb|n}">
                                     <div class="input-group-prepend">
@@ -79,7 +79,7 @@
                         <div class="col-xl-2 col-lg-3 col-md-6 mb-4">
                             ${checkbox(info.attr.uniform_non_carbon, "Uniform non carbons", "uniform_non_carbon", append=None, is_checked=True)}
                         </div>
-                        <div class="col-xl-5 col-lg-6 col-md-8 mb-4">
+                        <div class="col-xl-6 col-lg-6 col-md-8 mb-4">
                             <div class="input-group" data-toggle="tooltip" data-html="true"
                                  title="${info.attr.sticks|n}">
                                 <div class="input-group-prepend">
