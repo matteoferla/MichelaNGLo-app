@@ -12,7 +12,7 @@ __license__ = "Cite me!"
 __copyright__ = 'GNU'
 __version__ = "0"
 
-import argparse, os, csv, re
+import argparse, os, re, threading
 from pprint import PrettyPrinter
 from collections import defaultdict
 pprint = PrettyPrinter().pprint
@@ -69,6 +69,48 @@ class ColorSwatch:
             return self._swatch[int(index)]
         else:
             return ColorItem(['', index, pymol.cmd.get_color_tuple(int(index))])
+
+
+class PyMolTranspilerDeco:
+    """
+    Decorator for the bound methods of PyMolTranspiler that use Pymol.
+    The session is shared... so only one thread at the time.
+    """
+    lock = threading.Lock()
+
+    def __init__(self, fun):
+        self.fun = fun
+
+
+    def __get__(self, obj, type=None):
+        return self.__class__(self.fun.__get__(obj, type))
+
+    def __call__(self, *args, **kwargs):
+        try:
+            self.fun(*args, **kwargs)
+        except Exception as err:
+            if self.lock.locked(): #the code errored before the lock could be released.
+                self.close_up()
+            raise err
+
+    def clean_up(self):
+        pymol.cmd.remove('(all)')
+        pymol.cmd.delete('(all)')
+
+    def close_up(self):
+        self.clean_up()
+        if self.lock.locked():
+            self.lock.release()
+        else:
+            warn('The lock was off already...')
+
+    def start_up(self):
+        if not self.lock.acquire(timeout=60): #one minute wait.
+            self.clean_up() #something failed very very ungracefully.
+            self.lock.acquire()
+            warn('The thread waited for over a minite!')
+        self.clean_up()
+
 
 class PyMolTranspiler:
     """
@@ -158,6 +200,7 @@ class PyMolTranspiler:
                      ('pseudoatom', 5387, (0.8999999761581421, 0.8999999761581421, 0.8999999761581421))])
     _iterate_cmd = "data.append({'ID': ID,  'segi': segi, 'chain': chain, 'resi': resi, 'resn': resn, 'name':name, 'elem':elem, 'reps':reps, 'color':color, 'ss': ss, 'cartoon': cartoon})"
 
+    @PyMolTranspilerDeco
     def __init__(self, file=None, verbose=False, validation=False, view=None, representation=None, pdb='', skip_disabled=True, **settings):
         """
         Converter
@@ -273,6 +316,7 @@ class PyMolTranspiler:
                 elif obj[4] == 12: # object:group
                     continue
             pdbfile = os.path.join(self.tmp, os.path.split(file)[1].replace('.pse','.pdb'))
+            print(pdbfile,'SAVING',__name__,__file__)
             pymol.cmd.save(pdbfile)
             pymol.cmd.delete('all')
             if names_for_mesh_route and 1==0: ##TODO reimplement
@@ -284,8 +328,6 @@ class PyMolTranspiler:
                 pymol.cmd.save(objfile)
                 self.mesh = PyMolTranspiler.convert_mesh(open(objfile,'r'))
                 os.remove(objfile)
-            pymol.cmd.remove('(all)')
-            pymol.cmd.delete('(all)')
         if view:
             self.convert_view(view)
         if representation:
@@ -309,6 +351,7 @@ class PyMolTranspiler:
             return None
 
     @classmethod
+    @PyMolTranspilerDeco
     def load_pdb(cls, file):
         self = cls()
         with open(file) as w:
@@ -323,7 +366,7 @@ class PyMolTranspiler:
 
 
     @staticmethod
-    def _mutante(outfile, mutations, chain):
+    def _mutagen(outfile, mutations, chain):
         pymol.cmd.wizard("mutagenesis")
         pymol.cmd.do("refresh_wizard")
         for mutant in mutations:
@@ -344,17 +387,17 @@ class PyMolTranspiler:
         pymol.cmd.delete('(all)')
 
     @classmethod
+    @PyMolTranspilerDeco
     def mutate_code(cls, code, outfile, mutations, chain):
-        pymol.cmd.delete('(all)')
         pymol.cmd.fetch(code)
-        cls._mutante(outfile, mutations, chain)
+        cls._mutagen(outfile, mutations, chain)
         return 1
 
     @classmethod
+    @PyMolTranspilerDeco
     def mutate_file(cls, infile, outfile, mutations, chain):
-        pymol.cmd.delete('(all)')
         pymol.cmd.load(infile)
-        cls._mutante(outfile, mutations, chain)
+        cls._mutagen(outfile, mutations, chain)
         return 1
 
     def fix_structure(self):
