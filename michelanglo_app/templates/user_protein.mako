@@ -1,7 +1,4 @@
 <%inherit file="layout_components/layout.mako"/>
-<%
-    import markdown
-%>
 <div class="jumbotron clearfix py-4"
 %if confidential:
     style="padding-left: 6rem;"
@@ -46,8 +43,18 @@
 
     <div class='col-${columns_text} ${part_order[1]}'>
         <div class="card shadow" role="tooltip">
+            <%
+                import markdown, re
+                descr_mdowned = markdown.markdown(description)
+                rex = re.search('^\<h2\>(.*?)\<\/h2\>',descr_mdowned)
+                if rex:
+                    descr_header = '<div class="card-header"><h3 class="card-title">'+rex.group(1)+'</h3></div>'
+                    descr_mdowned = re.sub('^\<h2\>(.*?)\<\/h2\>', '', descr_mdowned)
+                else:
+                    descr_header = ''
+            %>
 
-            <div class="card-header"><h3 class="card-title">Description</h3></div>
+            ${descr_header|n}
 
             <div class="card-body">
             %if location_viewport == 'left':
@@ -62,7 +69,7 @@
                             <button type="button" class="btn btn-outline-primary my-1" id="edit_btn" data-target="#edit_modal" data-toggle="modal"><i class="far fa-edit"></i></button>
                         </div>
                     %endif
-                <p>${markdown.markdown(description)|n}</p>
+                <p>${descr_mdowned|n}</p>
                 <hr/>
                 <button type="button" class="btn btn-outline-primary w-100 my-1" id="getimplement"><i class="far fa-code"></i> Implementation code</button>
 

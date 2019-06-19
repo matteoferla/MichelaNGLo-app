@@ -82,6 +82,9 @@ $('#clear').click(function () {
     $('.is-invalid').removeClass('is-invalid');
     $('.is-valid').removeClass('is-valid');
     $('.invalid-feedback').hide();
+    $('#submit').removeAttr('disabled').children('.far').detach();
+    ops.halt();
+    if (ops.main_ajax) {ops.main_ajax.abort(); ops.addToast('userkiller','User killed job','The user killed the job.','bg-warning')}
 });
 
 // validation.
@@ -141,7 +144,8 @@ $('#submit').click(function () {
     data.append('stick_format',$("input[name='sticks']:checked").val());
     // ajax to ajax_convert
     //{pdb: pdb, uniform_non_carbon: uniform_non_carbon, pymol_output: pymol_output, indent: indent, cdn: cdn}
-    $.ajax({
+    $('#submit').attr('disabled','disabled').prepend('<i class="far fa-circle-notch fa-spin"></i> ');
+    ops.main_ajax = $.ajax({
         type: "POST",
         url: "ajax_convert",
         processData: false,
@@ -153,9 +157,11 @@ $('#submit').click(function () {
             .done(function (msg) {
                 ops.addToast('jobcompletion','Conversion complete','The data has been converted successfully.','bg-success');
                 window.location.href = "/data/"+msg.page;
+                $('#submit').removeAttr('disabled').children('.far').detach();
             })
             .fail(function () {
                 ops.addToast('jobcompletion','Conversion issue','The server is unsure about something.','bg-warning');
+                $('#submit').removeAttr('disabled').children('.far').detach();
             });
     setTimeout(() => ops.statusCheck(), 2000);
 });
