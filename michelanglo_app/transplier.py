@@ -316,7 +316,6 @@ class PyMolTranspiler:
                 elif obj[4] == 12: # object:group
                     continue
             pdbfile = os.path.join(self.tmp, os.path.split(file)[1].replace('.pse','.pdb'))
-            print(pdbfile,'SAVING',__name__,__file__)
             pymol.cmd.save(pdbfile)
             pymol.cmd.delete('all')
             if names_for_mesh_route and 1==0: ##TODO reimplement

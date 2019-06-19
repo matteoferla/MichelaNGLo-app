@@ -22,19 +22,47 @@ def demo_file(request):
     Needed for ajax_convert. Paranoid way to prevent user sending a spurious demo file name (e.g. ~/.ssh/).
     """
     demos=os.listdir(os.path.join('michelanglo_app', 'demo'))
-    if request.POST['demo_file'] in demos:
-        return os.path.join('michelanglo_app', 'demo', request.POST['demo_file'])
+    if request.params['demo_file'] in demos:
+        return os.path.join('michelanglo_app', 'demo', request.params['demo_file'])
     else:
         raise Exception('Non existant demo file requested. Possible attack!')
 
 def save_file(request, extension):
     filename=os.path.join('michelanglo_app', 'temp','{0}.{1}'.format(uuid.uuid4(),extension))
-    request.POST['file'].file.seek(0)
+    request.params['file'].file.seek(0)
     with open(filename, 'wb') as output_file:
-        shutil.copyfileobj(request.POST['file'].file, output_file)
+        shutil.copyfileobj(request.params['file'].file, output_file)
     return filename
 
+########################################################################################
+#### Page <> User DB
 
+def anonymous_submission(request, settings, pagename):
+    settings['authors'] = ['anonymous']
+    settings['freelyeditable'] = True
+    settings['description'] = '## Description\n\n' +\
+              'Only <a href="#" class="text-secondary" data-toggle="modal" data-target="#login">logged-in users</a>'+\
+              ' can edit data pages.\n\nThis page will be deleted in 24 hours.'
+    trashcan = get_trashcan(request)
+    trashcan.add_owned_page(pagename)
+    request.dbsession.add(trashcan)
+    
+def user_submission(request, settings, pagename):
+    user = request.user
+    user.add_owned_page(pagename)
+    settings['author'] = [user.name]
+    request.dbsession.add(user)
+    settings['editors'] = [user.name]
+    
+def commit_submission(request, settings, pagename):
+    if request.user:
+        user_submission(request, settings, pagename)
+    else:
+        anonymous_submission(request, settings, pagename)
+    Page(pagename).save(settings)
+
+########################################################################################
+### VIEWS
 
 @view_config(route_name='ajax_convert', renderer="json")
 def ajax_convert(request):
@@ -45,29 +73,29 @@ def ajax_convert(request):
         minor_error='' #does nothing atm.
 
         ## assertions
-        if not 'pdb_string' in request.POST and not request.POST['pdb']:
+        if not 'pdb_string' in request.params and not request.params['pdb']:
             response = {'error': 'danger', 'error_title': 'No PDB code', 'error_msg': 'A PDB code is required to make the NGL viewer show a protein.','snippet':'','validation':''}
             log.warn(response)
             request.session['status'] = make_msg(response['error_title'],response['error_msg'],'error','bg-danger')
             return response
-        elif request.POST['mode'] == 'out' and not request.POST['pymol_output']:
+        elif request.params['mode'] == 'out' and not request.params['pymol_output']:
             response={'error': 'danger', 'error_title': 'No PyMOL code', 'error_msg': 'PyMOL code is required to make the NGL viewer show a protein.','snippet':'','validation':''}
             log.warn(response)
             request.session['status'] = make_msg(response['error_title'], response['error_msg'], 'error', 'bg-danger')
             return response
-        elif request.POST['mode'] == 'file' and not (('demo_file' in request.POST and request.POST['demo_file']) or ('file' in request.POST and request.POST['file'].filename)):
+        elif request.params['mode'] == 'file' and not (('demo_file' in request.params and request.params['demo_file']) or ('file' in request.params and request.params['file'].filename)):
             response = {'error': 'danger', 'error_title': 'No PSE file', 'error_msg': 'A PyMOL file to make the NGL viewer show a protein.','snippet':'','validation':''}
             log.warn(response)
             request.session['status'] = make_msg(response['error_title'], response['error_msg'], 'error', 'bg-danger')
             return response
 
         ## set settings
-        settings = {'viewport': 'viewport',#'tabbed': int(request.POST['indent']),
+        settings = {'viewport': 'viewport',#'tabbed': int(request.params['indent']),
                     'image': None,
-                    'uniform_non_carbon':is_js_true(request.POST['uniform_non_carbon']),
+                    'uniform_non_carbon':is_js_true(request.params['uniform_non_carbon']),
                     'verbose': False,
                     'validation': True,
-                    'stick_format': request.POST['stick_format'],
+                    'stick_format': request.params['stick_format'],
                     'save': True,
                     'backgroundcolor': 'white',
                     'location_viewport': 'left',
@@ -77,10 +105,10 @@ def ajax_convert(request):
         # parse data dependding on mode.
         request.session['status'] = make_msg('Conversion', 'Conversion in progress')
         ## case 1: user submitted output
-        if request.POST['mode'] == 'out':
+        if request.params['mode'] == 'out':
             view = ''
             reps = ''
-            data = request.POST['pymol_output'].split('PyMOL>')
+            data = request.params['pymol_output'].split('PyMOL>')
             for block in data:
                 if 'get_view' in block:
                     view = block
@@ -90,22 +118,22 @@ def ajax_convert(request):
                     pass  # empty line.
                 else:
                     minor_error = 'Unknown block: ' + block
-            trans = PyMolTranspiler(view=view, representation=reps, pdb=request.POST['pdb'], **settings)
+            trans = PyMolTranspiler(view=view, representation=reps, pdb=request.params['pdb'], **settings)
         ## case 2: user uses pse
-        elif request.POST['mode'] == 'file':
+        elif request.params['mode'] == 'file':
             ## case 2b: DEMO mode.
-            if 'demo_file' in request.POST:
+            if 'demo_file' in request.params:
                 filename=demo_file(request) #prevention against attacks
             ## case 2a: file mode.
             else:
                 filename = save_file(request,'pse')
             trans = PyMolTranspiler(file=filename, **settings)
             request.session['file'] = filename
-            if 'pdb_string' in request.POST:
+            if 'pdb_string' in request.params:
                 with open(os.path.join(trans.tmp, os.path.split(filename)[1].replace('.pse','.pdb'))) as fh:
                     trans.raw_pdb = fh.read()
             else:
-                trans.pdb = request.POST['pdb']
+                trans.pdb = request.params['pdb']
         else:
             log.warn(f'Unknown mode requested by {get_username(request)}.')
             return {'snippet': 'Please stop trying to hack the server', 'error_title': 'A major error arose', 'error': 'danger', 'error_msg': 'The code failed to run serverside. Most likely malicius','viewport':settings['viewport']}
@@ -115,15 +143,6 @@ def ajax_convert(request):
         code = 1
         request.session['status'] = make_msg('Permissions', 'Finalising user permissions')
         pagename=str(uuid.uuid4())
-        if user:
-            user.add_owned_page(pagename)
-            settings['author'] = [user.name]
-        else:
-            user = get_trashcan(request)
-            user.add_owned_page(pagename)
-            settings['author'] = ['Anonymous']
-        request.dbsession.add(user)
-
         # create output
         settings['pdb'] = []
         request.session['status'] = make_msg('Load function', 'Making load function')
@@ -135,11 +154,15 @@ def ajax_convert(request):
             settings['proteinJSON'] = '[{{"type": "rcsb", "value": "{0}", "loadFx": "loadfun"}}]'.format(trans.pdb)
         else:
             settings['proteinJSON'] = '[{{"type": "file", "value": "{0}", "loadFx": "loadfun"}}]'.format(trans.pdb)
-
-        # save sharable page data
-        settings['editors'] = [user.name]
-        request.session['status'] = make_msg('Saving', 'Storing data for retrieval.')
+        #user.
+        if user:
+            user_submission(request,settings,pagename)
+        else:
+            anonymous_submission(request, settings, pagename)
         Page(pagename).save(settings)
+        # save sharable page data
+        request.session['status'] = make_msg('Saving', 'Storing data for retrieval.')
+        
         request.session['status'] = make_msg('Loading results', 'Conversion is being loaded',condition='complete', color='bg-info')
         return {'page': pagename}
     except:
@@ -152,22 +175,22 @@ def ajax_convert(request):
 @view_config(route_name='ajax_custom', renderer="../templates/custom.result.mako")
 def ajax_custom(request):
     log.info(f'Mesh conversion requested by {get_username(request)}')
-    if 'demo_file' in request.POST:
+    if 'demo_file' in request.params:
         filename = demo_file(request)  # prevention against attacks
         fh = open(filename)
     else:
-        request.POST['file'].file.seek(0)
-        fh = io.StringIO(request.POST['file'].file.read().decode("utf8"), newline=None)
-    if 'scale' in request.POST:
-        scale = float(request.POST['scale'])
+        request.params['file'].file.seek(0)
+        fh = io.StringIO(request.params['file'].file.read().decode("utf8"), newline=None)
+    if 'scale' in request.params:
+        scale = float(request.params['scale'])
     else:
         scale = 0
-    if 'centroid' in request.POST and request.POST['centroid'] in ('unaltered','origin','center'):
-        centroid_mode = request.POST['centroid']
+    if 'centroid' in request.params and request.params['centroid'] in ('unaltered','origin','center'):
+        centroid_mode = request.params['centroid']
     else:
         centroid_mode = 'unaltered'
-    if 'origin' in request.POST and request.POST['centroid'] == 'origin':
-        origin = request.POST['origin'].split(',')
+    if 'origin' in request.params and request.params['centroid'] == 'origin':
+        origin = request.params['origin'].split(',')
     else:
         origin = None
     mesh = PyMolTranspiler.convert_mesh(fh, scale, centroid_mode, origin)
@@ -178,31 +201,21 @@ def ajax_custom(request):
 def ajax_pdb(request):
     log.info(f'PDB page creation requested by {get_username(request)}')
     pagename = str(uuid.uuid4())
-    settings = {'data_other': request.POST['viewcode'].replace('<div', '').replace('</div>', '').replace('<', '').replace('>', ''),
+    settings = {'data_other': request.params['viewcode'].replace('<div', '').replace('</div>', '').replace('<', '').replace('>', ''),
                 'page': pagename, 'editable': True,
                 'backgroundcolor': 'white', 'validation': None, 'js': None, 'pdb': [], 'loadfun': ''}
-    if request.POST['mode'] == 'code':
-        if len(request.POST['pdb']) == 4:
-            settings['proteinJSON'] = '[{{"type": "rcsb", "value": "{0}"}}]'.format(request.POST['pdb'])
+    if request.params['mode'] == 'code':
+        if len(request.params['pdb']) == 4:
+            settings['proteinJSON'] = '[{{"type": "rcsb", "value": "{0}"}}]'.format(request.params['pdb'])
         else:
-            settings['proteinJSON'] = '[{{"type": "file", "value": "{0}"}}]'.format(request.POST['pdb'])
+            settings['proteinJSON'] = '[{{"type": "file", "value": "{0}"}}]'.format(request.params['pdb'])
     else:
         settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true}]'
         filename = save_file(request,'pdb')
         trans = PyMolTranspiler.load_pdb(file=filename)
         settings['pdb'] = [('pdb', '\n'.join(trans.ss)+'\n'+trans.raw_pdb)]
         settings['js'] = 'external'
-    if request.user:
-        settings['authors'] = [request.user.name]
-        request.user.add_owned_page(pagename)
-        request.dbsession.add(request.user)
-    else:
-        settings['authors'] = ['anonymous']
-        settings['description'] = 'Only <a href="#" class="text-secondary" data-toggle="modal" data-target="#login">logged-in users</a> can edit data pages. This page will be deleted in 24 hours.'
-        trashcan = get_trashcan(request)
-        trashcan.add_owned_page(pagename)
-        request.dbsession.add(trashcan)
-    Page(pagename).save(settings)
+    commit_submission(request,settings,pagename)
     return {'page': pagename}
 
 
@@ -218,10 +231,10 @@ def status_check_view(request):
     """
     if 'status' not in request.session:
         ## prepare for next time
-        request.session['status'] = {'condition' : 'error',
-                            'title'     : 'Error',
-                            'body'      : 'The requested job was not found.',
-                            'color'     : 'bg-warning'}
+        request.session['status'] = {'condition' : 'running',
+                                    'title'     : 'Starting',
+                                    'body'      : 'The job is about to start (but is taking some time to do so).',
+                                    'color'     : 'bg-warning'}
         return {'condition' : 'running',
                 'title'     : 'Starting',
                 'body'      : 'The job is about to start.',

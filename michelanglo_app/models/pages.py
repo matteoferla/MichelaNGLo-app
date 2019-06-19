@@ -71,7 +71,7 @@ class Page:
         if not settings:
             settings = self.settings
         if 'description' not in settings:
-            settings['description'] = 'Editable text. press pen to edit.'
+            settings['description'] = '## Description\n\n Editable text. press pen to edit.'
         if 'title' not in settings:
             settings['title'] = 'User submitted structure'
         for fun, keys in ((list, ('editors', 'visitors', 'authors')),
