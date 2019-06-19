@@ -58,7 +58,7 @@
                         <span class="input-group-text" id="columns_viewport_label">Viewport size</span>
                     </div>
                     <div class="border rounded-right px-3 py-1">
-                        <input type="range" min="1" max="12" value="9" step="1" class="custom-range" id="columns_viewport">
+                        <input type="range" min="1" max="12" value="${columns_viewport}" step="1" class="custom-range" id="columns_viewport">
                     </div>
                 </div>
                     </div>
@@ -83,7 +83,7 @@
                             <span class="input-group-text" id="image_label">Use image</span>
                           </div>
                           %if image:
-                          <input id="image" type="text" class="form-control"  val="${image}"  aria-label="None" aria-describedby="image_label">
+                          <input id="image" type="text" class="form-control"  value="${image}"  aria-label="None" aria-describedby="image_label">
                           % else:
                           <input id="image" type="text" class="form-control" placeholder="No image" aria-label="None" aria-describedby="image_label">
                           %endif
