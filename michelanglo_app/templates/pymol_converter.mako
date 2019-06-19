@@ -100,16 +100,12 @@
                         </div><!--sticks-->
                     </div>
 
-
-                <!--footnote-->
-                <p class="card-text">Please see <a href="https://github.com/matteoferla/PyMOL-to-NGL-transpiler/blob/master/README.md">the Github readme <i class="fas fa-external-link"></i></a> for documentation about how the conversions are done.</p>
-
                 </form>
-
 
                 <div class="row align-center">
                     <div class="col-md-4 offset-md-4">
                         <div class="btn-group d-flex" role="group" aria-label="Submit">
+                            <button type="button" class="btn btn-info flex-fill" data-target="#info_modal" data-toggle="modal">Info</button>
                             <button type="button" class="btn btn-warning flex-fill" id="clear">Clear</button>
                             <button type="button" class="btn btn-success flex-fill" id="submit">Submit</button>
                         </div>
@@ -121,6 +117,42 @@
 
 ######## other blocks
 <%block name='modals'>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="info_modal">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="far fa-info-circle"></i> Details</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <p>The following get converted:</p>
+          <ul>
+              <li>Orientation</li>
+              <li>Lines and sticks</li>
+              <li>Ribbons and cartoons</li>
+              <li>Distances and hydrogen bonds</li>
+              <li>Atom colours</li>
+              <li>B-factor putty</li>
+          </ul>
+          <p>Multiple models in a scene will be collapsed and chains letters will be relabelled to avoid clashes.</p>
+          <p>The following will <b>not</b> get converted:</p>
+          <ul>
+              <li>Disabled models</li>
+              <li>Segment identifiers <span class="text-muted">&mdash;segi are ambiguous</span></li>
+              <li>CGO arrows <span class="text-muted">&mdash;mesh data not extractable, but re-implementable with JS code.</span></li>
+              <li>Surfaces <span class="text-muted">&mdash;mesh data not extractable, but re-implementable with JS code.</span></li>
+              <li>Transparency <span class="text-muted">&mdash;Not implemented as ambiguous as PyMOL <i>2</i>, but not <i>open source</i> PyMol, allows <i>selection-based</i> transparency.</span></li>
+          </ul>
+          <p>Please see <a href="https://github.com/matteoferla/PyMOL-to-NGL-transpiler/blob/master/README.md">the Github readme <i class="fas fa-external-link"></i></a> for documentation about how the conversions are done.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
 <div class="modal fade" tabindex="-1" role="dialog" id="CDN_modal">
   <div class="modal-dialog modal-lg" role="document">
