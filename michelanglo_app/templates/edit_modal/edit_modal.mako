@@ -69,10 +69,18 @@
                             </div>
                             <div class="btn-group btn-group-toggle" data-toggle="buttons">
                               <label class="btn btn-secondary active">
-                                <input type="radio" name="location_viewport" id="location_viewport_left" autocomplete="off" checked value="left"><i class="far fa-caret-square-left"></i>&nbsp; Left
+                                <input type="radio" name="location_viewport" id="location_viewport_left" autocomplete="off"
+                                       %if location_viewport == 'left':
+                                       checked
+                                       %endif
+                                       value="left"><i class="far fa-caret-square-left"></i>&nbsp; Left
                               </label>
                               <label class="btn btn-secondary">
-                                <input type="radio" name="location_viewport" id="location_viewport_right" autocomplete="off" value="right"> Right <i class="far fa-caret-square-right"></i>
+                                <input type="radio" name="location_viewport" id="location_viewport_right" autocomplete="off"
+                                       %if location_viewport != 'left': ##right.
+                                       checked
+                                       %endif
+                                       value="right"> Right <i class="far fa-caret-square-right"></i>
                               </label>
                             </div>
                         </div>
