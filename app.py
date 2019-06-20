@@ -14,5 +14,5 @@ else:
     configfile = 'production.ini'
 
 setup_logging(configfile)
-app = get_app(configfile, 'main', options=os.environ)
+app = get_app(configfile, 'main', options={'SQL_URL': os.environ['SQL_URL']})
 serve(app, host='0.0.0.0', port=8088, threads=50)
