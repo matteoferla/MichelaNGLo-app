@@ -238,7 +238,7 @@ def mutate(request):
             return {'status','cannot create mutations from URL for security reasons'}
         with open(filename, 'r') as fh:
             seq = fh.read()
-        new_variable = f"mutant_{model}"
+        new_variable = f"mutant_{len(json.loads(settings['proteinJSON']))}"
         all_protein_data.append({"type": "data",
                                  "value": new_variable,
                                  "isVariable": "true"})
