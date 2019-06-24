@@ -14,9 +14,9 @@
                 </p>
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
-                    <span class="input-group-text" id="mutate_chain">Chain</span>
+                    <span class="input-group-text" id="mutate_chain_label">Chain</span>
                   </div>
-                  <input type="text" class="form-control" placeholder="A" aria-label="A" aria-describedby="mutate_chain">
+                  <input type="text" class="form-control" placeholder="A" aria-label="A" aria-describedby="mutate_chain_label" id="mutate_chain">
                 </div>
                 <div class="input-group" data-toggle="tooltip" title="Space or newline separated.">
                   <div class="input-group-prepend">

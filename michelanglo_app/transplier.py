@@ -368,6 +368,7 @@ class PyMolTranspiler:
     def _mutagen(outfile, mutations, chain):
         pymol.cmd.wizard("mutagenesis")
         pymol.cmd.do("refresh_wizard")
+        print(pymol.cmd.get_names())
         for mutant in mutations:
             n = re.search("(\d+)", mutant).group(1)
             if re.match("\w{3}d+\w{3}", mutant):  # 3 letter Arg
@@ -375,7 +376,7 @@ class PyMolTranspiler:
             else:  # 1 letter R
                 f = p1to3[mutant[-1]].upper()
             pymol.cmd.get_wizard().set_mode(f)
-            print('*'*10,f"{chain}/{n}/")
+            #print('*'*10,f"{chain}/{n}/")
             pymol.cmd.get_wizard().do_select(f"{chain}/{n}/")
             pymol.cmd.get_wizard().apply()
             #m = pymol.cmd.get_model(f"resi {n} and name CA").atom

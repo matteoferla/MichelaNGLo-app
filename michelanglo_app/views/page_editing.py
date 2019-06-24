@@ -224,7 +224,7 @@ def mutate(request):
         protein_data = json.loads(settings['proteinJSON'])[model]
         filename = os.path.join('michelanglo_app', 'temp', f'{page.identifier}.mut.pdb')
         if protein_data['type'] == 'data':
-            if protein_data['isVariable'] == 'true':
+            if protein_data['isVariable'] is True or protein_data['isVariable'] == 'true':
                 seq = [p[1] for p in settings['pdb'] if p[0] == protein_data['value']][0]
             else:
                 seq = protein_data['value']
