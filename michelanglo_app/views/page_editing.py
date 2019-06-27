@@ -46,9 +46,14 @@ def edit(request):
             settings['authors'].append(user.name)
         # only admins and friends can edit html fully
         if user.role in ('admin', 'friend'):
-            for key in ('loadfun', 'title', 'description','pdb'):
+            for key in ('loadfun', 'title', 'description'):
                 if key in request.POST:
                     settings[key] = request.POST[key]
+            if 'pdb' in request.POST:
+                try:
+                    settings['pdb'] = json.loads(request.POST['pdb'])
+                except:
+                    settings['pdb'] = request.POST['pdb']
         else: # regular users have to be sanitised
             for key in ('title', 'description'):
                 if key in request.POST:

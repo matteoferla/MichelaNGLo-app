@@ -107,11 +107,11 @@
 <%block name='script'>
 <script type="text/javascript">
     %if isinstance(pdb,str):
-var pdb = `REMARK 666 Note that the indent is important as is the secondary structure def
+var pdb = `REMARK 666 Note that the indent is important, as is the secondary structure def
 ${pdb|n}`;
     %elif isinstance(pdb,list):
         %for n,seq in pdb:
-var ${n} = `REMARK 666 Note that the indent is important as is the secondary structure def
+var ${n} = `REMARK 666 Note that the indent is important, as is the secondary structure def
 ${seq|n}`;
         %endfor
     %endif
