@@ -32,6 +32,10 @@ NGL.stageIds = {};
 NGL.getStage = function (id) {
     // returns a stage stored in stageIds ...
     // unless somehow a stage was given.
+    if (id === undefined) {
+        if (myData) {id = myData.id}
+        else {id = 'viewport'}
+    }
     if (typeof id === 'string') {
         id = id.replace('#','');
         if (id in NGL.stageIds) {
