@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 __doc__ = \
     """
-    
-    NB. Written for python 3, not tested under 2.
+    NB. Written for python 3, not tested under 2. See readme.md
     """
 __author__ = "Matteo Ferla. [Github](https://github.com/matteoferla)"
 __email__ = "matteo.ferla@gmail.com"
@@ -13,6 +12,7 @@ __copyright__ = 'GNU'
 __version__ = "0"
 
 import argparse, os, re, threading
+from copy import deepcopy
 from pprint import PrettyPrinter
 from collections import defaultdict
 pprint = PrettyPrinter().pprint
@@ -198,7 +198,7 @@ class PyMolTranspiler:
                      ('hassium', 5383, (0.9019607901573181, 0.0, 0.18039216101169586)), ('meitnerium', 5384, (0.9215686321258545, 0.0, 0.14901961386203766)),
                      ('deuterium', 5385, (0.8999999761581421, 0.8999999761581421, 0.8999999761581421)), ('lonepair', 5386, (0.5, 0.5, 0.5)),
                      ('pseudoatom', 5387, (0.8999999761581421, 0.8999999761581421, 0.8999999761581421))])
-    _iterate_cmd = "data.append({'ID': ID,  'segi': segi, 'chain': chain, 'resi': resi, 'resn': resn, 'name':name, 'elem':elem, 'reps':reps, 'color':color, 'ss': ss, 'cartoon': cartoon})"
+    _iterate_cmd = "data.append({'ID': ID,  'segi': segi, 'chain': chain, 'resi': resi, 'resn': resn, 'name':name, 'elem':elem, 'reps':reps, 'color':color, 'ss': ss, 'cartoon': cartoon, 'label': label})"
 
     @PyMolTranspilerDeco
     def __init__(self, file=None, verbose=False, validation=False, view=None, representation=None, pdb='', skip_disabled=True, **settings):
@@ -220,20 +220,35 @@ class PyMolTranspiler:
         self.position = None
         self.teleposition = None
         self.scale = 10
+        self.slab_far = 1
+        self.slab_near = 1
+        self.fov = 40
         self.m4 = None
         self.m4_alt = None
         self.notes = ''
         self.atoms = []
-        self.cartoon=[]
-        self.putty = [] #tube
-        self.lines=[]
-        self.sticks=[]
+        self.sticks = []  # 0 licorice
+        self.stick_transparency = 0
+        self.spheres = []  # 1 spacefill
+        self.sphere_transparency = 0
+        self.surface = []  # 2 surface
+        self.surface_transparency = 0
+        self.label = {} #sele : text
+        self.cartoon = []  # 5 cartoon
+        self.cartoon_transparency = 0
+        self.ribbon = []  # 6 backbone
+        self.ribbon_transparency = 0
+        self.lines = []  # 7 line
+        self.mesh = []  # 8 surface {contour: true}
+        self.dots = []  # 9 point
+        self.cell = []  # 11 cell
+        self.putty = []  # NA.
         self.colors=[]
         self.distances=[] #and h-bonds...
         self.ss=[]
         self.code=''
         self.raw_pdb=None  #this is set from the instance `prot.raw_pdb = open(file).read()`
-        self.mesh = []
+        self.custom_mesh = []
         if file:
             #print(file)
             assert '.pse' in file.lower(), 'Only PSE files accepted.'
@@ -286,6 +301,13 @@ class PyMolTranspiler:
                         myspace = {'data': []}  # myspace['data'] is the same as self.atoms
                         pymol.cmd.iterate(obj_name, self._iterate_cmd, space=myspace)
                         self.convert_representation(myspace['data'], **settings)
+                        self.stick_transparency = float(pymol.cmd.get('stick_transparency'))
+                        self.surface_transparency = float(pymol.cmd.get('transparency'))
+                        self.cartoon_transparency = float(pymol.cmd.get('cartoon_transparency'))
+                        self.sphere_transparency = float(pymol.cmd.get('sphere_transparency'))
+                        self.ribbon_transparency = float(pymol.cmd.get('ribbon_transparency'))
+                        self.fov = float(pymol.cmd.get("field_of_view"))
+                        self.fog = float(pymol.cmd.get("fog_start"))*100
                         self.parse_ss(myspace['data'])
                         names_not_mesh.append(obj_name)
                 elif obj[4] == 2: #object:map
@@ -325,7 +347,7 @@ class PyMolTranspiler:
                 """
                 objfile = os.path.join(self.tmp, os.path.split(file)[1].replace('.pse','.obj'))
                 pymol.cmd.save(objfile)
-                self.mesh = PyMolTranspiler.convert_mesh(open(objfile,'r'))
+                self.custom_mesh = PyMolTranspiler.convert_mesh(open(objfile,'r'))
                 os.remove(objfile)
         if view:
             self.convert_view(view)
@@ -352,6 +374,11 @@ class PyMolTranspiler:
     @classmethod
     @PyMolTranspilerDeco
     def load_pdb(cls, file):
+        """
+        Loads a pdb into a transpiler obj
+        :param file: str file name
+        :return: self
+        """
         self = cls()
         with open(file) as w:
             self.raw_pdb = w.read()
@@ -366,9 +393,15 @@ class PyMolTranspiler:
 
     @staticmethod
     def _mutagen(outfile, mutations, chain):
+        """
+        Create a mutant protein based on a list of mutations on the already loaded protein.
+        :param outfile: str the file to save the mod as.
+        :param mutations: list of string in the single letter format (A234P) without "p.".
+        :param chain: str chain id in the pdb loaded.
+        :return: None
+        """
         pymol.cmd.wizard("mutagenesis")
         pymol.cmd.do("refresh_wizard")
-        print(pymol.cmd.get_names())
         for mutant in mutations:
             n = re.search("(\d+)", mutant).group(1)
             if re.match("\w{3}d+\w{3}", mutant):  # 3 letter Arg
@@ -389,6 +422,14 @@ class PyMolTranspiler:
     @classmethod
     @PyMolTranspilerDeco
     def mutate_code(cls, code, outfile, mutations, chain):
+        """
+        Create a mutant protein based on a list of mutations on a PDB code.
+        :param code: str pdb code.
+        :param outfile: str the file to save the mod as.
+        :param mutations: list of string in the single letter format (A234P) without "p.".
+        :param chain: str chain id in the pdb loaded.
+        :return:
+        """
         pymol.cmd.fetch(code)
         cls._mutagen(outfile, mutations, chain)
         return 1
@@ -396,6 +437,14 @@ class PyMolTranspiler:
     @classmethod
     @PyMolTranspilerDeco
     def mutate_file(cls, infile, outfile, mutations, chain):
+        """
+        Create a mutant protein based on a list of mutations on a PDB file path.
+        :param infile: str
+        :param outfile: str the file to save the mod as.
+        :param mutations: list of string in the single letter format (A234P) without "p.".
+        :param chain: str chain id in the pdb loaded.
+        :return:
+        """
         pymol.cmd.load(infile)
         cls._mutagen(outfile, mutations, chain)
         return 1
@@ -452,9 +501,6 @@ class PyMolTranspiler:
         fog and alpha not implemented.
         pymol.cmd.get("field_of_view"))
         pymol.cmd.get("fog_start")
-        slab
-        near = pymolian[11] + pymolian[15]
-        far = pymolian[11] + pymolian[16]
 
         :param view: str or tuple
         :return: np 4x4 matrix or a NGL string
@@ -465,9 +511,12 @@ class PyMolTranspiler:
             pymolian = np.array(view)
         self.rotation = pymolian[0:9].reshape([3, 3])
         depth = pymolian[9:12]
-        self.z = abs(depth[2])*.6
+        self.z = abs(depth[2])*1 #arbitraty
         self.position = pymolian[12:15]
         self.teleposition = np.matmul(self.rotation, -depth) + self.position
+        self.slab_near = pymolian[11] + pymolian[15]
+        self.slab_far = pymolian[11] + pymolian[16]
+        print('slabs... ', self.slab_near, self.slab_far)
 
         self.modrotation = np.multiply(self.rotation, np.array([[-1, -1, -1], [1, 1, 1], [-1, -1, -1]]).transpose())
         c = np.hstack((self.modrotation * self.z, np.zeros((3, 1))))
@@ -506,11 +555,11 @@ class PyMolTranspiler:
         """
         if isinstance(represenation,str):
             text=represenation
-            headers=('ID','segi','chain','resi', 'resn', 'name', 'elem','reps', 'color', 'cartoon') # gets ignored if iterate> like is present
+            headers=('ID','segi','chain','resi', 'resn', 'name', 'elem','reps', 'color', 'cartoon', 'label') # gets ignored if iterate> like is present
             for line in text.split('\n'):
                 if not line:
                     continue
-                elif line.find('terate') != -1:  # twice. I/i
+                elif line.find('terate') != -1:  # twice. [Ii]terate
                     if line.count(':'):
                         continue
                     else:
@@ -520,45 +569,65 @@ class PyMolTranspiler:
                     self.atoms.append(dict(zip(headers, line.replace('(','').replace(')','').replace(',','').replace('\'','').split())))
         else:
             self.atoms=represenation
-        # convert reps field
-        sticks = []
-        lines = []
-        cartoon = []
-        surface = []
-        putty = []
-        #putty override.
+        # convert reps field. See https://github.com/matteoferla/MichelaNGLo#primitive-equivalence-table for table.
+        rep2name = ['sticks', 'spheres', 'surface', 'label', 'non-bounded spheres', 'cartoon', 'ribbon', 'lines', 'mesh','dots','non-bounded', 'cell', 'putty']
+        ## determine shape of protein data
+        structure = {}
         for atom in self.atoms:
-            if atom['name'] == 'CA' and atom['cartoon'] == 7:
-                putty.append('{resi}:{chain}'.format_map(atom))
+            if atom['chain'] not in structure:
+                structure[ atom['chain'] ] = {}
+            if atom['resi'] not in structure[ atom['chain'] ]:
+                structure[ atom['chain'] ][ atom['resi'] ] = {}
+            structure[ atom['chain'] ][ atom['resi'] ][ atom['name'] ] = False
+        ## deetermine values for protein
+        repdata = {rep2name[i]: deepcopy(structure) for i in (0, 1, 2, 5, 6, 7, 8, 9, 11, 12)}
         for atom in self.atoms:
-            reps = list(reversed("{0:0>8b}".format(int(atom['reps']))))
-            # sticks
-            if atom['chain']:
-                if reps[0] == '1':  # sticks.
-                    sticks.append('{resi}:{chain}.{name}'.format_map(atom))
-                if reps[7] == '1':  # lines.
-                    lines.append('{resi}:{chain}.{name}'.format_map(atom))
-                if reps[5] == '1':  # cartoon. special case...
-                    sel = '{resi}:{chain}'.format_map(atom)
-                    if sel not in putty:
-                        cartoon.append(sel)
-                if reps[2] == '1':
-                    surface.append('{resi}:{chain}'.format_map(atom))
+            reps = [r == '1' for r in reversed("{0:0>12b}".format(int(atom['reps'])))]
+            reps[1] = reps[1] or reps[4]  # spheres fix
+            reps[7] = reps[7] or reps[10]  # spheres fix
+            assert atom['chain'], 'The atom has no chain. This ought to be fixed upstream!'
+            for i in (0, 1, 2, 5, 6, 7, 8, 9, 11):
+                repdata[ rep2name[i] ][ atom['chain'] ][ atom['resi'] ][ atom['name'] ] = reps[i]
+            #label
+            if reps[3]:
+                self.label['{resi}:{chain}.{name}'.format(**atom)] = atom['label']
+        ## deal with putty.
+        for atom in self.atoms:
+            if atom['name'] == 'CA' and atom['cartoon'] == 7:  # putty override.
+                repdata['putty'][ atom['chain'] ][ atom['resi'] ] = {name: True for name in structure[ atom['chain'] ][ atom['resi'] ]}
+                # cartoon off!
+                repdata['cartoon'][atom['chain']][atom['resi']] = {name: False for name in structure[ atom['chain'] ][ atom['resi'] ]}
+        ##convert
+        for i in (0, 1, 2, 5, 6, 7, 8, 9, 11, 12):
+            transdata = []
+            rep_name = rep2name[i]
+            chain_homo_state = True  # are the chains homogeneously represented as rep_name?
+            chain_list = []  # a list in case the chains differ
+            for chain in repdata[rep_name]:
+                resi_homo_state = True  # are the residues homogeneously represented as rep_name?
+                resi_list = [] # a list in case the chain is not homogeneous.
+                for resi in repdata[rep_name][chain]:
+                    if all(repdata[rep_name][chain][resi].values()):
+                        resi_list.append(resi)
+                    elif any(repdata[rep_name][chain][resi].values()): # some/all are present
+                        if not all(repdata[rep_name][chain][resi].values()):   # some are present
+                            transdata.extend([f'{resi}:{chain}.{name}' for name in repdata[chain][resi] if repdata[rep_name][chain][resi]])
+                            resi_homo_state = False
+                    else: # none are.
+                        resi_homo_state = False
+                if resi_homo_state: # no residues differ
+                    chain_list.append(':{chain}')
+                else:
+                    transdata.extend([f'{resi}:{chain}' for resi in resi_list]) # todo... add selection reduction
+                    chain_homo_state = False
+            if chain_homo_state:
+                transdata.append('*')
+            elif len(chain_list):
+                transdata.extend(chain_list)
             else:
-                if reps[0] == '1':  # sticks.
-                    sticks.append('{resi}.{name}'.format_map(atom))
-                if reps[7] == '1':  # lines.
-                    lines.append('{resi}.{name}'.format_map(atom))
-                if reps[5] == '1':  # cartoon. special case...
-                    cartoon.append('{resi}'.format_map(atom))
-                if reps[2] == '1':
-                    surface.append('{resi}'.format_map(atom))
-        # todo... add selection reduction
-        self.cartoon = list(set(cartoon))
-        self.putty = putty
-        self.sticks = sticks
-        self.lines = lines
-        self.surface = surface
+                pass
+            setattr(self, rep_name, transdata)
+
         # convert color field
         colorset=defaultdict(list)
         # self.swatch[atom['color']]
@@ -582,6 +651,7 @@ class PyMolTranspiler:
 
     @staticmethod
     def collapse_list(l):
+        ## not implemented
         l=sorted(l)
         for i in range(1,len(l)):
             e = l[i]
@@ -741,7 +811,6 @@ class PyMolTranspiler:
         return code
 
     def get_loadfun_js(self, **settings):
-
         code = Template(filename=os.path.join('michelanglo_app','transpiler_templates',  'loadfun.js.mako')) \
             .render_unicode(structure=self, **settings)
         self.code = code

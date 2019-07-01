@@ -128,11 +128,15 @@
         </button>
       </div>
       <div class="modal-body">
+          <p><i>For help using this page check <a href="#tour" onclick="$('#info_modal').modal('hide'); $('#tour').trigger('click');">the tour</a>.</i></p>
           <p>The following get converted:</p>
           <ul>
               <li>Orientation</li>
+              <li>Dots and spheres</li>
               <li>Lines and sticks</li>
               <li>Ribbons and cartoons</li>
+              <li>Mesh and surface</li>
+              <li>Object-wide transparency</li>
               <li>Distances and hydrogen bonds</li>
               <li>Atom colours</li>
               <li>B-factor putty</li>
@@ -143,8 +147,9 @@
               <li>Disabled models</li>
               <li>Segment identifiers <span class="text-muted">&mdash;segi are ambiguous</span></li>
               <li>CGO arrows <span class="text-muted">&mdash;mesh data not extractable, but re-implementable with JS code.</span></li>
-              <li>Surfaces <span class="text-muted">&mdash;mesh data not extractable, but re-implementable with JS code.</span></li>
-              <li>Transparency <span class="text-muted">&mdash;Not implemented as ambiguous as PyMOL <i>2</i>, but not <i>open source</i> PyMol, allows <i>selection-based</i> transparency.</span></li>
+              <li>Maps/isomesh <span class="text-muted">&mdash;mesh data not extractable, but re-implementable with JS code.</span></li>
+              <li>Residue specific transparency <span class="text-muted">&mdash;per-atom transparency data not extractable.</span>.</li>
+              <li>Labels <span class="text-muted">&mdash;bug with NGL.</span></li>
           </ul>
           <p>Please see <a href="https://github.com/matteoferla/PyMOL-to-NGL-transpiler/blob/master/README.md">the Github readme <i class="fas fa-external-link"></i></a> for documentation about how the conversions are done.</p>
       </div>

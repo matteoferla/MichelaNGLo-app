@@ -27,34 +27,83 @@ function loadfun (protein) {
             color_str =''
     %>
     protein.removeAllRepresentations();
-    % if structure.lines:
-        var lines = new NGL.Selection( "${' or '.join(structure.lines)}" );
-        myData.lineRepresentation = protein.addRepresentation( "line", {${color_str} sele: lines.string} );
-    % endif
+
+    ### REP 0 stick > licorice
     % if structure.sticks:
-        var sticks = new NGL.Selection( "${' or '.join(structure.sticks)}" );
+        let sticks = new NGL.Selection( "${' or '.join(structure.sticks)}" );
         % if stick_format == 'sym_licorice':
-        protein.addRepresentation( "licorice", {${color_str} sele: sticks.string, multipleBond: "symmetric"} );
+        protein.addRepresentation( "licorice", {${color_str} sele: sticks.string, multipleBond: "symmetric", opacity: ${1-structure.stick_transparency} } );
         % elif stick_format == 'licorice':
-        protein.addRepresentation( "licorice", {${color_str}  sele: sticks.string} );
+        protein.addRepresentation( "licorice", {${color_str}  sele: sticks.string, opacity: ${1-structure.stick_transparency}} );
         % elif stick_format == 'hyperball':
-        protein.addRepresentation( "hyperball", {${color_str}  sele: sticks.string} );
+        protein.addRepresentation( "hyperball", {${color_str}  sele: sticks.string, opacity: ${1-structure.stick_transparency}} );
         % elif stick_format == 'ball':
-        protein.addRepresentation( "ball+stick", {${color_str}  sele: sticks.string, multipleBond: "symmetric"} );
+        protein.addRepresentation( "ball+stick", {${color_str}  sele: sticks.string, multipleBond: "symmetric", opacity: ${1-structure.stick_transparency}} );
         % endif
     % endif
-    % if structure.cartoon:
-    var cartoon = new NGL.Selection( "${' or '.join(structure.cartoon)}" );
-    protein.addRepresentation( "cartoon", {${color_str}  sele: cartoon.string, smoothSheet: true} );
+
+    ### REP 1 self.spheres > spacefill
+    % if structure.spheres:
+        let spacefill = new NGL.Selection( "${' or '.join(structure.spheres)}" );
+        protein.addRepresentation( "spacefill", {${color_str} sele: spacefill.string, opacity: ${1-structure.sphere_transparency}} );
     % endif
+
+    ### REP 2 self.surface > surface
+    % if structure.surface:
+        let surf = new NGL.Selection( "${' or '.join(structure.surface)}" );
+        protein.addRepresentation( "surface", {${color_str} sele: surf.string, opacity: ${1-structure.surface_transparency}} );
+    % endif
+
+    ### REP 3 self.label > label
+    % if structure.label:
+        %for sele in structure.label:
+            protein.addRepresentation("label",{labelType: "text", labelText: ["${structure.label[sele]}"], sele: "${sele}" });
+        %endfor
+    % endif
+
+    ### REP 5 self.cartoon > cartoon
+    % if structure.cartoon:
+        let cartoon = new NGL.Selection( "${' or '.join(structure.cartoon)}" );
+        protein.addRepresentation( "cartoon", {${color_str}  sele: cartoon.string, smoothSheet: true, opacity: ${1-structure.cartoon_transparency}} );
+    % endif
+
+    ### REP 6 self.ribbon > backbone
+    % if structure.ribbon:
+        let backbone = new NGL.Selection( "${' or '.join(structure.ribbon)}" );
+        protein.addRepresentation( "backbone", {${color_str} sele: backbone.string, opacity: ${1-structure.ribbon_transparency}} );
+    % endif
+
+    ### REP 7 self.lines > line
+    % if structure.lines:
+        let line = new NGL.Selection( "${' or '.join(structure.lines)}" );
+        protein.addRepresentation( "line", {${color_str} sele: line.string} );
+    % endif
+
+    ### REP 8 self.mesh > surface
+    % if structure.mesh:
+        let mesh = new NGL.Selection( "${' or '.join(structure.mesh)}" );
+        protein.addRepresentation( "surface", {${color_str} sele: mesh.string, contour: true} );
+    % endif
+
+    ### REP 9 self.dots > point
+    % if structure.dots:
+        let point = new NGL.Selection( "${' or '.join(structure.dots)}" );
+        myData.lineRepresentation = protein.addRepresentation( "point", {${color_str} sele: point.string} );
+    % endif
+
+    ### REP 11 self.cell > cell
+    % if structure.cell:
+        let cell = new NGL.Selection( "${' or '.join(structure.cell)}" );
+        protein.addRepresentation( "cell", {${color_str} sele: cell.string} );
+    % endif
+
+    ### REP 12 self.putty > tube
     % if structure.putty:
-    var putty = new NGL.Selection( "${' or '.join(structure.putty)}" );
+    let putty = new NGL.Selection( "${' or '.join(structure.putty)}" );
     protein.addRepresentation( "tube", {${color_str}  sele: putty.string, radiusType: "bfactor", radiusScale: 0.05,} );
     % endif
-    % if structure.surface:
-    var surf = new NGL.Selection( "${' or '.join(structure.surface)}" );
-    protein.addRepresentation( "surface", {${color_str} sele: surf.string} );
-    % endif
+
+    ### distances
     %if structure.distances:
         %for d in structure.distances:
     protein.addRepresentation( "distance", { atomPair: [
@@ -64,10 +113,11 @@ function loadfun (protein) {
     ], colorValue: ${structure.swatch[d['color']].hex} } );
         %endfor
     %endif
-    %if structure.mesh:
-        let shape = new NGL.Shape("shape");
-        %for meshgroup in structure.mesh:
 
+    ### triang
+    %if structure.custom_mesh:
+        let shape = new NGL.Shape("shape");
+        %for meshgroup in structure.custom_mesh:
             let refmesh=${meshgroup['triangles']};
             let meshBuffer = new NGL.MeshBuffer( {
                 position: new Float32Array(refmesh),
@@ -79,4 +129,5 @@ function loadfun (protein) {
 
     //orient
     stage.viewerControls.orient((new NGL.Matrix4).fromArray(${structure.m4.reshape(16, ).tolist()}));
+    stage.setParameters({ cameraFov: ${structure.fov}, fogNear: ${structure.fog}}); //clipFar: ${structure.slab_far}, clipNear: ${structure.slab_near}
 }
