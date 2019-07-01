@@ -13,6 +13,7 @@ $('#viewport_menu_popover')
     .popover({html: true,
             trigger: "manual",
             title: "Options",
+            opacity: 0.5,
             content: "<div id='popbody'></div>"})
     .click(function(){
        if(! window.viewPopIsOpen ||  window.viewPopIsOpen === undefined) { //it is not open
@@ -24,6 +25,10 @@ $('#viewport_menu_popover')
        }
     }).on('shown.bs.popover',function() {
             $('#popbody').html(`
+
+<div class="container">
+<div class="row">
+<div class="col-xl-6">
 <div class="input-group mb-3">
   <div class="input-group-prepend">
     <span class="input-group-text" id="viewport_menu_selector_add">Focus on residue</span>
@@ -34,6 +39,89 @@ $('#viewport_menu_popover')
     <button class="btn btn-outline-secondary" type="button" id="viewport_menu_selector_go" data-toggle="tooltip" title="Go to residue"><i class="far fa-bullseye-arrow"></i></button>
   </div>
 </div>
+</div>
+<div class="col-xl-6">
+<div class="input-group mb-3">
+  <div class="input-group-prepend">
+  <span class="input-group-text" id="viewport_menu_ngl_add">NGL selection</span>
+  </div>
+  <input id="viewport_menu_ngl" type="text" class="form-control" placeholder="residueNumber:chainLetter.atomName" aria-label="NGL selection" aria-describedby="viewport_menu_ngl_add">
+  <div class="input-group-append">
+    <button class="btn btn-outline-secondary" type="button" id="viewport_menu_ngl_go" data-toggle="tooltip" title="Go to selection"><i class="far fa-bullseye-arrow"></i></button>
+  </div>
+</div>
+</div>
+<div class="col-lg-6 col-xl-4">
+<div class="input-group mb-3">
+<div class="input-group-prepend">
+    <span class="input-group-text" id="viewport_menu_clipNear_add">Clip<sub>Near</sub></span>
+</div>
+<div class="border rounded-right px-3 py-1">
+    <input type="range" min="0" max="100" value="0" step="5" class="custom-range" id="viewport_menu_clipNear" aria-label="ClipNear" aria-describedby="viewport_menu_clipNear_add">
+</div>
+</div>
+</div>
+<div class="col-lg-6 col-xl-4">
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text" id="viewport_menu_clipFar_add">Clip<sub>Far</sub></span>
+    </div>
+    <div class="border rounded-right px-3 py-1">
+        <input type="range" min="0" max="100" value="0" step="5" class="custom-range" id="viewport_menu_clipFar" aria-label="ClipFar" aria-describedby="viewport_menu_clipFar_add">
+    </div>
+</div>
+</div>
+<div class="col-lg-6 col-xl-4">
+
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text" id="viewport_menu_clipDist_add">Clip<sub>Distance</sub></span>
+    </div>
+    <div class="border rounded-right px-3 py-1">
+        <input type="range" min="0" max="10" value="0" step="1" class="custom-range" id="viewport_menu_clipDist" aria-label="ClipDist" aria-describedby="viewport_menu_clipDist_add">
+    </div>
+</div>
+</div>
+<div class="col-lg-6 col-xl-4">
+<div class="input-group mb-3">
+<div class="input-group-prepend">
+    <span class="input-group-text" id="viewport_menu_fogNear_add">Fog<sub>Near</sub></span>
+</div>
+<div class="border rounded-right px-3 py-1">
+    <input type="range" min="0" max="100" value="25" step="5" class="custom-range" id="viewport_menu_fogNear" aria-label="fogNear" aria-describedby="viewport_menu_fogNear_add">
+</div>
+</div>
+</div>
+<div class="col-lg-6 col-xl-4">
+<div class="input-group mb-3">
+<div class="input-group-prepend">
+    <span class="input-group-text" id="viewport_menu_fogFar_add">Fog<sub>Far</sub></span>
+</div>
+<div class="border rounded-right px-3 py-1">
+    <input type="range" min="0" max="100" value="50" step="5" class="custom-range" id="viewport_menu_fogFar" aria-label="fogFar" aria-describedby="viewport_menu_fogFar_add">
+</div>
+</div></div>
+<div class="col-lg-6 col-xl-4"></div>
+<div class="col-lg-6 col-xl-4"></div>
+</div>
+</div>
+
+
+
+
+<!-- $ {stage.getParameters().clipNear}-->
+
+
+
+
+
+
+
+
+
+
+
+
 <h4>Controls</h4>
 <p>The mouse and keyboard mappings are the standard NGL ones.</p>
 
@@ -59,9 +147,23 @@ $('#viewport_menu_popover')
 </table>`);
 
         $('#popbody [data-toggle="tooltip"]').tooltip();
-        $('#viewport_menu_selector_go').click((e) =>
-            NGL.specialOps.showResidue('viewport',$('#viewport_menu_selector_resi').val()+':'+$('#viewport_menu_selector_chain').val())
+        $('#viewport_menu_selector_go').click((e) => {
+                NGL.specialOps.showResidue('viewport', $('#viewport_menu_selector_resi').val() + ':' + $('#viewport_menu_selector_chain').val());
+                $('#viewport_menu_popover').popover('hide');
+            }
         );
+        $('#viewport_menu_ngl_go').click((e) => {
+            NGL.specialOps.showResidue('viewport',$('#viewport_menu_ngl').val());
+            $('#viewport_menu_popover').popover('hide');
+        }
+        );
+
+        $('#viewport_menu_clipNear').change((e) => NGL.getStage().setParameters({'clipNear': parseInt($('#viewport_menu_clipNear').val())}));
+        $('#viewport_menu_clipFar').change((e) => NGL.getStage().setParameters({'clipFar': parseInt($('#viewport_menu_clipFar').val())}));
+        $('#viewport_menu_clipDist').change((e) => NGL.getStage().setParameters({'clipDist': parseInt($('#viewport_menu_clipDist').val())}));
+        $('#viewport_menu_fogNear').change((e) => NGL.getStage().setParameters({'fogNear': parseInt($('#viewport_menu_fogNear').val())}));
+        $('#viewport_menu_fogFar').change((e) => NGL.getStage().setParameters({'fogFar': parseInt($('#viewport_menu_fogFar').val())}));
+        $('.popover [type="range"]').on('mousedown', (e) => $('.popover').css('opacity', 0.5)).on('mouseup', (e) => setInterval((e) => $('.popover').css('opacity', 1), 1000));
     });
 
 
