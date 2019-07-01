@@ -511,13 +511,12 @@ class PyMolTranspiler:
             pymolian = np.array(view)
         self.rotation = pymolian[0:9].reshape([3, 3])
         depth = pymolian[9:12]
-        self.z = abs(depth[2])*1 #arbitraty
+        self.z = abs(depth[2])*1 #arbitrary... correction. fov should be the same.
         self.position = pymolian[12:15]
         self.teleposition = np.matmul(self.rotation, -depth) + self.position
         self.slab_near = pymolian[11] + pymolian[15]
         self.slab_far = pymolian[11] + pymolian[16]
-        print('slabs... ', self.slab_near, self.slab_far)
-
+        # slabs are not clipping...
         self.modrotation = np.multiply(self.rotation, np.array([[-1, -1, -1], [1, 1, 1], [-1, -1, -1]]).transpose())
         c = np.hstack((self.modrotation * self.z, np.zeros((3, 1))))
         m4 = np.vstack((c, np.ones((1, 4))))
