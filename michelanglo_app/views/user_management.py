@@ -44,6 +44,20 @@ def log_reply(fun):
         return reply
     return inner
 
+from datetime import datetime
+
+def has_exceeded_tries(request):
+    now = datetime.now().timestamp()
+    if 'tries' in request.session:
+        if len(request.session['tries']) >10:
+            if now - request.session['tries'][-9] < 10*60: #ten minutes.
+                return True
+        request.session['tries'].append(now)
+    else:
+        request.session['tries'] = [now]
+    return False
+
+
 @view_config(route_name='login', renderer="json")
 @log_reply
 def user_view(request):
@@ -71,6 +85,9 @@ def user_view(request):
             headers = remember(request, targetuser.id)
             request.response.headerlist.extend(headers)
             return {'status': 'logged in', 'name': targetuser.name, 'rank': targetuser.role}
+        elif has_exceeded_tries(request):
+            request.response.status = 429
+            return {'status': 'Too many failures. Ten requests in ten minutes.'}
         elif targetuser:
             request.response.status = 400
             return {'status': 'wrong password'}
