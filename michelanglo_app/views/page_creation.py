@@ -28,7 +28,7 @@ def demo_file(request):
         raise Exception('Non existant demo file requested. Possible attack!')
 
 def save_file(request, extension):
-    filename=os.path.join('michelanglo_app', 'temp','{0}.{1}'.format(uuid.uuid4(),extension))
+    filename=os.path.join('michelanglo_app', 'temp','{0}.{1}'.format(get_uuid(),extension))
     request.params['file'].file.seek(0)
     with open(filename, 'wb') as output_file:
         shutil.copyfileobj(request.params['file'].file, output_file)
@@ -60,6 +60,13 @@ def commit_submission(request, settings, pagename):
     else:
         anonymous_submission(request, settings, pagename)
     Page(pagename).save(settings)
+
+def get_uuid():
+    identifier = str(uuid.uuid4())
+    if identifier in os.listdir(os.path.join('michelanglo_app', 'user-data')):
+        log.error('UUID collision!!!')
+        return get_uuid() #one in a ten-quintillion!
+    return identifier
 
 ########################################################################################
 ### VIEWS
@@ -142,7 +149,7 @@ def ajax_convert(request):
         # deal with user permissions.
         code = 1
         request.session['status'] = make_msg('Permissions', 'Finalising user permissions')
-        pagename=str(uuid.uuid4())
+        pagename=get_uuid()
         # create output
         settings['pdb'] = []
         request.session['status'] = make_msg('Load function', 'Making load function')
