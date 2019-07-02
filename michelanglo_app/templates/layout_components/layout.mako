@@ -158,8 +158,10 @@ pre {
 <script src="https://unpkg.com/ngl@2.0.0-dev.34/dist/ngl.js" type="text/javascript"></script>
 % if not remote:
     <script type="text/javascript" src="/static/michelanglo.js"></script>
+    <script type="text/javascript" src="/static/michelanglo_menu.js"></script>
 % else:
     <script type="text/javascript" src="https://michelanglo.sgc.ox.ac.uk/michelanglo.js"></script>
+    <script type="text/javascript" src="https://michelanglo.sgc.ox.ac.uk/michelanglo_menu.js"></script>
 % endif
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/3.0.0-beta.3/js/bootstrap-colorpicker.min.js"></script>

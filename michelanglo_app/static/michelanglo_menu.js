@@ -105,26 +105,9 @@ $('#viewport_menu_popover')
 <div class="col-lg-6 col-xl-4"></div>
 </div>
 </div>
-
-
-
-
-<!-- $ {stage.getParameters().clipNear}-->
-
-
-
-
-
-
-
-
-
-
-
-
+<div id="control_table" style="transition: opacity 0.5s; -webkit-transition: opacity 0.5s;">
 <h4>Controls</h4>
 <p>The mouse and keyboard mappings are the standard NGL ones.</p>
-
 <table class="table table-striped">
 <tr><th>Key</th><th>Effect</th></tr>
 <tr><td class="text-monospace">Scroll</td><td>zoom scene</td></tr>
@@ -144,7 +127,9 @@ $('#viewport_menu_popover')
 <tr><td class="text-monospace">k</td><td>toggle stage rocking</td></tr>
 <tr><td class="text-monospace">p</td><td>pause all stage animations</td></tr>
 <tr><td class="text-monospace">r</td><td>reset stage auto view</td></tr>
-</table>`);
+</table>
+</div>
+`);
 
         $('#popbody [data-toggle="tooltip"]').tooltip();
         $('#viewport_menu_selector_go').click((e) => {
@@ -163,7 +148,8 @@ $('#viewport_menu_popover')
         $('#viewport_menu_clipDist').change((e) => NGL.getStage().setParameters({'clipDist': parseInt($('#viewport_menu_clipDist').val())}));
         $('#viewport_menu_fogNear').change((e) => NGL.getStage().setParameters({'fogNear': parseInt($('#viewport_menu_fogNear').val())}));
         $('#viewport_menu_fogFar').change((e) => NGL.getStage().setParameters({'fogFar': parseInt($('#viewport_menu_fogFar').val())}));
-        $('.popover [type="range"]').on('mousedown', (e) => $('.popover').css('opacity', 0.5)).on('mouseup', (e) => setInterval((e) => $('.popover').css('opacity', 1), 1000));
+        $('.popover [type="range"]').on('mousedown', (e) => {$('#control_table').hide(500); if (window.menu_timeout) {clearTimeout(menu_tineout)}})
+                                .on('mouseup', (e) => setTimeout((e) => window.menu_timeout = $('#control_table').show(1000), 3000));
     });
 
 

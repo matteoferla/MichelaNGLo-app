@@ -170,5 +170,4 @@ $(document).ready(function () {
 }); //ready
 
 </script>
-<script type="text/javascript" src="/static/addMenu.js"></script>
 </%block>
