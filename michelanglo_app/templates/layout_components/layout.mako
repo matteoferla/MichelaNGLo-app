@@ -189,6 +189,22 @@ pre {
             $('#acceptCookies').on('hide.bs.toast',(event) => localStorage.setItem('cookiesAccepted',true));
         }
     %endif
+
+$('#chat_send').click((event) => {
+                    let msg = $('#chat_message').val();
+                    $('#chat_modal').modal('hide');
+                    if (msg) {$.ajax({url: "/msg",
+                                data: {'text': msg,
+                                       'page': window.location.pathname,
+                                        'event': 'chat'
+                                      },
+                                method: 'POST'
+                            })
+                        .done((msg) => ops.addToast('userchatgood','Send','Thank you! The site admin will get back to you shortly.', 'bg-success'))
+                        .fail(ops.addErrorToast)}
+                    else {ops.addToast('emptymessage','Empty message','Ehhr. Somehow the message is empty.', 'bg-warning')}
+                }) //click.
+
 % endif
     $(document).on('show.bs.modal', '.modal', function () {
     var zIndex = 1040 + (10 * $('.modal:visible').length);

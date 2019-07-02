@@ -157,7 +157,8 @@ $(document).ready(function () {
 
         $('#report').click((event) => $.ajax({url: "/msg",
                                             data: {'text': prompt("Reason for flagging?", "Data breach"),
-                                                    page: "${page}"
+                                                    page: "${page}",
+                                                    event: 'report'
                                                   },
                                             method: 'POST'
                                         })

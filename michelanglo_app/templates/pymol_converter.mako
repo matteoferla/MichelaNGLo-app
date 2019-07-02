@@ -1,7 +1,7 @@
 <%namespace file="layout_components/labels.mako" name="info"/>
 <%inherit file="layout_components/layout_w_card.mako"/>
 <%block name="buttons">
-            <%include file="layout_components/vertical_menu_buttons.mako" args='tour=True'/>
+            <%include file="layout_components/vertical_menu_buttons.mako"/>
 </%block>
 <%block name="title">
             &mdash; PyMol
@@ -106,6 +106,7 @@
                     <div class="col-md-4 offset-md-4">
                         <div class="btn-group d-flex" role="group" aria-label="Submit">
                             <button type="button" class="btn btn-info flex-fill" data-target="#info_modal" data-toggle="modal">Info</button>
+                            <button type="button" class="btn btn-info flex-fill" title="Guided tour of the page" data-toggle="tooltip" id="tour">Guide</button>
                             <button type="button" class="btn btn-warning flex-fill" id="clear">Clear</button>
                             <button type="button" class="btn btn-success flex-fill" id="submit">Submit</button>
                         </div>

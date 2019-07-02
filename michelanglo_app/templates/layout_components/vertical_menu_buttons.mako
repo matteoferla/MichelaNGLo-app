@@ -1,4 +1,3 @@
-<%page args="tour=False"/>
 <div class="float-right d-flex flex-row">
     #### filled by JS in layout.mako
     <span id="user" class="my-2 mr-3"></span>
@@ -32,9 +31,10 @@
                             </div>
                          '>
         <i class="far fa-bars"></i></button>
-    % if tour:
-        <button type="button" class="btn btn-outline-secondary my-1" title="Guided tour of the site" data-toggle="tooltip" id="tour"><i class="far fa-question"></i></button>
-    % endif
+    <button class="btn btn-outline-secondary my-1" type="button" data-toggle="modal" data-target="#chat_modal">
+        <i class="far fa-comments"></i>
+    </button>
 </div>
 </div>
 #### title toggling is in layout.mako
+<%include file="chat.mako"/>
