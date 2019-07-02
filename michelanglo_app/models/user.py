@@ -86,4 +86,4 @@ class User(Base):
         return self._get_loaded_pages(group='owned_pages')
 
     def remove_visited_page(self, page):
-        self.visited_pages.replace(page,'')
+        self.visited_pages = self.visited_pages.replace(page,'')

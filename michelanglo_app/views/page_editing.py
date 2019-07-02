@@ -61,12 +61,15 @@ def edit(request):
         settings['confidential'] = is_js_true(request.POST['confidential'])
         public_from_private= 'public' in settings and not settings['public'] and is_js_true(request.POST['public']) #was private public but is now.
         public_from_nothing= 'public' not in settings and is_js_true(request.POST['public']) #was not decalred but is now.
+        private_from_public = 'public' in settings and settings['public'] and not is_js_true(request.POST['public'])
+        print(public_from_private, public_from_nothing, private_from_public)
         if public_from_private or public_from_nothing:
             public = get_public(request)
             public.add_visited_page(page.identifier)
             request.dbsession.add(public)
-        elif 'public' in settings and settings['public'] and not is_js_true(request.POST['public']):
-                public = get_public(request)
+        elif not is_js_true(request.POST['public']):
+            public = get_public(request)
+            if page.identifier in public.get_visited_pages():
                 public.remove_visited_page(page.identifier)
                 request.dbsession.add(public)
         else:
@@ -106,7 +109,6 @@ def edit(request):
         if 'proteinJSON' in request.POST:
             settings['proteinJSON'] = request.POST['proteinJSON']
         if 'image' in request.POST:
-            print(__file__, __name__, request.POST['image'])
             settings['image'] = request.POST['image']
         #save
         page.save(settings)
