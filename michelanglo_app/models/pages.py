@@ -107,7 +107,28 @@ class Page:
 
     @staticmethod
     def sanitise_HTML(code):
-        return re.sub('<\s?\/?script', '&lt;script', code, re.IGNORECASE)
+        def substitute(code, pattern, message):
+            code = re.sub(f'<[^>]*?{pattern}[\s\S]*?>', message, code, re.IGNORECASE | re.MULTILINE | re.DOTALL)
+            pseudo = re.sub('''(<[^>]*?)['`"][\s\S]*?['`"]''', r'\1', code, re.IGNORECASE | re.MULTILINE | re.DOTALL)
+            print(pseudo)
+            if re.search(f'<[^>]*?{pattern}[\s\S]*?>', pseudo):  # go extreme.
+                print('here!', pattern)
+                code = re.sub(pattern, message, code, re.IGNORECASE | re.MULTILINE | re.DOTALL)
+            return code
+
+        code = re.sub('<!--*?-->', 'COMMENT REMOVED', code)
+        for character in ('\t','#x09;','&#x0A;','&#x0D;','\0'):
+            code = code.replace(character,' '*4)
+        code = code.replace(character,' '*4)
+        for tag in ('script', 'iframe', 'object', 'link','style','meta','frame', 'embed'):
+            code = substitute(code, tag, tag.upper() + ' BLOCKED')
+        for attr in ('javascript', 'vbscript','livescript', 'xss', 'seekSegmentTime', '&{', 'expression'):
+            code = substitute(code, attr, attr.upper() + ' BLOCKED')
+        code = substitute(code, 'on\w+', 'ON-EVENT BLOCKED')
+        for letter in range(65, 123):
+            code = substitute(code, f'&#0*{letter};', 'HEX ENCODED LETTER BLOCKED')
+            code = substitute(code, f'&#x0*{letter:02X};', 'HEX ENCODED LETTER BLOCKED')
+        return code
 
     #https://stackoverflow.com/questions/42568262/how-to-encrypt-text-with-a-password-in-python
     def _encrypt(self, source, encode=False):
