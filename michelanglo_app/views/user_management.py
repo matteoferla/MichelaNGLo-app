@@ -81,13 +81,13 @@ def user_view(request):
         else:
             return {'status': 'verification', 'name': 'guest', 'rank': 'guest'}
     elif action == 'login':
-        if targetuser is not None and targetuser.check_password(password):
+        if has_exceeded_tries(request):
+            request.response.status = 429
+            return {'status': 'Too many failures. Ten requests in ten minutes. Try again later.'}
+        elif targetuser is not None and targetuser.check_password(password):
             headers = remember(request, targetuser.id)
             request.response.headerlist.extend(headers)
             return {'status': 'logged in', 'name': targetuser.name, 'rank': targetuser.role}
-        elif has_exceeded_tries(request):
-            request.response.status = 429
-            return {'status': 'Too many failures. Ten requests in ten minutes.'}
         elif targetuser:
             request.response.status = 400
             return {'status': 'wrong password'}
