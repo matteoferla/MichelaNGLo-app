@@ -21,7 +21,6 @@ def get_username(request):
                                                       "HTTP_X_FORWARDED_FOR",
                                                       "HTTP_CLIENT_IP") if x in request.environ])
 
-os.environ['SLACK_WEBHOOK'] = 'https://hooks.slack.com/services/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'
 def notify_admin(msg):
     """
     Send message to a slack webhook
