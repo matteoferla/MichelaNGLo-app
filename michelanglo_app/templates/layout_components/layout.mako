@@ -141,7 +141,7 @@ pre {
 
 <footer class="footer">
       <div class="container">
-          <span class="text-muted"><small><a href="https://www.schrodinger.com/" target="_blank">PyMOL <i class="far fa-external-link-square"></i></a> is a trademark of <a href="https://pymol.org/2/" target="_blank">Schr&ouml;dinger , LLC <i class="far fa-external-link-square"></i></a>. The authors are not affiliated or involved in any way with PyMOL or Schr&ouml;dinger. Data is not kept for commercial or analytic purposes.</small></span>
+          <span class="text-muted"><small><a href="https://www.schrodinger.com/" target="_blank">PyMOL <i class="far fa-external-link-square"></i></a> is a trademark of <a href="https://pymol.org/2/" target="_blank">Schr&ouml;dinger , LLC <i class="far fa-external-link-square"></i></a>. The authors are not affiliated or involved with PyMOL or Schr&ouml;dinger. Data is not kept for commercial or analytic purposes.</small></span>
       </div>
     </footer>
 
