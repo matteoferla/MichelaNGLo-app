@@ -605,12 +605,13 @@ class PyMolTranspiler:
             for chain in repdata[rep_name]:
                 resi_homo_state = True  # are the residues homogeneously represented as rep_name?
                 resi_list = [] # a list in case the chain is not homogeneous.
+                print(repdata)
                 for resi in repdata[rep_name][chain]:
                     if all(repdata[rep_name][chain][resi].values()):
                         resi_list.append(resi)
                     elif any(repdata[rep_name][chain][resi].values()): # some/all are present
                         if not all(repdata[rep_name][chain][resi].values()):   # some are present
-                            transdata.extend([f'{resi}:{chain}.{name}' for name in repdata[chain][resi] if repdata[rep_name][chain][resi]])
+                            transdata.extend([f'{resi}:{chain}.{name}' for name in repdata[rep_name][chain][resi] if repdata[rep_name][chain][resi]])
                             resi_homo_state = False
                     else: # none are.
                         resi_homo_state = False
