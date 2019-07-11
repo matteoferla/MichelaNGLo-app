@@ -260,3 +260,22 @@ def mutate(request):
                                        f'/{common}  data-focus="clash" data-title="{mutant} mutant" data-load="{new_model} " data-selection="{n}:{chain}">mutant</span>)\n'
         page.save(settings)
         return {'status': 'success'}
+
+
+@view_config(route_name='rename_user-page', renderer='json')
+def rename(request):
+    if not request.user or request.user.role == 'admin':
+        request.response.status = 403
+        log.warn(f'{get_username(request)} is not autharised to rename page')
+        return {'status': 'not authorised'}
+    else:
+        old = request.params['old_page']
+        new = request.params['new_page']
+        if 'key' in request.params:
+            page = Page(old,key=request.params['key'])
+        else:
+            page = Page(old)
+        page.load()
+        page.identifier = new
+        page.save()
+        return {'status': 'success'}
