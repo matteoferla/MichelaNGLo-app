@@ -2,6 +2,8 @@ $('#mutate_create').click((event) => {
     let chain = $('#mutate_chain').val() || 'A';
     let mutations = $('#mutate_mutations').val().replace(/p\./gm,'').split(/[\W,]+/);
     console.log(mutations);
+    $('#mutate_create').attr('disabled','disabled').children('.far').removeClass('fa-wrench').addClass('fa-circle-notch').addClass('fa-spin');
+    ops.addToast('informare','Data submission','Your request is being processed','bg-info');
     $.ajax({
             url: "/mutate",
             type: 'POST',

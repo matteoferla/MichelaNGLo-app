@@ -83,7 +83,7 @@ $('#edit_submit').click(function () {
     description = description.replace(/@fa\[(.*?)\]/gi,'<i class="far fa-$1"></i>')
 
     //console.log('new');
-
+    $('#edit_submit').attr('disabled','disabled').children('.far').removeClass('fa-save').addClass('fa-circle-notch').addClass('fa-spin');
     $.ajax({
         url: "/edit_user-page",
         type: 'POST',

@@ -265,6 +265,7 @@ def mutate(request):
 @view_config(route_name='rename_user-page', renderer='json')
 def rename(request):
     """
+    admin only method.
     old_page: uuid, new_page: string
     """
     if not request.user or request.user.role != 'admin':
@@ -282,7 +283,6 @@ def rename(request):
             key = request.params['key']
         else:
             key = None
-
         old_page = Page(old_name, key=key)
         settings = old_page.load()
         new_page = Page(new_name, key=key)
