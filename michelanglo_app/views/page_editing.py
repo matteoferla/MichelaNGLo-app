@@ -264,13 +264,16 @@ def mutate(request):
 
 @view_config(route_name='rename_user-page', renderer='json')
 def rename(request):
+    """
+    old_page: uuid, new_page: string
+    """
     if not request.user or request.user.role == 'admin':
         request.response.status = 403
         log.warn(f'{get_username(request)} is not autharised to rename page')
         return {'status': 'not authorised'}
     else:
         old = request.params['old_page']
-        new = request.params['new_page']
+        new = re.sub('\W','', request.params['new_page'])
         if 'key' in request.params:
             page = Page(old,key=request.params['key'])
         else:
@@ -278,4 +281,4 @@ def rename(request):
         page.load()
         page.identifier = new
         page.save()
-        return {'status': 'success'}
+        return {'status': 'success', 'page': new}
