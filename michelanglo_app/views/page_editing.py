@@ -27,7 +27,7 @@ def edit(request):
     user = request.user
     # check if encrypted
     if page.is_password_protected():
-        page.key = request.POST['encryption_key'].encode('uft-8')
+        page.key = request.params['encryption_key'].encode('uft-8')
         page.path = page.encrypted_path
     # load data
     settings = page.load()
@@ -47,40 +47,40 @@ def edit(request):
         # only admins and friends can edit html fully
         if user.role in ('admin', 'friend'):
             for key in ('loadfun', 'title', 'description'):
-                if key in request.POST:
-                    settings[key] = request.POST[key]
-            if 'pdb' in request.POST:
+                if key in request.params:
+                    settings[key] = request.params[key]
+            if 'pdb' in request.params:
                 try:
-                    settings['pdb'] = json.loads(request.POST['pdb'])
+                    settings['pdb'] = json.loads(request.params['pdb'])
                 except:
-                    settings['pdb'] = request.POST['pdb']
+                    settings['pdb'] = request.params['pdb']
         else: # regular users have to be sanitised
             for key in ('title', 'description'):
-                if key in request.POST:
-                    settings[key] = Page.sanitise_HTML(request.POST[key])
-        settings['confidential'] = is_js_true(request.POST['confidential'])
-        public_from_private= 'public' in settings and not settings['public'] and is_js_true(request.POST['public']) #was private public but is now.
-        public_from_nothing= 'public' not in settings and is_js_true(request.POST['public']) #was not decalred but is now.
-        private_from_public = 'public' in settings and settings['public'] and not is_js_true(request.POST['public'])
+                if key in request.params:
+                    settings[key] = Page.sanitise_HTML(request.params[key])
+        settings['confidential'] = is_js_true(request.params['confidential'])
+        public_from_private= 'public' in settings and not settings['public'] and is_js_true(request.params['public']) #was private public but is now.
+        public_from_nothing= 'public' not in settings and is_js_true(request.params['public']) #was not decalred but is now.
+        private_from_public = 'public' in settings and settings['public'] and not is_js_true(request.params['public'])
         if public_from_private or public_from_nothing:
             public = get_public(request)
             public.add_visited_page(page.identifier)
             request.dbsession.add(public)
-        elif not is_js_true(request.POST['public']):
+        elif not is_js_true(request.params['public']):
             public = get_public(request)
             if page.identifier in public.get_visited_pages():
                 public.remove_visited_page(page.identifier)
                 request.dbsession.add(public)
         else:
             pass
-        settings['public'] = is_js_true(request.POST['public'])
+        settings['public'] = is_js_true(request.params['public'])
         if not settings['public']:
-            settings['freelyeditable'] = is_js_true(request.POST['freelyeditable'])
+            settings['freelyeditable'] = is_js_true(request.params['freelyeditable'])
         else:
             settings['freelyeditable'] = False
             #new_editors
-        if 'new_editors' in request.POST and request.POST['new_editors']:
-            for new_editor in json.loads((request.POST['new_editors'])):
+        if 'new_editors' in request.params and request.params['new_editors']:
+            for new_editor in json.loads((request.params['new_editors'])):
                 target = request.dbsession.query(User).filter_by(name=new_editor).one()
                 if target:
                     target.add_owned_page(page.identifier)
@@ -89,26 +89,26 @@ def edit(request):
                 else:
                     print('This is impossible...', new_editor, ' does not exist.')
         #encrypt
-        if not page.is_password_protected() and request.POST['encryption'] == 'true': # to be encrypted
+        if not page.is_password_protected() and request.params['encryption'] == 'true': # to be encrypted
             page.delete()
-            page.key = request.POST['encryption_key'].encode('utf-8')
+            page.key = request.params['encryption_key'].encode('utf-8')
             page.path = page.encrypted_path
-        elif page.is_password_protected() and request.POST['encryption'] == 'false':  #to be dencrypted
+        elif page.is_password_protected() and request.params['encryption'] == 'false':  #to be dencrypted
             page.delete()
             page.key = None
             page.path = page.unencrypted_path
         else: # no change
             pass
         #alter ratio
-        if 'columns_viewport' in request.POST:
-            settings['columns_viewport'] = int(request.POST['columns_viewport'])
-            settings['columns_text'] = int(request.POST['columns_text'])
-        if 'location_viewport' in request.POST:
-            settings['location_viewport'] = request.POST['location_viewport']
-        if 'proteinJSON' in request.POST:
-            settings['proteinJSON'] = request.POST['proteinJSON']
-        if 'image' in request.POST:
-            settings['image'] = request.POST['image']
+        if 'columns_viewport' in request.params:
+            settings['columns_viewport'] = int(request.params['columns_viewport'])
+            settings['columns_text'] = int(request.params['columns_text'])
+        if 'location_viewport' in request.params:
+            settings['location_viewport'] = request.params['location_viewport']
+        if 'proteinJSON' in request.params:
+            settings['proteinJSON'] = request.params['proteinJSON']
+        if 'image' in request.params:
+            settings['image'] = request.params['image']
         #save
         page.save(settings)
         return {'success': 1}
@@ -140,7 +140,7 @@ def combined(request):
     for page, role in ((target_page,'target'), (donor_page,'donor')):
         # check if encrypted
         if page.is_password_protected():
-            page.key = request.POST[f'{role}_encryption_key'].encode('uft-8')
+            page.key = request.params[f'{role}_encryption_key'].encode('uft-8')
             page.path = page.encrypted_path
         page.load()
         if not page.settings:
@@ -183,7 +183,7 @@ def combined(request):
 def delete(request):
     # get ready
     log.info(f'{get_username(request)} is requesting to delete page')
-    page = Page(request.POST['page'])
+    page = Page(request.params['page'])
     user = request.user
     if not user:
         request.response.status = 403
