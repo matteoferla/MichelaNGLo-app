@@ -21,3 +21,8 @@ $('#mutate_create').click((event) => {
         .done((msg) => location.reload())
         .fail((xhr) => ops.addToast('userpageerror','Error '+xhr.status,'An error occured. '+(!! xhr.responseJSON ? xhr.responseJSON.status : '(server side)'),'bg-danger'));
 });
+
+
+$('#mutate_modal').on('show.bs.modal',(event) => ops.addToast('savefirst','Unsaved changes?','Any unsaved changes to the previous modal (description and settings) will be discarded.','bg-info'));
+
+
