@@ -7,25 +7,7 @@ $('#viewport').prepend(`<button type="button"
     </b>
 </button>`);
 
-
-
-$('#viewport_menu_popover')
-    .popover({html: true,
-            trigger: "manual",
-            title: "Options",
-            opacity: 0.5,
-            content: "<div id='popbody'></div>"})
-    .click(function(){
-       if(! window.viewPopIsOpen ||  window.viewPopIsOpen === undefined) { //it is not open
-           $(this).popover('show');
-            window.viewPopIsOpen=true;}
-       else {
-           $(this).popover('hide');
-           window.viewPopIsOpen=false;
-       }
-    }).on('shown.bs.popover',function() {
-            $('#popbody').html(`
-
+let popbody = `
 <div class="container">
 <div class="row">
 <div class="col-xl-6">
@@ -101,35 +83,28 @@ $('#viewport_menu_popover')
     <input type="range" min="0" max="100" value="50" step="5" class="custom-range" id="viewport_menu_fogFar" aria-label="fogFar" aria-describedby="viewport_menu_fogFar_add">
 </div>
 </div></div>
+<div class="col-lg-6 col-xl-4"><button type="button" class="btn btn-info" data-toggle="modal" data-target="#controlguide_modal">Show Mouse Controls</div>
 <div class="col-lg-6 col-xl-4"></div>
-<div class="col-lg-6 col-xl-4"></div>
 </div>
 </div>
-<div id="control_table" style="transition: opacity 0.5s; -webkit-transition: opacity 0.5s;">
-<h4>Controls</h4>
-<p>The mouse and keyboard mappings are the standard NGL ones.</p>
-<table class="table table-striped">
-<tr><th>Key</th><th>Effect</th></tr>
-<tr><td class="text-monospace">Scroll</td><td>zoom scene</td></tr>
-<tr><td class="text-monospace">scroll-ctrl</td><td>move near clipping plane</td></tr>
-<tr><td class="text-monospace">scroll-shift</td><td>move near clipping plane and far fog</td></tr>
-<tr><td class="text-monospace">scroll-alt</td><td>change isolevel of isosurfaces</td></tr>
-<tr><td class="text-monospace">drag-right</td><td>pan/translate scene</td></tr>
-<tr><td class="text-monospace">drag-middle</td><td>zoom scene</td></tr>
-<tr><td class="text-monospace">drag-left</td><td>rotate scene</td></tr>
-<tr><td class="text-monospace">drag-shift-right</td><td>zoom scene</td></tr>
-<tr><td class="text-monospace">drag-left+right</td><td>zoom scene</td></tr>
-<tr><td class="text-monospace">drag-ctrl-right</td><td>pan/translate hovered component</td></tr>
-<tr><td class="text-monospace">drag-ctrl-left</td><td>rotate hovered component</td></tr>
-<tr><td class="text-monospace">clickPick-middle</td><td>auto view picked component element</td></tr>
-<tr><td class="text-monospace">hoverPick</td><td>show tooltip for hovered component element</td></tr>
-<tr><td class="text-monospace">i</td><td>toggle stage spinning</td></tr>
-<tr><td class="text-monospace">k</td><td>toggle stage rocking</td></tr>
-<tr><td class="text-monospace">p</td><td>pause all stage animations</td></tr>
-<tr><td class="text-monospace">r</td><td>reset stage auto view</td></tr>
-</table>
-</div>
-`);
+`;
+
+$('#viewport_menu_popover')
+    .popover({html: true,
+            trigger: "manual",
+            title: "Options",
+            html: true,
+            content: "<div id='popbody'>"+popbody+"</div>"})
+    .click(function(){
+       if(! window.viewPopIsOpen ||  window.viewPopIsOpen === undefined) { //it is not open
+           $(this).popover('show');
+            window.viewPopIsOpen=true;}
+       else {
+           $(this).popover('hide');
+           window.viewPopIsOpen=false;
+       }
+    }).on('shown.bs.popover',function() {
+            $('#popbody').html(popbody); //this seems insane but the HTML gets buggered in Moz otherwise and the position is all wtrong.
 
         $('#popbody [data-toggle="tooltip"]').tooltip();
         $('#viewport_menu_selector_go').click((e) => {
@@ -148,11 +123,49 @@ $('#viewport_menu_popover')
         $('#viewport_menu_clipDist').change((e) => NGL.getStage().setParameters({'clipDist': parseInt($('#viewport_menu_clipDist').val())}));
         $('#viewport_menu_fogNear').change((e) => NGL.getStage().setParameters({'fogNear': parseInt($('#viewport_menu_fogNear').val())}));
         $('#viewport_menu_fogFar').change((e) => NGL.getStage().setParameters({'fogFar': parseInt($('#viewport_menu_fogFar').val())}));
-        $('.popover [type="range"]').on('mousedown', (e) => {$('#control_table').hide(500); if (window.menu_timeout) {clearTimeout(menu_tineout)}})
-                                .on('mouseup', (e) => setTimeout((e) => window.menu_timeout = $('#control_table').show(1000), 3000));
+        //$('.popover [type="range"]').on('mousedown', (e) => {$('.transparentable').hide(500); if (window.menu_timeout) {clearTimeout(menu_tineout)}})
+         //                       .on('mouseup', (e) => setTimeout((e) => window.menu_timeout = $('.transparentable').show(1000), 3000));
+        //worked with ... class='transparentable' style="transition: opacity 0.5s; -webkit-transition: opacity 0.5s;"
     });
 
 
-
-
-
+$('body').append(`
+<div class="modal" tabindex="-1" role="dialog" id="controlguide_modal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <h4>Controls</h4>
+            <p>The mouse and keyboard mappings are the standard NGL ones.</p>
+            <table class="table table-striped">
+            <tr><th>Key</th><th>Effect</th></tr>
+            <tr><td class="text-monospace">Scroll</td><td>zoom scene</td></tr>
+            <tr><td class="text-monospace">scroll-ctrl</td><td>move near clipping plane</td></tr>
+            <tr><td class="text-monospace">scroll-shift</td><td>move near clipping plane and far fog</td></tr>
+            <tr><td class="text-monospace">scroll-alt</td><td>change isolevel of isosurfaces</td></tr>
+            <tr><td class="text-monospace">drag-right</td><td>pan/translate scene</td></tr>
+            <tr><td class="text-monospace">drag-middle</td><td>zoom scene</td></tr>
+            <tr><td class="text-monospace">drag-left</td><td>rotate scene</td></tr>
+            <tr><td class="text-monospace">drag-shift-right</td><td>zoom scene</td></tr>
+            <tr><td class="text-monospace">drag-left+right</td><td>zoom scene</td></tr>
+            <tr><td class="text-monospace">drag-ctrl-right</td><td>pan/translate hovered component</td></tr>
+            <tr><td class="text-monospace">drag-ctrl-left</td><td>rotate hovered component</td></tr>
+            <tr><td class="text-monospace">clickPick-middle</td><td>auto view picked component element</td></tr>
+            <tr><td class="text-monospace">hoverPick</td><td>show tooltip for hovered component element</td></tr>
+            <tr><td class="text-monospace">i</td><td>toggle stage spinning</td></tr>
+            <tr><td class="text-monospace">k</td><td>toggle stage rocking</td></tr>
+            <tr><td class="text-monospace">p</td><td>pause all stage animations</td></tr>
+            <tr><td class="text-monospace">r</td><td>reset stage auto view</td></tr>
+            </table>
+      </div>
+    </div>
+  </div>
+</div>
+`);
+setTimeout(()=> $('#controlguide_modal').on('show.bs.modal',(event) => $('#viewport_menu_popover').popover('hide')), 1000);
+//cannae be bothered doing this properly, but the problem is that this should go only when the modal is added to the body.

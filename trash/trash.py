@@ -48,6 +48,9 @@ def old_edit(request):
     return {'success': 1}
 
 
+<div id="control_table" >
+
+</div>
 
 
 
