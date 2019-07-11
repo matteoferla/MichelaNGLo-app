@@ -582,8 +582,8 @@ class PyMolTranspiler:
         repdata = {rep2name[i]: deepcopy(structure) for i in (0, 1, 2, 5, 6, 7, 8, 9, 11, 12)}
         for atom in self.atoms:
             reps = [r == '1' for r in reversed("{0:0>12b}".format(int(atom['reps'])))]
-            reps[1] = reps[1] or reps[4]  # spheres fix
-            reps[7] = reps[7] or reps[10]  # spheres fix
+            reps[1] = reps[1] or reps[4]  # hetero spheres fix
+            reps[7] = reps[7] or reps[10]  # hetero line fix
             assert atom['chain'], 'The atom has no chain. This ought to be fixed upstream!'
             for i in (0, 1, 2, 5, 6, 7, 8, 9, 11):
                 repdata[ rep2name[i] ][ atom['chain'] ][ atom['resi'] ][ atom['name'] ] = reps[i]
@@ -605,7 +605,6 @@ class PyMolTranspiler:
             for chain in repdata[rep_name]:
                 resi_homo_state = True  # are the residues homogeneously represented as rep_name?
                 resi_list = [] # a list in case the chain is not homogeneous.
-                print(repdata)
                 for resi in repdata[rep_name][chain]:
                     if all(repdata[rep_name][chain][resi].values()):
                         resi_list.append(resi)
