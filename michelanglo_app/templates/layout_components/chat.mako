@@ -16,7 +16,7 @@
                   <div class="input-group-prepend">
                     <span class="input-group-text" id="chat_message_label">Message</span>
                   </div>
-                  <input type="text" class="form-control" placeholder="your message here" aria-label="message" aria-describedby="chat_message_label" id="chat_message">
+                        <textarea type="text" class="form-control" placeholder="your message here" aria-label="message" aria-describedby="chat_message_label" id="chat_message"></textarea>
                 </div>
                 % else:
                     <div class="alert alert-warning" role="alert">Logged in users only. Sorry.</div>
