@@ -1,12 +1,12 @@
 # Markup for protein
 A system to control the protein without any JS coding.
 
-To activate the script `NGL.extended.js` ([link](https://github.com/matteoferla/MichelaNGLo/blob/master/michelanglo_app/static/ngl.extended.js)) needs to be loaded after `NGL.js`.
+To activate the script `michelanglo.js` ([link](https://michelanglo.sgc.ox.ac.uk/michelanglo.js)) needs to be loaded after `NGL.js`.
 
-See [ngl.matteoferla.com/markup](ngl.matteoferla.com/markup) for description and demo. Alternatively, if you like second best, a description only can be found in this document.
+See [michelanglo: docs/markup](https://michelanglo.sgc.ox.ac.uk/docs/markup) for description and demo. Alternatively, if you like second best, a description only can be found in this document.
 
-## NGL.extended.js
-NGL.exteneded.js adds the following functions:
+## michelanglo.js
+michelanglo.js adds the following functions:
 
 * NGL.stageIds an object taht stores id: stages
 * NGL.getStage(id) is a getter for this.
@@ -32,6 +32,10 @@ NB. this file ends with `$('[data-toggle="protein"]').protein();` to activate al
 
 proteins is an array of {name: 'unique_name', type: 'rcsb' (default) | 'file' | 'data', value: xxx, 'ext': 'pdb' (default), loadFx: xxx}
 where the optional loadFx is a function that is run on loading.
+
+## michelanglo_menu.js
+
+This script adds the menu button.
 
 ## Markup
 
@@ -69,7 +73,7 @@ The attribute `data-toggle="protein"` is what tells the browser that the link co
 
 <td>All</td>
 
-<td>Instructs that the anchor element (link) or similar element affects the protein. The NGL.extension.js script add a monkeypatches JQuery with the prototype `protein`, then runs `$('[data-toggle="protein"]').protein();` so all relevant elements existing when the document is loaded are enabled. If new are added they have to be activated manually in JS with `$('whatever').protein()`.</td>
+<td>Instructs that the anchor element (link) or similar element affects the protein. The michelanglo.js script add a monkeypatches JQuery with the prototype `protein`, then runs `$('[data-toggle="protein"]').protein();` so all relevant elements existing when the document is loaded are enabled. If new are added they have to be activated manually in JS with `$('whatever').protein()`.</td>
 
 </tr>
 

@@ -39,7 +39,7 @@
     </div>
 </div>
 <%block name="script">
-    <script type="text/javascript" src="static/ngl.extended.js"></script>
+    <script type="text/javascript" src="static/michelanglo.js"></script>
     <script type="text/javascript">
         //NGL.setDebug(true);
         //NGL.stageIds['viewport'] =  new NGL.Stage( "viewport",{backgroundColor: "white"});

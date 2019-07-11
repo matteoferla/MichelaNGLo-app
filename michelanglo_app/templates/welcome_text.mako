@@ -86,7 +86,7 @@
             <div class="row">
                 <div class="col-12 col-md-10">
                     <div class="mb-2 p-3 border border-dark rounded-lg border-top-0 border-bottom-0 text-muted">
-                <p>The source code for this server is available at <a href="https://github.com/matteoferla/MichelaNGLo" target="_blank">github.com/matteoferla/MichelaNGLo <i class="far fa-external-link"></i></a>. The JS file to extend NGL can be found <a href="https://raw.githubusercontent.com/matteoferla/MichelaNGLo/master/michelanglo_app/static/ngl.extended.js" target="_blank">here <i class="far fa-external-link"></i></a>.</p>
+                <p>The source code for this server is available at <a href="https://github.com/matteoferla/MichelaNGLo" target="_blank">github.com/matteoferla/MichelaNGLo <i class="far fa-external-link"></i></a>. The JS file to extend NGL can be found <a href="https://michelanglo.sgc.ox.ac.uk/michelanglo.js" target="_blank">here <i class="far fa-external-link"></i></a>.</p>
             </div>
                 </div>
 

@@ -24,7 +24,7 @@
                 <h3>Aims</h3>
                 <p>This system to control the protein without any JS coding.</p>
                 <h3>Demo</h3>
-                <p><i class="far fa-hand-point-right"></i> This page is running on the <a href="static/ngl.extended.js">file ngl.extended.js</a></p>
+                <p><i class="far fa-hand-point-right"></i> This page is running on the <a href="static/michelanglo.js">file michelanglo.js</a></p>
                 <p>Let's look at the structure of GFP. Overall is <span class="prolink" data-toggle="protein" data-target="viewport" data-focus="domain" data-selection="11-228" data-color="lime">a &beta;-barrel</span>,
                     but sports <span class="prolink" data-toggle="protein" data-target="#viewport" data-selection="54-82" data-color="purple">a loop that traverses the core</span>.</p>
                 <p>In this loop, there are <span class="prolink" data-toggle="protein" data-target="#viewport"  data-focus="residue" data-selection="65-67" data-radius="2">three residues, SYG,</span> that mature to form a chromophore.</p>
@@ -56,7 +56,7 @@
         <tr id="row_toggle">
             <td colspan="2"><code>data-toggle="protein"</code></td>
             <td>All</td>
-            <td>Instructs that the anchor element (link) or similar element affects the protein. The NGL.extension.js script add a monkeypatches JQuery with the prototype <code>protein</code>, then runs <code>$('[data-toggle="protein"]').protein();</code> so all relevant elements existing when the document is loaded are enabled. If new are added they have to be activated manually in JS with <code>$('whatever').protein()</code>.</td>
+            <td>Instructs that the anchor element (link) or similar element affects the protein. The michelanglo.js script add a monkeypatches JQuery with the prototype <code>protein</code>, then runs <code>$('[data-toggle="protein"]').protein();</code> so all relevant elements existing when the document is loaded are enabled. If new are added they have to be activated manually in JS with <code>$('whatever').protein()</code>.</td>
         </tr>
         <tr id="row_target">
             <td><code>data-target</code></td>
@@ -139,13 +139,13 @@
 
 
     <h3 id="note">Note</h3>
-                <p>There are a bunch of underlying functions. They are in the file: <a href="static/ngl.extended.js">file ngl.extended.js</a>, which requires JQuery and NGL, which works as usual*. So at the end of your documents you should have:</p>
+                <p>There are a bunch of underlying functions. They are in the file: <a href="static/michelanglo.js">file ngl.extended.js</a>, which requires JQuery and NGL, which works as usual*. So at the end of your documents you should have:</p>
                 <pre><code>
 &lt;script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"&gt;&lt;/script&gt;
 &lt;script src="https://unpkg.com/ngl@2.0.0-dev.34/dist/ngl.js" type="text/javascript"&gt;&lt;/script&gt;
 &lt;script src="https://www.matteoferla.com/ngl.extended.js" type="text/javascript"&gt;&lt;/script&gt;
                 </code></pre>
-    <p>There is no official CDN for <code>ngl.extended.js</code>, but if you are checking this out, you can sneakily use the last address, but please do not use it in production.</p>
+    <p>The CDN for <code>michelanglo.js</code> is <code>michelanglo.sgc.ox.ac.uk/michelanglo.js</code>, but if you are checking this out, you can sneakily use the last address, but please do not use it in production.</p>
             <p>&lowast;One issue is holding onto the stage object in JS. Therefore the stage is added as follows: <code>NGL.stageIds['viewport'] = new Stage( ...</code>. However, a better feature is using the <code>NGL.specialOps.multiLoad</code>, which handles it.</p>
 
                 <h3 id="basics">Basic terms</h3>

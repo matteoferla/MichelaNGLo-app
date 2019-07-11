@@ -37,7 +37,7 @@
 
 <%block name="script">
 
-    <script type="text/javascript" src="/static/ngl.extended.js"></script>
+    <script type="text/javascript" src="/static/michelanglo.js"></script>
     <script type="text/javascript">
         function myView (protein) {
             var nonCmap = {"N": "0x3333ff", "O": "0xff4c4c", "H": "0xe5e5e5", "S": "0xe5c53f"};

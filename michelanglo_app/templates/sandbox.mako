@@ -39,5 +39,5 @@
     </div>
 </div>
 <%block name="script">
-    <script type="text/javascript" src="static/ngl.extended.js"></script>
+    <script type="text/javascript" src="static/michelanglo.js"></script>
 </%block>
