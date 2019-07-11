@@ -117,7 +117,7 @@ def edit(request):
 def combined(request):
     log.info(f'{get_username(request)} is requesting to merge page')
     if any([k not in request.params for k in ('target_page','donor_page','task','name')]):
-        request.response.status = 403
+        request.response.status = 422
         log.warn(f'{get_username(request)} malformed request')
         return {'status': 'malformed request: target_page, donor_page and task are required'}
     target_page = Page(request.params['target_page'])
@@ -267,18 +267,24 @@ def rename(request):
     """
     old_page: uuid, new_page: string
     """
-    if not request.user or request.user.role == 'admin':
+    if not request.user or request.user.role != 'admin':
         request.response.status = 403
         log.warn(f'{get_username(request)} is not autharised to rename page')
         return {'status': 'not authorised'}
     else:
-        old = request.params['old_page']
-        new = re.sub('\W','', request.params['new_page'])
+        if 'old_page' not in request.params or 'new_page' not in request.params:
+            request.response.status = 422
+            log.warn(f'{get_username(request)} malformed request')
+            return {'status': 'malformed'}
+        old_name = request.params['old_page']
+        new_name = re.sub('\W','', request.params['new_page'])
         if 'key' in request.params:
-            page = Page(old,key=request.params['key'])
+            key = request.params['key']
         else:
-            page = Page(old)
-        page.load()
-        page.identifier = new
-        page.save()
-        return {'status': 'success', 'page': new}
+            key = None
+
+        old_page = Page(old_name, key=key)
+        settings = old_page.load()
+        new_page = Page(new_name, key=key)
+        new_page.save(settings)
+        return {'status': 'success', 'page': new_name}
