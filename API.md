@@ -1,6 +1,8 @@
 # API
 Sometimes it is handy to submit edits in the confort of a Jupyter notebook.
 
+The following is just a small demo. For a longer description see: [https://michelanglo.sgc.ox.ac.uk/docs/api](https://michelanglo.sgc.ox.ac.uk/docs/api)
+
 ## Login
 Only registered users can edit pages, therefore if one wants to edit you need to log in. See `ajax_test.py` for an example.
 

@@ -98,7 +98,7 @@ def user_view(request):
         if targetuser:
             request.response.status = 409
             return {'status': 'existing username'}
-        elif username in ('guest', 'Anonymous', 'trashcan', 'public'): ##blacklisted
+        elif username in ('guest', 'Anonymous', 'anonymous', 'error', '', 'trashcan', 'public'):
             request.response.status = 403
             return {'status': 'forbidden'}
         else:

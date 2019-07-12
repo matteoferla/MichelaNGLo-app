@@ -44,6 +44,8 @@ def edit(request):
         #add author if user was an upgraded to editor by the original author. There are three lists: authors (can and have edited, editors can edit, visitors visit.
         if user.name not in settings['authors']:
             settings['authors'].append(user.name)
+        if 'trashcan' in settings['authors']:
+            settings['authors'].remove('trashcan')
         # only admins and friends can edit html fully
         if user.role in ('admin', 'friend'):
             for key in ('loadfun', 'title', 'description'):
