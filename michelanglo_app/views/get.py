@@ -78,6 +78,11 @@ def get_pages(request):
         data['visited'] = 'not logged in'
         data['error'] = 'not logged in'
     else:
+        if user.role == 'admin':
+            data['all'] = {'unencrypted': [p.replace('.p','') for p in os.listdir(os.path.join('michelanglo_app', 'user-data')) if os.path.splitext(p)[1] == '.p'],
+                           'encrypted': [p.replace('.ep','') for p in os.listdir(os.path.join('michelanglo_app', 'user-data')) if os.path.splitext(p)[1] == '.ep']}
+        else:
+            data['all'] = 'RESTRICTED'
         data['owned'] = user.get_owned_pages()
         data['visited'] = user.get_visited_pages()
     data['public'] = request.dbsession.query(User).filter_by(name='public').one().get_owned_pages()
