@@ -17,7 +17,7 @@
                 </div>
 
                 <div class="row">
-                    <div class="offset-1 col-11">
+                    <div class="offset-1 col-11 pb-1">
                         <div class="btn-group" role="group" aria-label="formatting" id="formatting">
                           <button type="button" class="btn btn-outline-secondary" id="formatting_h3"><i class="far fa-h3"></i></button>
                           <button type="button" class="btn btn-outline-secondary" id="formatting_bold"><i class="far fa-bold"></i></button>
@@ -26,17 +26,25 @@
                           <button type="button" class="btn btn-outline-secondary" id="formatting_list"><i class="far fa-list"></i></button>
                           <button type="button" class="btn btn-outline-secondary" id="formatting_list-ol"><i class="far fa-list-ol"></i></button>
                           <button type="button" class="btn btn-outline-secondary" id="formatting_quote"><i class="far fa-quote-left"></i></button>
+                          <button type="button" class="btn btn-outline-secondary" id="formatting_code"><i class="far fa-code"></i></button>
                             <!--
                           <button type="button" class="btn btn-outline-secondary" id="formatting_sub"><i class="far fa-subscript"></i></button>
                           <button type="button" class="btn btn-outline-secondary" id="formatting_super"><i class="far fa-superscript"></i></button>
                           -->
-                          <button type="button" class="btn btn-outline-secondary" id="formatting_greek">&alpha;</button>
-                          <button type="button" class="btn btn-outline-secondary" id="formatting_help"><i class="far fa-question"></i></button>
+                          <button type="button" class="btn btn-outline-secondary" id="formatting_alpha">&alpha;</button>
+                          <button type="button" class="btn btn-outline-secondary" id="formatting_beta">&beta;</button>
+                          <button type="button" class="btn btn-outline-secondary" id="formatting_gamma">&gamma;</button>
+                          <button type="button" class="btn btn-outline-secondary" id="formatting_delta">&delta;</button>
+                          <button type="button" class="btn btn-outline-secondary" id="formatting_mu">&mu;</button>
+                          <button type="button" class="btn btn-outline-secondary" id="formatting_Aring">&Aring;</button>
+                          <button type="button" class="btn btn-outline-secondary" id="formatting_Delta">&Delta;</button>
+                          <button type="button" class="btn btn-outline-info" id="formatting_help"><i class="far fa-question"></i></button>
                         </div>
+                    </div>
+                       <div class="offset-1 col-11 pb-1">
                         <%include file="../markup/markup_builder_btn.mako"/>
                         <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#combine_modal"><i class="far fa-paperclip"></i> Add additional model</button>
                         <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#mutate_modal"><i class="far fa-biohazard"></i> Make mutations</button>
-
                     </div>
                     </div>
                 <div class="input-group mb-3">
