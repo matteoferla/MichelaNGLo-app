@@ -11,9 +11,7 @@ import os
 import io
 import json, re
 
-from ._common_methods import is_js_true
-
-from ._common_methods import get_username
+from ._common_methods import is_js_true, get_username, is_malformed
 
 import logging
 log = logging.getLogger(__name__)
@@ -22,8 +20,11 @@ log = logging.getLogger(__name__)
 @view_config(route_name='edit_user-page', renderer='json')
 def edit(request):
     log.info(f'Page edit requested by {get_username(request)}')
+    malformed = is_malformed(request, 'page', 'encryption', 'public', 'confidential','freelyeditable')
+    if malformed:
+        return {'status': malformed}
     # get ready
-    page = Page(request.POST['page'])
+    page = Page(request.params['page'])
     user = request.user
     # check if encrypted
     if page.is_password_protected():
@@ -44,8 +45,8 @@ def edit(request):
         #add author if user was an upgraded to editor by the original author. There are three lists: authors (can and have edited, editors can edit, visitors visit.
         if user.name not in settings['authors']:
             settings['authors'].append(user.name)
-        if 'trashcan' in settings['authors']:
-            settings['authors'].remove('trashcan')
+        if 'anonymous' in settings['authors']: #got it out of trashcan.
+            settings['authors'].remove('anonymous')
         # only admins and friends can edit html fully
         if user.role in ('admin', 'friend'):
             for key in ('loadfun', 'title', 'description'):
@@ -118,10 +119,9 @@ def edit(request):
 @view_config(route_name='combine_user-page', renderer='json')
 def combined(request):
     log.info(f'{get_username(request)} is requesting to merge page')
-    if any([k not in request.params for k in ('target_page','donor_page','task','name')]):
-        request.response.status = 422
-        log.warn(f'{get_username(request)} malformed request')
-        return {'status': 'malformed request: target_page, donor_page and task are required'}
+    malformed = is_malformed(request, 'target_page','donor_page','task','name')
+    if malformed:
+        return {'status': malformed}
     target_page = Page(request.params['target_page'])
     donor_page = Page(request.params['donor_page'])
     task = Page(request.params['task'])
@@ -185,29 +185,34 @@ def combined(request):
 def delete(request):
     # get ready
     log.info(f'{get_username(request)} is requesting to delete page')
+    malformed = is_malformed(request, 'page')
+    if malformed:
+        return {'status': malformed}
     page = Page(request.params['page'])
     user = request.user
     if not user:
         request.response.status = 403
-        log.warn(f'{get_username(request)} is not autharised to edit page')
-        return {'status': 'not authorised'}
+        log.warn(f'{get_username(request)} is not autharised to delete page')
+        return {'status': 'not authorised. sign in.'}
     ownership = user.get_owned_pages()
     ## cehck permissions
     if page.identifier not in ownership and user.role != 'admin': ## only owners can delete
         request.response.status = 403
-        log.warn(f'{get_username(request)} tried but failed to delete page')
-        return {'status': 'Not owner'}
+        log.warn(f'{get_username(request)} is not autharised to delete page')
+        return {'status': 'not authorised'}
     else:
-        page.delete()
-        return {'status': 'success'}
+        if page.delete():
+            return {'status': 'success'}
+        else:
+            return {'status': 'file missing'}
 
 @view_config(route_name='mutate', renderer='json')
 def mutate(request):
     #''page', 'key'?, 'chain', 'mutations'
     log.info(f'{get_username(request)} is making mutants page')
-    if not all([k in request.params for k in ('page','model','chain','mutations')]):
-        request.response.status = 400
-        return {'status': f'Missing field ({[k for k in ("page model chain mutations".split()) if k not in request.params]})'}
+    malformed = is_malformed(request, 'page','model','chain','mutations')
+    if malformed:
+        return {'status': malformed}
     page = Page(request.params['page'])
     user = request.user
     if not user:
@@ -263,7 +268,6 @@ def mutate(request):
         page.save(settings)
         return {'status': 'success'}
 
-
 @view_config(route_name='rename_user-page', renderer='json')
 def rename(request):
     """
@@ -275,10 +279,9 @@ def rename(request):
         log.warn(f'{get_username(request)} is not autharised to rename page')
         return {'status': 'not authorised'}
     else:
-        if 'old_page' not in request.params or 'new_page' not in request.params:
-            request.response.status = 422
-            log.warn(f'{get_username(request)} malformed request')
-            return {'status': 'malformed'}
+        malformed = is_malformed(request, 'old_page', 'new_page')
+        if malformed:
+            return {'status': malformed}
         old_name = request.params['old_page']
         new_name = re.sub('\W','', request.params['new_page'])
         if 'key' in request.params:

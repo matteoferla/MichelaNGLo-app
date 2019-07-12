@@ -92,14 +92,17 @@ class Page:
                 uncryptic = pickle.dumps(settings)
                 cryptic = self._encrypt(uncryptic)
                 fh.write(cryptic)
+        return True
 
     def delete(self):
         if os.path.exists(self.encrypted_path):
             os.remove(self.encrypted_path)
+            return True
         elif os.path.exists(self.unencrypted_path):
             os.remove(self.unencrypted_path)
+            return True
         else:
-            print('Impossible. cannot remove missing item')
+            return False
 
     @staticmethod
     def sanitise_URL(page):

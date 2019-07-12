@@ -52,6 +52,7 @@ def userdata_view(request):
             user.add_visited_page(pagename)
             settings['visitors'].append(user.name)
         elif user.role == 'admin':
+            # this means admin does not leave a trace upon inspection. Fine for admin bots. Bad human admin.
             settings['editable'] = True
         elif pagename in user.get_owned_pages():
             settings['editable'] = True
