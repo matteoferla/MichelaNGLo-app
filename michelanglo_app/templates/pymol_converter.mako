@@ -63,7 +63,7 @@
                             <div class="invalid-feedback" id="error_upload">Please upload a valid pse file.</div>
                         </div>
                         <div class="col-xl-3 col-lg-4 col-md-6 mb-3">
-                            ${checkbox(info.attr.pdb_string, "Include PDB data", "pdb_string", '<div class="btn btn-info" data-toggle="modal" data-target="#CDN_modal" >?</div>', justify_right=True)}
+                            ${checkbox(info.attr.pdb_string, "Include PDB data", "pdb_string", '<div class="btn btn-outline-info" data-toggle="modal" data-target="#CDN_modal" >?</div>', justify_right=True)}
 
                         </div>
                         <div class="col-xl-3 col-lg-3 col-md-6 mb-3">
@@ -105,10 +105,10 @@
                 <div class="row align-center">
                     <div class="col-md-4 offset-md-4">
                         <div class="btn-group d-flex" role="group" aria-label="Submit">
-                            <button type="button" class="btn btn-info flex-fill" data-target="#info_modal" data-toggle="modal">Info</button>
-                            <button type="button" class="btn btn-info flex-fill" title="Guided tour of the page" data-toggle="tooltip" id="tour">Guide</button>
-                            <button type="button" class="btn btn-warning flex-fill" id="clear">Clear</button>
-                            <button type="button" class="btn btn-success flex-fill" id="submit">Submit</button>
+                            <button type="button" class="btn btn-info flex-fill" data-target="#info_modal" data-toggle="modal"><i class="far fa-search"></i> Info</button>
+                            <button type="button" class="btn btn-info flex-fill" title="Guided tour of the page" data-toggle="tooltip" id="tour"><i class="far fa-map-signs"></i> Guide</button>
+                            <button type="button" class="btn btn-warning flex-fill" id="clear"><i class="far fa-trash-alt"></i> Clear</button>
+                            <button type="button" class="btn btn-success flex-fill" id="submit"><i class="far fa-cogs"></i> Submit</button>
                         </div>
                     </div>
                 </div>
@@ -130,6 +130,7 @@
       </div>
       <div class="modal-body">
           <p><i>For help using this page check <a href="#tour" onclick="$('#info_modal').modal('hide'); $('#tour').trigger('click');">the tour</a>.</i></p>
+          <p><i>For extended documentation check <a href="/docs">documentation</a>.</i></p>
           <p>The following get converted:</p>
           <ul>
               <li>Orientation</li>

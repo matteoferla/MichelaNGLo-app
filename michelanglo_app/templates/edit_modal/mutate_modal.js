@@ -23,6 +23,6 @@ $('#mutate_create').click((event) => {
 });
 
 
-$('#mutate_modal').on('show.bs.modal',(event) => ops.addToast('savefirst','Unsaved changes?','Any unsaved changes to the previous modal (description and settings) will be discarded.','bg-info'));
+$('#mutate_modal,#combine_modal').on('show.bs.modal',(event) => ops.addToast('savefirst','Unsaved changes?','Any unsaved changes to the previous modal (description and settings) will be discarded.','bg-info'));
 
 

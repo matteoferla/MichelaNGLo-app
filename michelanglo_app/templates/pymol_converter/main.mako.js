@@ -144,6 +144,7 @@ $('#submit').click(function () {
     data.append('stick_format',$("input[name='sticks']:checked").val());
     // ajax to ajax_convert
     //{pdb: pdb, uniform_non_carbon: uniform_non_carbon, pymol_output: pymol_output, indent: indent, cdn: cdn}
+    $('#submit .far').detach();
     $('#submit').attr('disabled','disabled').prepend('<i class="far fa-circle-notch fa-spin"></i> ');
     ops.main_ajax = $.ajax({
         type: "POST",

@@ -32,6 +32,10 @@ $('#markup_modal').on('shown.bs.modal', function (e) {
         else if ($(this).attr('id') === 'clash') {$('#markup_selection,#markup_color,#markup_radius,#markup_tolerance,#markup_view').each(function () {show_input(this)});}
         else if ($(this).attr('id') === 'orientation') {$('#markup_view').each(function () {show_input(this)});
                                                         $('#markup_view').attr('placeholder','16x1 array or the keywords "auto" or "reset"');}
+        else if ($(this).attr('id') === 'auto') {$('#markup_view').each(function () {show_input(this)});
+                                                        $('#markup_view').val('auto');}
+        else if ($(this).attr('id') === 'default') {$('#markup_view').each(function () {show_input(this)});
+                                                        $('#markup_view').val('default');}
         else if ($(this).attr('id') === 'bfactor') {$('#markup_selection,#markup_color,#markup_radius,#markup_view').each(function () {show_input(this)});}
         else if ($(this).attr('id') === 'surface') {$('#markup_view').each(function () {show_input(this)});}
 
@@ -76,5 +80,7 @@ $('#markup_modal').on('shown.bs.modal', function (e) {
     $('#results p').append(spanCode);
     $('#results a,#results span').protein();
 });
+
+    $('#markup_view_toggle label').first().trigger('click');
 });
 

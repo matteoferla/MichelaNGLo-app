@@ -41,3 +41,4 @@ window.copyJSPage = function (uuid) {
         .fail((xhr) => ops.addToast('userpageerror','Error '+xhr.status,'An error occured. '+xhr.responseJSON.status));
      }
 };
+

@@ -52,11 +52,11 @@
                   </div>
                   <textarea class="form-control" aria-label="With textarea" rows="3" placeholder="4x4 matrix or 16x1 array" id="markup_view" style="font-size: 80%;"></textarea>
                     <div class="input-group-append">
-                    <button class="btn btn-info" id="markup_current">Get</button>
+                    <button class="btn btn-outline-info" id="markup_current">Get</button>
                   </div>
                 </div>
-                <div class="col-6 col-md-3 mb-2">
-                <button type="button" class="btn btn-success" id="markup_calculate">Make</button>
+                <div class="col-6 col-md-4 mb-2">
+                <button type="button" class="btn btn-outline-success w-100" id="markup_calculate"><i class="far fa-magic"></i> Make</button>
                 </div>
 
                 <div class="col-12" id="results">
@@ -64,7 +64,7 @@
                     <p><a>Press make first!</a></p>
                 </div>
                 <div class="col-12">
-                <h6>Details</h6>
+                <h5>Details</h5>
                 <p>The difference between the two types of link is that the a-element ("anchor" element) is a regular link,
                     while the span element is just a span of text with custom styling: for example the protein-controlling elements are green in this site because they are span elements with the extra styling conferred by the attribute <code>class="prolink"</code>. The CSS style of this class is declared in the stylesheet as:</p>
                 <pre><code>.prolink {

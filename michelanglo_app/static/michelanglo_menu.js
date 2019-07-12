@@ -83,7 +83,7 @@ let popbody = `
     <input type="range" min="0" max="100" value="50" step="5" class="custom-range" id="viewport_menu_fogFar" aria-label="fogFar" aria-describedby="viewport_menu_fogFar_add">
 </div>
 </div></div>
-<div class="col-lg-6 col-xl-4"><button type="button" class="btn btn-info" data-toggle="modal" data-target="#controlguide_modal">Show Mouse Controls</div>
+<div class="col-lg-6 col-xl-4"><button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#controlguide_modal">Show Mouse Controls</div>
 <div class="col-lg-6 col-xl-4"></div>
 </div>
 </div>
