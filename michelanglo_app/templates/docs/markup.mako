@@ -128,6 +128,20 @@
             <td></td>
             <td>If the stage was loaded with the multiLoader() and a loadFx was supplied with the protein it will run that, otherwise it will do the same as auto.</td>
         </tr>
+        <tr>
+            <td><code>data-label</code></td>
+            <td><code>true</code></td>
+            <td><code>data-focus='residue'</code> and <code>data-focus='clash'</code></td>
+            <td>Control whether a label on the residue is added or not &mdash;this is not the same as <code>data-title</code>, which controls the text under the scene.</td>
+        </tr>
+        <tr>
+            <td><code>data-cartoonScheme</code></td>
+            <td><code>'chainid'</code></td>
+            <td><code>data-focus='residue'</code> and <code>data-focus='clash'</code> in the precence of <code>data-load</code></td>
+            <td>This command alters a fix for the case when the model is changed (_e.g._ a mutant is loaded) and therefore there is no colour information for the newly loaded cartoon.
+                If set to <code>false</code> or <code>'none'</code> the cartoon will be set to white. While if set to a string corresponding to a NGL scheme it will use that scheme.
+            </td>
+        </tr>
         </tbody>
     </table>
 

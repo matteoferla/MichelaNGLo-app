@@ -1,4 +1,4 @@
-NGL.specialOps = {'note': `This is a monkeypatch to allow HTML control of the structure using the markup defined in ngl.matteoferla.com/markup
+NGL.specialOps = {'note': `This is a monkeypatch to allow HTML control of the structure using the markup defined in https://michelanglo.sgc.ox.ac.uk/docs/markup
 /* This script adds to NGL the following...
 
 * NGL.stageIds an object taht stores id: stages
@@ -23,7 +23,7 @@ NB. this file ends with $('[data-toggle="protein"]').protein(); to activate all 
 
 proteins is an array of {name: 'unique_name', type: 'rcsb' (default) | 'file' | 'data', value: xxx, 'ext': 'pdb' (default), loadFx: xxx}
 where the optional loadFx is a function that is run on loading.
-`};
+`, version: '1.0'};
 
 NGL.specialOps.version = '0.3.0';
 
@@ -90,20 +90,26 @@ NGL.specialOps.showDomain = function (id, selection, color, view) {
         }
     };
 
-NGL.specialOps.showResidue = function (id, selection, color, radius, view) {
+NGL.specialOps.showResidue = function (id, selection, color, radius, view, label, cartoonScheme) { //'chainid'
         if (NGL.debug) {console.log('Show residues '+selection)}
+        //try the selection (its better to crash now than after clearing the scene...)
+        let selector = new NGL.Selection(selection.toString());
         // Prepare
         NGL.specialOps.postInitialise(); //worst case schenario prevention.
-        var protein = NGL.getStage(id).getComponentByType('structure');
+        let protein = NGL.getStage(id).getComponentByType('structure');
         // corner case that there is no cartoon.
         if (protein.reprList.length === 0) {
-            protein.addRepresentation( "cartoon", {color: NGL.ColormakerRegistry.addSelectionScheme([["white", "*"]]), smoothSheet: true})}
+            if ((cartoonScheme === undefined) || (cartoonScheme === false) || (cartoonScheme === 'false')  || (cartoonScheme === 'none')) {
+                protein.addRepresentation( "cartoon", {color: NGL.ColormakerRegistry.addSelectionScheme([["white", "*"]]), smoothSheet: true})
+            }
+            else {protein.addRepresentation( "cartoon", {color: cartoonScheme, smoothSheet: true})}
+        }
         // defaults
         color = color || "hotpink";
         radius = radius || 4;
         //selection = typeof selection === "string" ? new NGL.Selection(selection) : selection;
         // Remove all bar cartoon-like representation
-        ['ball+stick', 'contact', 'hyperball', 'licorice','line', 'point','spacefill', 'surface'].map(function (value) {
+        ['ball+stick', 'contact', 'label', 'hyperball', 'licorice','line', 'point','spacefill', 'surface'].map(function (value) {
             protein.stage.getRepresentationsByName(value).forEach(function (o) {
                 protein.removeRepresentation(o);
             }); //.forEach representation
@@ -113,7 +119,6 @@ NGL.specialOps.showResidue = function (id, selection, color, radius, view) {
         var schemeId = NGL.ColormakerRegistry.addSelectionScheme([
             [color,'_C'],["blue",'_N'],["red",'_O'],["white",'_H'],["yellow",'_S'],["orange","*"] //this is such a weird way of doing it.
         ]);
-        var selector = new NGL.Selection(selection.toString());
         var atomSet = protein.structure.getAtomSetWithinSelection( selector , parseFloat(radius) );
         // expand selection to complete groups
         var atomSet2 = protein.structure.getAtomSetWithinGroup( atomSet );
@@ -125,6 +130,15 @@ NGL.specialOps.showResidue = function (id, selection, color, radius, view) {
             maxHbondDonPlaneAngle: 35,
             sele: atomSet2.toSeleString()
           });
+        if (!! label) {
+            protein.addRepresentation('label', {
+                    sele: selection.toString(),
+                    color: color,
+                    showBackground: true,
+                    backgroundColor: 'white',
+                    labelGrouping: 'residue'
+                });
+        }
         if (!! view) {NGL.specialOps.slowOrient(id, view);}
         else {
         protein.autoView(2000);
@@ -132,12 +146,12 @@ NGL.specialOps.showResidue = function (id, selection, color, radius, view) {
         }
     };
 
-NGL.specialOps.showClash = function (id, selection, color, radius, tolerance, view) {
+NGL.specialOps.showClash = function (id, selection, color, radius, tolerance, view, label, cartoonScheme) {
     // Prepare
     NGL.specialOps.postInitialise(); //worst case schenario prevention.
     tolerance= tolerance || 1; //how much is the wiggle room. 0.2 &Aring; is probs good.
     radius = radius || 2;
-    NGL.specialOps.showResidue(id, selection, color, radius, view);
+    NGL.specialOps.showResidue(id, selection, color, radius, view, label, cartoonScheme);
     var protein = NGL.getStage(id).getComponentByType('structure');
     // Find what clashes...
     protein.structure.getView(new NGL.Selection(selection.toString())).eachAtom(function (atom) {
@@ -190,7 +204,7 @@ NGL.specialOps.showSurface = function (id,selection, view) {
         }
 };
 
-NGL.specialOps.showBlur = function (id,selection, color, radius, view, scale) {
+NGL.specialOps.showBlur = function (id,selection, color, radius, view, scale, label) {
     if (NGL.debug) {console.log('Show surface '+selection)}
     // Prepare
     NGL.specialOps.postInitialise(); //worst case schenario prevention.
@@ -206,7 +220,7 @@ NGL.specialOps.showBlur = function (id,selection, color, radius, view, scale) {
     colorScale: "RdYlBu"
   });
   if (selection) {
-      NGL.specialOps.showResidue(id,selection,color,radius,view);
+      NGL.specialOps.showResidue(id,selection,color,radius,view, label); //cartoonScheme must/cannot not be implemented!
   }
   else if (!! view) {NGL.specialOps.slowOrient(id, view);}
         else {
@@ -432,6 +446,10 @@ NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
     var title = $(prolink).data('title');
     var focus = $(prolink).data('focus'); // residue | domain | clash
     var hetero = $(prolink).data('hetero') || false;
+    var label = $(prolink).data('label');
+    if (label === undefined) {label = true}
+    var cartoonScheme  = $(prolink).data('cartoonscheme');
+    if (cartoonScheme === undefined) {cartoonScheme = 'chainid'};
 
     // title.
     NGL.specialOps.showTitle(id, title);
@@ -453,19 +471,19 @@ NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
             NGL.specialOps.slowOrient(id, view);
         }
         else if (focus === 'residue'){
-            NGL.specialOps.showResidue(id, selection, color, radius, view);
+            NGL.specialOps.showResidue(id, selection, color, radius, view, label, cartoonScheme);
         }
         else if (focus === 'domain' || focus === 'region' || focus === undefined){
             NGL.specialOps.showDomain(id, selection, color, view);
         }
         else if (focus === 'clash'){
-            NGL.specialOps.showClash(id, selection, color, radius, tolerance, view);
+            NGL.specialOps.showClash(id, selection, color, radius, tolerance, view, label, cartoonScheme);
         }
         else if (focus === 'surface'){
             NGL.specialOps.showSurface(id, selection, view);
         }
         else if ((focus === 'blur') || (focus === 'bfactor')) {
-            NGL.specialOps.showBlur(id,selection, color, radius, view);
+            NGL.specialOps.showBlur(id,selection, color, radius, view, label);
         }
         else if (structure !== undefined) { console.log('Please add view-reset if you are changing structure as its too ambiguous otherwise.');}
         else {throw 'ValueError: odd data-focus tag.'}

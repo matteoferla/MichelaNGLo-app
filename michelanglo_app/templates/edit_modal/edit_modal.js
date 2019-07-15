@@ -26,9 +26,9 @@ window.prolinks = {
         let value = prompt("Edit the string if desired", prolinks.elements[number-1].fore);
         if (value !== null) {prolinks.elements[number-1].fore = value;}
     },
-    expandProlinks: (description) => {
+    expandProlinks: () => {
         //on save
-        description = description || $('#edit_description').html();
+        let description = $('#edit_description').html();
         if (prolinks.elements !== null) {
                 prolinks.elements.forEach(function (code, i) {
                     if (code !== null) {
@@ -37,7 +37,7 @@ window.prolinks = {
 
                 });
             } else {prolinks.elements = [];}
-        return description;
+        $('#edit_description').html(description);
     },
     minimiseProlinks: () => {
         // on load
@@ -56,8 +56,8 @@ window.prolinks = {
         $('#edit_description').html(description);
     },
     addProlink: (prolink) => prolinks.elements.push({
-                    fore: prolink.replace(/(<.*?>).*?<\/.*?>/,'$1'),
-                    aft: prolink.replace(/<.*?>.*?(<\/.*?>)/,'$1'),
+                    fore: prolink.replace(/(<.*?>).*?<\/.*?>/,'$1').replace(/</mgi,'&lt;').replace(/>/mgi,'&gt;'),
+                    aft: prolink.replace(/<.*?>.*?(<\/.*?>)/,'$1').replace(/</mgi,'&lt;').replace(/>/mgi,'&gt;'),
                     original: prolink
                 }),
     prolink2md: (prolink, number) => prolink.replace(
@@ -73,14 +73,14 @@ $('#edit_submit').click(function () {
     if ($('#encryption').prop('checked')) {
     if (! $('#encryption_key').val) {return 0}
 }
+    if ($('#collapse_prolinks').prop('checked')) {prolinks.expandProlinks()}
     // convert description to markdown.
     var description = $($('#edit_description')[0].outerHTML.replace(/<br.*?>/g,'\n')).text(); //changed from html
     //description = description.replace(/<br.*?>/g,'\n\n').replace(/\n+/gm,'\n\n').replace('&gt;','>').replace('&lt;','<').replace('&amp;','&'); //unescape.
     description = description.replace(/<div>([\s\S]*?)<\/div>/gm, '$1'); //firefox bug.
     description = description.replace(/<br.*?>/g,'\n\n').replace(/\n\n+/gm,'\n\n'); //runaway newline bug.
-    description = prolinks.expandProlinks(description);
     // @fa[icon-name]
-    description = description.replace(/@fa\[(.*?)\]/gi,'<i class="far fa-$1"></i>')
+    description = description.replace(/@fa\[(.*?)\]/gi,'<i class="far fa-$1"></i>');
 
     //console.log('new');
     $('#edit_submit').attr('disabled','disabled').children('.far').removeClass('fa-save').addClass('fa-circle-notch').addClass('fa-spin');
@@ -139,9 +139,20 @@ $('#edit_delete').click(function () {
 });
 
 //collapse prolinks.
-$('#edit_modal').on('show.bs.modal', prolinks.minimiseProlinks);
+$('#collapse_prolinks').prop('checked', false);
+
+$('#collapse_prolinks').change((event) => {
+    let state = $('#collapse_prolinks').prop('checked');
+    if (state === true) {prolinks.minimiseProlinks();}
+    else {prolinks.expandProlinks();}
+    });
+
 //reset values the stupid way
-$('#edit_modal').on('hide.bs.modal', ()=> window.location.reload());
+$('#edit_modal').on('hide.bs.modal', ()=> {window.location.reload();
+                                           ops.addToast('resetting',
+                                                        'Relaoding page',
+                                                        'To ensure that the state of the edit menu is correctly reset, the page will reload.',
+                                                        'bg-warning');});
 
 
 ///////////////////////////MODAL/////////////////////////////////////////////////////////////////////
@@ -159,9 +170,12 @@ $('#markup_modal_btn').on('click', e => {
 $('#useanchor,#usespan').click(function () {
     $('#markup_calculate').trigger('click');
     let elems=$($('#results').text());
+    // select the appropriate one.
     let wanted = ($(this).attr('id') === 'useanchor') ? elems[0].outerHTML : elems[2].outerHTML;
     let n = prolinks.addProlink(wanted);
-    let addenda = prolinks.prolink2md(wanted, n);
+    let addenda;
+    if ($('#collapse_prolinks').prop('checked')) {addenda = prolinks.prolink2md(wanted, n);}
+    else {addenda = wanted.replace(/</mgi,'&lt;').replace(/>/mgi,'&gt;');}
     if (window.currentRange.toString().length > 0) {
         addenda = addenda.replace(/Try me as .*?element/,window.currentRange.toString());
     } else {

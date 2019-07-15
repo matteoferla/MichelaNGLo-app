@@ -40,11 +40,23 @@
                           <button type="button" class="btn btn-outline-secondary" id="formatting_Delta">&Delta;</button>
                           <button type="button" class="btn btn-outline-info" id="formatting_help"><i class="far fa-question"></i></button>
                         </div>
+
                     </div>
+
                        <div class="offset-1 col-11 pb-1">
                         <%include file="../markup/markup_builder_btn.mako"/>
                         <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#combine_modal"><i class="far fa-paperclip"></i> Add additional model</button>
                         <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#mutate_modal"><i class="far fa-biohazard"></i> Make mutations</button>
+                           <button class="btn" data-toggle="tooltip" title="Collapse prolinks. Note that in the case of complex nested formatting it may not work correctly.">
+                              <div class="input-group-prepend">
+                                <div class="input-group-text">
+                                  <div class="custom-control custom-switch">
+                                      <input type="checkbox" id="collapse_prolinks" class="custom-control-input">
+                                        <label class="custom-control-label" for="collapse_prolinks">Collapse prolinks</label>
+                                      </div>
+                                    </div>
+                                </div>
+                              </button>
                     </div>
                     </div>
                 <div class="input-group mb-3">
