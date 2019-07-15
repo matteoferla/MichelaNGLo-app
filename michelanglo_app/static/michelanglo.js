@@ -102,7 +102,7 @@ NGL.specialOps.showResidue = function (id, selection, color, radius, view, label
         if (protein.reprList.length === 0) {
             if (((cartoonScheme === 'previous') || (cartoonScheme === undefined)) && (myData.current_cartoonScheme)) {
                 protein.addRepresentation( "cartoon", {color: myData.current_cartoonScheme, smoothSheet: true})}
-            else if ((cartoonScheme === false) || (cartoonScheme === 'false')  || (cartoonScheme === 'none')) {
+            else if ((cartoonScheme === undefined) || (cartoonScheme === false) || (cartoonScheme === 'false')  || (cartoonScheme === 'none')) {
                 protein.addRepresentation( "cartoon", {color: NGL.ColormakerRegistry.addSelectionScheme([["white", "*"]]), smoothSheet: true})
             }
             else {protein.addRepresentation( "cartoon", {color: cartoonScheme, smoothSheet: true})}
