@@ -47,7 +47,7 @@
                         <%include file="../markup/markup_builder_btn.mako"/>
                         <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#combine_modal"><i class="far fa-paperclip"></i> Add additional model</button>
                         <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#mutate_modal"><i class="far fa-biohazard"></i> Make mutations</button>
-                           <button class="btn" data-toggle="tooltip" title="Collapse prolinks. Note that in the case of complex nested formatting it may not work correctly.">
+                           <button class="btn" data-toggle="tooltip" title="Collapse prolinks. Note that the formatting will be messed up if there are nested elements within a prolink.">
                               <div class="input-group-prepend">
                                 <div class="input-group-text">
                                   <div class="custom-control custom-switch">
