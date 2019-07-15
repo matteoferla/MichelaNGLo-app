@@ -77,11 +77,12 @@ NGL.specialOps.showDomain = function (id, selection, color, view) {
         NGL.specialOps.postInitialise(); //worst case schenario prevention.
         color = color || "green";
         //selection = typeof selection === "string" ? new NGL.Selection(selection) : selection;
-        var protein = NGL.getStage(id).getComponentByType('structure');
+        let protein = NGL.getStage(id).getComponentByType('structure');
         NGL.getStage(id).removeClashes();
         protein.removeAllRepresentations();
         // Color in!
-        var schemeId = NGL.ColormakerRegistry.addSelectionScheme([[color, selection],["white", "*"]]);
+        let schemeId = NGL.ColormakerRegistry.addSelectionScheme([[color, selection],["white", "*"]]);
+        myData.current_cartoonScheme = schemeId;
         protein.addRepresentation( "cartoon", {color: schemeId, smoothSheet: true});
         if (!! view) {NGL.specialOps.slowOrient(id, view);}
         else {
@@ -99,7 +100,9 @@ NGL.specialOps.showResidue = function (id, selection, color, radius, view, label
         let protein = NGL.getStage(id).getComponentByType('structure');
         // corner case that there is no cartoon.
         if (protein.reprList.length === 0) {
-            if ((cartoonScheme === undefined) || (cartoonScheme === false) || (cartoonScheme === 'false')  || (cartoonScheme === 'none')) {
+            if (((cartoonScheme === 'previous') || (cartoonScheme === undefined)) && (myData.current_cartoonScheme)) {
+                protein.addRepresentation( "cartoon", {color: myData.current_cartoonScheme, smoothSheet: true})}
+            else if ((cartoonScheme === false) || (cartoonScheme === 'false')  || (cartoonScheme === 'none')) {
                 protein.addRepresentation( "cartoon", {color: NGL.ColormakerRegistry.addSelectionScheme([["white", "*"]]), smoothSheet: true})
             }
             else {protein.addRepresentation( "cartoon", {color: cartoonScheme, smoothSheet: true})}
@@ -280,7 +283,7 @@ NGL.specialOps.load = function (option, noLoadFun) {
     else if (parseInt(option) !== NaN < myData.proteins.length) { //user gave a number as a string.
         index = parseInt(option);
     }
-    else {throw 'No idea what this use submitted option is.'}
+    else {throw 'No idea what this user submitted option is.'}
     // check if the one asked for is loaded.
     if ( (index === myData.currentIndex)) {
         var protein = NGL.stageIds[myData.id].getComponentByType('structure');
@@ -449,7 +452,6 @@ NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
     var label = $(prolink).data('label');
     if (label === undefined) {label = true}
     var cartoonScheme  = $(prolink).data('cartoonscheme');
-    if (cartoonScheme === undefined) {cartoonScheme = 'chainid'};
 
     // title.
     NGL.specialOps.showTitle(id, title);

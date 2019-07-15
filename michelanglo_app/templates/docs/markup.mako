@@ -136,10 +136,12 @@
         </tr>
         <tr>
             <td><code>data-cartoonScheme</code></td>
-            <td><code>'chainid'</code></td>
+            <td><code>'previous'</code></td>
             <td><code>data-focus='residue'</code> and <code>data-focus='clash'</code> in the precence of <code>data-load</code></td>
             <td>This command alters a fix for the case when the model is changed (_e.g._ a mutant is loaded) and therefore there is no colour information for the newly loaded cartoon.
-                If set to <code>false</code> or <code>'none'</code> the cartoon will be set to white. While if set to a string corresponding to a NGL scheme it will use that scheme.
+                If set to <code>false</code> or <code>'none'</code> the cartoon will be set to white. Setting to <code>'previous'</code> will use the previous representation.
+                While if set to a string corresponding to a NGL scheme it will use that scheme (_eg._ <code>"chainid"</code>).
+                Do note that "previous" makes sense only if the new model loaded is a variant of the old one, otherwise it may behave oddly, therefore make sure to set <code>data-cartoonScheme</code> for those cases.
             </td>
         </tr>
         </tbody>

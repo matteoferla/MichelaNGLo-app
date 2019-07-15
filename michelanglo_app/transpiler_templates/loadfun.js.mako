@@ -64,7 +64,7 @@ function loadfun (protein) {
     ### REP 5 self.cartoon > cartoon
     % if structure.cartoon:
         let cartoon = new NGL.Selection( "${' or '.join(structure.cartoon)}" );
-        protein.addRepresentation( "cartoon", {${color_str}  sele: cartoon.string, smoothSheet: true, opacity: ${1-structure.cartoon_transparency}} );
+        myData.current_cartoonScheme = protein.addRepresentation( "cartoon", {${color_str}  sele: cartoon.string, smoothSheet: true, opacity: ${1-structure.cartoon_transparency}} );
     % endif
 
     ### REP 6 self.ribbon > backbone
@@ -88,7 +88,7 @@ function loadfun (protein) {
     ### REP 9 self.dots > point
     % if structure.dots:
         let point = new NGL.Selection( "${' or '.join(structure.dots)}" );
-        myData.lineRepresentation = protein.addRepresentation( "point", {${color_str} sele: point.string} );
+        protein.addRepresentation( "point", {${color_str} sele: point.string} );
     % endif
 
     ### REP 11 self.cell > cell
