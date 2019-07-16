@@ -45,7 +45,7 @@ window.prolinks = {
         /*
         "Editable text. press pen to edit. &lt;span class=\"prolink\" data-target=\"#viewport\" data-toggle=\"protein\" data-focus=\"undefined\"&gt;Try me as a span-element&lt;/span&gt;"
         */
-        let promatch = description.match(/&lt;.*?data-toggle=\\?\"protein\"\\? .*?&gt;[\s\S]*?&lt;\/.*?&gt;/gm);
+        let promatch = description.match(/&lt;[^&]*?data-toggle=\\?\"protein\"\\? .*?&gt;[\s\S]*?&lt;\/.*?&gt;/gm);
         if (promatch !== null) {
             promatch.forEach(function (elem, i) {
                 let elemAsHtml = $('<p>'+elem+'</p>').text();
