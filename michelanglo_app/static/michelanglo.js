@@ -100,6 +100,10 @@ NGL.specialOps.showResidue = function (id, selection, color, radius, view, label
         let protein = NGL.getStage(id).getComponentByType('structure');
         // corner case that there is no cartoon.
         if (protein.reprList.length === 0) {
+            /* so if it is undefined (default) and there is a current Scheme it is set to that but if for some reason there is
+            no current scheme and or cartoonScheme is none or false it goes white (as before).
+            else the user has specified something like chainid.
+            */
             if (((cartoonScheme === 'previous') || (cartoonScheme === undefined)) && (myData.current_cartoonScheme)) {
                 protein.addRepresentation( "cartoon", {color: myData.current_cartoonScheme, smoothSheet: true})}
             else if ((cartoonScheme === undefined) || (cartoonScheme === false) || (cartoonScheme === 'false')  || (cartoonScheme === 'none')) {
@@ -153,7 +157,7 @@ NGL.specialOps.showClash = function (id, selection, color, radius, tolerance, vi
     // Prepare
     NGL.specialOps.postInitialise(); //worst case schenario prevention.
     tolerance= tolerance || 1; //how much is the wiggle room. 0.2 &Aring; is probs good.
-    radius = radius || 2;
+    radius = radius || 4;
     NGL.specialOps.showResidue(id, selection, color, radius, view, label, cartoonScheme);
     var protein = NGL.getStage(id).getComponentByType('structure');
     // Find what clashes...
