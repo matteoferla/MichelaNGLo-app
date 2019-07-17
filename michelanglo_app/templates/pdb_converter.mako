@@ -151,7 +151,7 @@
         var data = new FormData();
         data.append('mode',window.mode); //file | code
         if (window.mode === 'code') {data.append('pdb',$('#pdb').val());}
-        else {data.append('file',$('#upload_pdb')[0].files[0]);}
+        else {data.append('pdb',$('#upload_pdb')[0].files[0]);}
         data.append('viewcode',$('#viewcode').text()); //needs two to make it list.
         //ajax it.
         ops.addToast('submitting','Submission','Submission in progress.','bg-info');

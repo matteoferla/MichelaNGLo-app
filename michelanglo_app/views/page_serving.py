@@ -16,11 +16,19 @@ def userdata_view(request):
             request.session['tries'] = 0  ## first go
 
     log.info(f'{get_username(request)} is looking at a page')
+    if 'mode' in request.params and request.params['mode'] == 'json':
+        json_mode = True
+    else:
+        json_mode = False
     pagename = request.matchdict['id']
     page = Page(pagename)
     if not page.exists(True):
-        response_settings = {'project': 'Michelanglo', 'user': request.user, 'page': pagename}
-        return render_to_response("../templates/410.mako", response_settings, request)
+        request.response.status = 410
+        if json_mode:
+            return render_to_response("json", {'status': 'Missing page'}, request)
+        else:
+            response_settings = {'project': 'Michelanglo', 'user': request.user, 'page': pagename}
+            return render_to_response("../templates/410.mako", response_settings, request)
     ### deal with encryption
     if page.is_password_protected() and 'key' in request.params: # encrypted and key given
         page.key = request.params['key'].encode('utf-8')
@@ -32,12 +40,20 @@ def userdata_view(request):
         except ValueError: ##got it wrong
             log.warn('f{get_username(request)} got the password wrong.')
             tickup_tries()
-            response_settings = {'project': 'Michelanglo', 'user': request.user, 'tries': request.session['tries'], 'page': pagename}
-            return render_to_response("../templates/encrypted.mako", response_settings, request)
+            request.response.status = 401
+            if json_mode:
+                return render_to_response("json", {'status': 'password protected. Incorrect'}, request)
+            else:
+                response_settings = {'project': 'Michelanglo', 'user': request.user, 'tries': request.session['tries'], 'page': pagename}
+                return render_to_response("../templates/encrypted.mako", response_settings, request)
     elif page.is_password_protected() and 'key' not in request.params:  # encrypted and no key given
         tickup_tries()
-        response_settings = {'project': 'Michelanglo', 'user': request.user, 'tries': request.session['tries'], 'page': pagename}
-        return render_to_response("../templates/encrypted.mako", response_settings, request)
+        request.response.status = 401
+        if json_mode:
+            return render_to_response("json", {'status': 'password protected. Incorrect'}, request)
+        else:
+            response_settings = {'project': 'Michelanglo', 'user': request.user, 'tries': request.session['tries'], 'page': pagename}
+            return render_to_response("../templates/encrypted.mako", response_settings, request)
     else:
         settings = page.load()
         settings['encryption'] = False
@@ -86,13 +102,14 @@ def userdata_view(request):
     if not 'location_viewport' in settings:
         settings['location_viewport'] = 'left'
     settings['current_page'] = 'NOT A MENU OPTION....'
-    #API hack.
+    #API
     if 'mode' in request.params and request.params['mode'] == 'json':
         settings['user'] = get_username(request) #user isn't json serialisable
         #print('pageserve', 'request', type(settings['proteinJSON']))
         settings['proteinJSON'] = settings['proteinJSON'] #json.dumps() #because this is done badly.
         return render_to_response("json", settings, request)
-    return settings
+    else:
+        return settings
 
 
 @view_config(route_name='save_pdb', renderer='string')

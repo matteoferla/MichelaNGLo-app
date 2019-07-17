@@ -87,7 +87,7 @@ class PyMolTranspilerDeco:
 
     def __call__(self, *args, **kwargs):
         try:
-            self.fun(*args, **kwargs)
+            return self.fun(*args, **kwargs)
         except Exception as err:
             if self.lock.locked(): #the code errored before the lock could be released.
                 self.close_up()

@@ -27,11 +27,11 @@ def demo_file(request):
     else:
         raise Exception('Non existant demo file requested. Possible attack!')
 
-def save_file(request, extension):
+def save_file(request, extension, field='file'):
     filename=os.path.join('michelanglo_app', 'temp','{0}.{1}'.format(get_uuid(),extension))
-    request.params['file'].file.seek(0)
+    request.params[field].file.seek(0)
     with open(filename, 'wb') as output_file:
-        shutil.copyfileobj(request.params['file'].file, output_file)
+        shutil.copyfileobj(request.params[field].file, output_file)
     return filename
 
 ########################################################################################
@@ -217,12 +217,13 @@ def ajax_pdb(request):
                 'backgroundcolor': 'white', 'validation': None, 'js': None, 'pdb': [], 'loadfun': ''}
     if request.params['mode'] == 'code':
         if len(request.params['pdb']) == 4:
-            settings['proteinJSON'] = '[{{"type": "rcsb", "value": "{0}"}}]'.format(request.params['pdb'])
+            settings['proteinJSON'] = '[{{"type": "rcsb", "value": "{0}"}}]'.format(request.params['pdb']) # PDB code.
         else:
-            settings['proteinJSON'] = '[{{"type": "file", "value": "{0}"}}]'.format(request.params['pdb'])
+            settings['proteinJSON'] = '[{{"type": "file", "value": "{0}"}}]'.format(request.params['pdb']) # url
     else:
         settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true}]'
-        filename = save_file(request,'pdb')
+        filename = save_file(request,'pdb', field='pdb')
+        print(settings['data_other'])
         trans = PyMolTranspiler.load_pdb(file=filename)
         settings['pdb'] = [('pdb', '\n'.join(trans.ss)+'\n'+trans.raw_pdb)]
         settings['js'] = 'external'
