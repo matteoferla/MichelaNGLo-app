@@ -92,7 +92,7 @@ function loadfun (protein) {
     % endif
 
     ### REP 11 self.cell > cell
-    % if structure.cell:
+    % if structure.cell and 1==0:
         let cell = new NGL.Selection( "${' or '.join(structure.cell)}" );
         protein.addRepresentation( "cell", {${color_str} sele: cell.string} );
     % endif

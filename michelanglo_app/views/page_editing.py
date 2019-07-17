@@ -1,14 +1,10 @@
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
-import traceback
 from ..models.pages import Page
 from ..models.user import User
 from ..models.trashcan import get_trashcan, get_public
 from ..transplier import PyMolTranspiler
-import uuid
-import shutil
 import os
-import io
 import json, re
 
 from ._common_methods import is_js_true, get_username, is_malformed

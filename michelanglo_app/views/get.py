@@ -35,19 +35,19 @@ def get_ajax(request):
         if not user:
             request.response.status = 401
             log_it()
-            return render_to_response("../templates/part_error.mako", {'project': 'Michelanglo', 'error': '401'}, request)
+            return render_to_response("../templates/part_error.mako", {'error': '401'}, request)
         elif user.role == 'admin':
             target = request.dbsession.query(User).filter_by(name=request.POST['username']).one()
-            return render_to_response("../templates/login/pages.mako", {'project': 'Michelanglo', 'user': target}, request)
+            return render_to_response("../templates/login/pages.mako", {'user': target}, request)
         elif request.POST['username'] == user.name:
-            return render_to_response("../templates/login/pages.mako", {'project': 'Michelanglo', 'user': request.user}, request)
+            return render_to_response("../templates/login/pages.mako", {'user': request.user}, request)
         else:
             request.response.status = 403
             log_it()
-            return render_to_response("../templates/part_error.mako", {'project': 'Michelanglo', 'error': '403'}, request)
+            return render_to_response("../templates/part_error.mako", {'error': '403'}, request)
     ####### get the modals
     elif request.params['item'] in  modals.keys():
-        return render_to_response(modals[request.params['item']], {'project': 'Michelanglo', 'user': request.user}, request)
+        return render_to_response(modals[request.params['item']], { 'user': request.user}, request)
     ####### get the implementation code.
     elif request.params['item'] == 'implement':
         ## should non editors be able to see this??
@@ -61,7 +61,7 @@ def get_ajax(request):
     else:
         request.response.status = 404
         log_it()
-        return render_to_response("../templates/part_error.mako", {'project': 'Michelanglo', 'error': '404'}, request)
+        return render_to_response("../templates/part_error.mako", {'error': '404'}, request)
 
 @view_config(route_name='get_pages', renderer='json')
 def get_pages(request):

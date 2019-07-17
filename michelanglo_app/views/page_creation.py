@@ -13,7 +13,7 @@ import json
 
 PyMolTranspiler.tmp = os.path.join('michelanglo_app', 'temp')
 
-from ._common_methods import is_js_true, get_username
+from ._common_methods import is_js_true, get_username, is_malformed
 import logging
 log = logging.getLogger(__name__)
 
@@ -206,7 +206,11 @@ def ajax_custom(request):
 
 @view_config(route_name='ajax_pdb', renderer="json")
 def ajax_pdb(request):
+    # mode = code | file
     log.info(f'PDB page creation requested by {get_username(request)}')
+    malformed = is_malformed(request, 'viewcode', 'mode', 'pdb')
+    if malformed:
+        return {'status': malformed}
     pagename = str(uuid.uuid4())
     settings = {'data_other': request.params['viewcode'].replace('<div', '').replace('</div>', '').replace('<', '').replace('>', ''),
                 'page': pagename, 'editable': True,

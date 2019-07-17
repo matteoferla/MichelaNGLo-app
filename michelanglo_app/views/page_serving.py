@@ -95,7 +95,6 @@ def userdata_view(request):
     return settings
 
 
-
 @view_config(route_name='save_pdb', renderer='string')
 def save_pdb(request):
     page = Page(request.params['uuid'])

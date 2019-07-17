@@ -223,7 +223,6 @@ $('#chat_send').click((event) => {
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'UA-66652240-5');
 </script>
 % endif
