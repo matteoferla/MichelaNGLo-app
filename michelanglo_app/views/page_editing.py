@@ -86,7 +86,7 @@ def edit(request):
                     request.dbsession.add(target)
                     settings['editors'].append(target.name)
                 else:
-                    print('This is impossible...', new_editor, ' does not exist.')
+                    log.warning(f'This is impossible...{new_editor} does not exist.')
         #encrypt
         if not page.is_password_protected() and request.params['encryption'] == 'true': # to be encrypted
             page.delete()

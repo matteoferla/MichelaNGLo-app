@@ -3,7 +3,7 @@ log = logging.getLogger(__name__)
 
 ## convert booleans and settings
 def is_js_true(value):  # booleans get converted into strings in json.
-    if not value or value == 'false':
+    if not value or value in ('false', 'False', False, 'No','no', 'F','null', 'off'):
         return False
     else:
         return True
