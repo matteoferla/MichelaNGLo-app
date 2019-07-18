@@ -1,8 +1,9 @@
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
 from ..models.pages import Page
+from pyramid.response import FileResponse
 
-import logging, json
+import logging, json, os
 log = logging.getLogger(__name__)
 from ._common_methods import get_username
 
@@ -109,8 +110,21 @@ def userdata_view(request):
         settings['proteinJSON'] = settings['proteinJSON'] #json.dumps() #because this is done badly.
         return render_to_response("json", settings, request)
     else:
+        settings['meta_title'] = 'Michelaɴɢʟo user-created page: '+settings['title']
+        settings['meta_description'] = settings['description'][:150]
+        settings['meta_image'] = f'https://michelanglo.sgc.ox.ac.uk/thumb/{page.identifier}'
+        settings['meta_url'] = 'https://michelanglo.sgc.ox.ac.uk/data/'+page.identifier
         return settings
 
+
+@view_config(route_name='userthumb')
+def thumbnail(request):
+    pagename = request.matchdict['id']
+    page = Page(pagename)
+    if os.path.exists(page.thumb):
+        return FileResponse(page.thumb)
+    else: #if not page.exists(True):
+        return FileResponse(os.path.join('michelanglo_app', 'static','tim_barrel.png'))
 
 @view_config(route_name='save_pdb', renderer='string')
 def save_pdb(request):
@@ -118,8 +132,6 @@ def save_pdb(request):
     if 'key' in request.params:
         page.key = request.params['key'].encode('utf-8')
     return page.load()['pdb']
-
-
 
 @view_config(route_name='save_zip', renderer="string")
 def save_zip(request):

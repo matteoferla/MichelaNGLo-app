@@ -6,8 +6,12 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Michelanglo, a simple way to create NGL views for webpages and for sharing">
-    <meta name="author" content="Matteo Ferla">
+    <meta name="description" content="${meta_description}">
+    <meta name="author" content="Matteo Ferla et al. 2019">
+    <meta property="og:title" content="${meta_title}">
+    <meta property="og:description" content="${meta_description}">
+    <meta property="og:image" content="${meta_image}">
+    <meta property="og:url" content="${meta_url}">
     <link rel="icon" href="/static/NGL.png">
     %if not public:
         <meta name="robots" content="none">

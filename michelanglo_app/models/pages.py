@@ -15,6 +15,7 @@ class Page:
         self.identifier = identifier.replace('\\','/').replace('*','').split('/')[-1]
         self.unencrypted_path = os.path.join('michelanglo_app', 'user-data', self.identifier + '.p')
         self.encrypted_path = os.path.join('michelanglo_app', 'user-data', self.identifier + '.ep')
+        self.thumb = os.path.join('michelanglo_app', 'user-data', self.identifier + '.png')
         if key:
             self.path = self.encrypted_path
         else:

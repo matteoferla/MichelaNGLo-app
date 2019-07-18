@@ -49,7 +49,13 @@ def my_view(request):
     reply = {'project': 'Michalanglo',
                 'user': user,
                 'bootstrap': bootstrap,
-                'current_page': page}
+                'current_page': page,
+                'meta_title': 'Michelaɴɢʟo: sculpting protein views on webpages without coding.',
+                'meta_description': 'Convert PyMOL files, upload PDB files or submit PDB codes and '+\
+                                    'create a webpage to edit, share or implement standalone on your site',
+                'meta_image': '/static/tim_barrel.png',
+                'meta_url': 'https://michelanglo.sgc.ox.ac.uk/'
+            }
     if page != 'docs':
         return reply
     else:

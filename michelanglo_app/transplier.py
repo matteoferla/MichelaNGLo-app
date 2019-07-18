@@ -390,7 +390,6 @@ class PyMolTranspiler:
         self.parse_ss(myspace['data'])
         return self
 
-
     @staticmethod
     def _mutagen(outfile, mutations, chain):
         """
