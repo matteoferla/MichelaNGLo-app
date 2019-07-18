@@ -122,9 +122,13 @@ def thumbnail(request):
     pagename = request.matchdict['id']
     page = Page(pagename)
     if os.path.exists(page.thumb):
-        return FileResponse(page.thumb)
+        reponse = FileResponse(page.thumb)
     else: #if not page.exists(True):
-        return FileResponse(os.path.join('michelanglo_app', 'static','tim_barrel.png'))
+        reponse = FileResponse(os.path.join('michelanglo_app', 'static','tim_barrel.png'))
+    reponse.headers.update({
+        'Access-Control-Allow-Origin': '*',
+    })
+    return reponse
 
 @view_config(route_name='save_pdb', renderer='string')
 def save_pdb(request):
