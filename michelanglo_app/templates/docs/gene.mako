@@ -34,5 +34,5 @@ Which bound macromolecule or small molecule is up to you, but if in doubt, check
 <p>If you want to show one or more mutations go to edit (pencil button in the description card visible when logged in) and then press the button that says "Make mutations". Enter the chain and the mutations in the form M1W or A2D etc. separated by spaces. The program will do the rest.</p>
 <h4>Bonus: add bilayer</h4>
 <p>If for illustrative purposes you want to add a lipid bilayer, I recommend using <a href="http://www.charmm-gui.org/?doc=input/membrane.bilayer" target="_blank">Charmm-GUI membrane builder <i class="far fa-external-link"></i></a> and going a few steps in and stopping at solvating the molecule &mdash;Charmm is a MD simulator. Another feature offered is <a href="http://www.charmm-gui.org/?doc=input/pdbreader" target="_blank">modifying residues by phosphorylation, chemical attack or linkage with a few cyanine dyes<i class="far fa-external-link"></i><</a>.</p>
-<p>Not all residue changes are possible, for another approach (using Rosetta see <a href="https://blog.matteoferla.com/2019/01/phosphorylated-pdb-files.html">this post</a>).</p>
+<p>Not all common residue changes (e.g. methylation) are possible, for another approach (using Rosetta) see <a href="https://blog.matteoferla.com/2019/01/phosphorylated-pdb-files.html">this post</a>.</p>
 </%block>
