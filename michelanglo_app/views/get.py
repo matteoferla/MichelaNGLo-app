@@ -124,7 +124,6 @@ def set_ajax(request):
                 log.warning(f'{get_username(request)} tried to terminate the app')
                 notify_admin(f'{get_username(request)} tried to terminate the app')
                 return {'status': 'wrong secret code.'}
-
         else:
             return {'status': 'unknown cmd'}
 
