@@ -32,7 +32,7 @@ def save_file(request, extension, field='file'):
     with open(filename, 'wb') as output_file:
         if isinstance(request.params[field], str): ###API user made a mess.
             log.warning(f'user uploaded a str not a file!')
-            output_file.write(request.params[field])
+            output_file.write(request.params[field].encode('utf-8'))
         else:
             request.params[field].file.seek(0)
             shutil.copyfileobj(request.params[field].file, output_file)
@@ -216,7 +216,10 @@ def convert_pdb(request):
     if malformed:
         return {'status': malformed}
     pagename = str(uuid.uuid4())
-    settings = {'data_other': request.params['viewcode'].replace('<div', '').replace('</div>', '').replace('<', '').replace('>', ''),
+    data_other = request.params['viewcode'].replace('<div', '').replace('</div>', '').replace('<', '').replace('>', '')
+    if not request.user or request.user.role not in ('admin', 'friend'):
+        data_other = Page.sanitise_HTML(data_other)
+    settings = {'data_other': data_other,
                 'page': pagename, 'editable': True,
                 'backgroundcolor': 'white', 'validation': None, 'js': None, 'pdb': [], 'loadfun': ''}
     if request.params['mode'] == 'code':

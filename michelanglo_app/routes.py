@@ -4,12 +4,12 @@ def includeme(config):
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_static_view('images', '../images', cache_max_age=3600)
     config.add_static_view('favicon.ico','static/favicon.ico', cache_max_age=3600)
-    config.add_route('home', '/')
-    config.add_route('home_text', '/verbose')
-    config.add_route('custom', '/custom')
-    config.add_route('pdb', '/pdb')
-    config.add_route('pymol', '/pymol')
-    config.add_route('gallery', '/gallery')
+    config.add_route('home', '/')   ##the home page
+    config.add_route('home_text', '/verbose') ### the old home page
+    config.add_route('custom', '/custom') ### mesh converter
+    config.add_route('pdb', '/pdb')   ### pdb converter
+    config.add_route('pymol', '/pymol')  ### pymol converter
+    config.add_route('gallery', '/gallery')  ###
     config.add_route('docs', '/docs/{id}')
     config.add_route('main_docs', '/docs')
     config.add_route('convert_pse', '/convert_pse')

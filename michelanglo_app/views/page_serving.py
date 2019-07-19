@@ -32,7 +32,15 @@ def userdata_view(request):
         if json_mode:
             return render_to_response("json", {'status': 'Missing page'}, request)
         else:
-            response_settings = {'project': 'Michelanglo', 'user': request.user, 'page': pagename}
+            response_settings = {'project': 'Michelanglo', 'user': request.user,
+                                 'page': pagename,
+                                 'custom_messages': json.dumps(custom_messages),
+                                'meta_title': 'Michelaɴɢʟo: sculpting protein views on webpages without coding.',
+                                'meta_description': 'Convert PyMOL files, upload PDB files or submit PDB codes and '+\
+                                                    'create a webpage to edit, share or implement standalone on your site',
+                                'meta_image': '/static/tim_barrel.png',
+                                'meta_url': 'https://michelanglo.sgc.ox.ac.uk/'
+                                 }
             return render_to_response("../templates/410.mako", response_settings, request)
     ### deal with encryption
     if page.is_password_protected() and 'key' in request.params: # encrypted and key given
@@ -49,7 +57,13 @@ def userdata_view(request):
             if json_mode:
                 return render_to_response("json", {'status': 'password protected. Incorrect'}, request)
             else:
-                response_settings = {'project': 'Michelanglo', 'user': request.user, 'tries': request.session['tries'], 'page': pagename}
+                response_settings = {'project': 'Michelanglo', 'user': request.user, 'tries': request.session['tries'], 'page': pagename,
+                                     'meta_title': 'Michelaɴɢʟo: sculpting protein views on webpages without coding.',
+                                     'meta_description': 'Convert PyMOL files, upload PDB files or submit PDB codes and ' + \
+                                                         'create a webpage to edit, share or implement standalone on your site',
+                                     'meta_image': '/static/tim_barrel.png',
+                                     'meta_url': 'https://michelanglo.sgc.ox.ac.uk/'
+                                     }
                 return render_to_response("../templates/encrypted.mako", response_settings, request)
     elif page.is_password_protected() and 'key' not in request.params:  # encrypted and no key given
         tickup_tries()
@@ -57,7 +71,13 @@ def userdata_view(request):
         if json_mode:
             return render_to_response("json", {'status': 'password protected. Incorrect'}, request)
         else:
-            response_settings = {'project': 'Michelanglo', 'user': request.user, 'tries': request.session['tries'], 'page': pagename}
+            response_settings = {'project': 'Michelanglo', 'user': request.user, 'tries': request.session['tries'], 'page': pagename,
+                                 'meta_title': 'Michelaɴɢʟo: sculpting protein views on webpages without coding.',
+                                 'meta_description': 'Convert PyMOL files, upload PDB files or submit PDB codes and ' + \
+                                                     'create a webpage to edit, share or implement standalone on your site',
+                                 'meta_image': '/static/tim_barrel.png',
+                                 'meta_url': 'https://michelanglo.sgc.ox.ac.uk/'
+                                 }
             return render_to_response("../templates/encrypted.mako", response_settings, request)
     else:
         settings = page.load()

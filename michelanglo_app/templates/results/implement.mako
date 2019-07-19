@@ -25,22 +25,33 @@
 ##################### data
 % if pdb:
     <h4>PDB string</h4>
-<p>The PDB data needs to be embedded, therefore, below these add:</p>
+<p>The PDB data needs to be embedded, therefore, below these add. Do note that the indent is important &mdash;as is the secondary structure definition.</p>
     <pre style="overflow: scroll; height: 5.5rem;">${copy_btn('pdb_code')}<code id="pdb_code">&lt;script type="text/javascript"&gt;
-var pdb = `REMARK 666 Note that the indent is important as is the secondary structure def.
-${pdb}`;
+        %if isinstance(pdb, str):
+var pdb = `${pdb|n}`;
+        %else:
+            %for name, structure in pdb:
+var ${name} = `${structure|n}`;
+            %endfor
+        %endif
+
 &lt;/script&gt;</code></pre>
+%else:
+    <h4>PDB Code</h4>
+    <p>The structure is retrieved from the PDB, so there is no need to do anything for the structural data.</p>
 % endif
 
 
 ###################### fun
-<h4>Function</h4>
+%if loadfun:
+    <h4>Function</h4>
 Below these add the following to all the custom representation and view of the protein:
-<pre style="overflow: scroll; height: 5.5rem;">${copy_btn('fun_code')}<code id="fun_code">&lt;script type="text/javascript"&gt;${loadfun}&lt;/script&gt;</code></pre>
+<pre style="overflow: scroll; height: 5.5rem;">${copy_btn('fun_code')}<code id="fun_code">&lt;script type="text/javascript"&gt;${loadfun|n}&lt;/script&gt;</code></pre>
 
 <h4>Multiple representations</h4>
 <p>If you want to have multiple representations or protein, triggerable with a <a href="/docs/markup">guiding link</a>, simply upload a new PyMol file and combine the <code>data-proteins</code> attribute, change the name of the second function in both the <code>data-proteins</code> attribute and its declaration block.</p>
 
+%endif
 
 <!--
 <h3 data-toggle="collapse" data-target=".docs_raw" style="cursor: pointer;">
