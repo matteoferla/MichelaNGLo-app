@@ -17,7 +17,7 @@ Description of users is in [github.com/matteoferla/MichelaNGLo/data.md](https://
 For a privacy centered description see also [https://ngl.matteoferla.com/docs#Users](users section in docs).
 
 ## Edit
-Conversion are done to the address `ajax_convert`.
+Conversion are done to the address `convert_pse`.
 
     data = {'mode': 'file', #file|mode
            'demo_file': 'A.pse', #alt. `file`

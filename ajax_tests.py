@@ -48,6 +48,6 @@ data = {'mode': 'file', #file|mode
        'pdb_string': True
       }
 
-r =site.test('ajax_convert',data=data)
+r =site.test('convert_pse',data=data)
 
 print(r.content)

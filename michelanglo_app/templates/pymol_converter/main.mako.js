@@ -142,13 +142,13 @@ $('#submit').click(function () {
     //finish adding data.
     data.append( 'uniform_non_carbon',$('#uniform_non_carbon').is(':checked'));
     data.append('stick_format',$("input[name='sticks']:checked").val());
-    // ajax to ajax_convert
+    // ajax to convert_pse
     //{pdb: pdb, uniform_non_carbon: uniform_non_carbon, pymol_output: pymol_output, indent: indent, cdn: cdn}
     $('#submit .far').detach();
     $('#submit').attr('disabled','disabled').prepend('<i class="far fa-circle-notch fa-spin"></i> ');
     ops.main_ajax = $.ajax({
         type: "POST",
-        url: "ajax_convert",
+        url: "convert_pse",
         processData: false,
         enctype: "multipart/form-data",
         cache: false,

@@ -157,7 +157,7 @@
         ops.addToast('submitting','Submission','Submission in progress.','bg-info');
         $.ajax({
             type: "POST",
-            url: "ajax_pdb",
+            url: "convert_pdb",
             processData: false,
             enctype: "multipart/form-data",
             cache: false,

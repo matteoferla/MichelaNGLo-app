@@ -19,7 +19,7 @@ log = logging.getLogger(__name__)
 
 def demo_file(request):
     """
-    Needed for ajax_convert. Paranoid way to prevent user sending a spurious demo file name (e.g. ~/.ssh/).
+    Needed for convert_pse. Paranoid way to prevent user sending a spurious demo file name (e.g. ~/.ssh/).
     """
     demos=os.listdir(os.path.join('michelanglo_app', 'demo'))
     if request.params['demo_file'] in demos:
@@ -29,9 +29,13 @@ def demo_file(request):
 
 def save_file(request, extension, field='file'):
     filename=os.path.join('michelanglo_app', 'temp','{0}.{1}'.format(get_uuid(),extension))
-    request.params[field].file.seek(0)
     with open(filename, 'wb') as output_file:
-        shutil.copyfileobj(request.params[field].file, output_file)
+        if isinstance(request.params[field], str): ###API user made a mess.
+            log.warning(f'user uploaded a str not a file!')
+            output_file.write(request.params[field])
+        else:
+            request.params[field].file.seek(0)
+            shutil.copyfileobj(request.params[field].file, output_file)
     return filename
 
 ########################################################################################
@@ -71,8 +75,8 @@ def get_uuid():
 ########################################################################################
 ### VIEWS
 
-@view_config(route_name='ajax_convert', renderer="json")
-def ajax_convert(request):
+@view_config(route_name='convert_pse', renderer="json")
+def convert_pse(request):
     user = request.user
     log.info('Conversion of PyMol requested.')
     request.session['status'] = make_msg('Checking data', 'The data has been recieved and is being checked')
@@ -179,8 +183,8 @@ def ajax_convert(request):
         return {'status': 'error'}
 
 
-@view_config(route_name='ajax_custom', renderer="../templates/custom.result.mako")
-def ajax_custom(request):
+@view_config(route_name='convert_mesh', renderer="../templates/custom.result.mako")
+def convert_mesh(request):
     log.info(f'Mesh conversion requested by {get_username(request)}')
     if 'demo_file' in request.params:
         filename = demo_file(request)  # prevention against attacks
@@ -204,8 +208,8 @@ def ajax_custom(request):
     return {'mesh': mesh}
 
 
-@view_config(route_name='ajax_pdb', renderer="json")
-def ajax_pdb(request):
+@view_config(route_name='convert_pdb', renderer="json")
+def convert_pdb(request):
     # mode = code | file
     log.info(f'PDB page creation requested by {get_username(request)}')
     malformed = is_malformed(request, 'viewcode', 'mode', 'pdb')
@@ -230,7 +234,6 @@ def ajax_pdb(request):
     commit_submission(request,settings,pagename)
     return {'page': pagename}
 
-
 @view_config(route_name='task_check', renderer="json")
 def status_check_view(request):
     """
@@ -252,8 +255,6 @@ def status_check_view(request):
                 'body'      : 'The job is about to start.',
                 'color'     : 'bg-warning'}
     return request.session['status']
-
-
 
 
 def make_msg(title, body, condition='running', color=''):

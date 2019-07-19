@@ -204,7 +204,7 @@ $('#submit').click(function () {
     data.append('scale',$('#scale').val());
     $.ajax({
         type: "POST",
-        url: "ajax_custom",
+        url: "convert_mesh",
         processData: false,
         enctype: "multipart/form-data",
         cache: false,
