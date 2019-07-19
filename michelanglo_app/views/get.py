@@ -13,7 +13,7 @@ import json
 
 import logging
 log = logging.getLogger(__name__)
-from ._common_methods import get_username, is_malformed
+from ._common_methods import get_username, is_malformed, notify_admin
 
 from .default import custom_messages
 
@@ -115,6 +115,16 @@ def set_ajax(request):
             while custom_messages:
                 custom_messages.pop()
             return {'status': 'success'}
+        elif request.params['item'] == 'terminate':
+            if 'code' in request.params and request.params['code'] == os.environ['SECRETCODE']:
+                log.warning(f'{get_username(request)} terminated the app')
+                notify_admin(f'{get_username(request)} terminated the app')
+                raise SystemExit(0)
+            else:
+                log.warning(f'{get_username(request)} tried to terminate the app')
+                notify_admin(f'{get_username(request)} tried to terminate the app')
+                return {'status': 'wrong secret code.'}
+
         else:
             return {'status': 'unknown cmd'}
 
