@@ -1,9 +1,9 @@
 from pyramid.view import view_config, notfound_view_config
 from pyramid.renderers import render_to_response
-import os
+import os, json
 from ._common_methods import get_username
 
-
+custom_messages = []
 
 ### make folder if exists.
 if os.path.isdir(os.path.join('michelanglo_app','temp')):
@@ -50,6 +50,7 @@ def my_view(request):
                 'user': user,
                 'bootstrap': bootstrap,
                 'current_page': page,
+                'custom_messages': json.dumps(custom_messages),
                 'meta_title': 'Michelaɴɢʟo: sculpting protein views on webpages without coding.',
                 'meta_description': 'Convert PyMOL files, upload PDB files or submit PDB codes and '+\
                                     'create a webpage to edit, share or implement standalone on your site',

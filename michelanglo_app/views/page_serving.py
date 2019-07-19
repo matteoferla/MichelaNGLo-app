@@ -1,3 +1,5 @@
+import json
+
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
 from ..models.pages import Page
@@ -6,6 +8,8 @@ from pyramid.response import FileResponse
 import logging, json, os
 log = logging.getLogger(__name__)
 from ._common_methods import get_username
+
+from .default import custom_messages
 
 @view_config(route_name='userdata', renderer="../templates/user_protein.mako")
 def userdata_view(request):
@@ -114,6 +118,7 @@ def userdata_view(request):
         settings['meta_description'] = settings['description'][:150]
         settings['meta_image'] = f'https://michelanglo.sgc.ox.ac.uk/thumb/{page.identifier}'
         settings['meta_url'] = 'https://michelanglo.sgc.ox.ac.uk/data/'+page.identifier
+        settings['custom_messages'] = json.dumps(custom_messages)
         return settings
 
 

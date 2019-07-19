@@ -13,7 +13,9 @@ import json
 
 import logging
 log = logging.getLogger(__name__)
-from ._common_methods import get_username
+from ._common_methods import get_username, is_malformed
+
+from .default import custom_messages
 
 #from pprint import PrettyPrinter
 #pprint = PrettyPrinter()
@@ -21,6 +23,10 @@ from ._common_methods import get_username
 
 @view_config(route_name='get')
 def get_ajax(request):
+    malformed = is_malformed(request, 'item')
+    if malformed:
+        return {'status': malformed}
+
     def log_it():
         log.warn(f'{get_username(request)} was refused {request.params["item"]}, code: {request.response.status}')
 
@@ -87,5 +93,30 @@ def get_pages(request):
         data['visited'] = user.get_visited_pages()
     data['public'] = request.dbsession.query(User).filter_by(name='public').one().get_owned_pages()
     return data
+
+@view_config(route_name='set', renderer='json')
+def set_ajax(request):
+    if not request.user or request.user.role != 'admin':
+        request.response.status = 403
+        log.warn(f'{get_username(request)} was refused setting.')
+    else:
+        malformed = is_malformed(request, 'item')
+        if malformed:
+            return {'status': malformed}
+        if request.params['item'] == 'msg':
+            malformed = is_malformed(request, 'title','descr','bg')
+            if malformed:
+                return {'status': malformed}
+            custom_messages.append({el: request.params[el] for el in ('title','descr','bg')})
+            log.info(f'{get_username(request)} set a new custom message.')
+            return {'status': 'success'}
+        elif request.params['item'] == 'clear_msg':
+            log.info(f'{get_username(request)} cleared custom messages.')
+            while custom_messages:
+                custom_messages.pop()
+            return {'status': 'success'}
+        else:
+            return {'status': 'unknown cmd'}
+
 
 

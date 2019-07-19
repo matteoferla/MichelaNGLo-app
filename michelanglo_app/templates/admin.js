@@ -75,3 +75,21 @@ $("[data-target='#mod']").click(function () {
             method: 'POST'
         }).done( (msg) => $('#mod .modal-body').append(msg));
 });
+
+window.setMsg = (bg) => {
+    $.ajax({url: "/set",
+            data: {item: 'msg',
+                   title: $('#msg_title').val(),
+                   descr: $('#msg_descr').val(),
+                   bg: bg},
+            method: 'POST'
+        })
+        .done((msg) => ops.addToast('done', 'Success', JSON.stringify(msg), 'bg-success'));
+};
+window.clearMsg = (bg) => {
+    $.ajax({url: "/set",
+            data: {item: 'clear_msg'},
+            method: 'POST'
+        })
+        .done((msg) => ops.addToast('done', 'Success', JSON.stringify(msg), 'bg-success'));
+};

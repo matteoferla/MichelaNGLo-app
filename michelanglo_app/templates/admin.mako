@@ -36,6 +36,43 @@
                 </span> ${u.name} </a></li>
             %endfor
         </ul>
+    <h3>Command station</h3>
+        <div class="row border rounded w-100 p-2 m-2">
+                <div class="col-lg-3">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text" id="msg_title_label">Title</span>
+                  </div>
+                  <input type="text" class="form-control" placeholder="Title" aria-label="title" aria-describedby="msg_title_label" id="msg_title">
+                </div>
+            </div>
+                <div class="col-lg-5">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text" id="msg_descr_label">Msg</span>
+                  </div>
+                  <input type="text" class="form-control" placeholder="Title" aria-label="title" aria-describedby="msg_descr_label" id="msg_descr">
+                </div>
+            </div>
+                <div class="col-lg-2">
+                    <div class="btn-group">
+                      <button type="button" class="btn  btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Add
+                      </button>
+                      <div class="dropdown-menu">
+                      % for bg in ('danger', 'warning', 'info', 'success', 'primary', 'secondary'):
+                          <a class="dropdown-item bg-${bg}" onclick="setMsg('bg-${bg}')">As ${bg}</a>
+                      % endfor
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" onclick="setMsg('')">in white</a>
+                      </div>
+
+                      <button type="button" class="btn btn-outline-secondary" onclick="clearMsg()">Clear</button>
+                    </div>
+                </div>
+
+
+        </div>
     <h3>Reversed request log</h3>
     <div style="height: 70vh; overflow: scroll;">
         <pre><code>${log}</code></pre>
