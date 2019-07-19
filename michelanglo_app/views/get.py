@@ -119,7 +119,7 @@ def set_ajax(request):
             if 'code' in request.params and request.params['code'] == os.environ['SECRETCODE']:
                 log.warning(f'{get_username(request)} terminated the app')
                 notify_admin(f'{get_username(request)} terminated the app')
-                raise SystemExit(0)
+                os.system('kill `lsof -t -i:8088`') ## is this the most graceful way of kill itself???
             else:
                 log.warning(f'{get_username(request)} tried to terminate the app')
                 notify_admin(f'{get_username(request)} tried to terminate the app')
