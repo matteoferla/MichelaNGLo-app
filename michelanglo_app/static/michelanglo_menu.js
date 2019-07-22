@@ -104,8 +104,8 @@ $('#viewport_menu_popover')
            window.viewPopIsOpen=false;
        }
     }).on('shown.bs.popover',function() {
-            $('#popbody').html(popbody); //this seems insane but the HTML gets buggered in Moz otherwise and the position is all wtrong.
-
+        $('#popbody').html(popbody); //this seems insane but the HTML gets buggered in Moz otherwise and the position is all wtrong.
+        $('.popover-header:contains("Options")').append(`<button type="button" class="close" onclick="$('#viewport_menu_popover').popover('hide');" aria-label="Close"><span aria-hidden="true">&times;</span></button>`);
         $('#popbody [data-toggle="tooltip"]').tooltip();
         $('#viewport_menu_selector_go').click((e) => {
                 NGL.specialOps.showResidue('viewport', $('#viewport_menu_selector_resi').val() + ':' + $('#viewport_menu_selector_chain').val());
@@ -128,7 +128,7 @@ $('#viewport_menu_popover')
         //worked with ... class='transparentable' style="transition: opacity 0.5s; -webkit-transition: opacity 0.5s;"
     });
 
-
+// modal to show extra buttons
 $('body').append(`
 <div class="modal" tabindex="-1" role="dialog" id="controlguide_modal">
   <div class="modal-dialog" role="document">
