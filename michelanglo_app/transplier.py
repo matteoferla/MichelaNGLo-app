@@ -456,10 +456,8 @@ class PyMolTranspiler:
         """
         # This really ought to a class and this half-breed. But get new letter returns a letter not in old_chains
         old_chains = list()
-
-        def get_new_letter():
-            possible = iter('ABCDEFGHIJKLMNOPQRSTUVWXYZ' +
-                            'abcdefghijklmnopqrstuvwxyz')
+        possible = iter('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz')
+        def get_new_letter(possible):
                            # 'ßÞÐÅÆØ' + 'ÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ' +
                            # 'àáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ')
             new = next(possible)
@@ -478,10 +476,10 @@ class PyMolTranspiler:
                     chains = set([atom.chain for atom in o.atom])
                     for c in chains:
                         if not c: # missing chain ID is still causing issues.
-                            new_chain = get_new_letter()
+                            new_chain = get_new_letter(possible)
                             pymol.cmd.alter(f"{on} and chain ''", f'chain="{new_chain}"')
                         elif c in old_chains:
-                            new_chain = get_new_letter()
+                            new_chain = get_new_letter(possible)
                             pymol.cmd.alter(f"{on} and chain {c}", f'chain="{new_chain}"')
                         else:
                             old_chains.append(c)
