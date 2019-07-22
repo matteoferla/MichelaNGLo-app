@@ -45,7 +45,7 @@
         #### visited
         %if visited:
             <h6>Visited pages</h6>
-            <ul>
+            <ul class="list-group">
                 %for page in visited:
                     <li class="list-group-item" data-page="${page.identifier}">
                         <a href="/data/${page.identifier}">${page.settings['title']}</a>

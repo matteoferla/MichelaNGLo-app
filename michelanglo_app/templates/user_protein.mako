@@ -28,6 +28,7 @@
 %>
 
 <div class='row p-4'>
+    % if columns_viewport>0:
     <div class='col-${columns_viewport} ${part_order[0]}'>
         <div class='card shadow'>
             <div class="card-body">
@@ -39,8 +40,9 @@
             </div>
         </div>
     </div>
+    % endif
 
-
+    %if columns_text>0:
     <div class='col-${columns_text} ${part_order[1]}'>
         <div class="card shadow" role="tooltip">
             <%
@@ -57,14 +59,15 @@
             ${descr_header|n}
 
             <div class="card-body">
-            %if location_viewport == 'left':
-                <div class="arrow-left"></div>
-            %else:
-                <div class="arrow-right"></div>
+            %if columns_viewport:
+                %if location_viewport == 'left':
+                    <div class="arrow-left"></div>
+                %else:
+                    <div class="arrow-right"></div>
+                %endif
             %endif
 
-
-                    %if editable:
+                    %if editable and not no_user:
                         <div class="float-right">
                             <button type="button" class="btn btn-outline-primary my-1" id="edit_btn" data-target="#edit_modal" data-toggle="modal"><i class="far fa-edit"></i></button>
                         </div>
@@ -88,6 +91,7 @@
                 </div>
         </div>
     </div>
+    %endif
 </div>
 
 <%block name="modals">
