@@ -114,12 +114,12 @@ def edit(request):
 
 @view_config(route_name='combine_user-page', renderer='json')
 def combined(request):
-    log.info(f'{get_username(request)} is requesting to merge page')
     malformed = is_malformed(request, 'target_page','donor_page','task','name')
     if malformed:
         return {'status': malformed}
     target_page = Page(request.params['target_page'])
     donor_page = Page(request.params['donor_page'])
+    log.info(f'{get_username(request)} is requesting to merge page {donor_page} to {target_page}')
     task = Page(request.params['task'])
     name = request.params['name']
     user = request.user
@@ -180,11 +180,11 @@ def combined(request):
 @view_config(route_name='delete_user-page', renderer='json')
 def delete(request):
     # get ready
-    log.info(f'{get_username(request)} is requesting to delete page')
     malformed = is_malformed(request, 'page')
     if malformed:
         return {'status': malformed}
     page = Page(request.params['page'])
+    log.info(f'{get_username(request)} is requesting to delete page {page}')
     user = request.user
     if not user:
         request.response.status = 403
@@ -205,11 +205,11 @@ def delete(request):
 @view_config(route_name='mutate', renderer='json')
 def mutate(request):
     #''page', 'key'?, 'chain', 'mutations'
-    log.info(f'{get_username(request)} is making mutants page')
     malformed = is_malformed(request, 'page','model','chain','mutations')
     if malformed:
         return {'status': malformed}
     page = Page(request.params['page'])
+    log.info(f'{get_username(request)} is making mutants page {page}')
     user = request.user
     if not user:
         request.response.status = 403

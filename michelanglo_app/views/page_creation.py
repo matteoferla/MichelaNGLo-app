@@ -54,7 +54,7 @@ def anonymous_submission(request, settings, pagename):
 def user_submission(request, settings, pagename):
     user = request.user
     user.add_owned_page(pagename)
-    settings['author'] = [user.name]
+    settings["authors"] = [user.name]
     request.dbsession.add(user)
     settings['editors'] = [user.name]
     
@@ -230,7 +230,6 @@ def convert_pdb(request):
     else:
         settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true}]'
         filename = save_file(request,'pdb', field='pdb')
-        print(settings['data_other'])
         trans = PyMolTranspiler.load_pdb(file=filename)
         settings['pdb'] = [('pdb', '\n'.join(trans.ss)+'\n'+trans.raw_pdb)]
         settings['js'] = 'external'

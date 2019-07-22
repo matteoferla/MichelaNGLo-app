@@ -20,12 +20,12 @@ def userdata_view(request):
         else:
             request.session['tries'] = 0  ## first go
 
-    log.info(f'{get_username(request)} is looking at a page')
+    pagename = request.matchdict['id']
+    log.info(f'{get_username(request)} is looking at a page {pagename}')
     if 'mode' in request.params and request.params['mode'] == 'json':
         json_mode = True
     else:
         json_mode = False
-    pagename = request.matchdict['id']
     page = Page(pagename)
     if not page.exists(True):
         request.response.status = 410
@@ -114,13 +114,14 @@ def userdata_view(request):
         settings['bootstrap'] = request.params['bootstrap']
     if 'no_user'  in request.params:
         settings['no_user'] = True
+        settings['no_analytics'] = True
     else:
         settings['no_user'] = False
+        settings['no_analytics'] = False  ## Google analytics always on...
     if 'no_buttons' in request.params:
         settings['no_buttons'] = True
     else:
         settings['no_buttons'] = False
-    settings['no_analytics'] = True
     if not 'columns_viewport' in settings:
         settings['columns_viewport'] = 9
         settings['columns_text'] = 3
