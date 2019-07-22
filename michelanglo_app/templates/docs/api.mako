@@ -114,10 +114,60 @@ for key in donor:
 </ul>
 <pre>${copy_btn('class_code')}<code id="class_code">import requests, json
 
-class MikeAPI:
+import requests, json
+from IPython.display import display, HTML
 
-    def __init__(self, username: str, password: str, session=None):
-        self.url = 'https://michelanglo.sgc.ox.ac.uk/'
+class MikeAPI:
+    """
+    A simple API interface for Py3.6+ for [https://michelanglo.sgc.ox.ac.uk](https://michelanglo.sgc.ox.ac.uk).
+
+        >>> mike = MikeAPI('username','password')
+        >>> page_data = mike.get_page('abcdedf-uuid-string-of-page')
+        >>> page_data['title'] = 'Hello World'
+        >>> mike.set_page('abcdedf-uuid-string-of-page',page_data)
+
+    New pages can be added using either a pdb code or a filename with additional arguments as used by prolinks,
+    but with underscores instead of spaces.
+        >>> new_page = mike.convert_pdb(code='1UBQ', data_focus='residue', data_selection='20:A')
+        >>> new_page = mike.convert_pdb(filename='/home/my_protein.pdb')
+
+    To display in a Jupyter notebook a link use `mike.page_link(uuid)`, however will not work in terminal I think.
+
+    Altering 'loadfun' (the JS) and 'pdb' is restricted to admin and approved users.
+
+    Note, changing the variable name in 'proteinJSON' for the PDB code requires it to be changed in 'pdb'.
+        >>> page_data['proteinJSON'][2]['value'] = 'altered_variable_name'
+        >>> page_data['pdb'][2][0] = 'altered_variable_name'
+
+    ### Instance attributes:
+    * `.url` is 'https://michelanglo.sgc.ox.ac.uk/' unless altered (_e.g._ local version of Michelanglo)
+    * `.username` is the username
+    * `.password` is the raw password
+    * `.visited_pages`, `.owned_pages` and `.public_pages` are lists filled by `.refresh_pages()`
+    * `.request` is a requests session object.
+
+    ### Instance methods:
+    * `.post(route, data=None, headers=None)` does the requests for other methods...
+    * `.post_json(route, data=None, headers=None)` as above but decodes the json reply...
+    * `.login()`. called automatically during initialisation.
+    * `.verify_user()`. check whether you are still logged in.
+    * `.refresh_pages()`. gets the lists `.visited_pages`, `.owned_pages` and `.public_pages` (and `.all` if admin)
+    * `.get_page(uuid)` returns the data (:dict) for a given page.
+    * `.set_page(uuid, data)` sets the data (:dict) for a given page
+    * `.delete_page(uuid)` delete
+    * `.rename_page(uuid, name)` rename (admin only!)
+
+    ### keys of page json
+    Some are obsolete.
+    'viewport', 'image', 'uniform_non_carbon', 'verbose', 'validation', 'stick_format', 'save', 'backgroundcolor',
+    'location_viewport', 'columns_viewport', 'columns_text', 'pdb', 'loadfun', 'proteinJSON', 'author', 'editors',
+    'description', 'title', 'visitors', 'authors', 'public', 'confidential', 'stick', 'data_other', 'date', 'page',
+    'key', 'encryption', 'freelyeditable', 'user', 'editable', 'no_user', 'no_buttons', 'no_analytics',
+    'current_page'
+    """
+
+    def __init__(self, username: str, password: str, session=None, url: str='https://michelanglo.sgc.ox.ac.uk/'):
+        self.url = url
         self.username = username
         self.password = password
         self.visited_pages = [] # filled by self.refresh_pages()
@@ -135,7 +185,8 @@ class MikeAPI:
         if reply.status_code == 200:
             return reply
         else:
-            raise Exception('The site {url} returned a status code {code}. Content: {con}'.format(url=self.url, code = r.status_code, con = r.content))
+            raise Exception('The site {url} returned a status code {code}. Content: {con}'\
+                            .format(url=self.url, code = reply.status_code, con = reply.content))
 
     def post_json(self,route, data=None, headers=None):
         reply = self.post(route, data, headers)
@@ -155,15 +206,40 @@ class MikeAPI:
         self.visited_pages = data['visited']
         self.owned_pages = data['owned']
         self.public_pages = data['public']
+        self.all_pages = data['all'] # admin only
         return self
 
     def get_page(self,uuid):
-        data = self.post_json('data/'+uuid, data={'mode':'json'})
-        if isinstance(data['proteinJSON'],str): #will be.
-            data['proteinJSON'] = json.loads(data['proteinJSON'])
-        if isinstance(data['pdb'],str): #will be.
-            data['pdb'] = json.loads(data['pdb'])
-        return data
+        try:
+            data = self.post_json('data/'+uuid, data={'mode':'json'})
+            if isinstance(data['proteinJSON'],str): #will be.
+                    data['proteinJSON'] = json.loads(data['proteinJSON'])
+            if isinstance(data['pdb'],str): #will be.
+                data['pdb'] = json.loads(data['pdb'])
+            return data
+        except:
+            return None
+
+    def convert_pdb(self, code=None, filename=None, **prolink_settings):
+        """
+        use underscores for the hyphens in the data attr!
+        >>> new_page = mike.convert_pdb(code='1UBQ', data_focus='residue', data_selection='20:A')
+        >>> new_page = mike.convert_pdb(filename='/home/my_protein.pdb')
+        >>> mike.page_link(new_page['page'])
+        """
+        data = {}
+        prolink_settings['role'] = 'NGL'
+        if code:
+            prolink_settings['data-load']=code
+            data['mode'] = 'code'
+            data['pdb'] = code
+        elif filename:
+            data['mode'] = 'file'
+            data['pdb'] = open(filename).read()
+        else:
+            raise ValueError('Specifiy at least a pdb `code` or a `file`')
+        data['viewcode'] = ' '.join(['{a}="{p}"'.format(p=prolink_settings[s], a=s.replace('_','-')) for s in prolink_settings])
+        return self.post_json('convert_pdb', data)
 
 
     def set_page(self,uuid,data):
@@ -172,16 +248,19 @@ class MikeAPI:
             data['proteinJSON'] = json.dumps(data['proteinJSON'])
         if not isinstance(data['pdb'],str):
             data['pdb'] = json.dumps(data['pdb'])
-        self.post('edit_user-page', data=data)
+        return self.post_json('edit_user-page', data=data)
 
     def del_page(self,uuid):
-        self.post('delete_user-page', data={'page': uuid})
+        return self.post_json('delete_user-page', data={'page': uuid})
 
     def rename_page(self,uuid, new_name): ##admin only
-        self.post('rename_user-page', data={'old_page': uuid, 'new_page': new_name})
+        return self.post_json('rename_user-page', data={'old_page': uuid, 'new_page': new_name})
 
     @staticmethod
     def print_reply(reply):
         print(f'Status code: {reply.status_code}; Headers: {reply.headers}; Content: {reply.content}')
+
+    def page_link(self, uuid):
+        display(HTML(f'<a href="{self.url}data/{uuid}" target="_blank">{uuid}</a>'))
 </code></pre>
 </%block>
