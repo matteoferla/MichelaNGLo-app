@@ -122,7 +122,7 @@
         window.descriptions = [
         {
             title_left: '<i class="far fa-rocket"></i> Quick and easy',
-            text_left: 'Create interactive protein views from <a href="/pymol">a PyMOL PSE file</a> or <a href="/pymol">a PDB code/file</a>',
+            text_left: 'Create interactive protein views starting from<ul class="text-left"><li><a href="/pymol">a PyMOL PSE file</a> or</li><li> <a href="/pymol">a PDB code/file</a></li></ul><span style="font-size: small;">(Do not have a structure? see <a href="/docs/gene">this note</a>)</span>',
             title_right: '<i class="far fa-map-marked-alt"></i> Control',
             text_right: 'Create <span class="prolink" data-toggle="protein" data-focus="residue" data-selection="210:A" data-hetero=true>links</span> to control the protein views',
             id: '#frame0 i',
@@ -138,17 +138,17 @@
         },
         {
             title_left: '<i class="far fa-bolt"></i> NGL powered',
-            text_left: 'NGL (<a href="http://nglviewer.org/ngl/api/" target="_blank">nglviewer.org <i class="far fa-external-link"></i></a>) is a powerful javascript library that allows the visualisation of protein on websites that was developed by Alex Rose at the PDB. With the tools presented here, it becomes even easier to create great protein represetations on the web.',
+            text_left: 'NGL (<a href="http://nglviewer.org/ngl/api/" target="_blank">nglviewer.org <i class="far fa-external-link"></i></a>) is a JavaScript library that allows the visualisation of protein on the web.',
             title_right: '<i class="fab fa-github"></i> Open source',
-            text_right: 'The source code for this server is available at <a href="https://github.com/matteoferla/MichelaNGLo" target="_blank">github.com/matteoferla/MichelaNGLo <i class="far fa-external-link"></i></a>. The JS file to extend NGL (<a href="https://raw.githubusercontent.com/matteoferla/MichelaNGLo/master/michelanglo_app/static/michelanglo.js" target="_blank">michelanglo.js</a>) can be WHAT.</a>.',
+            text_right: 'The source code for this server is available at <a href="https://github.com/matteoferla/MichelaNGLo" target="_blank">github.com/matteoferla/MichelaNGLo <i class="far fa-external-link"></i></a>.',
             id: '#frame2 i',
             view: ()=>NGL.specialOps.showDomain('viewport','*','lightcoral', [-18.368176150507537, 74.81398271773811, 53.85689065075363, 0, 2.24223533030926, 55.26199556901072, -76.00112369042608, 0, -92.15567840009014, -13.567107701862422, -12.583763466412949, 0, -12.895500659942627, -26.876500129699707, -2.82450008392334, 1])
         },
         {
             title_left: '<i class="far fa-quote-left"></i> Citations',
-            text_left: '<span class="text-danger">Unpublished.</span><br/><a href="https://dx.doi.org/10.1093/bioinformatics/bty419" target="_blank">AS Rose, AR Bradley, Y Valasatava, JM Duarte, A Prlić and PW Rose. NGL viewer: web-based molecular graphics for large complexes. Bioinformatics: bty419, 2018. <i class="far fa-external-link"></i></a>',
+            text_left: 'See <a href="docs/cite">citation</a>',
             title_right: '<i class="far fa-books"></i> More',
-            text_right: 'See <a href="/docs">Documentation</a>',
+            text_right: 'See <a href="/docs">documentation</a>',
             id: '#frame3 i',
             view: ()=>NGL.specialOps.showSurface('viewport')
         }
@@ -174,7 +174,7 @@
             // start
             $('.flip-card-back').hide();
 
-
+            window.frequency = 8000;
             window.tick = true; //front or back?
             window.tock = 1; //description. the first tock was onLoad.
             window.time_fn = () => {
@@ -183,7 +183,7 @@
                 tock = (tock + 1) % descriptions.length;
             };
 
-            window.timer = setInterval(time_fn,5000);
+            window.timer = setInterval(time_fn,window.frequency);
             //buttons
             (new Array(descriptions.length)).fill(0).forEach((v,i)=> $('#frame'+i).click((e) => {
                 $('#pause').trigger('click');
@@ -206,7 +206,7 @@
 
 
     $('#pause').click((e) => {clearInterval(window.timer); $('#resume').show(); $('#pause').hide();});
-    $('#resume').click((e) => {window.timer = setInterval(time_fn,5000); $('#resume').hide(); $('#pause').show();});
+    $('#resume').click((e) => {window.timer = setInterval(time_fn,window.frequency); $('#resume').hide(); $('#pause').show();});
 
 
 

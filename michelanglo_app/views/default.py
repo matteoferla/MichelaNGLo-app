@@ -72,6 +72,8 @@ def my_view(request):
             return render_to_response("../templates/docs/api.mako", reply, request)
         elif request.matchdict['id'] == 'gene':
             return render_to_response("../templates/docs/gene.mako", reply, request)
+        elif request.matchdict['id'] == 'cite':
+            return render_to_response("../templates/docs/cite.mako", reply, request)
         elif request.matchdict['id'] == 'users' or request.matchdict['id'] == 'pages':
             return render_to_response("../templates/docs/users_n_pages.mako", reply, request)
         else:
