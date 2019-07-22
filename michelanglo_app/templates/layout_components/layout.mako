@@ -12,7 +12,7 @@
     <meta property="og:description" content="${meta_description}">
     <meta property="og:image" content="${meta_image}">
     <meta property="og:url" content="${meta_url}">
-    <link rel="icon" href="/static/NGL.png">
+    <link rel="icon" href="/flavicon.ico">
     %if not public:
         <meta name="robots" content="none">
     %endif
