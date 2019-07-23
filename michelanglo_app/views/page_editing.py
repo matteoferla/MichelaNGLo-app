@@ -107,7 +107,10 @@ def edit(request):
         if 'proteinJSON' in request.params:
             settings['proteinJSON'] = request.params['proteinJSON']
         if 'image' in request.params:
-            settings['image'] = is_js_true(request.params['image'])
+            if is_js_true(request.params['image']):
+                settings['image'] = request.params['image']
+            else:
+                settings['image'] = False
         #save
         page.save(settings)
         return {'success': 1}
