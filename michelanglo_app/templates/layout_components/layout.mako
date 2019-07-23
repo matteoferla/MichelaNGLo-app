@@ -144,8 +144,18 @@ pre {
 </main>
 
 <footer class="footer">
-      <div class="container">
-          <span class="text-muted"><small><a href="https://www.schrodinger.com/" target="_blank">PyMOL <i class="far fa-external-link-square"></i></a> is a trademark of <a href="https://pymol.org/2/" target="_blank">Schr&ouml;dinger , LLC <i class="far fa-external-link-square"></i></a>. The authors are not affiliated or involved with PyMOL or Schr&ouml;dinger. Data is not kept for commercial or analytic purposes.</small></span>
+      <div class="container-fluid">
+          <div class="row" style="line-height: 1rem;">
+              <div class="col-5 offset-lg-1 text-muted p-3">
+                  <small><a href="https://www.schrodinger.com/" target="_blank">PyMOL <i class="far fa-external-link-square"></i></a> is a trademark of <a href="https://pymol.org/2/" target="_blank">Schr&ouml;dinger , LLC <i class="far fa-external-link-square"></i></a>. The authors are not affiliated or involved with PyMOL or Schr&ouml;dinger.
+                      <br/>Data is not kept for commercial, see data <a href="docs/users">policy documentation</a>.</small></div>
+              <div class="col-5 offset-lg-1 p-2">
+                  <img src="/static/ox_full.svg" alt="University of Oxford" class="footer-logo">&nbsp;&nbsp;&nbsp;
+                  <img src="/static/OxfordBRC-logo-2019.png" alt="BRC"   class="footer-logo">&nbsp;&nbsp;&nbsp;
+                  <img src="/static/SGC_reverse_trans.png" alt="SGC"   class="footer-logo">
+              </div>
+          </div>
+
       </div>
     </footer>
 

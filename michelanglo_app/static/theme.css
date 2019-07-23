@@ -1,3 +1,17 @@
+.footer-logo {
+    height: 3em;
+    display: inline-block;
+}
+
+.footer-logo:hover {
+    height: 4em;
+    display: inline-block;
+    cursor: pointer;
+  -ms-transform: translate(0px,-1em); /* IE 9 */
+  -webkit-transform: translate(0px,-1em); /* Safari prior 9.0 */
+  transform: translate(0px,-1em); /* Standard syntax */
+}
+
 .prolink-icon {
     position: relative;
 	padding-left: 1.2em;
