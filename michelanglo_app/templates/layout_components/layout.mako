@@ -43,6 +43,123 @@
     background-color: #f5f5f5;
 }
 
+.footer-logo {
+    height: 3em;
+    display: inline-block;
+}
+
+.footer-logo:hover {
+    height: 4em;
+    display: inline-block;
+    cursor: pointer;
+  -ms-transform: translate(0px,-1em); /* IE 9 */
+  -webkit-transform: translate(0px,-1em); /* Safari prior 9.0 */
+  transform: translate(0px,-1em); /* Standard syntax */
+}
+
+.prolink-icon {
+    position: relative;
+	padding-left: 1.2em;
+}
+
+.prolink-icon::after{
+    content: '';
+    background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz48c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IiB2aWV3Qm94PSIwIDAgMTc0IDEzMCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgMTc0IDEzMDsiIHhtbDpzcGFjZT0icHJlc2VydmUiPjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+LnN0MHtmaWxsOm5vbmU7c3Ryb2tlOiMwMTAxMDE7c3Ryb2tlLXdpZHRoOjIwO3N0cm9rZS1saW5lY2FwOnJvdW5kO3N0cm9rZS1taXRlcmxpbWl0OjEwO30uc3Qxe2ZpbGw6IzAxMDEwMTt9LnN0MntmaWxsOm5vbmU7c3Ryb2tlOiMwMTAxMDE7c3Ryb2tlLXdpZHRoOjQ7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLW1pdGVybGltaXQ6MTA7fTwvc3R5bGU+PGc+PGc+PGxpbmUgY2xhc3M9InN0MCIgeDE9IjMyLjUiIHkxPSIzMi45IiB4Mj0iMTA1LjIiIHkyPSIzMi45Ii8+PGc+PHBvbHlnb24gY2xhc3M9InN0MSIgcG9pbnRzPSI5OS4zLDUyLjggMTMzLjksMzIuOSA5OS4zLDEyLjkgIi8+PC9nPjwvZz48Zz48bGluZSBjbGFzcz0ic3QwIiB4MT0iMTMzLjkiIHkxPSI3MCIgeDI9IjYxLjIiIHkyPSI3MCIvPjxnPjxwb2x5Z29uIGNsYXNzPSJzdDEiIHBvaW50cz0iNjcuMSw1MC4xIDMyLjUsNzAgNjcuMSw4OS45ICIvPjwvZz48L2c+PGc+PGxpbmUgY2xhc3M9InN0MCIgeDE9IjMyLjUiIHkxPSIxMDUuMSIgeDI9IjEwNS4yIiB5Mj0iMTA1LjEiLz48Zz48cG9seWdvbiBjbGFzcz0ic3QxIiBwb2ludHM9Ijk5LjMsMTI1LjEgMTMzLjksMTA1LjEgOTkuMyw4NS4yICIvPjwvZz48L2c+PHBhdGggY2xhc3M9InN0MiIgZD0iTTQyLjYsMjkuOWMwLDAtMzEsMC4xLTMxLDIwLjFjMCwyMC44LDMxLDIwLjEsMzEsMjAuMSIvPjxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0xMjkuMywxMDYuM2MwLDAsMjguNy0wLjEsMjguNy0xOC42YzAtMTkuMi0yOC43LTE4LjYtMjguNy0xOC42Ii8+PC9nPjwvc3ZnPg==);
+	fill: currentColor;
+    background-size:1em;
+    position: absolute;
+	padding-left: 1.2em;
+    left: 0;
+    top: 0;
+    height: 100%;
+}
+
+.arrow-left {
+    left:-30px; top: 80px; position: absolute; width: 0; z-index:1000;
+    height: 0;
+    border-style: solid;
+    border-width: 30px 30px 30px 0;
+    border-color: transparent rgba(0, 0, 0, 0.125) transparent transparent;
+
+}
+
+.arrow-left:after {
+    display: block;
+    content: "";
+    position: absolute;
+    left: 1px; top: -30px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 30px 30px 30px 0;
+    z-index:1000;
+    border-color: transparent white transparent transparent;
+}
+
+.arrow-right {
+    right:-30px; top: 80px; position: absolute; width: 0; z-index:1000;
+    height: 0;
+    border-style: solid;
+    border-width: 30px 0px 30px 30px;
+    border-color: transparent transparent transparent rgba(0, 0, 0, 0.125);
+
+}
+
+.arrow-right:after {
+    display: block;
+    content: "";
+    position: absolute;
+    right: 1px; top: -30px;
+    width: 0;
+    z-index:1000;
+    height: 0;
+    border-style: solid;
+    border-width: 30px 0px 30px 30px;
+    border-color: transparent transparent transparent white;
+}
+
+
+ /* The flip card container - set the width and height to whatever you want. We have added the border property to demonstrate that the flip itself goes out of the box on hover (remove perspective if you don't want the 3D effect */
+.flip-card {
+  background-color: transparent;
+  padding-top: 10%;
+  height: 300px;
+  /*perspective: 200px; /* Remove this if you don't want the 3D effect */
+}
+
+/* This container is needed to position the front and back side */
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 2s;
+  transform-style: preserve-3d;
+}
+
+/* Position the front and back side */
+.flip-card-front, .flip-card-back {
+  position: absolute;
+  padding-top: 10%;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+}
+
+.flip-card-inner > * {backface-visibility: hidden;}
+
+/* Style the front side (fallback if image is missing) */
+.flip-card-front {
+}
+
+/* Style the back side */
+.flip-card-back {
+  transform: rotateX(180deg);
+}
+
+
+
+
 html {
     position: relative;
     min-height: 100%;
@@ -150,9 +267,9 @@ pre {
                   <small><a href="https://www.schrodinger.com/" target="_blank">PyMOL <i class="far fa-external-link-square"></i></a> is a trademark of <a href="https://pymol.org/2/" target="_blank">Schr&ouml;dinger , LLC <i class="far fa-external-link-square"></i></a>. The authors are not affiliated or involved with PyMOL or Schr&ouml;dinger.
                       <br/>Data is not kept for commercial, see data <a href="docs/users">policy documentation</a>.</small></div>
               <div class="col-5 offset-lg-1 p-2">
-                  <img src="/static/ox_full.svg" alt="University of Oxford" class="footer-logo">&nbsp;&nbsp;&nbsp;
-                  <img src="/static/OxfordBRC-logo-2019.png" alt="BRC"   class="footer-logo">&nbsp;&nbsp;&nbsp;
-                  <img src="/static/SGC_reverse_trans.png" alt="SGC"   class="footer-logo">
+                  <img src="/static/ox_full.svg" alt="University of Oxford" class="footer-logo" onclick="window.location.href = 'http://www.ox.ac.uk/';">&nbsp;&nbsp;&nbsp;
+                  <img src="/static/OxfordBRC-logo-2019.png" alt="BRC"   class="footer-logo" onclick="window.location.href = 'https://oxfordbrc.nihr.ac.uk/';">&nbsp;&nbsp;&nbsp;
+                  <img src="/static/SGC_reverse_trans.png" alt="SGC"   class="footer-logo" onclick="window.location.href = 'https://www.sgc.ox.ac.uk/';">
               </div>
           </div>
 
