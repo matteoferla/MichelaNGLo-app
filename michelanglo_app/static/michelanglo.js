@@ -380,7 +380,10 @@ NGL.specialOps.multiLoader = function (id, proteins, backgroundColor, startIndex
     else {window.myData={currentIndex: -1, proteins: proteins, id: id, backgroundColor: backgroundColor || 'white'};}
     var img = $('#'+id+' img');
     if (img.length) {
-        img.click(function () {NGL.specialOps.load(startIndex);});
+        img.css('cursor','pointer');
+        NGL.specialOps.showTitle(id, 'Click to interact with the protein structure.');
+        $('#viewport_menu_popover').click(() => NGL.specialOps.load(startIndex));
+        img.click(() => NGL.specialOps.load(startIndex));
     }
     else {return NGL.specialOps.load(startIndex);}
 };

@@ -4,7 +4,7 @@
 * On the home page, some of the text hangs out of the boxes **RES** &mdash;this is a bug... boxes have a fixed height that is independent of vw or em.
 **MPF**
 * Download a totally offline version of page **BDM**
-
+* Messages of progress are crap. The problem is that the log is committed (stringified actually) when the respose is give. Switching to a unique log is a better option. **MPF**
 * Mobile **MPF**
 
 ## Fixed
