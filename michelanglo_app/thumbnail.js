@@ -23,7 +23,7 @@ process.on('UnhandledPromiseRejectionWarning', err => process.exit(1) ); //this 
 				(uuid) => NGL.getStage()
 					     .makeImage( {trim: true, antialias: true, transparent: false})
 					     .then((blob) => NGL.download(blob, `${uuid}.png`))
-				, uuid)
+				, uuid);
   await timeout(2000);
   await browser.close();
 })();
