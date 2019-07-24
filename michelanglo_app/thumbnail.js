@@ -10,7 +10,8 @@ const timeout = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 process.on('UnhandledPromiseRejectionWarning', err => process.exit(1) ); //this does nothing.
 
 (async () => {
-  const browser = await puppeteer.launch(); //{headless: false}
+  //for some reason I cannot get npm to install chromium on centos.
+  const browser = await puppeteer.launch({executablePath: '/usr/lib64/chromium-browser/chromium-browser'}); //{headless: false} {executablePath: '/usr/lib64/chromium-browser/chromium-browser'}
   const page = await browser.newPage();
   await page.goto(`http://localhost:8088/data/${uuid}?columns_viewport=12`);
   //const errorLogger = (err) =>  console.log("Internal error: " + err.toString());
