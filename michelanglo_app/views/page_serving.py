@@ -122,9 +122,14 @@ def userdata_view(request):
         settings['no_buttons'] = True
     else:
         settings['no_buttons'] = False
-    if not 'columns_viewport' in settings:
+    if 'columns_viewport' in request.params:
+        settings['columns_viewport'] = int(request.params['columns_viewport'])
+        settings['columns_text'] = 12 - settings['columns_viewport']
+    elif not 'columns_viewport' in settings:
         settings['columns_viewport'] = 9
         settings['columns_text'] = 3
+    else:
+        pass #use the default settings within the page.
     if not 'location_viewport' in settings:
         settings['location_viewport'] = 'left'
     settings['current_page'] = 'NOT A MENU OPTION....'
@@ -148,13 +153,20 @@ def thumbnail(request):
     pagename = request.matchdict['id']
     page = Page(pagename)
     if os.path.exists(page.thumb):
-        reponse = FileResponse(page.thumb)
-    else: #if not page.exists(True):
-        reponse = FileResponse(os.path.join('michelanglo_app', 'static','tim_barrel.png'))
-    reponse.headers.update({
+        response = FileResponse(page.thumb)
+    elif not page.exists(True):
+        # shouldn't this be a 404?
+        response = FileResponse(os.path.join('michelanglo_app', 'static','tim_barrel.png'))
+    else: # first time round!
+        if not os.system(f'node michelanglo_app/thumbnail.js {pagename}'):
+            response = FileResponse(page.thumb)
+        else:
+            log.error(f'Thumbnail generation failed for {pagename}')
+            response = FileResponse(os.path.join('michelanglo_app', 'static', 'tim_barrel.png'))
+    response.headers.update({
         'Access-Control-Allow-Origin': '*',
     })
-    return reponse
+    return response
 
 @view_config(route_name='save_pdb', renderer='string')
 def save_pdb(request):
