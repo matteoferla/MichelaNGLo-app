@@ -14,6 +14,11 @@ process.on('UnhandledPromiseRejectionWarning', err => process.exit(1) ); //this 
   const browser = process.env.PUPPETEER_CHROME ? await puppeteer.launch({executablePath: process.env.PUPPETEER_CHROME}) : await puppeteer.launch();
    //{headless: false} if dev.
   const page = await browser.newPage();
+  await page.setViewport({
+                          width: 1000,
+                          height: 700,
+                          deviceScaleFactor: 1,
+                        });
   await page.goto(`http://localhost:8088/data/${uuid}?columns_viewport=12`);
   //const errorLogger = (err) =>  console.log("Internal error: " + err.toString());
   //page.on("pageerror", errorLogger);
