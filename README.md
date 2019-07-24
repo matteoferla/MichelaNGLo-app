@@ -224,6 +224,14 @@ In windows the excecutables will have `.exe` suffixes and are in `Scripts` folde
 Afterwhich, change the secret in `production.ini` and run the script and made a user called `admin`.
 The users `trashcan` gets generated automatically when a guest makes a view and is blacklisted along with `guest` and `Anonymous`.
 
+# nodejs
+
+In order to get thumbnails of the protein, for Twitter or Facebook, nodejs with puppeteer is required.
+
+    sudo apt install nodejs
+    sudo apt install npm
+    npm i puppeteer
+
 ## Licence
 * [PyMOL](https://github.com/schrodinger/pymol-open-source/blob/master/LICENSE) is a trademark of Schrodinger, LLC, and can be used freely.
 * NGL uses an MIT licence.
