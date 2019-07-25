@@ -52,7 +52,7 @@ def anonymous_submission(request, settings, pagename):
     
 def user_submission(request, settings, pagename):
     user = request.user
-    user.onwed.add(pagename)
+    user.owned.add(pagename)
     settings["authors"] = [user.name]
     request.dbsession.add(user)
     settings['editors'] = [user.name]
@@ -68,7 +68,7 @@ def commit_submission(request, settings, pagename):
 
 def get_uuid(request):
     identifier = str(uuid.uuid4())
-    if identifier in [p.identifier for p in request.query(Page)]:
+    if identifier in [p.identifier for p in request.dbsession.query(Page)]:
         log.error('UUID collision!!!')
         return get_uuid(request) #one in a ten-quintillion!
     return identifier

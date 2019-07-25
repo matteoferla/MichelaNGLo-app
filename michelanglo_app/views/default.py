@@ -2,6 +2,7 @@ from pyramid.view import view_config, notfound_view_config
 from pyramid.renderers import render_to_response
 import os, json
 from ..models import User
+from . import custom_messages
 
 import logging
 log = logging.getLogger(__name__)

@@ -11,7 +11,7 @@ from .pages import Page
 
 class Pagegroup:
     ### see User
-    pages = property(lambda self: getattr(self.user, self.groupname),
+    pages = property(lambda self: getattr(self.user, self.groupname) if getattr(self.user, self.groupname) is not None else '',
                      lambda self, value: setattr(self.user, self.groupname, value))
 
     def __init__(self, user, group):

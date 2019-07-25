@@ -163,11 +163,10 @@ def user_view(request):
 
 
 def permission(request, page, mode='edit', key_label='encryption_key'):
-
     user = request.user
     if not page:
         request.response.status = 404
-        log.warn(f'{User.get_username(request)} requested a missing page {page.identifier}')
+        log.warn(f'{User.get_username(request)} requested a missing page {page}')
         return {'status': 'page not found'}
     elif not page.exists:
         request.response.status = 410

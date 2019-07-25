@@ -22,7 +22,7 @@ def edit(request):
         return {'status': malformed}
     # get ready
     page = Page.select(request, request.params['page'])
-    verdict = permission(request, 'edit', key_label='encryption_key')
+    verdict = permission(request, page, 'edit', key_label='encryption_key')
     if verdict['status'] != 'OK':
         return verdict
     else:
@@ -123,10 +123,10 @@ def combined(request):
     task = Page(request.params['task'])
     name = request.params['name']
     user = request.user
-    target_verdict = permission(request, 'edit', key_label='target_encryption_key')
+    target_verdict = permission(request, target_page, 'edit', key_label='target_encryption_key')
     if target_verdict['status'] != 'OK':
         return target_verdict
-    donor_verdict = permission(request, 'view', key_label='donor_encryption_key')
+    donor_verdict = permission(request, donor_page, 'view', key_label='donor_encryption_key')
     if target_verdict['status'] != 'OK':
         return donor_verdict
     ### user is legal!

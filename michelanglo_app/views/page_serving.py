@@ -16,13 +16,13 @@ def userdata_view(request):
     pagename = request.matchdict['id']
     log.info(f'{User.get_username(request)} is looking at a page {pagename}')
     page = Page.select(request, pagename)
-    verdict = permission(request, 'view', key_label='key')
+    verdict = permission(request, page, 'view', key_label='key')
     if 'mode' in request.params and request.params['mode'] == 'json':
         json_mode = True
     else:
         json_mode = False
     if verdict['status'] != 'OK' and json_mode:
-        return verdict
+        return render_to_response("json", verdict, request)
     elif verdict['status'] != 'OK' and not json_mode:
         if request.response.status == 410:
             response_settings = {'project': 'Michelanglo', 'user': request.user,
@@ -36,7 +36,7 @@ def userdata_view(request):
                                  }
             return render_to_response("../templates/410.mako", response_settings, request)
         if request.response.status in (401, 403): #unknown or forbidden
-            response_settings = {'project': 'Michelanglo', 'user': request.user, 'tries': request.session['tries'],
+            response_settings = {'project': 'Michelanglo', 'user': request.user,
                                  'page': pagename,
                                  'meta_title': 'Michelaɴɢʟo: sculpting protein views on webpages without coding.',
                                  'meta_description': 'Convert PyMOL files, upload PDB files or submit PDB codes and ' + \
@@ -122,7 +122,7 @@ def userdata_view(request):
 @view_config(route_name='userthumb')
 def thumbnail(request):
     pagename = request.matchdict['id']
-    page = Page.select(pagename)
+    page = Page.select(request, pagename)
     verdict = permission(request, page, 'view', key_label='key')
     if verdict['status'] != 'OK':
         request.response.status = 200 # we would block facebook and twitter otherwise...
