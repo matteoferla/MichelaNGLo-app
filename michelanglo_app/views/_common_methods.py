@@ -2,24 +2,14 @@ import os, requests, logging, re, unicodedata
 log = logging.getLogger(__name__)
 
 ## convert booleans and settings
-def is_js_true(value):  # booleans get converted into strings in json.
+def is_js_true(value):
+    """
+    booleans get converted into strings in json. This fixes that.
+    """
     if not value or value in ('false', 'False', False, 'No','no', 'F','null', 'off'):
         return False
     else:
         return True
-
-def get_username(request):
-    """
-    Returns the useraname or the IP address...
-    :param request:
-    :return:
-    """
-    if request.user:
-        return f'{request.user.name} ({request.user.role})'
-    else:
-        return '/'.join([request.environ[x] for x in ("REMOTE_ADDR",
-                                                      "HTTP_X_FORWARDED_FOR",
-                                                      "HTTP_CLIENT_IP") if x in request.environ])
 
 def notify_admin(msg):
     """
@@ -41,10 +31,16 @@ def notify_admin(msg):
 
 
 def is_malformed(request, *args):
+    """
+    Verify that the request.params is valid. returns None if it is valid. Else returns why.
+    :param request:
+    :param args:
+    :return:
+    """
     missing = [k for k in args if k not in request.params]
     if missing:
         request.response.status = 422
-        log.warn(f'{get_username(request)} malformed request due to missing {missing}')
+        log.warn(f'{User.get_username(request)} malformed request due to missing {missing}')
         return f'Missing field ({missing})'
     else:
         return None

@@ -13,7 +13,7 @@ The modal that controls it is `login/user_modal.mako`. However the content is co
 """
 from pyramid.view import view_config
 from ._common_methods import notify_admin
-from ..models import User
+from ..models import User, Page
 
 import logging
 log = logging.getLogger(__name__)
@@ -137,7 +137,7 @@ def user_view(request):
             return {'status': 'wrong password'}
     elif action == 'reset':
         if requestor and requestor.role == 'admin': ##only admins can set password this way.
-            target=request.dbsession.query(User).filter_by(name=username).one()
+            target = request.dbsession.query(User).filter_by(name=username).one()
             target.set_password('password')
             request.dbsession.add(target)
             return {'status': 'reset'}
@@ -160,3 +160,41 @@ def user_view(request):
     else:
         request.response.status = 405
         return {'status': 'unknown request'}
+
+
+def permission(request, page, mode='edit', key_label='encryption_key'):
+
+    user = request.user
+    if not page:
+        request.response.status = 404
+        log.warn(f'{User.get_username(request)} requested a missing page {page.identifier}')
+        return {'status': 'page not found'}
+    elif not page.exists:
+        request.response.status = 410
+        log.warn(f'{User.get_username(request)} requested a deleted page')
+        return {'status': 'page no longer existent'}
+    elif page.encrypted and key_label in request.params:
+        request.response.status = 403
+        log.warn(f'{User.get_username(request)} requested an encrypted page {page.identifier} without key')
+        return {'status': 'page requires key'}
+    elif page.encrypted and key_label in request.params:
+        page.key = request.params[key_label].encode('uft-8')
+    else:
+        try:
+            page.load()
+        except ValueError:
+            request.response.status = 403
+            log.warn(f'{User.get_username(request)} requested an encrypted page {page.identifier} without wrong key')
+            return {'status': 'page requires correct key'}
+        if mode != 'view' and not user:
+            request.response.status = 401
+            log.warn(f'{User.get_username(request)} not authorised to {mode} page {page.identifier}')
+            return {'status': f'not authorised to {mode} page without at least logging in'}
+        elif mode != 'view' and not (page.identifier in user.owned_pages or
+                                      user.role == 'admin' or page.settings['freelyeditable']):
+            ## only owners and admins can edit freely.
+            request.response.status = 403
+            log.warn(f'{User.get_username(request)} not authorised to {mode} page {page.identifier}')
+            return {'status': f'not authorised to {mode} page'}
+        else:
+            return {'status': 'OK'}

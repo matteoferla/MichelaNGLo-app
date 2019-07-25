@@ -9,9 +9,44 @@ from sqlalchemy import (
 from .meta import Base
 from .pages import Page
 
+class Pagegroup:
+    ### see User
+    pages = property(lambda self: getattr(self.user, self.groupname),
+                     lambda self, value: setattr(self.user, self.groupname, value))
+
+    def __init__(self, user, group):
+        self.user = user
+        self.group = group
+        self.groupname = group+'_pages'
+
+    def remove(self, pagename):
+        self.pages = self.pages.replace(pagename,'')
+
+    def add(self, pagename):
+        self.pages += ' ' + pagename
+
+    def set(self, pagenames):
+        self.pages = ' '.join(pagenames)
+
+    def get(self):
+        if self.group == 'visited':
+            return list(set(self.user.visited_pages.split()) - set(self.user.owned_pages.split()))
+        else:
+            return self.pages.split()
+
+    def select(self, request):
+        pagenames = self.get()
+        pages = Page.select_list(request, pagenames)
+        self.set(pages)
+        return pages
+
 
 class User(Base):
-    """ The SQLAlchemy declarative model class for a User object. """
+    """ The SQLAlchemy declarative model class for a User object.
+    Contains `visited_pages` and `owned_pages` DB entries and the `.visited` and `.owned` attributes,
+    which have the methods .get() .set(pagenames) .delete(pagename) .add(pagename), which work on pagenames/uuids
+    while the method .select(request) is the same as get but interacts with the DB Page table...
+    """
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     name = Column(Text, nullable=False, unique=True)
@@ -20,6 +55,19 @@ class User(Base):
     owned_pages = Column(Text)  #space separated list as text as array is not valid
     visited_pages = Column(Text)
     password_hash = Column(Text)
+    _visited = None
+    _owned = None
+    @property
+    def visited(self):
+        if not self._visited:
+            self._visited = Pagegroup(self, 'visited')
+        return self._visited
+
+    @property
+    def owned(self):
+        if not self._owned:
+            self._owned = Pagegroup(self, 'owned')
+        return self._owned
 
     def set_password(self, pw):
         pwhash = bcrypt.hashpw(pw.encode('utf8'), bcrypt.gensalt())
@@ -32,58 +80,16 @@ class User(Base):
             return bcrypt.checkpw(pw.encode('utf8'), expected_hash)
         return False
 
-    def _add_page(self, pagename, group='visited_pages'):
-        pages = self._get_pages(group)
-        pages.append(pagename)
-        setattr(self,group, ' '.join(pages))
-        return self
-
-    def add_visited_page(self,pagename):
-        self._add_page(pagename, 'visited_pages')
-        return self
-
-    def add_owned_page(self,pagename):
-        self._add_page(pagename, 'owned_pages')
-        return self
-
-    def get_owned_pages(self):
-        return self._get_pages('owned_pages')
-
-    def get_visited_pages(self):
-        return list(set(self._get_pages('visited_pages')) - set(self.get_owned_pages()))
-
-    def _get_pages(self, group='visited_pages'):
-        # for p in [Page(pagename) for pagename in user.owned_pages.split()] if p.exists()
-        if getattr(self, group):
-            return self._filter_pages(getattr(self, group).split())
+    @staticmethod
+    def get_username(request):
+        """
+        Returns the useraname or the IP address...
+        :param request:
+        :return:
+        """
+        if request.user:
+            return f'{request.user.name} ({request.user.role})'
         else:
-            return []
-
-    def _filter_pages(self, pages):
-        raw = [Page(pagename) for pagename in pages]
-        return [page.identifier for page in raw if page.exists(try_both=True)]
-
-    ############### these methods return not list of string but list of Page instatnces.
-    def _get_loaded_pages(self, group='visited_pages'):
-        pagelist = []
-        if group == 'visited_pages':
-            fun = self.get_visited_pages
-        else:
-            fun = self.get_owned_pages
-        for pagename in fun():
-            page = Page(pagename)
-            if page.is_password_protected():
-                page.settings = {'title': '***********', 'description': 'This page is encrypted.'}
-            else:
-                page.load()
-            pagelist.append(page)
-        return pagelist
-
-    def get_visited_loaded_pages(self):
-        return self._get_loaded_pages(group='visited_pages')
-
-    def get_owned_loaded_pages(self):
-        return self._get_loaded_pages(group='owned_pages')
-
-    def remove_visited_page(self, page):
-        self.visited_pages = self.visited_pages.replace(page,'')
+            return '/'.join([request.environ[x] for x in ("REMOTE_ADDR",
+                                                          "HTTP_X_FORWARDED_FOR",
+                                                          "HTTP_CLIENT_IP") if x in request.environ])

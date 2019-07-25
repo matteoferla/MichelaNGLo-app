@@ -7,8 +7,8 @@
         %endif
 
         <%
-            owned = user.get_owned_loaded_pages()
-            visited = user.get_visited_loaded_pages()
+            owned = user.owned.select(request)
+            visited = user.visited.select(request)
         %>
 
         ################# owned
@@ -16,9 +16,9 @@
             <h6>Edited pages</h6>
             %if len(owned) < 20:
                 <ul class="list-group">
-                %for page in owned:
+                %for page in owned: ##these are Page instances.
                     <li class="list-group-item" data-page="${page.identifier}">
-                        <a href="/data/${page.identifier}">${page.settings['title']}</a>
+                        <a href="/data/${page.identifier}">${page.title}</a>
                         <button class="btn btn-danger btn-sm float-right py-0" onclick="deletePage('${page.identifier}')"><i class="far fa-trash-alt"></i></button>
                     </li>
                 %endfor
@@ -30,7 +30,7 @@
                             <ul  class="list-group">
                             %for page in owned:
                                 <li class="list-group-item" data-page="${page.identifier}">
-                                    <a href="/data/${page.identifier}">${page.settings['title']}</a>
+                                    <a href="/data/${page.identifier}">${page.title}</a>
                                     <button class="btn btn-danger btn-sm float-right py-0" onclick="deletePage('${page.identifier}')"><i class="far fa-trash-alt"></i></button>
                                 </li>
                             %endfor
@@ -48,12 +48,11 @@
             <ul class="list-group">
                 %for page in visited:
                     <li class="list-group-item" data-page="${page.identifier}">
-                        <a href="/data/${page.identifier}">${page.settings['title']}</a>
+                        <a href="/data/${page.identifier}">${page.title}</a>
                     </li>
                 %endfor
             </ul>
         %endif
         ######end of visited
-
     %endif
 </div>

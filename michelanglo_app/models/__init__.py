@@ -1,10 +1,12 @@
 from sqlalchemy import engine_from_config
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker #, scoped_session
 from sqlalchemy.orm import configure_mappers
+#from zope.sqlalchemy import ZopeTransactionExtension
 import zope.sqlalchemy
 
 # import or define all models here to ensure they are attached to the
 # Base.metadata prior to any initialization routines
+from .pages import Page  # flake8: noqa
 from .user import User  # flake8: noqa
 
 # run configure_mappers after defining all of the models to ensure
@@ -20,6 +22,7 @@ def get_session_factory(engine):
     factory = sessionmaker()
     factory.configure(bind=engine)
     return factory
+
 
 
 def get_tm_session(session_factory, transaction_manager):

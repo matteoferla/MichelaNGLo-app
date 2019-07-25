@@ -10,7 +10,7 @@ def get_trashcan(request):
     if trashcan:
         return trashcan
     else:
-        #someone deleted the trashcan!
+        #someone deleted the trashcan!?
         trashcan = User(name='trashcan', role='trashcan', password_hash='$2b$12$EaadzvGZ3hd60a3dfqTrkOAstBQtzjTXVdG0OFm0O.pTibjK3OIn6')
         request.dbsession.add(trashcan)
         return trashcan

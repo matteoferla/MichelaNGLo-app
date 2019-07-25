@@ -1,9 +1,8 @@
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
 import traceback
-from ..models.pages import Page
-from ..models.user import User
-from ..models.trashcan import get_trashcan, get_public
+from ..models import Page, User
+from ..models.trashcan_public import get_trashcan, get_public
 from ..transplier import PyMolTranspiler
 import uuid
 import shutil
@@ -13,7 +12,7 @@ import json
 
 PyMolTranspiler.tmp = os.path.join('michelanglo_app', 'temp')
 
-from ._common_methods import is_js_true, get_username, is_malformed
+from ._common_methods import is_js_true, is_malformed
 import logging
 log = logging.getLogger(__name__)
 
@@ -28,7 +27,7 @@ def demo_file(request):
         raise Exception('Non existant demo file requested. Possible attack!')
 
 def save_file(request, extension, field='file'):
-    filename=os.path.join('michelanglo_app', 'temp','{0}.{1}'.format(get_uuid(),extension))
+    filename=os.path.join('michelanglo_app', 'temp','{0}.{1}'.format(get_uuid(request),extension))
     with open(filename, 'wb') as output_file:
         if isinstance(request.params[field], str): ###API user made a mess.
             log.warning(f'user uploaded a str not a file!')
@@ -48,12 +47,12 @@ def anonymous_submission(request, settings, pagename):
               'Only <a href="#" class="text-secondary" data-toggle="modal" data-target="#login">logged-in users</a>'+\
               ' can edit data pages.\n\nThis page will be deleted in 24 hours.'
     trashcan = get_trashcan(request)
-    trashcan.add_owned_page(pagename)
+    trashcan.owned.add(pagename)
     request.dbsession.add(trashcan)
     
 def user_submission(request, settings, pagename):
     user = request.user
-    user.add_owned_page(pagename)
+    user.onwed.add(pagename)
     settings["authors"] = [user.name]
     request.dbsession.add(user)
     settings['editors'] = [user.name]
@@ -63,13 +62,15 @@ def commit_submission(request, settings, pagename):
         user_submission(request, settings, pagename)
     else:
         anonymous_submission(request, settings, pagename)
-    Page(pagename).save(settings)
+    p = Page(pagename)
+    p.edited = False
+    p.save(settings).commit(request)
 
-def get_uuid():
+def get_uuid(request):
     identifier = str(uuid.uuid4())
-    if identifier in os.listdir(os.path.join('michelanglo_app', 'user-data')):
+    if identifier in [p.identifier for p in request.query(Page)]:
         log.error('UUID collision!!!')
-        return get_uuid() #one in a ten-quintillion!
+        return get_uuid(request) #one in a ten-quintillion!
     return identifier
 
 ########################################################################################
@@ -146,14 +147,14 @@ def convert_pse(request):
             else:
                 trans.pdb = request.params['pdb']
         else:
-            log.warn(f'Unknown mode requested by {get_username(request)}.')
+            log.warn(f'Unknown mode requested by {User.get_username(request)}.')
             return {'snippet': 'Please stop trying to hack the server', 'error_title': 'A major error arose', 'error': 'danger', 'error_msg': 'The code failed to run serverside. Most likely malicius','viewport':settings['viewport']}
 
 
         # deal with user permissions.
         code = 1
         request.session['status'] = make_msg('Permissions', 'Finalising user permissions')
-        pagename=get_uuid()
+        pagename=get_uuid(request)
         # create output
         settings['pdb'] = []
         request.session['status'] = make_msg('Load function', 'Making load function')
@@ -165,12 +166,7 @@ def convert_pse(request):
             settings['proteinJSON'] = '[{{"type": "rcsb", "value": "{0}", "loadFx": "loadfun"}}]'.format(trans.pdb)
         else:
             settings['proteinJSON'] = '[{{"type": "file", "value": "{0}", "loadFx": "loadfun"}}]'.format(trans.pdb)
-        #user.
-        if user:
-            user_submission(request,settings,pagename)
-        else:
-            anonymous_submission(request, settings, pagename)
-        Page(pagename).save(settings)
+        commit_submission(request, settings, pagename)
         # save sharable page data
         request.session['status'] = make_msg('Saving', 'Storing data for retrieval.')
         
@@ -185,7 +181,7 @@ def convert_pse(request):
 
 @view_config(route_name='convert_mesh', renderer="../templates/custom.result.mako")
 def convert_mesh(request):
-    log.info(f'Mesh conversion requested by {get_username(request)}')
+    log.info(f'Mesh conversion requested by {User.get_username(request)}')
     if 'demo_file' in request.params:
         filename = demo_file(request)  # prevention against attacks
         fh = open(filename)
@@ -211,7 +207,7 @@ def convert_mesh(request):
 @view_config(route_name='convert_pdb', renderer="json")
 def convert_pdb(request):
     # mode = code | file
-    log.info(f'PDB page creation requested by {get_username(request)}')
+    log.info(f'PDB page creation requested by {User.get_username(request)}')
     malformed = is_malformed(request, 'viewcode', 'mode', 'pdb')
     if malformed:
         return {'status': malformed}
@@ -233,7 +229,7 @@ def convert_pdb(request):
         trans = PyMolTranspiler.load_pdb(file=filename)
         settings['pdb'] = [('pdb', '\n'.join(trans.ss)+'\n'+trans.raw_pdb)]
         settings['js'] = 'external'
-    commit_submission(request,settings,pagename)
+    commit_submission(request, settings, pagename)
     return {'page': pagename}
 
 @view_config(route_name='task_check', renderer="json")

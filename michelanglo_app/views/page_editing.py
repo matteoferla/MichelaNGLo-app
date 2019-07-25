@@ -2,12 +2,13 @@ from pyramid.view import view_config
 from pyramid.renderers import render_to_response
 from ..models.pages import Page
 from ..models.user import User
-from ..models.trashcan import get_trashcan, get_public
+from ..models.trashcan_public import get_trashcan, get_public
+from .user_management import permission
 from ..transplier import PyMolTranspiler
 import os
 import json, re
 
-from ._common_methods import is_js_true, get_username, is_malformed
+from ._common_methods import is_js_true,  is_malformed
 
 import logging
 log = logging.getLogger(__name__)
@@ -15,143 +16,124 @@ log = logging.getLogger(__name__)
 
 @view_config(route_name='edit_user-page', renderer='json')
 def edit(request):
-    log.info(f'Page edit requested by {get_username(request)}')
+    log.info(f'Page edit requested by {User.get_username(request)}')
     malformed = is_malformed(request, 'page', 'encryption', 'public', 'confidential','freelyeditable')
     if malformed:
         return {'status': malformed}
     # get ready
-    page = Page(request.params['page'])
-    user = request.user
-    # check if encrypted
-    if page.is_password_protected():
-        page.key = request.params['encryption_key'].encode('uft-8')
-        page.path = page.encrypted_path
-    # load data
-    settings = page.load()
-    if not settings:
-        request.response.status = 404
-        log.warn(f'{get_username(request)} requested a missing page')
-        return {'status': 'page not found'}
-    ## cehck permissions
-    if not user or not (page.identifier in user.get_owned_pages() or user.role == 'admin' or settings['freelyeditable']): ## only owners and admins can edit.
-        request.response.status = 403
-        log.warn(f'{get_username(request)} is not autharised to edit page')
-        return {'status': 'not authorised'}
+    page = Page.select(request, request.params['page'])
+    verdict = permission(request, 'edit', key_label='encryption_key')
+    if verdict['status'] != 'OK':
+        return verdict
     else:
-        #add author if user was an upgraded to editor by the original author. There are three lists: authors (can and have edited, editors can edit, visitors visit.
-        if user.name not in settings['authors']:
-            settings['authors'].append(user.name)
-        if 'anonymous' in settings['authors']: #got it out of trashcan.
-            settings['authors'].remove('anonymous')
+        # you have been approved.
+        user = request.user
+        # add author if user was an upgraded to editor by the original author. There are three lists: authors (can and have edited, editors can edit, visitors visit.
+        if user.name not in page.settings['authors']:
+            page.settings['authors'].append(user.name)
+        if 'anonymous' in page.settings['authors']:
+            # got it out of trashcan.
+            page.settings['authors'].remove('anonymous')
+            get_trashcan(request).owned.remove(page.identifier)
         # only admins and friends can edit html fully
         if user.role in ('admin', 'friend'):
             for key in ('loadfun', 'title', 'description'):
                 if key in request.params:
-                    settings[key] = request.params[key]
+                    page.settings[key] = request.params[key]
             if 'pdb' in request.params:
                 try:
-                    settings['pdb'] = json.loads(request.params['pdb'])
+                    page.settings['pdb'] = json.loads(request.params['pdb'])
                 except:
-                    settings['pdb'] = request.params['pdb']
-        else: # regular users have to be sanitised
+                    page.settings['pdb'] = request.params['pdb']
+        else:  # regular users have to be sanitised
             for key in ('title', 'description'):
                 if key in request.params:
-                    settings[key] = Page.sanitise_HTML(request.params[key])
-        settings['confidential'] = is_js_true(request.params['confidential'])
-        public_from_private= 'public' in settings and not settings['public'] and is_js_true(request.params['public']) #was private public but is now.
-        public_from_nothing= 'public' not in settings and is_js_true(request.params['public']) #was not decalred but is now.
-        private_from_public = 'public' in settings and settings['public'] and not is_js_true(request.params['public'])
+                    page.settings[key] = Page.sanitise_HTML(request.params[key])
+        page.settings['confidential'] = is_js_true(request.params['confidential'])
+        public_from_private = 'public' in page.settings and not page.settings['public'] and is_js_true(
+            request.params['public'])  # was private public but is now.
+        public_from_nothing = 'public' not in page.settings and is_js_true(
+            request.params['public'])  # was not decalred but is now.
+        private_from_public = 'public' in page.settings and page.settings['public'] and not is_js_true(
+            request.params['public'])
         if public_from_private or public_from_nothing:
             public = get_public(request)
-            public.add_visited_page(page.identifier)
+            public.visited.add(page.identifier)
             request.dbsession.add(public)
         elif not is_js_true(request.params['public']):
             public = get_public(request)
-            if page.identifier in public.get_visited_pages():
-                public.remove_visited_page(page.identifier)
+            if page.identifier in public.visited_pages:
+                public.visited.remove(page.identifier)
                 request.dbsession.add(public)
         else:
             pass
-        settings['public'] = is_js_true(request.params['public'])
-        if not settings['public']:
-            settings['freelyeditable'] = is_js_true(request.params['freelyeditable'])
+        page.settings['public'] = is_js_true(request.params['public'])
+        if not page.settings['public']:
+            page.settings['freelyeditable'] = is_js_true(request.params['freelyeditable'])
         else:
-            settings['freelyeditable'] = False
-            #new_editors
+            page.settings['freelyeditable'] = False
+            # new_editors
         if 'new_editors' in request.params and request.params['new_editors']:
             for new_editor in json.loads((request.params['new_editors'])):
-                target = request.dbsession.query(User).filter_by(name=new_editor).one()
+                target = request.dbsession.query(User).filter_by(name=new_editor).first()
                 if target:
-                    target.add_owned_page(page.identifier)
+                    target.owned.add(page.identifier)
                     request.dbsession.add(target)
-                    settings['editors'].append(target.name)
+                    page.settings['editors'].append(target.name)  ##useless!
                 else:
                     log.warning(f'This is impossible...{new_editor} does not exist.')
-        #encrypt
-        if not page.is_password_protected() and request.params['encryption'] == 'true': # to be encrypted
+        # encrypt
+        if not page.is_password_protected() and request.params['encryption'] == 'true':  # to be encrypted
             page.delete()
             page.key = request.params['encryption_key'].encode('utf-8')
-            page.path = page.encrypted_path
-        elif page.is_password_protected() and request.params['encryption'] == 'false':  #to be dencrypted
+            page.encrypted = True
+        elif page.is_password_protected() and request.params['encryption'] == 'false':  # to be dencrypted
             page.delete()
             page.key = None
-            page.path = page.unencrypted_path
-        else: # no change
+            page.encrypted = False
+        else:  # no change
             pass
-        #alter ratio
+        # alter ratio
         if 'columns_viewport' in request.params:
-            settings['columns_viewport'] = int(request.params['columns_viewport'])
-            settings['columns_text'] = int(request.params['columns_text'])
+            page.settings['columns_viewport'] = int(request.params['columns_viewport'])
+            page.settings['columns_text'] = int(request.params['columns_text'])
         if 'location_viewport' in request.params:
-            settings['location_viewport'] = request.params['location_viewport']
+            page.settings['location_viewport'] = request.params['location_viewport']
         if 'proteinJSON' in request.params:
-            settings['proteinJSON'] = request.params['proteinJSON']
+            page.settings['proteinJSON'] = request.params['proteinJSON']
         if 'image' in request.params:
             if is_js_true(request.params['image']):
-                settings['image'] = request.params['image']
+                page.settings['image'] = request.params['image']
             else:
-                settings['image'] = False
-        #save
-        page.save(settings)
-        return {'success': 1}
+                page.settings['image'] = False
+        # save
+        page.edited = True
+        page.save().commit(request)
+
+
 
 @view_config(route_name='combine_user-page', renderer='json')
 def combined(request):
     malformed = is_malformed(request, 'target_page','donor_page','task','name')
     if malformed:
         return {'status': malformed}
-    target_page = Page(request.params['target_page'])
-    donor_page = Page(request.params['donor_page'])
-    log.info(f'{get_username(request)} is requesting to merge page {donor_page} to {target_page}')
+    target_page = Page.select(request.params['target_page'])
+    donor_page = Page.select(request.params['donor_page'])
+    log.info(f'{User.get_username(request)} is requesting to merge page {donor_page} to {target_page}')
     task = Page(request.params['task'])
     name = request.params['name']
     user = request.user
-    if not user:
-        request.response.status = 403
-        log.warn(f'{get_username(request)} is not autharised to edit page')
-        return {'status': 'unregistered'}
-    ownership = user.get_owned_pages()
-    ## check permissions
-    if target_page.identifier not in ownership and not user.role == 'admin':  ## only owners can edit
-        #to do sort corner case of settings['freelyeditable']
-        request.response.status = 403
-        log.warn(f'{get_username(request)} tried but failed to delete page')
-        return {'status': 'Not owner'}
-    #do stuff
-    for page, role in ((target_page,'target'), (donor_page,'donor')):
-        # check if encrypted
-        if page.is_password_protected():
-            page.key = request.params[f'{role}_encryption_key'].encode('uft-8')
-            page.path = page.encrypted_path
-        page.load()
-        if not page.settings:
-            request.response.status = 404
-            log.warn(f'{get_username(request)} requested a missing {role} page')
-            return {'status': f'{role} page not found'}
+    target_verdict = permission(request, 'edit', key_label='target_encryption_key')
+    if target_verdict['status'] != 'OK':
+        return target_verdict
+    donor_verdict = permission(request, 'view', key_label='donor_encryption_key')
+    if target_verdict['status'] != 'OK':
+        return donor_verdict
+    ### user is legal!
     #common
     if re.match('^\w+$', name) == None:
         request.response.status = 400
-        log.warn(f'{get_username(request)} wanted to add a function name that was not alphanumeric.')
+        log.warn(f'{User.get_username(request)} wanted to add a function name that was not alphanumeric.')
         return {'status': f'function name is not alphanumeric.'}
     #fun
     target_page.settings['loadfun'] += '\n' + donor_page.settings['loadfun'].replace('function loadfun', f'function loadfun{name}') + '\n'
@@ -177,7 +159,9 @@ def combined(request):
         #loadfun
         target_page.settings['description'] += f'\nPage data from {donor_page.identifier} added as {name}.'+\
                                                f'E.g. <span class="prolink" data-target="#viewport" data-toggle="protein" data-load="{name}" data-view="reset">Show new protein</span>'
-    target_page.save()
+
+    target_page.edited = True
+    target_page.save().commit(request)
     return {'status': 'success'}
 
 @view_config(route_name='delete_user-page', renderer='json')
@@ -187,20 +171,13 @@ def delete(request):
     if malformed:
         return {'status': malformed}
     page = Page(request.params['page'])
-    log.info(f'{get_username(request)} is requesting to delete page {page}')
-    user = request.user
-    if not user:
-        request.response.status = 403
-        log.warn(f'{get_username(request)} is not autharised to delete page')
-        return {'status': 'not authorised. sign in.'}
-    ownership = user.get_owned_pages()
-    ## cehck permissions
-    if page.identifier not in ownership and user.role != 'admin': ## only owners can delete
-        request.response.status = 403
-        log.warn(f'{get_username(request)} is not autharised to delete page')
-        return {'status': 'not authorised'}
+    log.info(f'{User.get_username(request)} is requesting to delete page {page}')
+    verdict = permission(request, page, 'del', key_label='key')
+    if verdict['status'] != 'OK':
+        return verdict
     else:
-        if page.delete():
+        page.delete().commit(request)
+        if not page.exists:
             return {'status': 'success'}
         else:
             return {'status': 'file missing'}
@@ -211,24 +188,14 @@ def mutate(request):
     malformed = is_malformed(request, 'page','model','chain','mutations')
     if malformed:
         return {'status': malformed}
-    page = Page(request.params['page'])
-    log.info(f'{get_username(request)} is making mutants page {page}')
+    page = Page.select(request, request.params['page'])
+    log.info(f'{User.get_username(request)} is making mutants page {page}')
     user = request.user
-    if not user:
-        request.response.status = 403
-        log.warn(f'{get_username(request)} is not autharised to edit page')
-        return {'status': 'not authorised'}
-    ownership = user.get_owned_pages()
-    ## cehck permissions
-    if page.identifier not in ownership and user.role != 'admin':  ## only owners can delete/mutate
-        request.response.status = 403
-        log.warn(f'{get_username(request)} tried but failed to mutate page')
-        return {'status': 'Not owner'}
+    verdict = permission(request, page, 'del', key_label='key')
+    if verdict['status'] != 'OK':
+        return verdict
     else:
-        if 'key' in request.params:
-            page.key = request.params['key'].encode('utf-8')
-        settings = page.load()
-        #protein = settings['pdb'][]
+        settings = page.settings
         model = int(request.params['model'])
         chain = request.params['chain']
         mutations = request.params['mutations'].split()
@@ -247,6 +214,7 @@ def mutate(request):
             PyMolTranspiler.mutate_code(protein_data['value'], filename, mutations, chain)
         else:
             request.response.status = 406
+            ## this is a super corner case. I am not sure at all how to proceed. Clickbait?
             return {'status','cannot create mutations from URL for security reasons'}
         with open(filename, 'r') as fh:
             seq = fh.read()
@@ -273,9 +241,10 @@ def rename(request):
     admin only method.
     old_page: uuid, new_page: string
     """
+    #verdict = permission(...? Nah. Admin only!
     if not request.user or request.user.role != 'admin':
         request.response.status = 403
-        log.warn(f'{get_username(request)} is not autharised to rename page')
+        log.warn(f'{User.get_username(request)} is not autharised to rename page')
         return {'status': 'not authorised'}
     else:
         malformed = is_malformed(request, 'old_page', 'new_page')
@@ -288,7 +257,7 @@ def rename(request):
         else:
             key = None
         old_page = Page(old_name, key=key)
-        settings = old_page.load()
+        settings = old_page.load().settings
         new_page = Page(new_name, key=key)
-        new_page.save(settings)
+        new_page.save(settings).commit(request)
         return {'status': 'success', 'page': new_name}

@@ -11,7 +11,7 @@
 </%block>
 
 <%block name="main">
-    <p>You have ${5-tries} tries available.</p>
+    <p>Note: to prevent dictionary attacks, you <b>will be banned</b> if you fail an inhuman amount of times a minute.</p>
     <form action="/data/${page}" method="post">
         <div class="input-group mb-3">
           <div class="input-group-prepend">

@@ -11,7 +11,7 @@
 
 <%block name="main">
     <%
-        from michelanglo_app.models.trashcan import get_public
+        from michelanglo_app.models.trashcan_public import get_public
         public = get_public(request)
     %>
         <div class="list-group">

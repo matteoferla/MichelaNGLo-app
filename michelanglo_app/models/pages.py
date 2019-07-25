@@ -5,72 +5,85 @@ from Crypto.Hash import SHA256
 from Crypto import Random
 
 ##################### Page
-# The reason this is not a DB is because
+# The reason this is not a full DB is because
 # * the PDB files can get massive
-# * the
-# * they are easy to query anyway as they have a uuid
 
-class Page:
+#import bcrypt
+from sqlalchemy import (
+    Column,
+    Integer,
+    Text,
+    DateTime,
+    Boolean
+)
+
+from .meta import Base
+
+
+
+class Page(Base):
+    """ The SQLAlchemy declarative model class for a Page object.
+        This is just to speed up things. The actual data is in user-data as a pickle!
+        CREATE TABLE pages (
+        index SERIAL PRIMARY KEY NOT NULL,
+        uuid TEXT NOT NULL UNIQUE,
+        title TEXT,
+        exists BOOL,
+        edited BOOL,
+        encrypted BOOL,
+        timestamp TIMESTAMP NOT NULL);
+
+        """
+    __tablename__ = 'pages'
+    id = Column(Integer, primary_key=True)
+    identifier = Column(Text, nullable=False, unique=True)
+    title = Column(Text)
+    exists = Column(Boolean)
+    edited = Column(Boolean)
+    encrypted = Column(Boolean)
+    timestamp = Column(DateTime)
+    settings = None  #watchout this ought to be a dict, but dict is mutable.
+    key = None
+    unencrypted_path = property(lambda self: os.path.join('michelanglo_app', 'user-data', self.identifier + '.p'))
+    encrypted_path = property(lambda self: os.path.join('michelanglo_app', 'user-data', self.identifier + '.ep'))
+    thumb_path = property(lambda self: os.path.join('michelanglo_app', 'user-data', self.identifier + '.png'))
+    path = property(lambda self: self.encrypted_path if self.encrypted is True else self.unencrypted_path)
+
     def __init__(self, identifier, key=None):
         self.identifier = identifier.replace('\\','/').replace('*','').split('/')[-1]
-        self.unencrypted_path = os.path.join('michelanglo_app', 'user-data', self.identifier + '.p')
-        self.encrypted_path = os.path.join('michelanglo_app', 'user-data', self.identifier + '.ep')
-        self.thumb = os.path.join('michelanglo_app', 'user-data', self.identifier + '.png')
         if key:
-            self.path = self.encrypted_path
+            self.encrypted = True
+            self.key = key.encode('utf-8')  # this does not get committed to the db. Promise.
         else:
-            self.path = self.unencrypted_path
-        self.settings = {}
-        if key:
-            self.key = key.encode('utf-8')
-        else:
+            self.encrypted = False
             self.key = None
+        self.settings = {}
 
-    def exists(self, try_both = False):
-        if try_both:
-            if os.path.exists(self.unencrypted_path) or os.path.exists(self.encrypted_path):
-                return True
+    def load(self):
+        if self.exists:
+            if self.encrypted:
+                if self.key:
+                    with open(self.path, 'rb') as fh:
+                        cryptic = fh.read()
+                        decryptic = self._decrypt(cryptic)
+                        self.settings = pickle.loads(decryptic)
+                else:
+                    raise ValueError('No key provided.')
+            else:
+                with open(self.path, 'rb') as fh:
+                    self.settings = pickle.load(fh)
         elif os.path.exists(self.path):
-            return True
+            raise FileExistsError(f'File {self.identifier} exists but is not in the DB!')
         else:
-            return False
-
-    def is_password_protected(self, raise_error = False):
-        path_exists = os.path.exists(os.path.join('michelanglo_app', 'user-data', self.identifier + '.p'))
-        epath_exists = os.path.exists(os.path.join('michelanglo_app', 'user-data', self.identifier + '.ep'))
-        if path_exists and not epath_exists:
-            return False
-        elif not path_exists and epath_exists:
-            return True
-        else:
-            if raise_error:
-                raise FileExistsError
-            else:
-                return False
-
-    def load(self, die_on_error = False):
-        if self.exists():
-            if not self.is_password_protected():
-                with open(self.path, 'rb') as fh:
-                    self.settings  = pickle.load(fh)
-            elif self.key:
-                with open(self.path, 'rb') as fh:
-                    cryptic = fh.read()
-                    decryptic = self._decrypt(cryptic)
-                    self.settings = pickle.loads(decryptic)
-            else:
-                raise ValueError('No key provided.')
-        else:
-            if die_on_error:
-                raise FileNotFoundError(self.identifier)
-            else:
-                print(self.identifier,'not found')
-        return self.settings
+            raise FileNotFoundError(f'File {self.identifier} ought to exist?')
+        return self
 
     def save(self, settings=None):
         ## sort things out
-        if not settings:
-            settings = self.settings
+        if self.settings is None: # bad coding.
+            self.settings = {}
+        if not settings:  ### I need to consider whether, for the purpose of the API. I really want everything saved.
+            settings = {**self.settings, **settings}
         if 'description' not in settings:
             settings['description'] = '## Description\n\nEditable text. press pen to edit.'
         if 'title' not in settings:
@@ -82,57 +95,24 @@ class Page:
                 if key not in settings:
                     settings[key] = fun()
         # metadata
-        settings['date'] = str(datetime.datetime.now())
+        settings['date'] = str(datetime.datetime.now())  # redundant and disused.
         settings['page'] = self.identifier
-        settings['key'] = self.key # is this wise??
+        if self.encrypted:
+            settings['key'] = self.key # is this wise? It will be encrypted in. So should be. This is so it the mako template requests are good.
         ## write
         with open(self.path, 'wb') as fh:
-            if not self.key:
+            if not self.encrypted:
                 pickle.dump(settings, fh)
+            elif not self.key:
+                raise ValueError(f'Impossible. No key provided in saving {self.identifier}...')
             else:
                 uncryptic = pickle.dumps(settings)
                 cryptic = self._encrypt(uncryptic)
                 fh.write(cryptic)
-        return True
-
-    def delete(self):
-        if os.path.exists(self.encrypted_path):
-            os.remove(self.encrypted_path)
-            return True
-        elif os.path.exists(self.unencrypted_path):
-            os.remove(self.unencrypted_path)
-            return True
-        else:
-            return False
-
-    @staticmethod
-    def sanitise_URL(page):
-        return page.replace('\\', '/').replace('*', '').split('/')[-1]
-
-    @staticmethod
-    def sanitise_HTML(code):
-        def substitute(code, pattern, message):
-            code = re.sub(f'<[^>]*?{pattern}[\s\S]*?>', message, code, re.IGNORECASE | re.MULTILINE | re.DOTALL)
-            pseudo = re.sub('''(<[^>]*?)['`"][\s\S]*?['`"]''', r'\1', code, re.IGNORECASE | re.MULTILINE | re.DOTALL)
-            print(pseudo)
-            if re.search(f'<[^>]*?{pattern}[\s\S]*?>', pseudo):  # go extreme.
-                print('here!', pattern)
-                code = re.sub(pattern, message, code, re.IGNORECASE | re.MULTILINE | re.DOTALL)
-            return code
-
-        code = re.sub('<!--*?-->', 'COMMENT REMOVED', code)
-        for character in ('\t','#x09;','&#x0A;','&#x0D;','\0'):
-            code = code.replace(character,' '*4)
-        code = code.replace(character,' '*4)
-        for tag in ('script', 'iframe', 'object', 'link','style','meta','frame', 'embed'):
-            code = substitute(code, tag, tag.upper() + ' BLOCKED')
-        for attr in ('javascript', 'vbscript','livescript', 'xss', 'seekSegmentTime', '&{', 'expression'):
-            code = substitute(code, attr, attr.upper() + ' BLOCKED')
-        code = substitute(code, 'on\w+', 'ON-EVENT BLOCKED')
-        for letter in range(65, 123):
-            code = substitute(code, f'&#0*{letter};', 'HEX ENCODED LETTER BLOCKED')
-            code = substitute(code, f'&#x0*{letter:02X};', 'HEX ENCODED LETTER BLOCKED')
-        return code
+        self.exists = True
+        self.title = settings['title'] ## keep synched!
+        self.timestamp = datetime.datetime.utcnow()
+        return self
 
     #https://stackoverflow.com/questions/42568262/how-to-encrypt-text-with-a-password-in-python
     def _encrypt(self, source, encode=False):
@@ -155,3 +135,59 @@ class Page:
         if data[-padding:] != bytes([padding]) * padding:  # Python 2.x: chr(padding) * padding
             raise ValueError("Invalid padding...")
         return data[:-padding]  # remove the padding
+
+    def delete(self):
+        if self.exists:
+            os.remove(self.path)
+            self.exists = False
+        else:
+            pass
+        return self
+
+    @staticmethod
+    def sanitise_URL(page):
+        return page.replace('\\', '/').replace('*', '').split('/')[-1]
+
+    @staticmethod
+    def sanitise_HTML(code):
+        def substitute(code, pattern, message):
+            code = re.sub(f'<[^>]*?{pattern}[\s\S]*?>', message, code, re.IGNORECASE | re.MULTILINE | re.DOTALL)
+            pseudo = re.sub('''(<[^>]*?)['`"][\s\S]*?['`"]''', r'\1', code, re.IGNORECASE | re.MULTILINE | re.DOTALL)
+            print(pseudo)
+            if re.search(f'<[^>]*?{pattern}[\s\S]*?>', pseudo):  # go extreme.
+                print('here!', pattern)
+                code = re.sub(pattern, message, code, re.IGNORECASE | re.MULTILINE | re.DOTALL)
+            return code
+
+        code = re.sub('<!--*?-->', 'COMMENT REMOVED', code)
+        for character in ('\t', '#x09;', '&#x0A;', '&#x0D;', '\0'):
+            code = code.replace(character, ' ' * 4)
+        code = code.replace(character, ' ' * 4)
+        for tag in ('script', 'iframe', 'object', 'link', 'style', 'meta', 'frame', 'embed'):
+            code = substitute(code, tag, tag.upper() + ' BLOCKED')
+        for attr in ('javascript', 'vbscript', 'livescript', 'xss', 'seekSegmentTime', '&{', 'expression'):
+            code = substitute(code, attr, attr.upper() + ' BLOCKED')
+        code = substitute(code, 'on\w+', 'ON-EVENT BLOCKED')
+        for letter in range(65, 123):
+            code = substitute(code, f'&#0*{letter};', 'HEX ENCODED LETTER BLOCKED')
+            code = substitute(code, f'&#x0*{letter:02X};', 'HEX ENCODED LETTER BLOCKED')
+        return code
+
+    def commit(self, request):
+        cls = self.__class__
+        request.dbsession.add(self)
+
+    def __str__(self):
+        return Page.identifier
+
+    @classmethod
+    def select(cls, request, identifier):
+        #get the DB version...
+        self = request.dbsession.query(cls).filter(cls.identifier == identifier).first()
+        return self
+
+    @classmethod
+    def select_list(cls, request, pages):
+        """returns the list of existing pages as Page objects from the db"""
+        query = request.dbsession.query(cls).filter(cls.identifier in pages)
+        return [page for page in query if page.exists]
