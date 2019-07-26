@@ -89,11 +89,11 @@ def get_pages(request):
         data['error'] = 'not logged in'
     else:
         if user.role == 'admin':   ### ULTRABACK DOOR.
-            data['all'] = {'unencrypted_files': [p.replace('.p','') for p in os.listdir(os.path.join('michelanglo_app', 'user-data')).all() if os.path.splitext(p)[1] == '.p'],
-                           'encrypted_files': [p.replace('.ep','') for p in os.listdir(os.path.join('michelanglo_app', 'user-data')).all() if os.path.splitext(p)[1] == '.ep'],
-                           'unencrypted_entries': [p.identifier for p in request.dbsession.query(Page).all() if p.exists and not p.encrypted],
-                           'encrypted_entries': [p.identifier for p in request.dbsession.query(Page).all() if p.exists and p.encrypted],
-                           'deleted_entries': [p.identifier for p in request.dbsession.query(Page).all() if not p.exists]}
+            data['all'] = {'unencrypted_files': [p.replace('.p','') for p in os.listdir(os.path.join('michelanglo_app', 'user-data')) if os.path.splitext(p)[1] == '.p'],
+                           'encrypted_files': [p.replace('.ep','') for p in os.listdir(os.path.join('michelanglo_app', 'user-data')) if os.path.splitext(p)[1] == '.ep'],
+                           'unencrypted_entries': [p.identifier for p in request.dbsession.query(Page) if p.exists and not p.encrypted],
+                           'encrypted_entries': [p.identifier for p in request.dbsession.query(Page) if p.exists and p.encrypted],
+                           'deleted_entries': [p.identifier for p in request.dbsession.query(Page) if not p.exists]}
         else:
             data['all'] = 'RESTRICTED'
         to_list = lambda x: [p.identifier for p in x]  ## crap name. converts the objects to names only.
