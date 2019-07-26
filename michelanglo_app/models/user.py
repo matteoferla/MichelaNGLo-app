@@ -37,7 +37,7 @@ class Pagegroup:
     def select(self, request):
         pagenames = self.get()
         pages = Page.select_list(request, pagenames)
-        self.set(pages)
+        self.set([p.identifier for p in pages])
         return pages
 
 
@@ -52,11 +52,12 @@ class User(Base):
     name = Column(Text, nullable=False, unique=True)
     role = Column(Text, nullable=False) #basic|admin|friend|trashcan
     email = Column(Text)
-    owned_pages = Column(Text)  #space separated list as text as array is not valid
+    owned_pages = Column(Text)  #space separated list as text as array is not valid in mySQL... but I have switched to postgres...
     visited_pages = Column(Text)
     password_hash = Column(Text)
     _visited = None
     _owned = None
+
     @property
     def visited(self):
         if not self._visited:

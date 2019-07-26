@@ -16,8 +16,8 @@
                 </p>
                 %if user:
                     <%
-                        owned = user.get_owned_loaded_pages()
-                        visited = user.get_visited_loaded_pages()
+                        owned = user.owned.select(request)
+                        visited = user.visited.select(request)
                     %>
                         <ul class="list-group">
                             <li class="list-group-item list-group-item-dark">
@@ -40,7 +40,7 @@
                             <li class="list-group-item">
                                 <div class="row">
                                     <div class="col-12 col-md-5">
-                                        <a href="/data/${page.identifier}">${page.settings['title']}</a>
+                                        <a href="/data/${page.identifier}">${page.title}</a>
                                     </div>
                                     <div class="col-4 col-md-2 offset-md-1">
                                         <button class="btn btn-primary w-100" onclick="combinePage('${page.identifier}')"><i class="far fa-paperclip"></i></button>

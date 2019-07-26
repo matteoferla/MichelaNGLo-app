@@ -24,18 +24,18 @@ def userdata_view(request):
     if verdict['status'] != 'OK' and json_mode:
         return render_to_response("json", verdict, request)
     elif verdict['status'] != 'OK' and not json_mode:
+        response_settings = {'project': 'Michelanglo', 'user': request.user,
+                             'page': pagename,
+                             'custom_messages': json.dumps(custom_messages),
+                             'meta_title': 'Michelaɴɢʟo: sculpting protein views on webpages without coding.',
+                             'meta_description': 'Convert PyMOL files, upload PDB files or submit PDB codes and ' + \
+                                                 'create a webpage to edit, share or implement standalone on your site',
+                             'meta_image': '/static/tim_barrel.png',
+                             'meta_url': 'https://michelanglo.sgc.ox.ac.uk/'
+                             }
         if request.response.status == 410:
-            response_settings = {'project': 'Michelanglo', 'user': request.user,
-                                 'page': pagename,
-                                 'custom_messages': json.dumps(custom_messages),
-                                 'meta_title': 'Michelaɴɢʟo: sculpting protein views on webpages without coding.',
-                                 'meta_description': 'Convert PyMOL files, upload PDB files or submit PDB codes and ' + \
-                                                     'create a webpage to edit, share or implement standalone on your site',
-                                 'meta_image': '/static/tim_barrel.png',
-                                 'meta_url': 'https://michelanglo.sgc.ox.ac.uk/'
-                                 }
             return render_to_response("../templates/410.mako", response_settings, request)
-        if request.response.status in (401, 403): #unknown or forbidden
+        elif request.response.status in (401, 403): #unknown or forbidden
             response_settings = {'project': 'Michelanglo', 'user': request.user,
                                  'page': pagename,
                                  'meta_title': 'Michelaɴɢʟo: sculpting protein views on webpages without coding.',
@@ -45,13 +45,17 @@ def userdata_view(request):
                                  'meta_url': 'https://michelanglo.sgc.ox.ac.uk/'
                                  }
             return render_to_response("../templates/encrypted.mako", response_settings, request)
+        else:
+            return render_to_response("../templates/404.mako", response_settings, request)
     else:
         ## yay! you are not a terrorist!
         settings = page.settings
         if page.encrypted:
             settings['encryption_key'] = request.params['key']   ### For the Mako!
+            settings['key'] = request.params['key']  #to be fixed...
         else:
             settings['encryption_key'] = None
+            settings['key'] = None
         ### add new values
         if 'freelyeditable' not in settings:
             settings['freelyeditable'] = False

@@ -189,5 +189,7 @@ class Page(Base):
     @classmethod
     def select_list(cls, request, pages):
         """returns the list of existing pages as Page objects from the db"""
-        query = request.dbsession.query(cls).filter(cls.identifier in pages)
+        print('??', pages)
+        query = request.dbsession.query(cls).filter(cls.identifier.in_(pages)).all()
+        print(query)
         return [page for page in query if page.exists]

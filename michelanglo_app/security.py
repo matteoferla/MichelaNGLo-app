@@ -7,7 +7,6 @@ from .models import User
 class MyAuthenticationPolicy(AuthTktAuthenticationPolicy):
     def authenticated_userid(self, request):
         user = request.user
-        print('Hello from authenticaed')
         if user is not None:
             return user.id
 

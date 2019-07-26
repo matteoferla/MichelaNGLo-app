@@ -875,7 +875,6 @@ class PyMolTranspiler:
                     [int((vertices[int(i) - 1][ax] - centroid[ax]) * scale_factor * 100) / 100 for i in new_face[0:3]
                      for ax in range(3)])
         mesh.append({'o_name': o_name, 'triangles': trilist})
-        print(mesh)
         return mesh
 
 def test():
