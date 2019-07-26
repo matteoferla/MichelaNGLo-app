@@ -133,7 +133,7 @@ def thumbnail(request):
         request.response.status = 200 # we would block facebook and twitter otherwise...
         response = FileResponse(os.path.join('michelanglo_app', 'static', 'tim_barrel.png'))
     elif not os.system(f'node michelanglo_app/thumbnail.js {pagename}'):
-        response = FileResponse(page.thumb)
+        response = FileResponse(page.thumb_path)
     else:
         log.error(f'Thumbnail generation failed for {pagename}')
         response = FileResponse(os.path.join('michelanglo_app', 'static', 'tim_barrel.png'))
