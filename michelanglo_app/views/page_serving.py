@@ -64,18 +64,19 @@ def userdata_view(request):
         if user:
             if settings['freelyeditable']:
                 settings['editable'] = True
-                user.add_visited_page(pagename)
-                settings['visitors'].append(user.name)
+                if pagename not in user.owned_pages:
+                    user.visited.add(pagename)
+                    settings['visitors'].append(user.name)
             elif user.role == 'admin':
                 # this means admin does not leave a trace upon inspection. Fine for admin bots. Bad human admin.
                 settings['editable'] = True
-            elif pagename in user.get_owned_pages():
+            elif pagename in user.owned_pages:
                 settings['editable'] = True
-            elif pagename in user.get_visited_pages():
+            elif pagename in user.owned_pages:
                 settings['editable'] = False
             else:
                 user.add_visited_page(pagename)
-                request.dbsession.add(user)
+                request.dbsession.add(user)  ## why?? Autocommit is on. Surely this is pointless. But best not risk it. Leaving it.
                 settings['visitors'].append(user.name)
                 page.save()
                 settings['editable'] = False
