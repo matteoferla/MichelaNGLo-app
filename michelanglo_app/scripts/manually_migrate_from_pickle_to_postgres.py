@@ -1,4 +1,21 @@
 #### THIS PIECE OF CODE IS FOR THE ONE TIME ONLY MIGRATION FROM PAGES AS PICKLE ONLY TO A DB MANAGED PICKLE SYSTEM.
+'''
+CREATE TABLE pages (
+index SERIAL PRIMARY KEY NOT NULL,
+identifier TEXT NOT NULL UNIQUE,
+title TEXT,
+exists BOOL,
+edited BOOL,
+encrypted BOOL,
+timestamp TIMESTAMP NOT NULL);
+
+ALTER TABLE pages OWNER TO apps
+ALTER TABLE pages ALTER COLUMN exists SET DEFAULT true;
+ALTER TABLE pages ALTER COLUMN edited SET DEFAULT false;
+ALTER TABLE pages ALTER COLUMN encrypted SET DEFAULT false;
+'''
+
+
 if __name__ == '__main__':
     from ..models import *
     import os, transaction

@@ -75,7 +75,7 @@ def userdata_view(request):
             elif pagename in user.owned_pages:
                 settings['editable'] = False
             else:
-                user.add_visited_page(pagename)
+                user.visited.add(pagename)
                 request.dbsession.add(user)  ## why?? Autocommit is on. Surely this is pointless. But best not risk it. Leaving it.
                 settings['visitors'].append(user.name)
                 page.save()

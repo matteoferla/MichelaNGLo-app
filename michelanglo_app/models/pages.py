@@ -82,8 +82,11 @@ class Page(Base):
         ## sort things out
         if self.settings is None: # bad coding.
             self.settings = {}
-        if not settings:  ### I need to consider whether, for the purpose of the API. I really want everything saved.
+        if settings is not None:  ### I need to consider whether, for the purpose of the API. I really want everything saved.
+            print(settings, self.settings)
             settings = {**self.settings, **settings}
+        else:
+            settings = self.load().settings
         if 'description' not in settings:
             settings['description'] = '## Description\n\nEditable text. press pen to edit.'
         if 'title' not in settings:
