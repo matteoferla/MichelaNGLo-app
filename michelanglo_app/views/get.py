@@ -98,7 +98,7 @@ def get_pages(request):
             data['all'] = 'RESTRICTED'
         data['owned'] = user.owned.select(request)
         data['visited'] = user.visited.select(request)
-    data['public'] = get_public(request).select(request)
+    data['public'] = get_public(request).visited.select(request)
     return data
 
 @view_config(route_name='set', renderer='json')
