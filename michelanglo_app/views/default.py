@@ -1,5 +1,6 @@
 from pyramid.view import view_config, notfound_view_config
 from pyramid.renderers import render_to_response
+from pyramid.response import FileResponse
 import os, json
 from ..models import User
 from . import custom_messages
@@ -91,3 +92,9 @@ def route_docs(request, reply):
 @view_config(route_name='status', renderer='json')
 def status_view(request):
     return {'status': 'OK'}
+
+
+@view_config(route_name="favicon") #why is static method not working is werid.
+def favicon_view(request):
+    icon = os.path.join("michelanglo_app", "static", "favicon.ico")
+    return FileResponse(icon, request=request)

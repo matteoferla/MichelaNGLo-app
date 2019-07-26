@@ -3,7 +3,8 @@
 def includeme(config):
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_static_view('images', '../images', cache_max_age=3600)
-    config.add_static_view('favicon.ico','static/favicon.ico', cache_max_age=3600)
+    #config.add_static_view('favicon.ico','static/favicon.ico', cache_max_age=3600)
+    config.add_route('favicon','/favicon.ico')
     config.add_route('home', '/')   ##the home page
     config.add_route('home_text', '/verbose') ### the old home page
     config.add_route('custom', '/custom') ### mesh converter
