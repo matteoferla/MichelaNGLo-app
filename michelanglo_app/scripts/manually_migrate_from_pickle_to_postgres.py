@@ -17,7 +17,8 @@ ALTER TABLE pages ALTER COLUMN encrypted SET DEFAULT false;
 
 
 if __name__ == '__main__':
-    from ..models import *
+    print('RUN AT Michelanglo root folder')
+    from .michelanglo_app.models import *
     import os, transaction
     from datetime import datetime
 
@@ -30,7 +31,7 @@ if __name__ == '__main__':
 
     with transaction.manager:
         sesh.rollback()
-        for file in os.listdir('../user-data/'):   ## asumed this file is in models...
+        for file in os.listdir('michelanglo_app/user-data/'):   ## asumed this file is in models...
             (uuid, ext) = os.path.splitext(file)
             p = sesh.query(Page).filter_by(identifier=uuid).first()
             try:
