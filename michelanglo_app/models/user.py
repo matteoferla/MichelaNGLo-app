@@ -33,9 +33,12 @@ class Pagegroup:
             if self.user.visited_pages is None:
                 return []
             else:
-                return list(set(self.pages.split()) - set(self.user.owned.split()))
+                return list(set(self.user.visited_pages.split()) - set(self.user.owned.get()))
         else:
-            return self.pages.split()
+            if self.user.owned_pages is None:
+                return []
+            else:
+                return self.user.owned_pages.split()
 
     def select(self, request):
         pagenames = self.get()
