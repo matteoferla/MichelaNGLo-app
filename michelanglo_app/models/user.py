@@ -30,7 +30,7 @@ class Pagegroup:
 
     def get(self):
         if self.group == 'visited':
-            return list(set(self.user.visited_pages.split()) - set(self.user.owned_pages.split()))
+            return list(set(self.user.visited.get()) - set(self.user.owned.split()))
         else:
             return self.pages.split()
 
