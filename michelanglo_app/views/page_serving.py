@@ -56,6 +56,17 @@ def userdata_view(request):
         else:
             settings['encryption_key'] = None
             settings['key'] = None
+        # first time flag
+        if 'is_unseen' not in settings:
+            settings['is_unseen'] = False
+            settings['firsttime'] = False
+        elif settings['is_unseen']:
+            settings['firsttime'] = True
+            settings['is_unseen'] = False # switch it off.
+            page.save(settings)
+        else:
+            settings['is_unseen'] = False
+            settings['firsttime'] = False
         ### add new values
         if 'freelyeditable' not in settings:
             settings['freelyeditable'] = False
@@ -78,7 +89,7 @@ def userdata_view(request):
                 user.visited.add(pagename)
                 request.dbsession.add(user)  ## why?? Autocommit is on. Surely this is pointless. But best not risk it. Leaving it.
                 settings['visitors'].append(user.name)
-                page.save()
+                page.save(settings)
                 settings['editable'] = False
         else:
             settings['editable'] = False

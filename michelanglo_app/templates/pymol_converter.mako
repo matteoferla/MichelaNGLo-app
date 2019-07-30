@@ -72,7 +72,7 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">PDB code</span>
                                     </div>
-                                    <input type="text" class="form-control rounded-right" id="pdb" value="1UBQ" required>
+                                    <input type="text" class="form-control rounded-right" id="pdb" placeholder="XXXX" required>
                                     <div class="invalid-feedback" id="error_pdb">No PDB code</div>
                                 </div>
                             </div>

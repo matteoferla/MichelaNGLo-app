@@ -64,7 +64,6 @@
             <button type="button" class="btn btn-outline-secondary border-0" id="resume" style="display: none;"><i class="far fa-play"></i></button>
                 %for i in range(4):
                     <button type="button" class="btn btn-outline-secondary border-0" id="frame${i}"><i class="far fa-circle"></i></button>
-
                 %endfor
             </div>
             <!-- ############################################ -->

@@ -104,6 +104,9 @@
 <%include file='edit_modal/implement_modal.mako'/>
 <%include file='edit_modal/combine_modal.mako'/>
 <%include file='edit_modal/mutate_modal.mako'/>
+    %if firsttime:
+        <%include file='results/wrong.mako'/>
+    %endif
 
 
 </%block>
@@ -170,6 +173,10 @@ $(document).ready(function () {
                         .fail(ops.addErrorToast)
                     ); //click.
 
+    %endif
+
+    %if firsttime:
+        ops.addToast('isWrong','<i class="far fa-bell"></i> Correct conversion?', 'If the conversion differs from what you were expecting <a href="#" data-toggle="modal" data-target="#wrong_modal"> click here.','bg-warning');
     %endif
 
 }); //ready

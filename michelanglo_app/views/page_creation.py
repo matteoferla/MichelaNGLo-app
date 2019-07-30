@@ -64,6 +64,7 @@ def commit_submission(request, settings, pagename):
         anonymous_submission(request, settings, pagename)
     p = Page(pagename)
     p.edited = False
+    settings['is_unseen'] = True
     p.save(settings).commit(request)
 
 def get_uuid(request):
