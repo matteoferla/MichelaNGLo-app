@@ -83,11 +83,11 @@ def edit(request):
                 else:
                     log.warning(f'This is impossible...{new_editor} does not exist.')
         # encrypt
-        if not page.is_password_protected() and request.params['encryption'] == 'true':  # to be encrypted
+        if not page.encrypted and is_js_true(request.params['encryption']):  # to be encrypted
             page.delete()
             page.key = request.params['encryption_key'].encode('utf-8')
             page.encrypted = True
-        elif page.is_password_protected() and request.params['encryption'] == 'false':  # to be dencrypted
+        elif page.encrypted and not is_js_true(request.params['encryption']):  # to be dencrypted
             page.delete()
             page.key = None
             page.encrypted = False
