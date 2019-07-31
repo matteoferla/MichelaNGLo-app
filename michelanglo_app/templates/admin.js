@@ -1,8 +1,6 @@
 
 /*
 <%
-    from michelanglo_app.models import User
-    users = self.context._data['request'].dbsession.query(User).all()
     udex = [{a: getattr(u,a) if getattr(u,a) else "" for a in ('name', 'role', 'visited_pages', 'owned_pages')} for u in users]
 
 %>

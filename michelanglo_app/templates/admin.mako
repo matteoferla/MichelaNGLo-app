@@ -14,8 +14,6 @@
 <%block name="main">
 % if user and user.role == 'admin':
     <%
-        from michelanglo_app.models import User
-        users = self.context._data['request'].dbsession.query(User).all()
         icon = {'basic': 'user', 'friend': 'user-tie', 'guest': 'user-secret', 'admin': 'user-crown', 'new': 'user-astronaut', 'hacker': 'user-ninja', 'trashcan': 'dumpster'}
         log = ''.join(reversed(open('michelanglo_app.log','r').readlines()[-100:])) #for some ducked up reason, templates are in root.
 
@@ -29,9 +27,9 @@
                     <a href="#mod" data-toggle="modal" data-target="#mod" data-user="${u.name}">
                     <span class="fa-li" >
                 %if u.role in icon:
-                    <i class="far fa-${icon[u.role]}"></i>
+                    <i class="far fa-${icon[u.role]}" title="This user has the role: ${u.role}"></i>
                 %else:
-                    <i class="far fa-user-ninja"></i>
+                    <i class="far fa-user-ninja" title="This user has a weird role: ${u.role}!?"></i>
                 %endif
                 </span> ${u.name} </a></li>
             %endfor
