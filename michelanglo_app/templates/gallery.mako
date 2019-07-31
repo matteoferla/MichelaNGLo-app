@@ -10,13 +10,9 @@
 </%block>
 
 <%block name="main">
-    <%
-        from michelanglo_app.models.trashcan_public import get_public
-        public = get_public(request)
-    %>
         <div class="list-group">
-    % for page in public.get_visited_loaded_pages():
-        <a href="/data/${page.identifier}" class="list-group-item list-group-item-action">${page.settings['title']}</a>
+    % for page in public_pages:
+        <a href="/data/${page.identifier}" class="list-group-item list-group-item-action">${page.title}</a>
     % endfor
         </div>
 </%block>

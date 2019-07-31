@@ -1,6 +1,7 @@
 from pyramid.view import view_config, notfound_view_config
 from pyramid.renderers import render_to_response
 from pyramid.response import FileResponse
+from ..models.trashcan_public import get_public
 import os, json
 from ..models import User
 from . import custom_messages
@@ -60,6 +61,12 @@ def my_view(request):
             }
     if page == 'docs':
         return route_docs(request, reply)
+    elif page == 'gallery':
+        reply['public_pages'] = get_public(request).visited.select(request)
+        return reply
+    elif page == 'admin':
+        reply['users'] = request.dbsession.query(User).all()
+        return reply
     else:
         return reply
 
