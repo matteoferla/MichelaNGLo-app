@@ -1,6 +1,10 @@
+window.add_menu = () => {
+    // a tweak to deal with the header in cards. I am not sure what causes it. abs/rel postion and flex.
+const topness = ($('#viewport').parent().parent().children('.card-header').length) ? $('.card-body #viewport').position().top + 30 : '2rem';
+
 $('#viewport').prepend(`<button type="button"
     class="btn btn-outline-secondary rounded-circle bg-white"
-    style="position:absolute; top:2rem; right:2rem; z-index:1001"
+    style="position:absolute; top:${topness}; right:2rem; z-index:1001"
     id="viewport_menu_popover"
     >
     <b>&nbsp;<i class="far fa-ellipsis-v"></i>&nbsp;
@@ -169,3 +173,7 @@ $('body').append(`
 `);
 setTimeout(()=> $('#controlguide_modal').on('show.bs.modal',(event) => $('#viewport_menu_popover').popover('hide')), 1000);
 //cannae be bothered doing this properly, but the problem is that this should go only when the modal is added to the body.
+};
+
+// will need rerunning if element is added later! No listener.
+add_menu();
