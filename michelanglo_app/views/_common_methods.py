@@ -1,4 +1,5 @@
 import os, requests, logging, re, unicodedata
+from ..models import User
 log = logging.getLogger(__name__)
 
 ## convert booleans and settings
