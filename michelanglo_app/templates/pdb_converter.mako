@@ -15,12 +15,12 @@
 <ul class="list-group list-group-flush">
             <li class="list-group-item">
                 <h3>Step 1 <small class="text-muted">Load structure</small></h3>
-                <p>For greater control see <a href="pymol">PyMOL converter</a>.</p>
+                <p>For greater control see <a href="pymol">PyMOL converter</a>. If in need of a demo, you could try the PDB code 1UBQ (ubiquitin) as it has a fun helix to look down at 22-34 or 1GFL (wild type GFP), which has a chromophore at 65-67:A.</p>
                 <div class="row">
                     <div class="col-12 col-md-5">
 
                         <div class="input-group mb-3" data-toggle="tooltip"
-                                     title="4 letter PDB code">
+                                     title="4 letter PDB code.">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">PDB code</span>
                                     </div>
