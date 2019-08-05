@@ -10,12 +10,13 @@ def includeme(config):
     config.add_route('custom', '/custom') ### mesh converter
     config.add_route('pdb', '/pdb')   ### pdb converter
     config.add_route('pymol', '/pymol')  ### pymol converter
+    config.add_route('name', '/name')  ### gene name.
     config.add_route('gallery', '/gallery')  ###
     config.add_route('docs', '/docs/{id}')
     config.add_route('main_docs', '/docs')
     config.add_route('convert_pse', '/convert_pse')
     config.add_route('convert_mesh', '/convert_mesh')
-    config.add_route('convert_pdb', '/convert_pdb')
+    config.add_route('choose_pdb', '/choose_pdb')
     config.add_route('task_check','/task_check')
     config.add_route('save_pdb', '/save_pdb')
     config.add_route('save_zip', '/save_zip')

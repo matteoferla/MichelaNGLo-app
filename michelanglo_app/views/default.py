@@ -29,6 +29,7 @@ else:
 @view_config(route_name='main_docs', renderer="../templates/docs.mako")
 @view_config(route_name='docs', renderer="../templates/docs.mako")
 @view_config(route_name='pdb', renderer="../templates/pdb_converter.mako")
+@view_config(route_name='name', renderer="../templates/name.mako")
 def my_view(request):
     user = request.user
     # ?bootstrap=materials is basically for the userdata_view only.
