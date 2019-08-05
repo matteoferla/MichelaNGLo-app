@@ -17,7 +17,9 @@ from pprint import PrettyPrinter
 from collections import defaultdict
 pprint = PrettyPrinter().pprint
 
+
 import sys, json
+from datetime import datetime
 from warnings import warn
 
 if sys.version_info[0] < 3:
@@ -38,7 +40,6 @@ import pymol
 pymol.finish_launching()
 
 from Bio.Data.IUPACData import protein_letters_1to3 as p1to3
-
 
 ###############################################################
 
@@ -74,7 +75,7 @@ class ColorSwatch:
 class PyMolTranspilerDeco:
     """
     Decorator for the bound methods of PyMolTranspiler that use Pymol.
-    The session is shared... so only one thread at the time.
+    The session is shared... so only one thread at the time ought to use PyMOL.
     """
     lock = threading.Lock()
 
@@ -87,7 +88,10 @@ class PyMolTranspilerDeco:
 
     def __call__(self, *args, **kwargs):
         try:
-            return self.fun(*args, **kwargs)
+            self.start_up()
+            reply = self.fun(*args, **kwargs)
+            self.close_up()
+            return reply
         except Exception as err:
             if self.lock.locked(): #the code errored before the lock could be released.
                 self.close_up()
@@ -101,6 +105,7 @@ class PyMolTranspilerDeco:
         self.clean_up()
         if self.lock.locked():
             self.lock.release()
+            PyMolTranspiler.current_task = f'[{datetime.utcnow()}] idle'
         else:
             warn('The lock was off already...')
 
@@ -108,7 +113,8 @@ class PyMolTranspilerDeco:
         if not self.lock.acquire(timeout=60): #one minute wait.
             self.clean_up() #something failed very very ungracefully.
             self.lock.acquire()
-            warn('The thread waited for over a minite!')
+            PyMolTranspiler.current_task = f'[{datetime.utcnow()}] working.'
+            warn('The thread waited for over a minute!')
         self.clean_up()
 
 
@@ -118,7 +124,10 @@ class PyMolTranspiler:
     For views see `.convert_view(view_string)`, which processes the output of PyMOL command `set_view`
     For representation see `.convert_reps(reps_string)`, which process the output of PyMOL command `iterate 1UBQ, print resi, resn,name,ID,reps`
     """
-    tmp = os.getcwd() #temp folder.
+    # this is the silliest but straightforwardest way to implement a log that does not cause drama...
+    current_task = f'[{datetime.utcnow()}] idle'
+    #temp folder.
+    tmp = os.getcwd()
     swatch = ColorSwatch([('white', 0, (1.0, 1.0, 1.0)), ('black', 1, (0.0, 0.0, 0.0)), ('blue', 2, (0.0, 0.0, 1.0)), ('green', 3, (0.0, 1.0, 0.0)), ('red', 4, (1.0, 0.0, 0.0)),
                      ('cyan', 5, (0.0, 1.0, 1.0)), ('yellow', 6, (1.0, 1.0, 0.0)), ('dash', 7, (1.0, 1.0, 0.0)), ('magenta', 8, (1.0, 0.0, 1.0)),
                      ('salmon', 9, (1.0, 0.6000000238418579, 0.6000000238418579)), ('lime', 10, (0.5, 1.0, 0.5)), ('slate', 11, (0.5, 0.5, 1.0)), ('hotpink', 12, (1.0, 0.0, 0.5)),
@@ -201,9 +210,10 @@ class PyMolTranspiler:
     _iterate_cmd = "data.append({'ID': ID,  'segi': segi, 'chain': chain, 'resi': resi, 'resn': resn, 'name':name, 'elem':elem, 'reps':reps, 'color':color, 'ss': ss, 'cartoon': cartoon, 'label': label})"
 
     @PyMolTranspilerDeco
-    def __init__(self, file=None, verbose=False, validation=False, view=None, representation=None, pdb='', skip_disabled=True, **settings):
+    def __init__(self, file=None, verbose=False, validation=False, view=None, representation=None, pdb='', skip_disabled=True, job='task', **settings):
         """
         Converter
+        :param: job: this is needed for the async querying of progress in the app, but not the transpiler code itself. see .log method
         :param: file: filename of PSE file.
         :param verbose: print?
         :param validation: print validation_text set for pymol?
@@ -211,6 +221,7 @@ class PyMolTranspiler:
         :param representation: the text from PyMOL iterate
         :param pdb: the PDB name or code
         """
+        self.job = job
         self.verbose = verbose
         self.validation = validation #boolean for printing.
         self.validation_text = ''
@@ -249,14 +260,21 @@ class PyMolTranspiler:
         self.code=''
         self.raw_pdb=None  #this is set from the instance `prot.raw_pdb = open(file).read()`
         self.custom_mesh = []
+        #self._logbook = []  ##not a logging instance!
+        #self.log = lambda msg: self._logbook.append(f'[{datetime.utcnow()} GMT] {msg}')
+        #swiched to class method... essentially:
+        # self.log = lambda msg: self.__class__.current_task := f'[{datetime.utcnow()} GMT] {msg}'
         if file:
             #print(file)
             assert '.pse' in file.lower(), 'Only PSE files accepted.'
             ##orient
             pymol.cmd.load(file)
+            self.log(f'[JOB={self.job}] File loaded.')
             v = pymol.cmd.get_view()
             self.convert_view(v)
+            self.log(f'[JOB={self.job}] View converted.')
             self.fix_structure()
+            self.log(f'[JOB={self.job}] Secondary structure fix applied.')
             names_for_mesh_route = [] #this is for a last ditch attempt.
             names_not_mesh = []
             ### sort the pymol objetcs into relevant methods
@@ -337,22 +355,28 @@ class PyMolTranspiler:
                     names_for_mesh_route.append(obj_name)
                 elif obj[4] == 12: # object:group
                     continue
+            self.log(f'[JOB={self.job}] Reps converted.')
             pdbfile = os.path.join(self.tmp, os.path.split(file)[1].replace('.pse','.pdb'))
             pymol.cmd.save(pdbfile)
             pymol.cmd.delete('all')
-            if names_for_mesh_route and 1==0: ##TODO reimplement
-                """
-                This secion has an issue with the alibi transformation.
-                The coordinate vectors need to be moved by the camera movement probably.
-                """
-                objfile = os.path.join(self.tmp, os.path.split(file)[1].replace('.pse','.obj'))
-                pymol.cmd.save(objfile)
-                self.custom_mesh = PyMolTranspiler.convert_mesh(open(objfile,'r'))
-                os.remove(objfile)
+            if names_for_mesh_route:
+                if 1==0: ##TODO reimplement
+                    """
+                    This secion has an issue with the alibi transformation.
+                    The coordinate vectors need to be moved by the camera movement probably.
+                    """
+                    objfile = os.path.join(self.tmp, os.path.split(file)[1].replace('.pse','.obj'))
+                    pymol.cmd.save(objfile)
+                    self.custom_mesh = PyMolTranspiler.convert_mesh(open(objfile,'r'))
+                    os.remove(objfile)
+                else:
+                    self.log(f'[JOB={self.job}] WARNING! Conversion of meshes disabled for now.')
         if view:
             self.convert_view(view)
+            self.log(f'[JOB={self.job}] View converted.')
         if representation:
             self.convert_representation(representation, **settings)
+            self.log(f'[JOB={self.job}] Reps converted.')
 
     @classmethod
     def get_atom_id_of_coords(cls, coord):
@@ -370,6 +394,10 @@ class PyMolTranspiler:
                             return atom
         else:
             return None
+
+    @classmethod
+    def log(cls, msg):
+        cls.current_task = f'[{datetime.utcnow()} GMT] {msg}'
 
     @classmethod
     @PyMolTranspilerDeco

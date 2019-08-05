@@ -83,7 +83,7 @@ class Page(Base):
         if self.settings is None: # bad coding.
             self.settings = {}
         if settings is not None:  ### I need to consider whether, for the purpose of the API. I really want everything saved.
-            print(settings, self.settings)
+            #print(settings, self.settings)
             settings = {**self.settings, **settings}
         else:
             settings = self.load().settings

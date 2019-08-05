@@ -39,7 +39,7 @@ $('#upload,#upload_id').change(function () {
         $(this).removeClass('is-invalid');
         $('#error_'+id).hide();
         if (extension == '.pse') {
-            if (! $('#pdb').val()) {$('#pdb').val(file).replace('.pse','.pdb')}
+            if (! $('#pdb').val()) {$('#pdb').val(file.replace('.pse','.pdb'))}
         }
         else {
             //unique actions for pdb

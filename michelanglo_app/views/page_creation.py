@@ -131,7 +131,7 @@ def convert_pse(request):
                     pass  # empty line.
                 else:
                     minor_error = 'Unknown block: ' + block
-            trans = PyMolTranspiler(view=view, representation=reps, pdb=request.params['pdb'], **settings)
+            trans = PyMolTranspiler(view=view, representation=reps, pdb=request.params['pdb'], job=User.get_username(request), **settings)
         ## case 2: user uses pse
         elif request.params['mode'] == 'file':
             ## case 2b: DEMO mode.
@@ -140,7 +140,7 @@ def convert_pse(request):
             ## case 2a: file mode.
             else:
                 filename = save_file(request,'pse')
-            trans = PyMolTranspiler(file=filename, **settings)
+            trans = PyMolTranspiler(file=filename, job=User.get_username(request), **settings)
             request.session['file'] = filename
             if 'pdb_string' in request.params:
                 with open(os.path.join(trans.tmp, os.path.split(filename)[1].replace('.pse','.pdb'))) as fh:
@@ -243,17 +243,26 @@ def status_check_view(request):
     :param request:
     :return:
     """
-    if 'status' not in request.session:
-        ## prepare for next time
-        request.session['status'] = {'condition' : 'running',
-                                    'title'     : 'Starting',
-                                    'body'      : 'The job is about to start (but is taking some time to do so).',
-                                    'color'     : 'bg-warning'}
-        return {'condition' : 'running',
-                'title'     : 'Starting',
-                'body'      : 'The job is about to start.',
-                'color'     : 'bg-warning'}
-    return request.session['status']
+
+    msg = PyMolTranspiler.current_task
+    if 'idle' in msg:
+        if 'status' in request.session and request.session['status']:
+            return request.session['status']
+        else:#unlikely and most likely symptomatic of an issue.
+            return {'condition': 'running',
+                    'title': 'Starting',
+                    'body': 'The converter is idle ATM.',
+                    'color': 'bg-warning'}
+    elif User.get_username(request) in msg:
+        return {'condition': 'running',
+                'title': 'Running',
+                'body': msg,
+                'color': 'bg-secondary'}
+    else:
+        return {'condition': 'running',
+                'title': 'Quewing',
+                'body': 'There is another job ahead of yours: this will take a few seconds.',
+                'color': 'bg-warning'}
 
 
 def make_msg(title, body, condition='running', color=''):
