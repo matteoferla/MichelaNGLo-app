@@ -24,6 +24,7 @@ else:
 @view_config(route_name='gallery', renderer="../templates/gallery.mako")
 @view_config(route_name='custom', renderer="../templates/custom.mako")
 @view_config(route_name='home', renderer="../templates/welcome.mako")
+@view_config(route_name='home_gimmicky', renderer="../templates/welcome_gimmicky.mako")
 @view_config(route_name='home_text', renderer="../templates/welcome_text.mako")
 @view_config(route_name='pymol', renderer="../templates/pymol_converter.mako")
 @view_config(route_name='main_docs', renderer="../templates/docs.mako")
@@ -46,7 +47,7 @@ def my_view(request):
         log.warn(f'Non admin user ({User.get_username(request)}) attempted to view admin page')
         page = request.matched_route.name
     else:
-        log.info(f'page {request.matched_route.name} ({request.matchdict}) for {User.get_username(request)}')
+        log.info(f'page {request.matched_route.name} {"("+request.matchdict["id"]+")" if request.matchdict and "id" in request.matchdict else ""} for {User.get_username(request)}')
         page = request.matched_route.name
     ## reply is stuff that fills the mako template.
     reply = {'project': 'Michalanglo',

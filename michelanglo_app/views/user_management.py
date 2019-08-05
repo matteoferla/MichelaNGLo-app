@@ -15,6 +15,8 @@ from pyramid.view import view_config
 from ._common_methods import notify_admin
 from ..models import User, Page
 
+import time
+
 import logging
 log = logging.getLogger(__name__)
 

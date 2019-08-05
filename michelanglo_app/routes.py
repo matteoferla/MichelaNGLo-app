@@ -7,6 +7,7 @@ def includeme(config):
     config.add_route('favicon','/favicon.ico')
     config.add_route('home', '/')   ##the home page
     config.add_route('home_text', '/verbose') ### the old home page
+    config.add_route('home_gimmicky', '/gimmicky') ### the newer home page
     config.add_route('custom', '/custom') ### mesh converter
     config.add_route('pdb', '/pdb')   ### pdb converter
     config.add_route('pymol', '/pymol')  ### pymol converter
