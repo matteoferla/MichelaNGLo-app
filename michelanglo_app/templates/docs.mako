@@ -11,5 +11,6 @@
 </%block>
 
 <%block name="main">
+    <p>Choose one of the following topics to continue:</p>
     <%include file="docs/docs_nav.mako"/>
 </%block>

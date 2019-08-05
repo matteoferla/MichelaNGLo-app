@@ -1,11 +1,11 @@
-<ul class="list-group">
-    <a class="list-group-item list-group-item-action" href="/docs/implementations">Generic instructions on implementing a view</a>
-    <a class="list-group-item list-group-item-action" href="/docs/markup">HTML markup documentation ("prolinks")</a>
-    <a class="list-group-item list-group-item-action" href="/docs/cite">Citation</a>
-    <a class="list-group-item list-group-item-action" href="/docs/api">API documentation</a>
-    <a class="list-group-item list-group-item-action" href="/docs/clash">Clash documentation</a>
-    <a class="list-group-item list-group-item-action" href="/docs/image">Imagetoggle documentation</a>
-    <a class="list-group-item list-group-item-action" href="/docs/users">Documentation on users and pages</a>
-    <a class="list-group-item list-group-item-action" href="/docs/gene">Guide on starting with a gene</a>
+<ul class="nav nav-tabs">
+    %for url, name in [('implementations', 'Implementing a view'), ('markup','Prolinks'), ('cite','Citation'), ('api','API'), ('clash','Clash'), ('users','Users & pages'), ('gene','Staring with a gene name')]:
+        %if request.matchdict and "id" in request.matchdict and request.matchdict['id'] == url:
+            <li class="nav-item"><a class="nav-link active" href="/docs/${url}">${name}</a></li>
+        %else:
+            <li class="nav-item"><a class="nav-link" href="/docs/${url}">${name}</a></li>
+        %endif
+
+    %endfor
 </ul>
 <br/>
