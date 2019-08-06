@@ -2,7 +2,7 @@ from ._common_methods import *
 from pyramid.view import view_config
 import json, os
 
-organism = json.load(open(os.path.join('michelanglo_app','orgdex.json')))
+organism = json.load(open(os.path.join('michelanglo_app','organism.json')))
 
 @view_config(route_name='choose_pdb', renderer='json')
 def choose_pdb(request):
