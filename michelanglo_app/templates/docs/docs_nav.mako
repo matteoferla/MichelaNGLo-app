@@ -5,7 +5,6 @@
         %else:
             <li class="nav-item"><a class="nav-link" href="/docs/${url}">${name}</a></li>
         %endif
-
     %endfor
 </ul>
 <br/>

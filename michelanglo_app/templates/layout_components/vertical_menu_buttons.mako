@@ -15,6 +15,7 @@
                             menu_opts = (('Home','/','far fa-home'),
                                ('Convert PyMol file','/pymol','far fa-hammer'),
                                ('Convert PDB file','/pdb','far fa-wrench'),
+                               ('Name to PDB', '/name', 'far fa-id-badge'),
                                ('Convert custom mesh','/custom','far fa-mortar-pestle'),
                                ('Primary documentation','/docs','far fa-books'),
                                ('Gallery','/gallery','far fa-palette'),
