@@ -346,6 +346,16 @@ $('#chat_send').click((event) => {
     }, 0);
 });
 
+    window.onerror = (msg, url, lineNo, columnNo, error) => ops.addToast('JSerror',
+                                                                         'DEBUG: JS Error', [
+                                                                                              'Message: ' + msg,
+                                                                                              'URL: ' + url,
+                                                                                              'Line: ' + lineNo,
+                                                                                              'Column: ' + columnNo,
+                                                                                              'Error object: ' + JSON.stringify(error)
+                                                                                            ].join(' - '),
+                                                                         'bg-danger')
+
 </script>
 
 % if not no_analytics:
