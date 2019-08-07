@@ -209,8 +209,7 @@ class PyMolTranspiler:
                      ('pseudoatom', 5387, (0.8999999761581421, 0.8999999761581421, 0.8999999761581421))])
     _iterate_cmd = "data.append({'ID': ID,  'segi': segi, 'chain': chain, 'resi': resi, 'resn': resn, 'name':name, 'elem':elem, 'reps':reps, 'color':color, 'ss': ss, 'cartoon': cartoon, 'label': label})"
 
-    @PyMolTranspilerDeco
-    def __init__(self, file=None, verbose=False, validation=False, view=None, representation=None, pdb='', skip_disabled=True, job='task', **settings):
+    def __init__(self, file=None, verbose=False, validation=False, view=None, representation=None, pdb='', skip_disabled=True, job='task', run_analysis=True, **settings):
         """
         Converter
         :param: job: this is needed for the async querying of progress in the app, but not the transpiler code itself. see .log method
@@ -264,6 +263,11 @@ class PyMolTranspiler:
         #self.log = lambda msg: self._logbook.append(f'[{datetime.utcnow()} GMT] {msg}')
         #swiched to class method... essentially:
         # self.log = lambda msg: self.__class__.current_task := f'[{datetime.utcnow()} GMT] {msg}'
+        if run_analysis:
+            self._postinit(file, view, representation, skip_disabled, settings)
+
+    @PyMolTranspilerDeco
+    def _postinit(self, file, view, representation, skip_disabled, settings):
         if file:
             #print(file)
             assert '.pse' in file.lower(), 'Only PSE files accepted.'
@@ -378,6 +382,7 @@ class PyMolTranspiler:
             self.convert_representation(representation, **settings)
             self.log(f'[JOB={self.job}] Reps converted.')
 
+
     @classmethod
     def get_atom_id_of_coords(cls, coord):
         """
@@ -399,15 +404,17 @@ class PyMolTranspiler:
     def log(cls, msg):
         cls.current_task = f'[{datetime.utcnow()} GMT] {msg}'
 
+
     @classmethod
     @PyMolTranspilerDeco
     def load_pdb(cls, file):
         """
-        Loads a pdb into a transpiler obj
+        Loads a pdb into a transpiler obj.
+        This causes a segmentation fault at the fix structure step.
         :param file: str file name
         :return: self
         """
-        self = cls()
+        self = cls(run_analysis=False) #this is so badly done.
         with open(file) as w:
             self.raw_pdb = w.read()
         pymol.cmd.load(file)

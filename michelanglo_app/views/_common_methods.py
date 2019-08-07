@@ -38,7 +38,7 @@ def is_malformed(request, *args):
     :param args:
     :return:
     """
-    missing = [k for k in args if k not in request.params]
+    missing = [k for k in args if k not in request.params and f'{k}[]' not in request.params]
     if missing:
         request.response.status = 422
         log.warn(f'{User.get_username(request)} malformed request due to missing {missing}')

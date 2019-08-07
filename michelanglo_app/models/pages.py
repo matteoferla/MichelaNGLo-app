@@ -156,9 +156,7 @@ class Page(Base):
         def substitute(code, pattern, message):
             code = re.sub(f'<[^>]*?{pattern}[\s\S]*?>', message, code, re.IGNORECASE | re.MULTILINE | re.DOTALL)
             pseudo = re.sub('''(<[^>]*?)['`"][\s\S]*?['`"]''', r'\1', code, re.IGNORECASE | re.MULTILINE | re.DOTALL)
-            print(pseudo)
             if re.search(f'<[^>]*?{pattern}[\s\S]*?>', pseudo):  # go extreme.
-                print('here!', pattern)
                 code = re.sub(pattern, message, code, re.IGNORECASE | re.MULTILINE | re.DOTALL)
             return code
 
@@ -181,7 +179,7 @@ class Page(Base):
         request.dbsession.add(self)
 
     def __str__(self):
-        return Page.identifier
+        return str(Page.identifier)
 
     @classmethod
     def select(cls, request, identifier):

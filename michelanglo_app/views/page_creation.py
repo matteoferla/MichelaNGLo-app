@@ -226,9 +226,13 @@ def convert_pdb(request):
             settings['proteinJSON'] = '[{{"type": "file", "value": "{0}"}}]'.format(request.params['pdb']) # url
     else:
         settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true}]'
-        filename = save_file(request,'pdb', field='pdb')
-        trans = PyMolTranspiler.load_pdb(file=filename)
-        settings['pdb'] = [('pdb', '\n'.join(trans.ss)+'\n'+trans.raw_pdb)]
+        filename = save_file(request, 'pdb', field='pdb')
+        raw_pdb = open(filename).read()
+        os.remove(filename)
+        #trans = PyMolTranspiler.load_pdb(file=filename[:5])
+        #settings['pdb'] = [('pdb', '\n'.join(trans.ss)+'\n'+trans.raw_pdb)]
+        ## these lines are blanked out because there is a problem with the conversion to fix a few things.
+        settings['pdb'] = [('pdb', raw_pdb)]
         settings['js'] = 'external'
     commit_submission(request, settings, pagename)
     return {'page': pagename}

@@ -13,32 +13,33 @@
 </%block>
 
 <%block name="main">
+    <style>
+        .pb
+    </style>
     <div class="row">
 
-        <div class="col-12 col-lg-5">
+        <div class="col-12 col-lg-6">
             <div class="input-group mb-3" data-toggle="tooltip"
                                      title="Species">
                 <div class="input-group-prepend">
                     <span class="input-group-text">Species</span>
                 </div>
-                <input type="text" class="form-control" id="species" autocomplete="new-password" value="human">
+                <input type="text" class="form-control rounded-right" id="species" autocomplete="new-password" value="human">
                 <div class="invalid-feedback" id="error_species">Unrecognised name</div>
                 <div class="valid-feedback" id="taxid">Error</div>
             </div>
         </div>
 
-        <div class="col-12 col-lg-5">
+        <div class="col-12 col-lg-6">
             <div class="input-group mb-3" data-toggle="tooltip"
                                      title="A gene name, protein name or Uniprot accession.">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">Gene/protein name</span>
                                     </div>
-                                    <input type="text" class="form-control" id="gene" autocomplete="new-password">
+                                    <input type="text" class="form-control rounded-right" id="gene" autocomplete="new-password">
                                     <div class="invalid-feedback" id="error_gene">Unrecognised name</div>
+                                    <div class="valid-feedback" id="uniprot">Error</div>
                                 </div>
-        </div>
-        <div class="col-2 col-lg-1">
-            <button class="btn btn-success" type="button" id="name_fetch">Go</button>
         </div>
 
 
@@ -49,8 +50,15 @@
 
         </div>
     </div>
-    <p>For further steps see <a href="/docs/gene">documentation</a>.</p>
+    <p>For information on how to get the perfect model for your protein see <a href="/docs/gene">documentation</a>.</p>
+    <div id="staging" style="display: none;">
+        <%include file="pdb_staging_insert.mako"/>
+    </div>
 
+</%block>
+
+<%block name='modals'>
+    <%include file="markup/markup_builder_modal.mako"/>
 </%block>
 
 <%block name='script'>
@@ -59,10 +67,11 @@
         $('#species').on('input', event => {
             let species = $('#species');
             window.taxid ='ERROR';
-            $('#error_species,#taxid').hide();
+            $('#error_species,#taxid,#uniprot').hide();
             species.removeClass('is-valid').removeClass('is-invalid').popover('dispose');
             if (window.species_xhr !== undefined) {
                 window.species_xhr.abort();}
+            $('#matches').html(' ');
             window.species_xhr = $.ajax({url: "/choose_pdb",
                     data: {'item': 'match species',
                            'name': species.val()
@@ -88,14 +97,20 @@
                      error: ops.addErrorToast
                     });
     });
-        $('#species').trigger('input'); //Cannot guarantee the default/stored value is correct.
-        $('#name_fetch').click(event => {
-            $('#name_fetch').attr('disabled','disabled');
+        // starting value. Cannot guarantee the default/stored value is correct.
+        let species = $('#species');
+        if (species.val().toLowerCase() === 'human') {species.val('Human'); window.taxid=9606; species.addClass('is-valid'); $('#taxid').show().text('Taxid: 9606');}
+        else { species.trigger('input');}
+        // gene.
+        $('#gene').on('input', event => {
+            if (window.gene_xhr !== undefined) {
+                window.gene_xhr.abort();}
             let gene = $('#gene');
             let error_gene = $('#error_gene');
             gene.removeClass('is-valid').removeClass('is-invalid');
             error_gene.hide();
-            $.ajax({url: "/choose_pdb",
+            $('#matches').html(' ');
+            window.gene_xhr = $.ajax({url: "/choose_pdb",
                     data: {'item': 'match gene',
                            'gene': gene.val(),
                            'species': window.taxid
@@ -106,15 +121,54 @@
                                       else {
                                           if (msg.corrected_gene) {gene.val(msg.corrected_gene)}
                                           gene.addClass('is-valid');
-                                          $('#matches').html(msg.pdbs.join(' &mdash; '));}
-                ops.addToast('xxx','xxx',JSON.stringify(msg),'bg-warning');
-                                      $('#name_fetch').removeAttr('disabled');
+                                          $('#uniprot').show().html('Uniprot: <a href="https://www.uniprot.org/uniprot/'+msg.uniprot+'" target="_blank">'+msg.uniprot+' <i class="far fa-external-link-alt"></i></a>');
+                                          let matches = $('#matches');
+                                          if (msg.pdbs.length > 0) {
+                                              matches.html(msg.pdbs.map(v => v+' <i class="fas fa-spinner fa-spin"></i>').join(' <br/> '));
+                                              get_pdbs(msg.pdbs);
+                                          } else {
+                                              matches.html('No crystal structures to show.');
+                                          }
+                                      }
                                     },
                      error: ops.addErrorToast
                     });
 
         });
 
+        window.get_pdbs = pdbs => {
+            $.ajax({
+                url: "/choose_pdb",
+                data: {
+                    'item': 'get_pdbs',
+                    'entries': pdbs,
+                    'species': window.taxid
+                },
+                method: 'POST',
+                success: msg => {
+                    if (msg.descriptions !== undefined) {
+                        $('#matches').html(msg.descriptions);
+                        $('[name="pdb"]').click(event => load_pdb( $( event.target).data('code') ) );
+                    }
+                    else {ops.addToast('issue', 'Issue', JSON.stringify(msg),'bg-danger');}
+                },
+                error: ops.addErrorToast
+            });
+        };
+
+        window.load_pdb = pdb => {
+            $('#staging').show();
+            window.pdb = pdb;
+            window.myData = undefined;
+            NGL.stageIds = {};
+            $('#viewcode').text('<div role="NGL" data-load="'+pdb+'" ></div>');
+            NGL.specialOps.multiLoader('viewport',[{'type': 'rcsb','value': pdb}]);
+            NGL.specialOps.showTitle('viewport', 'Loaded: '+ pdb);
+        };
+
+        <%include file="markup/markup_builder_modal.js"/>
+
+        <%include file="pdb_staging_insert.js"/>
 
 
     });
