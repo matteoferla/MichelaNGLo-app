@@ -74,14 +74,16 @@ class PDBMeta:
 
     def get_range_by_entity(self, entity):
         if 'source' in entity:
-            mappings = entity['source'][0]['mappings']
-            if len(entity['source'][0]['mappings']) > 1:
-                raise ValueError('MULTIPLE MAPPINGS?!')
-            s = mappings[0]['start']['residue_number']
-            e = mappings[0]['end']['residue_number']
-            return (s, e)
+            if len(entity['source']):
+                mappings = entity['source'][0]['mappings']
+                if len(entity['source'][0]['mappings']) > 1:
+                    raise ValueError('MULTIPLE MAPPINGS?!')
+                s = mappings[0]['start']['residue_number']
+                e = mappings[0]['end']['residue_number']
+                return (s, e)
+            else: ## synthetic.
+                return (1, len(entity['sequence']))
         else:
-            print(self.data)
             raise ValueError('This is not a peptide')
 
     def get_proteins(self):
@@ -110,5 +112,5 @@ class PDBMeta:
                    entity["in_chains"]]
         hetero = [(f'{entity["chem_comp_ids"][0]} and :{chain}',
                    "/".join(entity["molecule_name"])) for entity in self.get_nonproteins() for chain in
-                  entity["in_chains"]]
+                  entity["in_chains"] if entity["molecule_name"] != "water"]
         return {'peptide': peptide, 'hetero': hetero}

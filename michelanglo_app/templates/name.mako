@@ -44,6 +44,9 @@
 
         </div>
     <div class="row">
+        <div class="col-12" id="ext_links">
+
+        </div>
         <div class="col-12" id="matches">
 
         </div>
@@ -69,6 +72,7 @@
             if (window.species_xhr !== undefined) {
                 window.species_xhr.abort();}
             $('#matches').html(' ');
+            $('#ext_links').html(' ');
             window.species_xhr = $.ajax({url: "/choose_pdb",
                     data: {'item': 'match species',
                            'name': species.val()
@@ -107,6 +111,7 @@
             gene.removeClass('is-valid').removeClass('is-invalid');
             error_gene.hide();
             $('#matches').html(' ');
+            $('#ext_links').html(' ');
             window.gene_xhr = $.ajax({url: "/choose_pdb",
                     data: {'item': 'match gene',
                            'gene': gene.val(),
@@ -119,6 +124,7 @@
                                           if (msg.corrected_gene) {gene.val(msg.corrected_gene)}
                                           gene.addClass('is-valid');
                                           $('#uniprot').show().html('Uniprot: <a href="https://www.uniprot.org/uniprot/'+msg.uniprot+'" target="_blank">'+msg.uniprot+' <i class="far fa-external-link-alt"></i></a>');
+                                          $('#ext_links').html('<a>View <a href="www.rcsb.org/pdb/protein/'+msg.uniprot+'" target="_blank">PDB entry</a> for more information. If no structures are available see <a href="https://swissmodel.expasy.org/repository/uniprot/'+msg.uniprot+'" target="_blank">Swiss-Model entry</a>.</p>');
                                           let matches = $('#matches');
                                           if (msg.pdbs.length > 0) {
                                               matches.html(msg.pdbs.map(v => v+' <i class="fas fa-spinner fa-spin"></i>').join(' <br/> '));

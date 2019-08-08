@@ -72,8 +72,15 @@ def choose_pdb(request):
         if malformed:
             return {'status': malformed}
         pdbs = request.params.getall('entries[]')
+        log.info(f'{User.get_username(request)} wants pdb list')
         #PDBMeta is in common methods
-        return {'descriptions': ' <br/> '.join([PDBMeta(entry).wordy_describe() for entry in pdbs])}
+        details = []
+        for entry in pdbs:
+            try:
+                details.append(PDBMeta(entry).wordy_describe())
+            except KeyError:
+                pass # this protein was removed. We shalt speak of it.
+        return {'descriptions': ' <br/> '.join(details)}
     else:
         request.response.status = 400
         return {'status': 'unknown cmd'}
