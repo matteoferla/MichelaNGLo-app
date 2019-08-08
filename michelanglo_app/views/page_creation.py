@@ -12,7 +12,7 @@ import json
 
 PyMolTranspiler.tmp = os.path.join('michelanglo_app', 'temp')
 
-from ._common_methods import is_js_true, is_malformed
+from ._common_methods import is_js_true, is_malformed, PDBMeta
 import logging
 log = logging.getLogger(__name__)
 
@@ -40,12 +40,35 @@ def save_file(request, extension, field='file'):
 ########################################################################################
 #### Page <> User DB
 
+def stringify_protein_description(settings):
+    descr = ''
+    if 'descriptors' in settings:
+        #{'peptide': [f'{first_resi}-{last_resi}:{chain}', ..], 'hetero': [f'[{resn}]{resi}:{chain}', ..]}
+        template = '<span class="prolink" data-toggle="protein" data-target="viewport" data-focus="{focus}" data-selection="{selection}">{label}</span>'
+        descr += '\n\n### peptide and nucleic acid chains\n\n'
+        if settings['descriptors']['peptide']:
+            for p, n in settings['descriptors']['peptide']:
+                if n:
+                    descr += '* '+template.format(focus='domain', selection=p, label=f'{n} ({p})') + '\n'
+                else:
+                    descr += '* '+template.format(focus='domain', selection=p, label=p) + '\n'
+            descr += '\n\n### ligands and prostetic groups\n\n'
+        if settings['descriptors']['hetero']:
+            for p, n in settings['descriptors']['hetero']:
+                if p.find('HOH') != -1 or p.find('WAT') != -1:
+                    if n:
+                        descr += '* ' + template.format(focus='residue', selection=p, label=f'{n} ({p})') + '\n'
+                    else:
+                        descr += '* ' + template.format(focus='residue', selection=p, label=p) + '\n'
+    return descr
+
 def anonymous_submission(request, settings, pagename):
     settings['authors'] = ['anonymous']
     settings['freelyeditable'] = True
     settings['description'] = '## Description\n\n' +\
               'Only <a href="#" class="text-secondary" data-toggle="modal" data-target="#login">logged-in users</a>'+\
-              ' can edit data pages.\n\nThis page will be deleted in 24 hours.'
+              ' can edit data pages.\n\nThis page will be deleted in 24 hours.' +\
+                              stringify_protein_description(settings)
     trashcan = get_trashcan(request)
     trashcan.owned.add(pagename)
     request.dbsession.add(trashcan)
@@ -53,6 +76,7 @@ def anonymous_submission(request, settings, pagename):
 def user_submission(request, settings, pagename):
     user = request.user
     user.owned.add(pagename)
+    settings["description"] = 'Editable text. press pen to edit (permissions permitting).\n' + stringify_protein_description(settings)
     settings["authors"] = [user.name]
     request.dbsession.add(user)
     settings['editors'] = [user.name]
@@ -150,8 +174,6 @@ def convert_pse(request):
         else:
             log.warn(f'Unknown mode requested by {User.get_username(request)}.')
             return {'snippet': 'Please stop trying to hack the server', 'error_title': 'A major error arose', 'error': 'danger', 'error_msg': 'The code failed to run serverside. Most likely malicius','viewport':settings['viewport']}
-
-
         # deal with user permissions.
         code = 1
         request.session['status'] = make_msg('Permissions', 'Finalising user permissions')
@@ -160,6 +182,7 @@ def convert_pse(request):
         settings['pdb'] = []
         request.session['status'] = make_msg('Load function', 'Making load function')
         settings['loadfun'] = trans.get_loadfun_js(tag_wrapped=True, **settings)
+        settings['descriptors'] = trans.description
         if trans.raw_pdb:
             settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true, "loadFx": "loadfun"}]'
             settings['pdb'] = [('pdb', '\n'.join(trans.ss)+'\n'+trans.raw_pdb)] #note that this used to be a string,
@@ -222,6 +245,7 @@ def convert_pdb(request):
     if request.params['mode'] == 'code':
         if len(request.params['pdb']) == 4:
             settings['proteinJSON'] = '[{{"type": "rcsb", "value": "{0}"}}]'.format(request.params['pdb']) # PDB code.
+            settings['descriptors'] = PDBMeta(request.params['pdb']).describe()
         else:
             settings['proteinJSON'] = '[{{"type": "file", "value": "{0}"}}]'.format(request.params['pdb']) # url
     else:
@@ -250,12 +274,9 @@ def status_check_view(request):
 
     msg = PyMolTranspiler.current_task
     if 'idle' in msg:
-        if 'status' in request.session and request.session['status']:
-            return request.session['status']
-        else:#unlikely and most likely symptomatic of an issue.
-            return {'condition': 'running',
-                    'title': 'Starting',
-                    'body': 'The converter is idle ATM.',
+        return {'condition': 'running',
+                    'title': 'Running',
+                    'body': 'Conversion in progress &mdash;final touches',
                     'color': 'bg-warning'}
     elif User.get_username(request) in msg:
         return {'condition': 'running',

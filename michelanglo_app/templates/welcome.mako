@@ -34,7 +34,7 @@
             "text": '''Create interactive protein views starting from
                         <ul class="text-left">
                             <li><a href="/pymol">a PyMOL PSE file</a> or</li>
-                            <li><a href="/pymol">a PDB code/file</a></li>
+                            <li><a href="/pdb">a PDB code/file</a></li>
                             <li><a href="/name">a gene name</a></li>
                             </ul>''',
 

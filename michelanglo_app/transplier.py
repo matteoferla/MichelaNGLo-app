@@ -17,7 +17,6 @@ from pprint import PrettyPrinter
 from collections import defaultdict
 pprint = PrettyPrinter().pprint
 
-
 import sys, json
 from datetime import datetime
 from warnings import warn
@@ -259,6 +258,7 @@ class PyMolTranspiler:
         self.code=''
         self.raw_pdb=None  #this is set from the instance `prot.raw_pdb = open(file).read()`
         self.custom_mesh = []
+        self.description = {}
         #self._logbook = []  ##not a logging instance!
         #self.log = lambda msg: self._logbook.append(f'[{datetime.utcnow()} GMT] {msg}')
         #swiched to class method... essentially:
@@ -362,6 +362,7 @@ class PyMolTranspiler:
             self.log(f'[JOB={self.job}] Reps converted.')
             pdbfile = os.path.join(self.tmp, os.path.split(file)[1].replace('.pse','.pdb'))
             pymol.cmd.save(pdbfile)
+            self.describe()
             pymol.cmd.delete('all')
             if names_for_mesh_route:
                 if 1==0: ##TODO reimplement
@@ -381,6 +382,30 @@ class PyMolTranspiler:
         if representation:
             self.convert_representation(representation, **settings)
             self.log(f'[JOB={self.job}] Reps converted.')
+
+    def describe(self):
+        ## determine how and what the chains are labelled and what are their ranges.
+        # {'peptide': [f'{first_resi}-{last_resi}:{chain}', ..], 'hetero': [f'[{resn}]{resi}:{chain}', ..]}
+        first_resi = defaultdict(lambda: 9999)
+        last_resi = defaultdict(lambda: -9999)
+        heteros = set()
+        for on in pymol.cmd.get_names(enabled_only=1): #pymol.cmd.get_names_of_type('object:molecule') does not handle enabled.
+            if pymol.cmd.get_type(on) == 'object:molecule':
+                o = pymol.cmd.get_model(on)
+                if o:
+                    for at in o.atom:
+                        if not at.hetatm:
+                            if int(at.resi) < first_resi[at.chain]:
+                                first_resi[at.chain] = int(at.resi)
+                            if int(at.resi) > last_resi[at.chain]:
+                                last_resi[at.chain] = int(at.resi)
+                        else:
+                            heteros.add((f'{at.resn} and :{at.chain}', None))
+        self.description = {'peptide': [(f'{first_resi[chain]}-{last_resi[chain]}:{chain}', None) for chain in first_resi], 'hetero': list(heteros)}
+        self.log(f'[JOB={self.job}] description generated.')
+        return self.description
+
+
 
 
     @classmethod

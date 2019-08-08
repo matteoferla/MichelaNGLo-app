@@ -72,59 +72,8 @@ def choose_pdb(request):
         if malformed:
             return {'status': malformed}
         pdbs = request.params.getall('entries[]')
-        return {'descriptions': ' <br/> '.join([PDBMeta(entry).describe() for entry in pdbs])}
+        #PDBMeta is in common methods
+        return {'descriptions': ' <br/> '.join([PDBMeta(entry).wordy_describe() for entry in pdbs])}
     else:
         request.response.status = 400
         return {'status': 'unknown cmd'}
-
-
-class PDBMeta:
-    """
-    Herein by chain the chain letter is meant, while the data of the chain is called entity... terrible.
-    """
-    def __init__(self, entry):
-        self.code, self.chain = entry.split('_')
-        reply = requests.get(f'http://www.ebi.ac.uk/pdbe/api/pdb/entry/molecules/{self.code}').json()
-        self.data = reply[self.code.lower()]
-
-    def get_data_by_chain(self, chain=None):
-        if not chain:
-            chain = self.chain
-        return [entity for entity in self.data if chain in entity['in_chains']][0]
-
-    def get_range_by_chain(self, chain=None):
-        if not chain:
-            chain = self.chain
-        entity = self.get_data_by_chain(chain)
-        return self.get_range_by_entity(entity)
-
-    def get_range_by_entity(self, entity):
-        if 'source' in entity:
-            mappings = entity['source'][0]['mappings']
-            if len(entity['source'][0]['mappings']) > 1:
-                raise ValueError('MULTIPLE MAPPINGS?!')
-            s = mappings[0]['start']['residue_number']
-            e = mappings[0]['end']['residue_number']
-            return (s, e)
-        else:
-            raise ValueError('This is not a peptide')
-
-    def get_proteins(self):
-        return [entity for entity in self.data if self.is_peptide(entity)]
-
-    def get_nonproteins(self):
-        return [entity for entity in self.data if not self.is_peptide(entity)]
-
-    def is_peptide(self, entity):
-        return entity['molecule_type'] == 'polypeptide(L)'
-
-    def describe_entity(self, entity):
-        if self.is_peptide(entity):
-            return f'{"/".join(entity["molecule_name"])} as chain {"/".join(entity["in_chains"])} [{"-".join([str(n) for n in self.get_range_by_entity(entity)])}]'
-        else:
-            return f'{"/".join(entity["molecule_name"])} in chain {"/".join(entity["in_chains"])}'
-
-    def describe(self, delimiter=' + '):
-        descr = delimiter.join([self.describe_entity(entity) for entity in self.get_proteins()])
-        descr += delimiter.join([self.describe_entity(entity) for entity in self.get_nonproteins()])
-        return f'<span class="prolink" name="pdb" data-code="{self.code}" data-chain="{self.chain}">{self.code}</span> ({descr})'

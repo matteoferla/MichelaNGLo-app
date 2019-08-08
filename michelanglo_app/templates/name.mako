@@ -13,9 +13,7 @@
 </%block>
 
 <%block name="main">
-    <style>
-        .pb
-    </style>
+    <p>This form simply searches for PDBs that match your protein. It does not account for homologues or models. For information on how to get the perfect model for your protein see <a href="/docs/gene">documentation</a>.</p>
     <div class="row">
 
         <div class="col-12 col-lg-6">
@@ -50,7 +48,6 @@
 
         </div>
     </div>
-    <p>For information on how to get the perfect model for your protein see <a href="/docs/gene">documentation</a>.</p>
     <div id="staging" style="display: none;">
         <%include file="pdb_staging_insert.mako"/>
     </div>
@@ -161,6 +158,7 @@
             window.pdb = pdb;
             window.myData = undefined;
             NGL.stageIds = {};
+            $('#viewport').html('');
             $('#viewcode').text('<div role="NGL" data-load="'+pdb+'" ></div>');
             NGL.specialOps.multiLoader('viewport',[{'type': 'rcsb','value': pdb}]);
             NGL.specialOps.showTitle('viewport', 'Loaded: '+ pdb);
