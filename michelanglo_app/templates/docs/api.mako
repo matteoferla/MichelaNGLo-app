@@ -58,7 +58,7 @@ data = {'page': 'the-long-uuid-for-the-page',
 r = mike.post(base_url+'/edit_user-page', data=data)
 print(r.content)
 </code></pre>
-<p>To prevent XSS threats, <code>loadfun</code> and <code>script</code> tags in the description (or title) are forbidden for regular users &mdash;email the site admin to discuss alternatives.</p>
+<p>To prevent XSS threats (<a href="data/7c76d65a-4a98-4768-8166-ad7bd38f148e">example</a>), <code>loadfun</code> and <code>script</code> tags in the description (or title) are forbidden for regular users &mdash;email the site admin to discuss alternatives.</p>
 
 <h4>Example</h4>
 <p>Let's copy the content of one page into another (note this can be done in the main page)</p>
@@ -263,4 +263,6 @@ class MikeAPI:
     def page_link(self, uuid):
         display(HTML(f'<a href="{self.url}data/{uuid}" target="_blank">{uuid}</a>'))
 </code></pre>
+
+For a Jupyter notebook version of this, see <a href="https://colab.research.google.com/drive/1f6lv3kTHSvq0Df7rszn8KzwcucagwY1s" target="_blank">this Google Colab notebook</a>.
 </%block>
