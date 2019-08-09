@@ -53,9 +53,9 @@ def stringify_protein_description(settings):
                 else:
                     descr += '* '+template.format(focus='domain', selection=p, label=p) + '\n'
             descr += '\n\n### ligands and prostetic groups\n\n'
-        if settings['descriptors']['hetero']:
+        if settings['descriptors']['hetero']: # {('ORO and :A', None), ('SO4 and :A', None), etc.
             for p, n in settings['descriptors']['hetero']:
-                if p.find('HOH') != -1 or p.find('WAT') != -1:
+                if p.find('HOH') == -1 and p.find('WAT') == -1:
                     if n:
                         descr += '* ' + template.format(focus='residue', selection=p, label=f'{n} ({p})') + '\n'
                     else:
@@ -190,6 +190,7 @@ def convert_pse(request):
             settings['proteinJSON'] = '[{{"type": "rcsb", "value": "{0}", "loadFx": "loadfun"}}]'.format(trans.pdb)
         else:
             settings['proteinJSON'] = '[{{"type": "file", "value": "{0}", "loadFx": "loadfun"}}]'.format(trans.pdb)
+        settings['title'] = 'User submitted structure (from PyMOL file)'
         commit_submission(request, settings, pagename)
         # save sharable page data
         request.session['status'] = make_msg('Saving', 'Storing data for retrieval.')
@@ -258,6 +259,7 @@ def convert_pdb(request):
         ## these lines are blanked out because there is a problem with the conversion to fix a few things.
         settings['pdb'] = [('pdb', raw_pdb)]
         settings['js'] = 'external'
+    settings['title'] = 'User submitted structure (from PDB)'
     commit_submission(request, settings, pagename)
     return {'page': pagename}
 

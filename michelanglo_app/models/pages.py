@@ -145,7 +145,7 @@ class Page(Base):
             os.remove(self.path)
             self.exists = False
         else:
-            pass
+            print('DEBUG.... DELETION OF A NON EXISTANT PAGE IS IMPOSSIBLE')
         return self
 
     @staticmethod

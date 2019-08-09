@@ -171,7 +171,7 @@ def delete(request):
     malformed = is_malformed(request, 'page')
     if malformed:
         return {'status': malformed}
-    page = Page(request.params['page'])
+    page = Page.select(request, request.params['page'])
     log.info(f'{User.get_username(request)} is requesting to delete page {page}')
     verdict = permission(request, page, 'del', key_label='key')
     if verdict['status'] != 'OK':

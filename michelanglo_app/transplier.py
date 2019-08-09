@@ -206,7 +206,7 @@ class PyMolTranspiler:
                      ('hassium', 5383, (0.9019607901573181, 0.0, 0.18039216101169586)), ('meitnerium', 5384, (0.9215686321258545, 0.0, 0.14901961386203766)),
                      ('deuterium', 5385, (0.8999999761581421, 0.8999999761581421, 0.8999999761581421)), ('lonepair', 5386, (0.5, 0.5, 0.5)),
                      ('pseudoatom', 5387, (0.8999999761581421, 0.8999999761581421, 0.8999999761581421))])
-    _iterate_cmd = "data.append({'ID': ID,  'segi': segi, 'chain': chain, 'resi': resi, 'resn': resn, 'name':name, 'elem':elem, 'reps':reps, 'color':color, 'ss': ss, 'cartoon': cartoon, 'label': label})"
+    _iterate_cmd = "data.append({'ID': ID,  'segi': segi, 'chain': chain, 'resi': resi, 'resn': resn, 'name':name, 'elem':elem, 'reps':reps, 'color':color, 'ss': ss, 'cartoon': cartoon, 'label': label, 'type': type})"
 
     def __init__(self, file=None, verbose=False, validation=False, view=None, representation=None, pdb='', skip_disabled=True, job='task', run_analysis=True, **settings):
         """
@@ -611,13 +611,13 @@ class PyMolTranspiler:
         """
         if isinstance(represenation,str):
             text=represenation
-            headers=('ID','segi','chain','resi', 'resn', 'name', 'elem','reps', 'color', 'cartoon', 'label') # gets ignored if iterate> like is present
+            headers = None
             for line in text.split('\n'):
                 if not line:
                     continue
                 elif line.find('terate') != -1:  # twice. [Ii]terate
                     if line.count(':'):
-                        continue
+                        headers=('ID','segi','chain','resi', 'resn', 'name', 'elem', 'reps', 'color', 'cartoon', 'label') # gets ignored if iterate> like is present
                     else:
                         headers = [element.rstrip().lstrip() for element in line.split(',')][1:]
                 else:
@@ -639,8 +639,9 @@ class PyMolTranspiler:
         repdata = {rep2name[i]: deepcopy(structure) for i in (0, 1, 2, 5, 6, 7, 8, 9, 11, 12)}
         for atom in self.atoms:
             reps = [r == '1' for r in reversed("{0:0>12b}".format(int(atom['reps'])))]
-            reps[1] = reps[1] or reps[4]  # hetero spheres fix
-            reps[7] = reps[7] or reps[10]  # hetero line fix
+            if atom['type'] == 'HETATM':
+                reps[1] = reps[1] or reps[4]  # hetero spheres fix
+                reps[7] = reps[7] or reps[10]  # hetero line fix
             assert atom['chain'], 'The atom has no chain. This ought to be fixed upstream!'
             for i in (0, 1, 2, 5, 6, 7, 8, 9, 11):
                 repdata[ rep2name[i] ][ atom['chain'] ][ atom['resi'] ][ atom['name'] ] = reps[i]
