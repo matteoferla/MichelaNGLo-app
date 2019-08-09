@@ -80,19 +80,20 @@ class Page(Base):
 
     def save(self, settings=None):
         ## sort things out
-        if self.settings is None: # bad coding.
+        if settings is None:
+            settings = {}
+        if self.settings is None: # technically impossible
             self.settings = {}
-        if settings is not None:  ### I need to consider whether, for the purpose of the API. I really want everything saved.
-            #print(settings, self.settings)
-            settings = {**self.settings, **settings}
-        else:
+        ## merge.
+        settings = {**self.settings, **settings}
+        if not settings:  ## last ditch.
             settings = self.load().settings
         if 'description' not in settings:
-            settings['description'] = '## Description\n\nEditable text. press pen to edit.'
+            settings['description'] = 'Warning: Description lost??!'
         if 'title' not in settings:
-            settings['title'] = 'User submitted structure'
+            settings['title'] = 'Warning: Your title has been somehow lost'
         for fun, keys in ((list, ('editors', 'visitors', 'authors')),
-                      (bool, ('image', 'uniform_non_carbon', 'verbose', 'validation', 'save', 'public','confidential')),
+                      (bool, ('image', 'uniform_non_carbon', 'verbose', 'validation', 'save', 'public','confidential', 'encryption')),
                       (str, ('viewport', 'stick', 'backgroundcolor', 'loadfun', 'proteinJSON', 'pdb', 'description', 'title', 'data_other'))):
             for key in keys:
                 if key not in settings:

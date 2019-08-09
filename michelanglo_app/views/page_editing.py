@@ -108,6 +108,7 @@ def edit(request):
                 page.settings['image'] = False
         # save
         page.edited = True
+        page.title = page.settings['title']
         page.save().commit(request)
 
 
