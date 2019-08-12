@@ -114,17 +114,18 @@ $('#submit').click(function () {
     data = new FormData();
     // determine mode
     var mode='file'; //no longer need
-    // deal with the include PDB data which means that the it is not a publically available PDB.
-    if ($('#pdb_string').is(':checked')) {data.append( 'pdb', ''); data.append('pdb_string',1)} else {data.append( 'pdb', valid_value('#pdb'));}
+    // deal with the include PDB data which means that the it is not a publicly available PDB.
+    // 'string as in store the coordinates as a string in js
+    if ($('#pdb_string').is(':checked')) {data.append( 'pdb', false);} else {data.append( 'pdb', valid_value('#pdb'));}
     data.append( 'mode', mode );
-    // output mode
+    // output mode... no longer active.
     if        (mode == 'out') {
         data.append('pymol_output', valid_value('#pymol_output'));
         ops.addToast('submitting','Submitting','Request is being sent.','bg-info');
     }
     // demo pse mode
     else if (mode == 'file' && !! window.demo_pse) {
-        data.append('demo_file',window.demo_pse);
+        data.append('demo_filename',window.demo_pse);
         ops.addToast('submitting','Submitting','Request is being sent.','bg-info');
     }
     // pse upload mode
@@ -141,7 +142,7 @@ $('#submit').click(function () {
     else {throw 'Impossible mode';}
     //finish adding data.
     data.append( 'uniform_non_carbon',$('#uniform_non_carbon').is(':checked'));
-    data.append('stick_format',$("input[name='sticks']:checked").val());
+    data.append('stick_format', $("input[name='sticks']:checked").val());
     // ajax to convert_pse
     //{pdb: pdb, uniform_non_carbon: uniform_non_carbon, pymol_output: pymol_output, indent: indent, cdn: cdn}
     $('#submit .far').detach();
@@ -160,9 +161,13 @@ $('#submit').click(function () {
                 window.location.href = "/data/"+msg.page;
                 $('#submit').removeAttr('disabled').children('.far').detach();
             })
-            .fail(function () {
-                ops.addToast('jobcompletion','Conversion issue','The server is unsure about something.','bg-warning');
+            .fail(function (xhr) {
+                ops.addErrorToast(xhr);
                 $('#submit').removeAttr('disabled').children('.far').detach();
             });
     setTimeout(() => ops.statusCheck(), 2000);
 });
+
+//why is it stored!?
+if (! $('#pdb_string').is(':checked')) $('#pdb_string').click();
+$('#pdb').attr('disabled', "disabled");

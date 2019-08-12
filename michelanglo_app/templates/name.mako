@@ -64,7 +64,7 @@
 <%block name='script'>
 <script type="text/javascript">
     $(document).ready(function () {
-        $('#species').on('input', event => {
+        $('#species').on('keyup', event => {
             let species = $('#species');
             window.taxid ='ERROR';
             $('#error_species,#taxid,#uniprot').hide();
@@ -103,9 +103,15 @@
         if (species.val().toLowerCase() === 'human') {species.val('Human'); window.taxid=9606; species.addClass('is-valid'); $('#taxid').show().text('Taxid: 9606');}
         else { species.trigger('input');}
         // gene.
-        $('#gene').on('input', event => {
+        $('#gene').on('keyup', event => {
             if (window.gene_xhr !== undefined) {
                 window.gene_xhr.abort();}
+            if (window.taxid === 'ERROR') {
+                //ops.addToast('taxid','Issue','Please check species is correct.','bg-info');
+                $('#species').addClass('is-invalid');
+                $('#error_species').show().text('Unknown species');
+                return 0;
+            }
             let gene = $('#gene');
             let error_gene = $('#error_gene');
             gene.removeClass('is-valid').removeClass('is-invalid');
@@ -140,6 +146,12 @@
         });
 
         window.get_pdbs = pdbs => {
+            if (window.taxid === 'ERROR') {
+                //ops.addToast('taxid','Issue','Please check species is correct.','bg-info');
+                $('#species').addClass('is-invalid');
+                $('#error_species').show().text('Unknown species');
+                return 0;
+            }
             $.ajax({
                 url: "/choose_pdb",
                 data: {
