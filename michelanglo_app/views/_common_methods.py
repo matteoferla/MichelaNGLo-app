@@ -7,9 +7,9 @@ def is_js_true(value):
     """
     booleans get converted into strings in json. This fixes that.
     """
-    if not value or value in ('false', 'False', False, 'No','no', 'F','null', 'off'):
+    if not value or value in ('false', 'False', False, 'No','no', 'F','null', 'off', 0, ''):
         return False
-    else:
+    else:  ## while also return True if its a number or string.
         return True
 
 def notify_admin(msg):

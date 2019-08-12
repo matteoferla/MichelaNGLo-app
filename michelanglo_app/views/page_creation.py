@@ -21,8 +21,8 @@ def demo_file(request):
     Needed for convert_pse. Paranoid way to prevent user sending a spurious demo file name (e.g. ~/.ssh/).
     """
     demos=os.listdir(os.path.join('michelanglo_app', 'demo'))
-    if request.params['demo_file'] in demos:
-        return os.path.join('michelanglo_app', 'demo', request.params['demo_file'])
+    if request.params['demo_filename'] in demos:
+        return os.path.join('michelanglo_app', 'demo', request.params['demo_filename'])
     else:
         raise Exception('Non existant demo file requested. Possible attack!')
 
@@ -100,32 +100,19 @@ def get_uuid(request):
 
 ########################################################################################
 ### VIEWS
-
 @view_config(route_name='convert_pse', renderer="json")
 def convert_pse(request):
     user = request.user
     log.info('Conversion of PyMol requested.')
-    request.session['status'] = make_msg('Checking data', 'The data has been recieved and is being checked')
+    request.session['status'] = make_msg('Checking data', 'The data has been received and is being checked')
     try:
-        minor_error='' #does nothing atm.
-
-        ## assertions
-        if not 'pdb_string' in request.params and not request.params['pdb']:
-            response = {'error': 'danger', 'error_title': 'No PDB code', 'error_msg': 'A PDB code is required to make the NGL viewer show a protein.','snippet':'','validation':''}
-            log.warn(response)
-            request.session['status'] = make_msg(response['error_title'],response['error_msg'],'error','bg-danger')
-            return response
-        elif request.params['mode'] == 'out' and not request.params['pymol_output']:
-            response={'error': 'danger', 'error_title': 'No PyMOL code', 'error_msg': 'PyMOL code is required to make the NGL viewer show a protein.','snippet':'','validation':''}
-            log.warn(response)
-            request.session['status'] = make_msg(response['error_title'], response['error_msg'], 'error', 'bg-danger')
-            return response
-        elif request.params['mode'] == 'file' and not (('demo_file' in request.params and request.params['demo_file']) or ('file' in request.params and request.params['file'].filename)):
-            response = {'error': 'danger', 'error_title': 'No PSE file', 'error_msg': 'A PyMOL file to make the NGL viewer show a protein.','snippet':'','validation':''}
-            log.warn(response)
-            request.session['status'] = make_msg(response['error_title'], response['error_msg'], 'error', 'bg-danger')
-            return response
-
+        malformed = is_malformed(request, 'uniform_non_carbon', 'stick_format')
+        if malformed:
+            return {'status': malformed}
+        if 'demo_filename' not in request.params and 'file' not in request.params:
+            request.response.status = 422
+            log.warn(f'{User.get_username(request)} malformed request due to missing demo_filename or file')
+            return f'Missing field (either demo_filename or file are compulsory)'
         ## set settings
         settings = {'viewport': 'viewport',#'tabbed': int(request.params['indent']),
                     'image': None,
@@ -138,42 +125,33 @@ def convert_pse(request):
                     'location_viewport': 'left',
                     'columns_viewport': 9,
                     'columns_text': 3}
-
         # parse data dependding on mode.
         request.session['status'] = make_msg('Conversion', 'Conversion in progress')
         ## case 1: user submitted output
-        if request.params['mode'] == 'out':
-            view = ''
-            reps = ''
-            data = request.params['pymol_output'].split('PyMOL>')
-            for block in data:
-                if 'get_view' in block:
-                    view = block
-                elif 'iterate' in block:  # strickly lowercase as it ends in _I_terate
-                    reps = block
-                elif not block:
-                    pass  # empty line.
-                else:
-                    minor_error = 'Unknown block: ' + block
-            trans = PyMolTranspiler(view=view, representation=reps, pdb=request.params['pdb'], job=User.get_username(request), **settings)
+        ##### mode no longer supported
         ## case 2: user uses pse
-        elif request.params['mode'] == 'file':
-            ## case 2b: DEMO mode.
-            if 'demo_file' in request.params:
-                filename=demo_file(request) #prevention against attacks
-            ## case 2a: file mode.
-            else:
-                filename = save_file(request,'pse')
-            trans = PyMolTranspiler(file=filename, job=User.get_username(request), **settings)
-            request.session['file'] = filename
-            if 'pdb_string' in request.params:
-                with open(os.path.join(trans.tmp, os.path.split(filename)[1].replace('.pse','.pdb'))) as fh:
-                    trans.raw_pdb = fh.read()
-            else:
-                trans.pdb = request.params['pdb']
+        ## case 2b: DEMO mode.
+        if 'demo_filename' in request.params:
+            print('demo')
+            mode = 'demo'
+            filename=demo_file(request) #prevention against attacks
+        ## case 2a: file mode.
         else:
-            log.warn(f'Unknown mode requested by {User.get_username(request)}.')
-            return {'snippet': 'Please stop trying to hack the server', 'error_title': 'A major error arose', 'error': 'danger', 'error_msg': 'The code failed to run serverside. Most likely malicius','viewport':settings['viewport']}
+            mode = 'file'
+            print('file')
+            malformed = is_malformed(request, 'file', 'pdb')
+            if malformed:
+                return {'status': malformed}
+            filename = save_file(request, 'pse')
+        trans = PyMolTranspiler(file=filename, job=User.get_username(request), **settings)
+        if mode == 'demo' or not is_js_true(request.params['pdb']):  ## pdb_string checkbox is true means that it adds the coordinates in the JS and not pdb code is given
+                print('include code.')
+                with open(os.path.join(trans.tmp, os.path.split(filename)[1].replace('.pse', '.pdb'))) as fh:
+                    trans.raw_pdb = fh.read()
+        else:
+            print('Code: '+request.params['pdb'])
+            trans.pdb = request.params['pdb']
+        request.session['file'] = filename
         # deal with user permissions.
         code = 1
         request.session['status'] = make_msg('Permissions', 'Finalising user permissions')
@@ -194,11 +172,10 @@ def convert_pse(request):
         commit_submission(request, settings, pagename)
         # save sharable page data
         request.session['status'] = make_msg('Saving', 'Storing data for retrieval.')
-        
         request.session['status'] = make_msg('Loading results', 'Conversion is being loaded',condition='complete', color='bg-info')
         return {'page': pagename}
-    except:
-        log.exception('serious error in page creation from PyMol')
+    except Exception as err:
+        log.exception(f'serious error in page creation from PyMol: {err}')
         request.response.status = 500
         request.session['status'] = make_msg('A server-side error arose', 'The code failed to run serverside.','error','bg-danger')
         return {'status': 'error'}

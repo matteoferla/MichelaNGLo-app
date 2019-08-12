@@ -1,3 +1,44 @@
+minor_error = ''  # does nothing now.
+# The problem is that there is not a standard mode toggle?
+## assertions
+if not 'pdb_string' in request.params and ('pdb' in request.params and not request.params['pdb']):
+    response = {'error': 'danger', 'error_title': 'No PDB code',
+                'error_msg': 'A PDB code is required to make the NGL viewer show a protein.', 'snippet': '',
+                'validation': ''}
+    log.warn(response)
+    request.session['status'] = make_msg(response['error_title'], response['error_msg'], 'error', 'bg-danger')
+    return response
+elif request.params['mode'] == 'out' and not request.params['pymol_output']:
+    response = {'error': 'danger', 'error_title': 'No PyMOL code',
+                'error_msg': 'PyMOL code is required to make the NGL viewer show a protein.', 'snippet': '',
+                'validation': ''}
+    log.warn(response)
+    request.session['status'] = make_msg(response['error_title'], response['error_msg'], 'error', 'bg-danger')
+    return response
+elif request.params['mode'] == 'file' and not (('demo_file' in request.params and request.params['demo_file']) or (
+        'file' in request.params and request.params['file'].filename)):
+    response = {'error': 'danger', 'error_title': 'No PSE file',
+                'error_msg': 'A PyMOL file to make the NGL viewer show a protein.', 'snippet': '', 'validation': ''}
+    log.warn(response)
+    request.session['status'] = make_msg(response['error_title'], response['error_msg'], 'error', 'bg-danger')
+    return response
+
+view = ''
+reps = ''
+data = request.params['pymol_output'].split('PyMOL>')
+for block in data:
+    if 'get_view' in block:
+        view = block
+    elif 'iterate' in block:  # strickly lowercase as it ends in _I_terate
+        reps = block
+    elif not block:
+        pass  # empty line.
+    else:
+        minor_error = 'Unknown block: ' + block
+trans = PyMolTranspiler(view=view, representation=reps, pdb=request.params['pdb'], job=User.get_username(request), **settings)
+
+
+
 
 def store_data(page, settings):
     if 'description' not in settings:

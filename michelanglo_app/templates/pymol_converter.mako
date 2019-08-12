@@ -79,9 +79,9 @@
                         <div class="col-xl-3 col-lg-3 col-md-6 mb-4">
                             ${checkbox(info.attr.uniform_non_carbon, "Uniform non carbons", "uniform_non_carbon", append=None, is_checked=True)}
                         </div>
-                        <div class="col-xl-6 col-lg-6 col-md-8 mb-4">
-                            <div class="input-group" data-toggle="tooltip" data-html="true"
+                        <div class="col-xl-6 col-lg-6 col-md-8 mb-4"  data-toggle="tooltip" data-html="true"
                                  title="${info.attr.sticks|n}">
+                            <div class="input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text" id="input_mode-addon">Sticks as </span>
                                   </div>

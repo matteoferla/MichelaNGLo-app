@@ -151,6 +151,7 @@ def thumbnail(request):
     response.headers.update({
         'Access-Control-Allow-Origin': '*',
     })
+    response.encode_content(encoding='identity') #gzip is pointless on png
     return response
 
 @view_config(route_name='save_pdb', renderer='string')
