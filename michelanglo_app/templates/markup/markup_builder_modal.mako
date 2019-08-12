@@ -12,7 +12,11 @@
           <div class="col-12 col-md-8">
               <p>This tool allows you to create custom anchor elements that control the protein.</p>
             <div class="row">
-                <div class="col-12 mb-2">
+                <div class="col-12 mb-2"
+                     title="Choose the focusing mode to use. If unsure consult 'prolinks' page in the documetation. <br/>But briefly, <code>domain</code> is best to show a region or domain. <code>residue</code> is to show residues in selection and their environs. <code>clash</code> shows a clash."
+                     data-toggle="tooltip"
+                     data-html=true
+                     data-placement="left">
                     <div class="input-group">
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="inputGroup-sizing-sm">Zoom to </span>
@@ -27,9 +31,18 @@
                 </div>
                 </div>
 
+                <%
+                    ##  id type placeholder title
+                    buttons = (('selection','text', '1-10:A','NGL selection of residues to focus on. <code>1:A</code> will select residue 1 of chain A, <code>1-20:B</code> the residues 1 to 20 of chain B, <code>PLP</code> (or <code>[PLP]123:D</code>) will select the residue named PLP (a ligand).<br/>The logical operators <code>and</code> and <code>or</code> can also be used, e.g. <code>:B or :C</code> will select chains B & C.'),
+                    ('color','text','yellow', 'The color to show. It is highly recommended to go for light colors as opposed to dark colors and preferable muted or pastel as opposed to primary. Say <span style="color: darkred">DarkRed</span> is hard to seem, <span style="color: red">Red</span> is too sharp, <span style="color: darkred">coral<Coral</span> or <span style="color: magenta">magenta</span> are better.'),
+                    ('title','text','bla bla', 'The text to show below the structure (optional)'),
+                    ('radius','number',4, 'How many &aring;ngstr&ouml;m to expand around the residue focused upon. 1.5 &Aring; will show residues that hydrogen bond (if hydrogens are shown), salt bridge or &pi; stack, 3&Aring; will show residues that hydrogen bond (within explicit hydrogens)'),
+                    ('tolerance','number',1, 'How high to set the threshhold of marking a clash: leave at 1 if unsure &mdash;see "prolink" documentation for more.'))
+                %>
 
-                %for n,t,d in (('selection','text', '1-10:A'),('color','text','yellow'),('title','text','bla bla'),('radius','number',4),('tolerance','number',1)):
-                    <div class="col-12 col-md-6 mb-2">
+
+                %for n,t,d,h in buttons:
+                    <div class="col-12 col-md-6 mb-2" data-toggle="tooltip" title="${h}" data-html=true data-placement="top" >
                     <div class="input-group">
                       <div class="input-group-prepend">
                         <span class="input-group-text" id="markup_${n}_addon">${n.title()}</span>
@@ -38,7 +51,7 @@
                     </div>
                 </div>
                 %endfor
-                <div class="col-12 col-md-6 mb-2">
+                <div class="col-12 col-md-6 mb-2" data-toggle="tooltip" title="By ligand is intended anything with a HETATM entry, so nucleic acids do not count, while modified residues in older structures are often HETATMs." data-html=true data-placement="top">
                     <div class="border rounded bg-light p-2">
                         <div     class="custom-control custom-switch">
                           <input class="custom-control-input"  id="markup_hetero" type="checkbox" >
@@ -55,17 +68,19 @@
                     <button class="btn btn-outline-info" id="markup_current">Get</button>
                   </div>
                 </div>
-                <div class="col-6 col-md-4 mb-2">
-                <button type="button" class="btn btn-outline-success w-100" id="markup_calculate"><i class="far fa-magic"></i> Make</button>
-                </div>
 
                 <div class="col-12" id="results">
                     <pre><code></code></pre>
-                    <p><a>Press make first!</a></p>
+                    <p><a>Change a setting!</a></p>
                 </div>
+                <hr/>
                 <div class="col-12">
-                <h5>Details</h5>
-                <p>The difference between the two types of link is that the a-element ("anchor" element) is a regular link,
+                    <button class="btn btn-outline-secondary" type="button" data-toggle="collapse" data-target="#details" aria-expanded="false" aria-controls="details">
+    Details
+  </button>
+<div class="collapse" id="details">
+  <div class="card card-body">
+    <p>The difference between the two types of link is that the a-element ("anchor" element) is a regular link,
                     while the span element is just a span of text with custom styling: for example the protein-controlling elements are green in this site because they are span elements with the extra styling conferred by the attribute <code>class="prolink"</code>. The CSS style of this class is declared in the stylesheet as:</p>
                 <pre><code>.prolink {
 	color: mediumseagreen;
@@ -76,6 +91,9 @@
 	cursor: pointer;
 	text-decoration: underline;
 }</code></pre>
+  </div>
+</div>
+
                 </div>
             </div>
 

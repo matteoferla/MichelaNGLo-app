@@ -43,12 +43,18 @@ $('#markup_modal').on('shown.bs.modal', function (e) {
     });
     //////////////// Current //////////////////////////////
     $('#markup_current').click(function () {
-        $('#markup_view').val('['+NGL.getStage('viewport').viewerControls.getOrientation().elements+']');
+        $('#markup_view').val('['+NGL.getStage('viewport').viewerControls.getOrientation().elements.map((v) => Math.round(v*10)/10)+']');
     });
     //////////////// Calculate! ///////////////////////////
-    $('#markup_calculate').click(function () {
-    $('.markup_modal .is-invalid').removeClass('is-invalid');
-    var attributes =['title','selection','color','radius','tolerance','view'].reduce(function (c,key){
+    //$('#markup_calculate').click(
+    //load domain.
+    $('#markup_view_toggle label').first().trigger('click');
+    $('#markup_selection').parent().parent().show();
+    $('#markup_color').parent().parent().show();
+
+    $('[id^="markup_"]').on('keyup change input', function () {
+    $('.is-invalid').removeClass('is-invalid');
+    let attributes =['title', 'color','radius','tolerance','view'].reduce(function (c,key){
             var value= $('#markup_'+key).val();
             if (!! value) {return c+'data-'+key+'="'+value+'" '}
             else {return c}
@@ -56,7 +62,10 @@ $('#markup_modal').on('shown.bs.modal', function (e) {
     if ($('#markup_hetero').prop('checked')) {
         attributes += 'data-hetero=true ';
     }
-    var mode = $('[name="markup_zoom"]:checked').attr('id');
+    let sel_el = $('#markup_selection');
+    if (!! sel_el.val()) {attributes += 'data-selection="'+sel_el.val()+'"'; sel_el.removeClass('is-invalid');}
+    else {sel_el.addClass('is-invalid'); attributes += 'data-selection="*"'}
+    let mode = $('[name="markup_zoom"]:checked').attr('id');
     let code;
     if (mode === 'default') {
         code = 'data-view="reset"';
@@ -65,13 +74,17 @@ $('#markup_modal').on('shown.bs.modal', function (e) {
         code = 'data-view="auto"';
     }
     else if (mode == 'orientation') {
-        if (! d) {$('#markup_view').addClass('is-invalid');}
-        code = 'data-view="'+d+'"';
+        let view_el = $('#markup_view');
+        if (! view_el.val()) {view_el.addClass('is-invalid'); return 0;}
+        else {code = 'data-view="'+view_el.val()+'"';
+        console.log(typeof view_el)
+        }
+
     }
     else {code = 'data-focus="'+mode+'"'}
-    var id = '#viewport';
-    var aCode = '<a href="'+id+'" data-toggle="protein" '+code+' '+attributes+'>Try me as an anchor-element</a>';
-    var spanCode ='<span class="prolink" data-target="'+id+'" data-toggle="protein" '+code+' '+attributes+'>Try me as a span-element</span>';
+    let id = 'viewport';
+    let aCode = '<a href="'+id+'" data-toggle="protein" '+code+' '+attributes+'>Try me as an anchor-element</a>';
+    let spanCode ='<span class="prolink" data-target="'+id+'" data-toggle="protein" '+code+' '+attributes+'>Try me as a span-element</span>';
     $('#results code').text(aCode+'\n'+spanCode);
     $('#results a').detach();
     $('#results span').detach();
@@ -79,8 +92,8 @@ $('#markup_modal').on('shown.bs.modal', function (e) {
     $('#results p').prepend(aCode);
     $('#results p').append(spanCode);
     $('#results a,#results span').protein();
+    $('#results a').click();
 });
 
-    $('#markup_view_toggle label').first().trigger('click');
 });
 
