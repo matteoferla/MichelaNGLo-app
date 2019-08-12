@@ -132,24 +132,20 @@ def convert_pse(request):
         ## case 2: user uses pse
         ## case 2b: DEMO mode.
         if 'demo_filename' in request.params:
-            print('demo')
             mode = 'demo'
             filename=demo_file(request) #prevention against attacks
         ## case 2a: file mode.
         else:
             mode = 'file'
-            print('file')
             malformed = is_malformed(request, 'file', 'pdb')
             if malformed:
                 return {'status': malformed}
             filename = save_file(request, 'pse')
         trans = PyMolTranspiler(file=filename, job=User.get_username(request), **settings)
         if mode == 'demo' or not is_js_true(request.params['pdb']):  ## pdb_string checkbox is true means that it adds the coordinates in the JS and not pdb code is given
-                print('include code.')
                 with open(os.path.join(trans.tmp, os.path.split(filename)[1].replace('.pse', '.pdb'))) as fh:
                     trans.raw_pdb = fh.read()
         else:
-            print('Code: '+request.params['pdb'])
             trans.pdb = request.params['pdb']
         request.session['file'] = filename
         # deal with user permissions.

@@ -97,8 +97,8 @@ class PyMolTranspilerDeco:
             raise err
 
     def clean_up(self):
-        pymol.cmd.remove('(all)')
-        pymol.cmd.delete('(all)')
+        pymol.cmd.remove('all')
+        pymol.cmd.delete('all')
 
     def close_up(self):
         self.clean_up()
@@ -265,6 +265,7 @@ class PyMolTranspiler:
         # self.log = lambda msg: self.__class__.current_task := f'[{datetime.utcnow()} GMT] {msg}'
         if run_analysis:
             self._postinit(file, view, representation, skip_disabled, settings)
+            print('DEBUG', self.cartoon)
 
     @PyMolTranspilerDeco
     def _postinit(self, file, view, representation, skip_disabled, settings):
@@ -395,18 +396,19 @@ class PyMolTranspiler:
                 if o:
                     for at in o.atom:
                         if not at.hetatm:
-                            if int(at.resi) < first_resi[at.chain]:
-                                first_resi[at.chain] = int(at.resi)
-                            if int(at.resi) > last_resi[at.chain]:
-                                last_resi[at.chain] = int(at.resi)
+                            if at.resi.isdigit():
+                                r = int(at.resi)
+                            else: ## likely a weird internal residue
+                                continue
+                            if r < first_resi[at.chain]:
+                                first_resi[at.chain] = r
+                            if r > last_resi[at.chain]:
+                                last_resi[at.chain] = r
                         else:
                             heteros.add((f'{at.resn} and :{at.chain}', None))
         self.description = {'peptide': [(f'{first_resi[chain]}-{last_resi[chain]}:{chain}', None) for chain in first_resi], 'hetero': list(heteros)}
         self.log(f'[JOB={self.job}] description generated.')
         return self.description
-
-
-
 
     @classmethod
     def get_atom_id_of_coords(cls, coord):
@@ -427,6 +429,7 @@ class PyMolTranspiler:
 
     @classmethod
     def log(cls, msg):
+        print(f'DEBUG {msg}')
         cls.current_task = f'[{datetime.utcnow()} GMT] {msg}'
 
 
@@ -446,7 +449,7 @@ class PyMolTranspiler:
         self.fix_structure()
         myspace = {'data': []}
         # myspace['data'] is the same as self.atoms, which is "kind of the same" as pymol.cmd.get_model('..').atoms
-        pymol.cmd.iterate('(all)', self._iterate_cmd, space=myspace)
+        pymol.cmd.iterate('all', self._iterate_cmd, space=myspace)
         self.parse_ss(myspace['data'])
         return self
 
@@ -568,7 +571,7 @@ class PyMolTranspiler:
             pymolian = np.array(view)
         self.rotation = pymolian[0:9].reshape([3, 3])
         depth = pymolian[9:12]
-        self.z = abs(depth[2])*1 #arbitrary... correction. fov should be the same.
+        self.z = abs(depth[2])*1 #1 arbitrary weidht to correct. fov should be the same.
         self.position = pymolian[12:15]
         self.teleposition = np.matmul(self.rotation, -depth) + self.position
         self.slab_near = pymolian[11] + pymolian[15]
@@ -673,7 +676,7 @@ class PyMolTranspiler:
                     else: # none are.
                         resi_homo_state = False
                 if resi_homo_state: # no residues differ
-                    chain_list.append(':{chain}')
+                    chain_list.append(f':{chain}')
                 else:
                     transdata.extend([f'{resi}:{chain}' for resi in resi_list]) # todo... add selection reduction
                     chain_homo_state = False
