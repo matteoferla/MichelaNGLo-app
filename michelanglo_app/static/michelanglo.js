@@ -307,7 +307,7 @@ NGL.specialOps.load = function (option, noLoadFun) {
     }
     //new model. Force reset
     if (myData.proteins[index].type === 'file') {
-        return NGL.stageIds[myData.id].loadFile(myData.proteins[index].value).then(function (protein) {
+        return NGL.stageIds[myData.id].loadFile(myData.proteins[index].value, {'firstModelOnly': true}).then(function (protein) {
                 if (noLoadFun === false || noLoadFun === undefined) {NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);}
             });
 
@@ -317,7 +317,7 @@ NGL.specialOps.load = function (option, noLoadFun) {
         if (!! myData.proteins[index].isVariable) {
             var varname = myData.proteins[index].value.replace(/\W/g, '');
             if (window[varname] !== undefined) {
-                return NGL.stageIds[myData.id].loadFile(new Blob([window[varname], {type: 'text/plain'}]), {ext: ext})
+                return NGL.stageIds[myData.id].loadFile(new Blob([window[varname], {type: 'text/plain'}]), {ext: ext, firstModelOnly: true})
                     .then(function (protein) {
                         if (noLoadFun === false || noLoadFun === undefined) {NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);}
                     });
@@ -326,11 +326,11 @@ NGL.specialOps.load = function (option, noLoadFun) {
             }
         }
         else if (typeof myData.proteins[index].value === 'string') {
-            return NGL.stageIds[myData.id].loadFile(new Blob ([myData.proteins[index].value, { type: 'text/plain'}]), { ext: ext }).then(function (protein) {
+            return NGL.stageIds[myData.id].loadFile(new Blob ([myData.proteins[index].value, { type: 'text/plain'}]), { ext: ext, firstModelOnly: true}).then(function (protein) {
             if (noLoadFun === false || noLoadFun === undefined) {NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);}
             });
         } else { //is a blob already
-            return NGL.stageIds[myData.id].loadFile(myData.proteins[index].value, { ext: ext }).then(function (protein) {
+            return NGL.stageIds[myData.id].loadFile(myData.proteins[index].value, { ext: ext , firstModelOnly: true}).then(function (protein) {
             if (noLoadFun === false || noLoadFun === undefined) {NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);}
             });
         }
@@ -339,7 +339,7 @@ NGL.specialOps.load = function (option, noLoadFun) {
         myData.currentIndex = -1;  //pass. Super odd backdoor. Why is it needed? Let's keep it secret in case I think it's too weird.
     }
     else { //PDB code.
-        return NGL.stageIds[myData.id].loadFile('rcsb://'+myData.proteins[index].value.replace('rcsb://','').toLowerCase().slice(0,4)).then(function (protein) {
+        return NGL.stageIds[myData.id].loadFile('rcsb://'+myData.proteins[index].value.replace('rcsb://','').toLowerCase().slice(0,4), {firstModelOnly: true}).then(function (protein) {
             if (noLoadFun === false || noLoadFun === undefined) {NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);}
         });
     }

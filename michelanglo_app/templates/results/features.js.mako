@@ -163,3 +163,8 @@ window.ft = new FeatureViewer('${protein.sequence}',
     });
     %endif
 %endfor
+
+$('.pdb').click(function () {
+    let id = $(this).attr('id').slice(1); //remove the first 'f'
+    load_pdb(id.split('_')[0]);
+});

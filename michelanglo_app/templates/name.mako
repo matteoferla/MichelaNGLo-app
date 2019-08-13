@@ -68,6 +68,9 @@
 <%block name='script'>
 <script type="text/javascript">
     $(document).ready(function () {
+
+        ops.addToast('todo_delete','Random error?','For now during debug, I want to keep track of all raised errors. However aborting an ajax request is technically an error, so if you are a nimble typist you will get "error 0", please ignore this one..','bg-danger');
+
         $('#species').on('keyup', event => {
             let species = $('#species');
             window.taxid ='ERROR';
@@ -76,6 +79,7 @@
             if (window.species_xhr !== undefined) {
                 window.species_xhr.abort();}
             $('#matches').html(' ');
+            $('#fv').html(' ');
             $('#ext_links').html(' ');
             window.species_xhr = $.ajax({url: "/choose_pdb",
                     data: {'item': 'match species',
@@ -122,6 +126,7 @@
             gene.removeClass('is-valid').removeClass('is-invalid');
             error_gene.hide();
             $('#matches').html(' ');
+            $('#fv').html(' ');
             $('#ext_links').html(' ');
             window.gene_xhr = $.ajax({url: "/choose_pdb",
                     data: {'item': 'match gene',
@@ -185,7 +190,7 @@
                     'species': window.taxid
                 },
                 method: 'POST',
-                success: msg => {console.log(msg); window.temp=msg; eval(msg);},
+                success: msg => eval(msg),
                 error: ops.addErrorToast
             });
         };
