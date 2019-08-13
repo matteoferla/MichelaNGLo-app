@@ -43,6 +43,7 @@ $('#markup_modal').on('shown.bs.modal', function (e) {
     });
     //////////////// Current //////////////////////////////
     $('#markup_current').click(function () {
+        $('#differing_view').hide();
         $('#markup_view').val('['+NGL.getStage('viewport').viewerControls.getOrientation().elements.map((v) => Math.round(v*10)/10)+']');
     });
     //////////////// Calculate! ///////////////////////////
@@ -93,7 +94,13 @@ $('#markup_modal').on('shown.bs.modal', function (e) {
     $('#results p').append(spanCode);
     $('#results a,#results span').protein();
     $('#results a').click();
+    $('#differing_view').hide(); // Unfortunate side-effect is that the orientation is reset.
 });
-
+    $('#differing_view').show();
+    window.alertDifference = () => $('#differing_view').show();
+    const sigs = NGL.getStage().mouseObserver.signals;
+    sigs.scrolled.add(alertDifference);
+    //sigs.moved.add(alertDifference);
+    sigs.dragged.add(alertDifference);
 });
 

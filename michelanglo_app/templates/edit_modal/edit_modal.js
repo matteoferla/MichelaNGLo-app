@@ -138,14 +138,18 @@ $('#edit_delete').click(function () {
     }
 });
 
-//collapse prolinks.
-$('#collapse_prolinks').prop('checked', false);
 
+//collapse prolinks.
+$('#collapse_prolinks').prop('checked', true);
+prolinks.minimiseProlinks();
+
+// allow uncollapsing
 $('#collapse_prolinks').change((event) => {
     let state = $('#collapse_prolinks').prop('checked');
     if (state === true) {prolinks.minimiseProlinks();}
     else {prolinks.expandProlinks();}
     });
+
 
 //reset values the stupid way
 $('#edit_modal').on('hide.bs.modal', ()=> {window.location.reload();

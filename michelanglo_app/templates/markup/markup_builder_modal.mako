@@ -59,7 +59,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="input-group mb-2 mx-3">
+                <div class="input-group mx-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text" >Orientation</span>
                   </div>
@@ -68,10 +68,11 @@
                     <button class="btn btn-outline-info" id="markup_current">Get</button>
                   </div>
                 </div>
+                <div id="differing_view" class="alert alert-warning mx-3 w-100"><i class="far fa-exclamation-triangle"></i> The orientation of the protein differs from the stored one above.</div>
 
-                <div class="col-12" id="results">
+                <div class="col-12 mt-2" id="results">
                     <pre><code></code></pre>
-                    <p><a>Change a setting!</a></p>
+                    <p style="display: none;"><a>Change a setting!</a></p>
                 </div>
                 <hr/>
                 <div class="col-12">
