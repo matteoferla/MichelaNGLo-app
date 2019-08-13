@@ -5,6 +5,7 @@ from pyramid.renderers import render_to_response
 from ..models import Page, User
 from pyramid.response import FileResponse
 from .user_management import permission
+from pyramid.httpexceptions import HTTPFound
 
 import logging, json, os
 log = logging.getLogger(__name__)
@@ -156,11 +157,17 @@ def thumbnail(request):
 
 @view_config(route_name='save_pdb', renderer='string')
 def save_pdb(request):
-    page = Page.select(request.params['uuid'])
+    page = Page.select(request, request.params['uuid'])
     verdict = permission(request, page, key_label='key')
     if verdict['status'] == 'OK':
-        pdb = page.load().settings['pdb']
-        if isinstance(pdb, str):
+        settings = page.load().settings
+        pdb = settings['pdb']
+        p = json.loads(settings['proteinJSON'])[0]
+        if p['type'] == 'rcsb': #rcsb PDB code
+            return HTTPFound(location=f"https://files.rcsb.org/download/{p['value']}.cif")
+        elif p['type'] == 'file': #external file
+            return HTTPFound(location=p['value'])
+        elif isinstance(pdb, str):
             log.warning(f'{page} has a pre-beta PDB!??')
             return pdb
         else:
