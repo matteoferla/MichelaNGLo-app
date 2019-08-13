@@ -13,7 +13,6 @@ if 'SENTRY_DNS_MICHELANGLO' in os.environ: #this is not in the config file due t
 from pyramid.config import Configurator
 from pyramid.session import SignedCookieSessionFactory
 
-
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """

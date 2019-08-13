@@ -518,7 +518,7 @@ $.prototype.viewport = function () {
         if ($(this).has('img').length === 0) {
              if ($(this).width() === 0) {$(this).css('width','100%');}
              if ($(this).height() === 0) {
-                 var h = Math.min( $(this).width(), window.innerHeight - $(this).offset().top - 4 );
+                 let h = Math.min( $(this).width(), window.innerHeight - $(this).offset().top - 10 );
                  $(this).height(h);
                  //$(this).css('padding-bottom','100%');
                  if (NGL.Debug) {console.log('new viewport sizes:'+$(this).width()+'x'+$(this).height());}

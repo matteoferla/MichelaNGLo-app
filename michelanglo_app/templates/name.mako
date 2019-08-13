@@ -47,6 +47,10 @@
         <div class="col-12" id="ext_links">
 
         </div>
+        <div class="col-12">
+            <div id="fv"></div>
+        </div>
+
         <div class="col-12" id="matches">
 
         </div>
@@ -103,6 +107,7 @@
         if (species.val().toLowerCase() === 'human') {species.val('Human'); window.taxid=9606; species.addClass('is-valid'); $('#taxid').show().text('Taxid: 9606');}
         else { species.trigger('input');}
         // gene.
+        window.uniprot = 'ERROR';
         $('#gene').on('keyup', event => {
             if (window.gene_xhr !== undefined) {
                 window.gene_xhr.abort();}
@@ -129,6 +134,7 @@
                                       else {
                                           if (msg.corrected_gene) {gene.val(msg.corrected_gene)}
                                           gene.addClass('is-valid');
+                                          window.uniprot = msg.uniprot;
                                           $('#uniprot').show().html('Uniprot: <a href="https://www.uniprot.org/uniprot/'+msg.uniprot+'" target="_blank">'+msg.uniprot+' <i class="far fa-external-link-alt"></i></a>');
                                           $('#ext_links').html('<a>View <a href="www.rcsb.org/pdb/protein/'+msg.uniprot+'" target="_blank">PDB entry</a> for more information. If no structures are available see <a href="https://swissmodel.expasy.org/repository/uniprot/'+msg.uniprot+'" target="_blank">Swiss-Model entry</a>.</p>');
                                           let matches = $('#matches');
@@ -157,6 +163,7 @@
                 data: {
                     'item': 'get_pdbs',
                     'entries': pdbs,
+                    'uniprot': window.uniprot,
                     'species': window.taxid
                 },
                 method: 'POST',
@@ -167,6 +174,18 @@
                     }
                     else {ops.addToast('issue', 'Issue', JSON.stringify(msg),'bg-danger');}
                 },
+                error: ops.addErrorToast
+            });
+
+            $.ajax({
+                url: "/choose_pdb",
+                data: {
+                    'item': 'get_uniprot',
+                    'uniprot': window.uniprot,
+                    'species': window.taxid
+                },
+                method: 'POST',
+                success: msg => {console.log(msg); window.temp=msg; eval(msg);},
                 error: ops.addErrorToast
             });
         };
@@ -185,12 +204,14 @@
                 }, 2000);
         };
 
+
         <%include file="markup/markup_builder_modal.js"/>
 
         <%include file="pdb_staging_insert.js"/>
 
-
     });
-
 </script>
+    <link rel="stylesheet" href="https://www.matteoferla.com//feature-viewer/css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script>
+    <script src="https://cdn.rawgit.com/calipho-sib/feature-viewer/v1.0.0/dist/feature-viewer.min.js"></script>
 </%block>

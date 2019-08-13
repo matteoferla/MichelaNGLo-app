@@ -1,6 +1,11 @@
 from ._common_methods import *
 from pyramid.view import view_config
+from pyramid.renderers import render_to_response
 import json, os
+from protein.generate import ProteinGatherer
+ProteinGatherer.settings.data_folder = os.environ['PROTEIN_DATA']
+
+
 print('Michelanglo-data is at present hard coded as ../Michelanglo-data')
 organism = json.load(open(os.path.join('..', 'Michelanglo-data','organism.json')))
 human = json.load(open(os.path.join('..', 'Michelanglo-data', 'gene2uniprot', 'taxid9606-names2uniprot.json')))
@@ -68,7 +73,7 @@ def choose_pdb(request):
         else:
             return {'invalid': True}
     elif request.params['item'] == 'get_pdbs':
-        malformed = is_malformed(request, 'entries')
+        malformed = is_malformed(request, 'entries', 'uniprot')
         if malformed:
             return {'status': malformed}
         pdbs = request.params.getall('entries[]')
@@ -81,6 +86,10 @@ def choose_pdb(request):
             except KeyError:
                 pass # this protein was removed. We shalt speak of it.
         return {'descriptions': ' <br/> '.join(details)}
+    elif request.params['item'] == 'get_uniprot':
+        uniprot = request.params['uniprot']
+        protein = ProteinGatherer(uniprot=uniprot).parse_uniprot()
+        return render_to_response("../templates/results/features.js.mako", {'protein': protein}, request)
     else:
         request.response.status = 400
         return {'status': 'unknown cmd'}
