@@ -74,16 +74,26 @@
                     %endif
                 <p>${descr_mdowned|n}</p>
                 <hr/>
-                <button type="button" class="btn btn-outline-primary w-100 my-1" id="getimplement"><i class="far fa-code"></i> Implementation code</button>
+                <button type="button" class="btn btn-outline-primary w-100 my-1" id="getimplement" data-toggle="tooltip" title="Show instructions on how to create a view on a different site you control"><i class="far fa-code"></i> Implementation code</button>
 
-                <button type="button" class="btn btn-outline-success w-100 my-1" id="save"><i class="far fa-camera"></i> Save image</button>
-                % if key:
-                    <a href="/data/${page}?no_user=1&remote=1&no_buttons=1" class="btn btn-outline-success w-100 my-1"  download="page.html"><i class="far fa-download"></i> Download html file</a>
-                    <a href="/save_pdb?uuid=${page}" class="btn btn-outline-success w-100 my-1"  download="model.pdb"><i class="far fa-map"></i> Download PDB</a>
-                % else:
-                    <a href="/data/${page}?no_user=1&remote=1&no_buttons=1&key=${key}" class="btn btn-outline-success w-100 my-1"  download="page.html"><i class="far fa-download"></i> Download html file</a>
-                    <a href="/save_pdb?uuid=${page}&key=${key}" class="btn btn-outline-success w-100 my-1"  download="model.pdb"><i class="far fa-map"></i> Download PDB file</a>
-                % endif
+                <button type="button" class="btn btn-outline-success w-100 my-1" id="save" data-toggle="tooltip" title="Save a PNG of the current view"><i class="far fa-camera"></i> Save image</button>
+                <a href="/data/${page}?no_user=1&remote=1&no_buttons=1&key=${key}" class="btn btn-outline-success w-100 my-1"  download="page.html"  data-toggle="tooltip" title="Download this page. Requires an internet connection to access third party libraries."><i class="far fa-download"></i> Download html file</a>
+                %if N_structures == 1:
+                    <a href="/save_pdb?uuid=${page}&key=${key}&index=0" class="btn btn-outline-success w-100 my-1"  download="model.pdb" data-toggle="tooltip" title="Download the structure from this page."><i class="far fa-map"></i> Download PDB file</a>
+                %else:
+                    <div class="dropdown">
+                      <button class="btn btn-outline-success dropdown-toggle w-100 my-1 " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-toggle="tooltip" title="Download the nth structure from this page.">
+                        <i class="far fa-map"></i> Download PDB file
+                      </button>
+                      <div class="dropdown-menu " aria-labelledby="dropdownMenuButton">
+                          %for i in range(N_structures):
+                            <a href="/save_pdb?uuid=${page}&key=${key}&index=${i}" class="dropdown-item"  download="model.pdb"><i class="far fa-map"></i> Download structure &#8470; ${i}</a>
+                          %endfor
+
+                      </div>
+                    </div>
+
+                %endif
                 ###<button type="button" class="btn btn-outline-primary w-100 my-1" data-toggle="modal" data-target="#basics"><i class="far fa-cubes"></i> Protein basics</button>
                 %if remote:
                     <button type="button" class="btn btn-outline-primary w-100 my-1" data-toggle="modal" data-target="#about"><i class="far fa-quote-right"></i> Credits</button>

@@ -1,9 +1,9 @@
 # Michelaɴɢʟo
 Michelaɴɢʟo is a web app to convert a PyMOL PSE file or PDB file to a easy to implement NGL.js view that can be implemented easily on any site.
 
-[Click here to visit the web app (temp URL)](https://ngl.matteoferla.com).
+[Click here to visit the web app (temp URL)](https://michelanglo.sgc.ox.ac.uk).
 
-For the documentation for the web app see [help page](https://ngl.matteoferla.com/docs).
+For the documentation for the web app see [help page](https://michelanglo.sgc.ox.ac.uk/docs).
 
 For more details about data stored see also [data](data.md).
 
@@ -25,7 +25,7 @@ A future possibility is that in collaboration with specific journals this could 
 ![process](images/process-01.jpg)
 
 # Script
-The following describes the script. For the documentation for the web app, such as forgotten passwords, cookie usage _etc._, see [help page](https://ngl.matteoferla.com/docs).
+The following describes the script. For the documentation for the web app, such as forgotten passwords, cookie usage _etc._, see [help page](https://michelanglo.sgc.ox.ac.uk/docs).
 
 ## Transpiler
 
@@ -96,7 +96,7 @@ In the first case, the HTML code is hidden as one sees what one gets as an end r
 ## data-toggle='protein'
 Extra functionality can be optionally added, including the ability to create links that control the protein.
 
-The full documentation and examples can be found at [ngl.matteoferla.com/docs/markup](https://ngl.matteoferla.com/docs/markup).
+The full documentation and examples can be found at [michelanglo.sgc.ox.ac.uk/docs/markup](https://michelanglo.sgc.ox.ac.uk/docs/markup).
 
 Briefly, `<a href='#viewport'>you see this text as a link</a>` is technically called an anchor element and is commonly called a link.
 Like all HTML elements, everything with the within the lesser-than and greater-than symbols controls its behaviour.

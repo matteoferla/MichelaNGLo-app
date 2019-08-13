@@ -11,6 +11,7 @@ import logging, json, os
 log = logging.getLogger(__name__)
 
 from . import custom_messages
+from ._common_methods import is_malformed
 
 @view_config(route_name='userdata', renderer="../templates/user_protein.mako")
 def userdata_view(request):
@@ -132,6 +133,7 @@ def userdata_view(request):
             settings['meta_image'] = f'https://michelanglo.sgc.ox.ac.uk/thumb/{page.identifier}'
             settings['meta_url'] = 'https://michelanglo.sgc.ox.ac.uk/data/' + page.identifier
             settings['custom_messages'] = json.dumps(custom_messages)
+            settings['N_structures'] = len(json.loads(settings['proteinJSON']))  ## regenerate each time for safety!
             return settings   ## renders via the "../templates/user_protein.mako"
 
 
@@ -157,12 +159,23 @@ def thumbnail(request):
 
 @view_config(route_name='save_pdb', renderer='string')
 def save_pdb(request):
+    malformed = is_malformed(request, 'uuid', 'index')
+    if malformed:
+        return {'status': malformed}
+    if not request.params['index'].isdigit():
+        request.response.status = 400
+        return {'status': 'index must be number'}
     page = Page.select(request, request.params['uuid'])
+    index = int(request.params['index'])
     verdict = permission(request, page, key_label='key')
     if verdict['status'] == 'OK':
         settings = page.load().settings
+        protein = json.loads(settings['proteinJSON'])
+        if index > len(protein):
+            request.response.status = 400
+            return {'status': f'index exceeds {len(protein)}'}
+        p = protein[index]
         pdb = settings['pdb']
-        p = json.loads(settings['proteinJSON'])[0]
         if p['type'] == 'rcsb': #rcsb PDB code
             return HTTPFound(location=f"https://files.rcsb.org/download/{p['value']}.cif")
         elif p['type'] == 'file': #external file

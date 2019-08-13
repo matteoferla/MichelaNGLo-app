@@ -186,7 +186,7 @@
           <h6>The big red 403</h6>
           <p>The PDB and JS files cannot be kept on Dropbox or most cloud storage providers. If you get a Dropbox share link, set it 'all with link' and add the URL query <code>?db=1</code> to it, you will get the following error in the JS console (in Chrome, right click, inspect, Console tab):</p>
           <pre><code>stage.loadFile("https://www.dropbox.com/s/23mxwy0okylrvll/dddG.pdb?dl=1")
-(index):1 Access to XMLHttpRequest at 'https://www.dropbox.com/s/23mxwy0okylrvll/dddG.pdb?dl=1' from origin 'http://ngl.matteoferla.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.</code></pre>
+(index):1 Access to XMLHttpRequest at 'https://www.dropbox.com/s/23mxwy0okylrvll/dddG.pdb?dl=1' from origin 'http://michelanglo.sgc.ox.ac.uk' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.</code></pre>
           <p>This is because of a server-side security setting, which cannot be circumvented by the user &mdash;and Bitcoin hacker-miners. Likewise, only a specially configured server will serve JS libraries (called a "CDN").</p>
           <p><b>Consequently, it is best to use the default CDN for NGL and tick <code>Include PDB data</code>.</b></p>
       </div>

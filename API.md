@@ -14,7 +14,7 @@ As expected, reply will contain `Set-Cookie` in its header, which obviously mean
 
 Description of users is in [github.com/matteoferla/MichelaNGLo/data.md](https://github.com/matteoferla/MichelaNGLo/blob/master/data.md).
 
-For a privacy centered description see also [https://ngl.matteoferla.com/docs#Users](users section in docs).
+For a privacy centered description see also [https://michelanglo.sgc.ox.ac.uk/docs#Users](users section in docs).
 
 ## Edit
 Conversion are done to the address `convert_pse`.

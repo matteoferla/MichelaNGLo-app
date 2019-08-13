@@ -52,15 +52,14 @@ def stringify_protein_description(settings):
                     descr += '* '+template.format(focus='domain', selection=p, label=f'{n} ({p})') + '\n'
                 else:
                     descr += '* '+template.format(focus='domain', selection=p, label=p) + '\n'
-
-        if settings['descriptors']['hetero']: # {('ORO and :A', None), ('SO4 and :A', None), etc.
+        waterless = [(p, n) for p, n in settings['descriptors']['hetero'] if p.find('HOH') == -1 and p.find('WAT') == -1]
+        if waterless: # {('ORO and :A', None), ('SO4 and :A', None), etc.
             descr += '\n\n### ligands and prostetic groups\n\n'
-            for p, n in settings['descriptors']['hetero']:
-                if p.find('HOH') == -1 and p.find('WAT') == -1:
-                    if n:
-                        descr += '* ' + template.format(focus='residue', selection=p, label=f'{n} ({p})') + '\n'
-                    else:
-                        descr += '* ' + template.format(focus='residue', selection=p, label=p) + '\n'
+            for p, n in waterless:
+                if n:
+                    descr += '* ' + template.format(focus='residue', selection=p, label=f'{n} ({p})') + '\n'
+                else:
+                    descr += '* ' + template.format(focus='residue', selection=p, label=p) + '\n'
     return descr
 
 def anonymous_submission(request, settings, pagename):
