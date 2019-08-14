@@ -157,6 +157,13 @@
   transform: rotateX(180deg);
 }
 
+.pdb {
+    cursor: pointer;
+}
+
+.pdb:hover {
+    fill: GreenYellow;
+}
 
 
 

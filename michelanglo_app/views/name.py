@@ -88,6 +88,7 @@ def choose_pdb(request):
         return {'descriptions': ' <br/> '.join(details)}
     elif request.params['item'] == 'get_uniprot':
         uniprot = request.params['uniprot']
+        log.info(f'{User.get_username(request)} wants uniprot data')
         protein = ProteinGatherer(uniprot=uniprot).parse_uniprot()
         return render_to_response("../templates/results/features.js.mako", {'protein': protein}, request)
     else:

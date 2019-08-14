@@ -13,7 +13,7 @@
 </%block>
 
 <%block name="main">
-    <p>This form simply searches for PDBs that match your protein. It does not account for homologues or models. For information on how to get the perfect model for your protein see <a href="/docs/gene">documentation</a>.</p>
+    <p>This form simply searches for PDBs that match your protein for your convenience. It does not account for homologues or models. Also it does not know if the protein has a shape-change, for which reading the litterature is required. For information on how to get the perfect model for your protein see <a href="/docs/gene">documentation</a>.</p>
     <div class="row">
 
         <div class="col-12 col-lg-6">
