@@ -54,7 +54,7 @@ def stringify_protein_description(settings):
                     descr += '* '+template.format(focus='domain', selection=p, label=p) + '\n'
         waterless = [(p, n) for p, n in settings['descriptors']['hetero'] if p.find('HOH') == -1 and p.find('WAT') == -1]
         if waterless: # {('ORO and :A', None), ('SO4 and :A', None), etc.
-            descr += '\n\n### ligands and prostetic groups\n\n'
+            descr += '\n\n### ligands\n\n'
             for p, n in waterless:
                 if n:
                     descr += '* ' + template.format(focus='residue', selection=p, label=f'{n} ({p})') + '\n'

@@ -15,7 +15,7 @@
 <ul class="list-group list-group-flush">
             <li class="list-group-item">
                 <h3>Step 1 <small class="text-muted">Load structure</small></h3>
-                <p>For greater control see <a href="pymol">PyMOL converter</a>. If in need of a demo, you could try the PDB code 1UBQ (ubiquitin) as it has a fun helix to look down at 22-34 or 1GFL (wild type GFP), which has a chromophore at 65-67:A.</p>
+                <p>For greater control see <a href="pymol">PyMOL converter</a>. If in need of a demo, you could try the PDB code <a href="#" onclick="$('#pdb').val('1UBQ')">1UBQ</a> (ubiquitin) as it has a fun helix to look down at 22-34 or <a href="#" onclick="$('#pdb').val('1GFL')">1GFL</a> (wild type GFP), which has a chromophore at 65-67:A.</p>
                 <div class="row">
                     <div class="col-12 col-md-5">
 
@@ -66,6 +66,14 @@
     <script type="text/javascript">
         <%include file="markup/markup_builder_modal.js"/>
 
+
+    window.start_stage_two = () => {
+        $('#staging').show();
+        window.myData = undefined;
+        NGL.stageIds = {};
+        $('#viewport').html('');
+    };
+
     $('#code_load').click(function () {
         window.mode = 'code'; //file | code
         $('.is-invalid').removeClass('is-invalid');
@@ -76,12 +84,11 @@
             $('#error_pdb').show();
             return false;
         }
-        $('#staging').show();
-        window.myData = undefined;
-        NGL.stageIds = {};
+        start_stage_two();
         $('#viewcode').text('<div role="NGL" data-load="'+$('#pdb').val()+'" ></div>');
         NGL.specialOps.multiLoader('viewport',[{'type': 'rcsb','value': $('#pdb').val()}]);
         NGL.specialOps.showTitle('viewport', 'Loaded: '+ $('#pdb').val() );
+        interactive_builder();
     });
 
     $('#upload_pdb').change(function () {
@@ -102,14 +109,11 @@
         }
         $('#upload_pdb+.custom-file-label').html(filename);
         } // else? nothing added. user chickened out.
-        // load.
-        $('#staging').show();
-        window.myData = undefined;
-        NGL.stageIds = {};
+        start_stage_two();
         $('#viewcode').text('<div role="NGL" data-proteins=\'[{"type": "data", "value": "pdbString", "isVariable": true}]\'></div>');
         NGL.specialOps.multiLoader('viewport',[{'type': 'file','value': $('#upload_pdb')[0].files[0]}]);
         NGL.specialOps.showTitle('viewport', 'Loaded: '+ $('#pdb').val() );
-
+        interactive_builder();
     });
 
     <%include file="pdb_staging_insert.js"/>

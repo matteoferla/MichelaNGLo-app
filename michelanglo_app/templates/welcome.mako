@@ -31,31 +31,31 @@
         topics = [
         {
            "title": '<i class="far fa-rocket"></i> Quick and easy',
-            "text": '''Create interactive protein views starting from
+            "text": '''Create interactive protein views starting from one of the following
                         <ul class="text-left">
-                            <li><a href="/pymol">a PyMOL PSE file</a> or</li>
+                            <li><a href="/pymol">a PyMOL PSE file</a></li>
                             <li><a href="/pdb">a PDB code/file</a></li>
                             <li><a href="/name">a gene name</a></li>
                             </ul>''',
 
         },
         {
-           "title": '<i class="far fa-code"></i> Implement',
-            "text": 'Either follow the easy instructions to implement the view on your website',
-
-        },
-        {
            "title": '<i class="far fa-globe-europe"></i> Share',
-            "text": "or edit and share the pages you create. (<a href='/data/LZTR1'>Example</a>)"
+            "text": "Edit and share the pages you create. (<a href='/data/LZTR1'>Example</a>)"
         },
         {
            "title": '<i class="far fa-map-marked-alt"></i> Control',
-            "text": 'Create <span class="prolink" data-toggle="protein" data-focus="residue" data-selection="210:A" data-hetero=true>links</span> to control the protein views',
+            "text": 'Guide readers on shared pages by creating <span class="prolink" data-toggle="protein" data-focus="residue" data-selection="210:A" data-hetero=true>"prolinks" (protein view controlling links)</span> to control the protein views (<a href="/docs/markup">Example</a>)',
+
+        },
+        {
+           "title": '<i class="far fa-code"></i> Implement',
+            "text": 'Alternatively, follow the easy instructions to implement the view on your website',
 
         },
         {
            "title": '<i class="fab fa-github"></i> Open source',
-            "text":  'The source code for this server is available at <a href="https://github.com/matteoferla/MichelaNGLo" target="_blank">github.com/matteoferla/MichelaNGLo <i class="far fa-external-link"></i></a>.'
+            "text":  'The source code for this server is available at <a href="https://github.com/matteoferla/MichelaNGLo" target="_blank">GitHub <i class="far fa-external-link"></i></a>.'
         },
         {
            "title": '<i class="far fa-books"></i> More',

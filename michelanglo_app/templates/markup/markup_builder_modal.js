@@ -8,11 +8,7 @@ $('#markup_modal').on('hide.bs.modal', function (e) {
     NGL.getStage('viewport').handleResize();
 });
 
-$('#markup_modal').on('shown.bs.modal', function (e) {
-    //move the viewport over...
-  $('#viewport').after('<div id="moved_viewport"></div>');
-  $('#modal_viewport_box').append($('#viewport').detach());
-  NGL.getStage('viewport').handleResize();
+window.interactive_builder = () => {
     //buttons.
     $('#markup_color').colorpicker();
     $('#markup_title').parent().show();
@@ -86,14 +82,11 @@ $('#markup_modal').on('shown.bs.modal', function (e) {
     let id = 'viewport';
     let aCode = '<a href="'+id+'" data-toggle="protein" '+code+' '+attributes+'>Try me as an anchor-element</a>';
     let spanCode ='<span class="prolink" data-target="'+id+'" data-toggle="protein" '+code+' '+attributes+'>Try me as a span-element</span>';
-    $('#results code').text(aCode+'\n'+spanCode);
-    $('#results a').detach();
+    $('#results code').text(spanCode);
     $('#results span').detach();
-    $('#results p').html(' or ');
-    $('#results p').prepend(aCode);
     $('#results p').append(spanCode);
-    $('#results a,#results span').protein();
-    $('#results a').click();
+    $('#results span').protein();
+    $('#results span').click();
     $('#differing_view').hide(); // Unfortunate side-effect is that the orientation is reset.
 });
     $('#differing_view').show();
@@ -102,5 +95,13 @@ $('#markup_modal').on('shown.bs.modal', function (e) {
     sigs.scrolled.add(alertDifference);
     //sigs.moved.add(alertDifference);
     sigs.dragged.add(alertDifference);
+};
+
+$('#markup_modal').on('shown.bs.modal', function (e) {
+    //move the viewport over...
+  $('#viewport').after('<div id="moved_viewport"></div>');
+  $('#modal_viewport_box').append($('#viewport').detach());
+  NGL.getStage('viewport').handleResize();
+  interactive_builder();
 });
 

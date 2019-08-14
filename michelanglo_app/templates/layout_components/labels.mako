@@ -47,6 +47,13 @@ The mouse image informing visitors of how to switch can be found <a href="/image
 sticks='''<p>The equivalent of PyMOL sticks is liquorice in NGL, however, hyperball looks a lot nicer.
 </p><img src='/images/stick.png' width='100px'><img src='/images/sym_stick.png' width='100px'><img src='/images/hyperball.png' width='100px'>'''
 
+stick='''<p>The equivalent of PyMOL sticks is liquorice in NGL, however, hyperball looks nicer. Example of &ldquo;liquorice&rdquo; with no valency shown akin to PyMOL v1 default settings:</p><img src='/images/stick.png' width='100px'>'''
+
+sym_stick='''<p>The equivalent of PyMOL sticks is liquorice in NGL, however, hyperball looks nicer. Example of &ldquo;liquorice&rdquo;  with valency shown akin to PyMOL v2 default settings:</p><img src='/images/sym_stick.png' width='100px'>'''
+
+hyperball='''<p>The equivalent of PyMOL sticks is liquorice in NGL, however, hyperball looks nicer. Example of &ldquo;hyperball&rdquo;:</p><img src='/images/hyperball.png' width='100px'>'''
+
+
 protein='''Here the code is seen in action. Any errors will appear in black &mdash; for example, if you have a chain that has a unicode character, &THORN;, PyMOL will make a mess of it. If you have residues with the same id or more than 500 ligand atoms but no connect map, these will be wrong.'''
 
 code='''This the the HTML code to paste into your editor. Do note, the viewport needs to be specified'''

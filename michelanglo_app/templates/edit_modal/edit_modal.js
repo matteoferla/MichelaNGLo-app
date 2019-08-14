@@ -162,8 +162,7 @@ $('#edit_modal').on('hide.bs.modal', ()=> {window.location.reload();
 ///////////////////////////MODAL/////////////////////////////////////////////////////////////////////
 //the prolink making modal is shared elsewhere. Here it gets customised.
 $('#results').append('<div class="btn-group mb-3" role="group" aria-label="Use">\n' +
-                    '  <button type="button" class="btn btn-primary"  id="useanchor"><i class="far fa-anchor"></i> Use anchor element</button>\n' +
-                    '  <button type="button" class="btn btn-success" id="usespan"><i class="far fa-paint-roller"></i> Use span element</button>\n' +
+                    '  <button type="button" class="btn btn-success" id="usespan"><i class="far fa-paint-roller"></i> Use element in text</button>\n' +
                     '  <button type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Close" data-target="#markup_modal"><i class="far fa-sign-out"></i> Cancel</button>\n' +
                     '</div>');
 
@@ -171,11 +170,11 @@ $('#markup_modal_btn').on('click', e => {
     window.currentRange = document.getSelection().getRangeAt(0);
 });
 
-$('#useanchor,#usespan').click(function () {
+$('#usespan').click(function () {
     $('#markup_calculate').trigger('click');
     let elems=$($('#results').text());
     // select the appropriate one.
-    let wanted = ($(this).attr('id') === 'useanchor') ? elems[0].outerHTML : elems[2].outerHTML;
+    let wanted = elems[0].outerHTML;
     let n = prolinks.addProlink(wanted);
     let addenda;
     if ($('#collapse_prolinks').prop('checked')) {addenda = prolinks.prolink2md(wanted, n);}

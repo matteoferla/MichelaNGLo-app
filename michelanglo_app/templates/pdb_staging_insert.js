@@ -1,13 +1,3 @@
-$('#results').append('<button type="button" class="btn btn-success mb-2" aria-label="Close" data-dismiss="modal">Use created link</button>');
-
-$('#markup_modal').on('hidden.bs.modal', function (e) {
-    var code = $('#results code').text().split('>')[0].replace('data-toggle="protein"','');
-    if (window.mode === 'code') {code = code.replace('<a href="#viewport"','<div role="NGL" data-load="'+$('#pdb').val()+'" ')+'></div>';}
-    else {code = code.replace('<a href="#viewport"',
-            '<div role="NGL" data-proteins=\'[{"type": "data", "value": "pdb", "isVariable": true}]\'')+'></div>';}
-  $('#viewcode').html(code);
-});
-
 $('#create').click(function () {
     //hard reset to proove all runs fine
     $('#viewport').detach();

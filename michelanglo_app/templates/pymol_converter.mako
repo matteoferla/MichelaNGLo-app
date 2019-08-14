@@ -43,11 +43,14 @@
 </%def>
 
 <%block name="body">
-<ul class="list-group list-group-flush">
-            <li class="list-group-item">
+    <p>See <a href="#" title="Guided tour of the page" data-toggle="tooltip" id="tour">tutorial</a> for help navigating this page.<br/>
+        This site works with both version of PyMol and converts most elements (see <a href="#" data-target="#info_modal" data-toggle="modal">compatibility</a> for more).
+    </p>
                 <form>
                     <div class="row">
                         <div class="col-xl-5 col-lg-6 mb-3">
+
+
                             <div class="input-group" data-toggle="tooltip" title="Upload your PyMOL PSE file">
                               <div class="input-group-prepend">
                                 <span class="input-group-text" id="upload_addon">Upload PSE file</span>
@@ -79,20 +82,22 @@
                         <div class="col-xl-3 col-lg-3 col-md-6 mb-4">
                             ${checkbox(info.attr.uniform_non_carbon, "Uniform non carbons", "uniform_non_carbon", append=None, is_checked=True)}
                         </div>
-                        <div class="col-xl-6 col-lg-6 col-md-8 mb-4"  data-toggle="tooltip" data-html="true"
-                                 title="${info.attr.sticks|n}">
+                        <div class="col-xl-6 col-lg-6 col-md-8 mb-4" >
                             <div class="input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text" id="input_mode-addon">Sticks as </span>
                                   </div>
                                 <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                                  <label class="btn btn-secondary">
+                                  <label class="btn btn-secondary" data-toggle="tooltip" data-html="true"
+                                 title="${info.attr.stick|n}">
                                     <input type="radio" name="sticks" id="sticks_licorice" autocomplete="off" value="licorice"> Liquorice
                                   </label>
-                                <label class="btn btn-secondary active">
+                                <label class="btn btn-secondary active" data-toggle="tooltip" data-html="true"
+                                 title="${info.attr.sym_stick|n}">
                                     <input type="radio" name="sticks" id="sticks_sym_licorice" autocomplete="off" value="sym_licorice" checked> Liq. w&#773; db bonds
                                   </label>
-                                  <label class="btn btn-secondary">
+                                  <label class="btn btn-secondary" data-toggle="tooltip" data-html="true"
+                                 title="${info.attr.hyperball|n}">
                                     <input type="radio" name="sticks" id="sticks_hyperball" value="hyperball" autocomplete="off"> Hyperball
                                   </label>
                                 </div>
@@ -105,15 +110,11 @@
                 <div class="row align-center">
                     <div class="col-md-4 offset-md-4">
                         <div class="btn-group d-flex" role="group" aria-label="Submit">
-                            <button type="button" class="btn btn-info flex-fill" data-target="#info_modal" data-toggle="modal"><i class="far fa-search"></i> Info</button>
-                            <button type="button" class="btn btn-info flex-fill" title="Guided tour of the page" data-toggle="tooltip" id="tour"><i class="far fa-map-signs"></i> Guide</button>
                             <button type="button" class="btn btn-warning flex-fill" id="clear"><i class="far fa-trash-alt"></i> Clear</button>
                             <button type="button" class="btn btn-success flex-fill" id="submit"><i class="far fa-cogs"></i> Submit</button>
                         </div>
                     </div>
                 </div>
-            </li>
-        </ul>
 </%block>
 
 ######## other blocks

@@ -204,6 +204,7 @@
             $('#viewcode').text('<div role="NGL" data-load="'+pdb+'" ></div>');
             NGL.specialOps.multiLoader('viewport',[{'type': 'rcsb','value': pdb}]);
             NGL.specialOps.showTitle('viewport', 'Loaded: '+ pdb);
+            interactive_builder();
             $('html, body').animate({
                     scrollTop: $('#staging').offset().top
                 }, 2000);
