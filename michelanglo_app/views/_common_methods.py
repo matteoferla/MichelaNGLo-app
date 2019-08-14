@@ -129,5 +129,5 @@ class PDBMeta:
                    entity["in_chains"]]
         hetero = [(f'{entity["chem_comp_ids"][0]} and :{chain}',
                    "/".join(entity["molecule_name"])) for entity in self.get_nonproteins() for chain in
-                  entity["in_chains"] if entity["molecule_name"] != "water"]
+                  entity["in_chains"] if not self.is_boring_ligand(entity)]
         return {'peptide': peptide, 'hetero': hetero}
