@@ -69,8 +69,6 @@
 <script type="text/javascript">
     $(document).ready(function () {
 
-        ops.addToast('todo_delete','Random error?','For now during debug, I want to keep track of all raised errors. However aborting an ajax request is technically an error, so if you are a nimble typist you will get "error 0", please ignore this one..','bg-danger');
-
         $('#species').on('keyup', event => {
             let species = $('#species');
             window.taxid ='ERROR';
@@ -103,8 +101,8 @@
                                             $('.popover .list-group-item').click(event => {species.val($(event.target).text()); species.popover('dispose'); species.trigger('input');})
                                        }
                                      },
-                     error: ops.addErrorToast
-                    });
+                     error: (xhr) => {if (xhr.statusText =='abort' || xhr.status === 0 || xhr.readyState === 0) {return;} else {ops.addErrorToast(xhr)}}
+            });
     });
         // starting value. Cannot guarantee the default/stored value is correct.
         let species = $('#species');
@@ -163,7 +161,9 @@
                 $('#error_species').show().text('Unknown species');
                 return 0;
             }
-            $.ajax({
+            if (window.pdbs_xhr !== undefined) {
+                window.pdbs_xhr.abort();}
+            window.pdbs_xhr = $.ajax({
                 url: "/choose_pdb",
                 data: {
                     'item': 'get_pdbs',
@@ -179,7 +179,7 @@
                     }
                     else {ops.addToast('issue', 'Issue', JSON.stringify(msg),'bg-danger');}
                 },
-                error: ops.addErrorToast
+                error: (xhr) => {if (xhr.statusText =='abort' || xhr.status === 0 || xhr.readyState === 0) {return;} else {ops.addErrorToast(xhr)}}
             });
 
             $.ajax({

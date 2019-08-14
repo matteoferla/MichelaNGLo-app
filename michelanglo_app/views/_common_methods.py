@@ -101,9 +101,26 @@ class PDBMeta:
         else:
             return f'{"/".join(entity["molecule_name"])} in chain {"/".join(entity["in_chains"])}'
 
+    def is_boring_ligand(self, entity):
+        if 'chem_comp_ids' not in entity:
+            return True #this entity isnt even a thing
+        elif len(entity['chem_comp_ids']) == 0:
+            return True #this entity isnt even a thing
+        else:
+            return entity['chem_comp_ids'][0] in ('WAT', 'HOH',  # `TP3` water is ambiguous and rare
+                                               'LI', 'NA' ,'K', 'RB', # group 1 cations
+                                               'BE', 'MG', 'CA', 'SR', # earth metal cations
+                                               'F', 'CL', 'BR', 'I', #halogens
+                                               'MN', 'FE', 'CO',  'NI', 'CU', 'ZN', # top period transition metals
+                                               'GOL', #glycerol
+                                               'EDO', #ethanediol
+                                               'SUC', #sucrose
+                                               'SO4', #sulfate
+                                               )
+
     def wordy_describe(self, delimiter=' + '):
         descr = delimiter.join([self.wordy_describe_entity(entity) for entity in self.get_proteins()])
-        descr += delimiter.join([self.wordy_describe_entity(entity) for entity in self.get_nonproteins()])
+        descr += ' &mdash; ' + delimiter.join([self.wordy_describe_entity(entity) for entity in self.get_nonproteins() if not self.is_boring_ligand(entity)])
         return f'<span class="prolink" name="pdb" data-code="{self.code}" data-chain="{self.chain}">{self.code}</span> ({descr})'
 
     def describe(self):
