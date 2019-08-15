@@ -1,4 +1,4 @@
-<div class="row">
+<div class="row" id="markup_form">
     <div class="col-12 mb-2"
          title="Choose the focusing mode to use. If unsure consult 'prolinks' page in the documetation. <br/>But briefly, <code>domain</code> is best to show a region or domain. <code>residue</code> is to show residues in selection and their environs. <code>clash</code> shows a clash."
          data-toggle="tooltip"
@@ -58,7 +58,6 @@
     <div id="differing_view" class="alert alert-warning mx-3 w-100"><i class="far fa-exclamation-triangle"></i> The orientation of the protein differs from the stored one above.</div>
 
     <div class="col-12 mt-2" id="results">
-        <pre><code></code></pre>
-        <p style="display: none;"><span data-toggle="viewport">Change a setting!</span></p>
+        <pre><code>&lt;span class="prolink" data-toggle="viewport"&gt;Change a setting!&lt;/span&gt;</code></pre>
     </div>
 </div>

@@ -18,7 +18,7 @@ NGL.specialOps = {'note': `This is a monkeypatch to allow HTML control of the st
 ** NGL.Stage.prototype.getComponentByType allowing stage objects to return a component.
 ** NGL.Stage.prototype.removeComponentsbyName array version.
 ** NGL.Stage.prototype.removeClashes removes clashes and the rotation.
-* $.prototype.protein to enable a link
+* $.prototype.protein to enable a link --will run on click.
 NB. this file ends with $('[data-toggle="protein"]').protein(); to activate all links.
 
 proteins is an array of {name: 'unique_name', type: 'rcsb' (default) | 'file' | 'data', value: xxx, 'ext': 'pdb' (default), loadFx: xxx}

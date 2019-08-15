@@ -11,7 +11,7 @@ $('#create').click(function () {
         data.append('pdb',window.pdb);
     } else if (window.mode === 'code') {data.append('pdb',$('#pdb').val());}
     else {data.append('pdb',$('#upload_pdb')[0].files[0]);}
-    data.append('viewcode',$('#viewcode').text()); //needs two to make it list.
+    data.append('viewcode',$('#results code').text()); //needs two to make it list.
     data.append('mode',window.mode); //file | code
     //ajax it.
     ops.addToast('submitting','Submission','Submission in progress.','bg-info');
