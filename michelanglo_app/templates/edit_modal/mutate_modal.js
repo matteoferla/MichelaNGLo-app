@@ -1,4 +1,6 @@
 $('#mutate_create').click((event) => {
+
+    let name = $('#mutate_name').val() || `mutant_${len(structure_info)}`;
     let chain = $('#mutate_chain').val() || 'A';
     let mutations = $('#mutate_mutations').val().replace(/p\./gm,'').split(/[\W,]+/);
     console.log(mutations);
@@ -9,6 +11,7 @@ $('#mutate_create').click((event) => {
             type: 'POST',
             dataType: 'json',
             data: {
+                'name': name,
                 'page': "${page}",
                 %if key:
                 'key': "${key}",

@@ -133,7 +133,7 @@ def userdata_view(request):
             settings['meta_image'] = f'https://michelanglo.sgc.ox.ac.uk/thumb/{page.identifier}'
             settings['meta_url'] = 'https://michelanglo.sgc.ox.ac.uk/data/' + page.identifier
             settings['custom_messages'] = json.dumps(custom_messages)
-            settings['N_structures'] = len(json.loads(settings['proteinJSON']))  ## regenerate each time for safety!
+            settings['structure_info'] = json.loads(settings['proteinJSON'])  ## regenerate each time for safety!
             return settings   ## renders via the "../templates/user_protein.mako"
 
 

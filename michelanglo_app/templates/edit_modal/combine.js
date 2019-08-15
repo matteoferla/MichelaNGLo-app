@@ -1,5 +1,6 @@
 window.combinePage = function (uuid) {
-           var nProtein = myData.proteins.length;
+
+           let name = window.prompt("Name to call the structure to show the view (the value that goes in data-load='xxxxxxxx' in a prolink. (Note it's view will be called the same+Fx)","altStructure");
            $.ajax({
             url: "/combine_user-page",
             type: 'POST',
@@ -11,7 +12,7 @@ window.combinePage = function (uuid) {
                 %endif
                 'donor_page': uuid,
                 'task': 'both',
-                'name': nProtein
+                'name': name
             }
         }   )
         .done((msg) => location.reload())
@@ -19,7 +20,7 @@ window.combinePage = function (uuid) {
         };
 
 window.copyJSPage = function (uuid) {
-     var name = window.prompt("Name to call the function. ","defaultText");
+     let name = window.prompt("Name to call the function to show the view (the value that goes in data-view='xxxxxxxx' in a prolink. ","altView");
      if (name === null) {ops.addToast('userCancel','Cancelled','User cancelled.','bg-warn')}
      else if (name in window)  {ops.addToast('nameTaken','Conflict','The name '+name+' appears already taken. Please try again with a different name.','bg-warn')}
      else {

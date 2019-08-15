@@ -78,7 +78,7 @@
 
                 <button type="button" class="btn btn-outline-success w-100 my-1" id="save" data-toggle="tooltip" title="Save a PNG of the current view"><i class="far fa-camera"></i> Save image</button>
                 <a href="/data/${page}?no_user=1&remote=1&no_buttons=1&key=${key}" class="btn btn-outline-success w-100 my-1"  download="page.html"  data-toggle="tooltip" title="Download this page. Requires an internet connection to access third party libraries."><i class="far fa-download"></i> Download html file</a>
-                %if N_structures == 1:
+                %if len(structure_info) == 1:
                     <a href="/save_pdb?uuid=${page}&key=${key}&index=0" class="btn btn-outline-success w-100 my-1"  download="model.pdb" data-toggle="tooltip" title="Download the structure from this page."><i class="far fa-map"></i> Download PDB file</a>
                 %else:
                     <div class="dropdown">
@@ -86,8 +86,8 @@
                         <i class="far fa-map"></i> Download PDB file
                       </button>
                       <div class="dropdown-menu " aria-labelledby="dropdownMenuButton">
-                          %for i in range(N_structures):
-                            <a href="/save_pdb?uuid=${page}&key=${key}&index=${i}" class="dropdown-item"  download="model.pdb"><i class="far fa-map"></i> Download structure &#8470; ${i}</a>
+                          %for i in range(len(structure_info)):
+                            <a href="/save_pdb?uuid=${page}&key=${key}&index=${i}" class="dropdown-item"  download="model.pdb"><i class="far fa-map"></i> Download structure &#8470; ${i} (${structure_info[i]["value"] if "value" in structure_info[i] else 'no name on record'})</a>
                           %endfor
 
                       </div>

@@ -353,7 +353,7 @@ $('#chat_send').click((event) => {
     }, 0);
 });
 
-    window.onerror = (msg, url, lineNo, columnNo, error) => ops.addToast('JSerror',
+    window.onerror = (msg, url, lineNo, columnNo, error) => ops.addToast('JSerror'+Math.floor(Math.random() * 1000),
                                                                          'DEBUG: JS Error', [
                                                                                               'Message: ' + msg,
                                                                                               'URL: ' + url,

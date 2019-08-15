@@ -13,6 +13,16 @@ from ._common_methods import is_js_true,  is_malformed
 import logging
 log = logging.getLogger(__name__)
 
+def sanitise_name(suggested_name, default, structure_info):
+    # structure_info is proteinJSON as dict.
+    suggested_name = re.sub('\W', '', suggested_name)
+    suggested_name = re.sub('$\d', '', suggested_name)
+    if len(suggested_name) == 0:  ## bad name
+        return default
+    elif suggested_name in [p['value'] for p in structure_info if 'value' in p]: #name taken
+        return default
+    else:
+        return suggested_name
 
 @view_config(route_name='edit_user-page', renderer='json')
 def edit(request):
@@ -118,47 +128,70 @@ def combined(request):
     malformed = is_malformed(request, 'target_page','donor_page','task','name')
     if malformed:
         return {'status': malformed}
-    target_page = Page.select(request.params['target_page'])
-    donor_page = Page.select(request.params['donor_page'])
+    print()
+    target_page = Page.select(request, request.params['target_page'])
+    donor_page = Page.select(request, request.params['donor_page'])
     log.info(f'{User.get_username(request)} is requesting to merge page {donor_page} to {target_page}')
     task = Page(request.params['task'])
-    name = request.params['name']
-    user = request.user
     target_verdict = permission(request, target_page, 'edit', key_label='target_encryption_key')
     if target_verdict['status'] != 'OK':
         return target_verdict
     donor_verdict = permission(request, donor_page, 'view', key_label='donor_encryption_key')
     if target_verdict['status'] != 'OK':
         return donor_verdict
-    ### user is legal!
+    ### user is legal! also rememeber that load happens in verdict
     #common
-    if re.match('^\w+$', name) == None:
-        request.response.status = 400
-        log.warn(f'{User.get_username(request)} wanted to add a function name that was not alphanumeric.')
-        return {'status': f'function name is not alphanumeric.'}
+    addenda = json.loads(donor_page.settings['proteinJSON'])
+    alteranda = json.loads(target_page.settings['proteinJSON'])
+    if "value" in addenda[0]:
+        name = sanitise_name(request.params['name'], addenda[0]["value"], alteranda)
+    else: ##this will crash if the merger name is already taken.
+        name = f'merger_{len(alteranda)}'
+    user = request.user
     #fun
-    target_page.settings['loadfun'] += '\n' + donor_page.settings['loadfun'].replace('function loadfun', f'function loadfun{name}') + '\n'
+    if task == 'method':
+        fun_name = name
+    else:
+        fun_name = f'{name}Fx'
+    ## deal with fun.
+    end_sequence = '\n//////FUNCTION-END\n'
+    if 'loadfun' in donor_page.settings and donor_page.settings['loadfun']:  # it has a loadFx for sure.
+        donated = donor_page.settings['loadfun'].split(end_sequence)[0]
+        donated = donated.replace(f'function {addenda[0]["loadFx"]}', f'window["{fun_name}"] = function ')
+        donated = donated.replace(f'window["{addenda[0]["loadFx"]}"] = function ', f'window["{fun_name}"] = function ')
+        target_page.settings['loadfun'] += end_sequence + donated + '\n'
+    elif 'data_other' in donor_page.settings and donor_page.settings['data_other']:  # it has custom data in the NGL
+        ### god, this is aweful!
+        donated = f'''window["{fun_name}"] = function () {{let dummy = $(`<span {donor_page.settings['data_other']}></span>`); dummy.protein(); dummy.click(); }};'''
+        target_page.settings['loadfun'] += end_sequence + donated + '\n'
+        addenda[0]['loadFx'] = fun_name
+    else:
+        pass
     # copies only the method
     if task == 'method':
-        target_page.settings['description'] += f'\nView from from {donor_page.identifier} added as {name}.' + \
-                                               f'E.g. <span class="prolink" data-target="#viewport" data-toggle="protein" data-view="{name}">Show to new view</span>'
+        target_page.settings['description'] += f'\nView from <a href="/data/{donor_page.identifier}">{donor_page.title}</a> added as {fun_name}.' + \
+                                               f'E.g. <span class="prolink" data-target="#viewport" data-toggle="protein" data-view="{fun_name}">Show to new view</span>'
     else: #both
         #proteinJSON
-        addenda = json.loads(donor_page.settings['proteinJSON'])
-        alteranda = json.loads(target_page.settings['proteinJSON'])
-        addenda[0]['loadFx'] = f'loadfun{name}'
-        addenda[0]['value'] = f'pdb{name}'
-        target_page.settings['proteinJSON'] = json.dumps(alteranda + addenda)
-        #pdb
         if addenda[0]['type'] == 'data':
-            if 'pdb' in target_page.settings and target_page.settings['pdb']:
-                if isinstance(target_page.settings['pdb'],str): #backwards compatibiity hack
-                    target_page.settings['pdb'] = [('pdb', target_page.settings['pdb'])]
-            else:
-                target_page.settings['pdb'] = []
-            target_page.settings['pdb'].append((f'pdb{name}', donor_page.settings['pdb']))
-        #loadfun
-        target_page.settings['description'] += f'\nPage data from {donor_page.identifier} added as {name}.'+\
+            addenda[0]['loadFx'] = fun_name
+            addenda[0]['value'] = name
+        elif addenda[0]['type'] == 'rcsb':
+            name = addenda[0]['value']
+        else: ## URL CASE!
+            pass
+        target_page.settings['proteinJSON'] = json.dumps(alteranda + [addenda[0]])
+        #pdb backwards compatibility fix.
+        if 'pdb' in target_page.settings:
+            if target_page.settings['pdb'] and isinstance(target_page.settings['pdb'],str): #backwards compatibiity hack
+                target_page.settings['pdb'] = [('pdb', target_page.settings['pdb'])]
+        else:
+            target_page.settings['pdb'] = []
+        ## add pdb
+        if addenda[0]['type'] == 'data':
+            target_page.settings['pdb'].append((name, donor_page.settings['pdb'][0][1]))
+        #description
+        target_page.settings['description'] += f'\n\nPage structure from <a href="/data/{donor_page.identifier}">{donor_page.title}</a> added as {name} and view as {fun_name}.'+\
                                                f'E.g. <span class="prolink" data-target="#viewport" data-toggle="protein" data-load="{name}" data-view="reset">Show new protein</span>'
 
     target_page.edited = True
@@ -186,7 +219,7 @@ def delete(request):
 @view_config(route_name='mutate', renderer='json')
 def mutate(request):
     #''page', 'key'?, 'chain', 'mutations'
-    malformed = is_malformed(request, 'page','model','chain','mutations')
+    malformed = is_malformed(request, 'page','model','chain','mutations', 'name')
     if malformed:
         return {'status': malformed}
     page = Page.select(request, request.params['page'])
@@ -219,14 +252,14 @@ def mutate(request):
             return {'status','cannot create mutations from URL for security reasons'}
         with open(filename, 'r') as fh:
             seq = fh.read()
-        new_variable = f"mutant_{len(json.loads(settings['proteinJSON']))}"
+        new_variable = sanitise_name(request.params['name'], f"mutant_{len(all_protein_data)}", all_protein_data)
         all_protein_data.append({"type": "data",
                                  "value": new_variable,
                                  "isVariable": "true"})
         settings['proteinJSON'] = json.dumps(all_protein_data)
         settings['pdb'].append((new_variable, seq))
         new_model = len(all_protein_data) - 1
-        settings['description'] += f'Protein variants generated for model #{model} as model #{new_model}.\n\n'
+        settings['description'] += f'\n\nProtein variants generated for model #{model} ({all_protein_data[model]["value"] if "value" in all_protein_data[model] else "no name given"}) as model #{new_model} ({new_variable}).\n\n'
         common = '<span class="prolink" data-toggle="protein" data-hetero="true"'
         for mutant in mutations:
             n = re.search("(\d+)", mutant).group(1)

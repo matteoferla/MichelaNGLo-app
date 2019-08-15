@@ -188,7 +188,11 @@ NGL.specialOps.showClash = function (id, selection, color, radius, tolerance, vi
                 shapeComp.addRepresentation("buffer");
                 if (! myData.spinningTimer) {myData.spinningTimer = [];}
                 myData.spinningTimer.push(setInterval(function () {
-                    shapeComp.controls.spin([1, 0, 0], 30)
+                    try {shapeComp.controls.spin([1, 0, 0], 30)}
+                    catch (e) {
+                        //pass. it dissapeared ungracefully!
+                    }
+
                     }, 100));
                 //spikyball made and added.
             } //end if
@@ -280,12 +284,15 @@ NGL.specialOps.load = function (option, noLoadFun) {
         myData.proteins.push(object);
         index = myData.proteins.length - 1;
     }
-    else if ((typeof option === "string") && (option.length) >= 4) { // user gave pdb code.
+    else if ((parseInt(option) !== NaN) && (parseInt(option) < myData.proteins.length)) { //user gave a number as a string.
+        index = parseInt(option);
+    }
+    else if ((typeof option === "string") && (myData.proteins.some(v => v.value === option))) {
+        index = myData.proteins.map(v => v.value).indexOf(option);
+    }
+    else if ((typeof option === "string") && (option.length === 4)) { // user gave pdb code that is new.
         myData.proteins.push({type: 'rcsb', value: option.slice(0,4)}); //no chains please.
         index = myData.proteins.length - 1;
-    }
-    else if (parseInt(option) !== NaN < myData.proteins.length) { //user gave a number as a string.
-        index = parseInt(option);
     }
     else {throw 'No idea what this user submitted option is.'}
     // check if the one asked for is loaded.

@@ -1,3 +1,5 @@
+##### This template is used by both the markup_builder_model and pdb_staging_insert.
+
 <div class="row" id="markup_form">
     <div class="col-12 mb-2"
          title="Choose the focusing mode to use. If unsure consult 'prolinks' page in the documetation. <br/>But briefly, <code>domain</code> is best to show a region or domain. <code>residue</code> is to show residues in selection and their environs. <code>clash</code> shows a clash."
