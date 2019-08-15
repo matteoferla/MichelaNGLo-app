@@ -550,7 +550,7 @@ $.prototype.viewport = function () {
 
 $(document).ready(function(){ //
     //activate prolinks
-    $('[data-toggle="protein"]').protein();
+    $('[data-toggle="protein"]:not([role="NGL"])').protein();
     //activate viewport
     $('[role="NGL"],[role="proteinViewport"],[role="proteinviewport"],[role="protein_viewport"]').viewport();
 });
