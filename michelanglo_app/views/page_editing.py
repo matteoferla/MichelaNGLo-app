@@ -128,7 +128,6 @@ def combined(request):
     malformed = is_malformed(request, 'target_page','donor_page','task','name')
     if malformed:
         return {'status': malformed}
-    print()
     target_page = Page.select(request, request.params['target_page'])
     donor_page = Page.select(request, request.params['donor_page'])
     log.info(f'{User.get_username(request)} is requesting to merge page {donor_page} to {target_page}')
@@ -209,6 +208,8 @@ def delete(request):
     verdict = permission(request, page, 'del', key_label='key')
     if verdict['status'] != 'OK':
         return verdict
+    elif page.protected:
+        return {'status': 'cannot delete protected page.'}
     else:
         page.delete().commit(request)
         if not page.exists:

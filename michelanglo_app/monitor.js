@@ -12,6 +12,7 @@ const timeout = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     const url = `http://localhost:8088/data/${uuid}?columns_viewport=6`;
     let labels = ['Initial view'];
     await page.goto(url);
+    //conf.
     await page.setViewport({
                           width: 1000,
                           height: 700,
@@ -21,8 +22,21 @@ const timeout = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     await page.evaluate( () => $('#viewport img').click() ? $('#viewport img').length : undefined );
     await page._client.send('Page.setDownloadBehavior', {behavior: 'allow',
                                                          downloadPath: './michelanglo_app/user-data-monitor/'});
-    //await page.evaluate(() => $('.prolink').each());
+
+
+    //navigation lock
+    page.on('request', req => {
+    if (req.isNavigationRequest() && req.frame() === page.mainFrame() && req.url() !== url) {
+      console.log(`request: ${req.url()}`);
+      console.log('abort');
+      req.abort('aborted');
+    } else {
+      req.continue();
+    }
+    });
+    await page.setRequestInterception(true);
     await timeout(3000); //safe side//
+    // start clicking!
     const nLinks = await page.evaluate( () => $('.prolink').length );
     const saver = (fn) => NGL.getStage().makeImage({trim: true, antialias: true, transparent: false}).then((blob) => NGL.download(blob, fn));
     await page.evaluate(saver,`${uuid}-0.png`);
