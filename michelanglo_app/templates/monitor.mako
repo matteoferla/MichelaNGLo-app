@@ -39,7 +39,7 @@
        <div class="row">
            %for i in range(len(labels)):
                <div class="col-12 col-xl-3">
-                   <div class="card" style="width: 18rem;">
+                   <div class="card mb-2">
                       <img class="card-img-top" src="/monitor/${page}?image=${i}" alt="${i}">
                       <div class="card-body">
                         <h5 class="card-title">Link &#8470; ${i+1}</h5>

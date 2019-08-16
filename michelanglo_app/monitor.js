@@ -28,8 +28,7 @@ const timeout = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     await page.evaluate(saver,`${uuid}-0.png`);
     for (let i=0; i < Math.min(nLinks, 100); i++) {
         await page.evaluate((index) => $(`.prolink:eq(${index})`).click(), i);
-        labels.push(i + ' → ' +
-            await page.evaluate((index) => $(`.prolink:eq(${index})`).text(), i));
+        labels.push(await page.evaluate((index) => $(`.prolink:eq(${index})`).text(), i));
         //console.log(labels[i]);
         await timeout(3000); //safe side//
         await page.evaluate(saver, `${uuid}-${i+1}.png`);
