@@ -154,13 +154,15 @@ def monitor(request):
         request.response.status = 400
         return render_to_response("../templates/404.mako", response_settings, request)
     elif 'image' in request.params:
-        file = os.path.join('michelanglo_app','user-data-monitor',f"{page.identifier}-{request.params['image']}.png")
-        if os.path.exists(file):
-            return FileResponse(file)
-        else:
-            return FileResponse(os.path.join('michelanglo_app','static','broken.gif'))
+            file = os.path.join('michelanglo_app','user-data-monitor',f"{page.identifier}-{request.params['image']}.png")
+            if page.protected and os.path.exists(file):
+                return FileResponse(file)
+            else:
+                return FileResponse(os.path.join('michelanglo_app', 'static', 'broken.gif'))
+    elif not page.protected:
+        return {'status': 'unprotected', **response_settings}
     else:
-        labelfile = os.path.join('michelanglo_app','user-data-monitor',page.identifier+'.json') ## this is not within hth pickle as nodejs makes it.
+        labelfile = os.path.join('michelanglo_app','user-data-monitor', page.identifier+'.json') ## this is not within hth pickle as nodejs makes it.
         if os.path.exists(labelfile):
             labels = json.load(open(labelfile))
             return {'status': 'monitoring', 'labels': labels, **response_settings}

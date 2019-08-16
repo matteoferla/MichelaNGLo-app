@@ -132,6 +132,21 @@ def set_ajax(request):
                 log.warning(f'{User.get_username(request)} tried to terminate the app')
                 notify_admin(f'{User.get_username(request)} tried to terminate the app')
                 return {'status': 'wrong secret code.'}
+        elif request.params['item'] == 'protection':
+            pagename = request.params['page']
+            log.info(f'{User.get_username(request)} changed the monitoring of page {pagename}.')
+            page = Page.select(request, pagename)
+            page.protected = True
+            return {'status': 'protected successfully'}
+        elif request.params['item'] == 'deprotection':
+            pagename = request.params['page']
+            log.info(f'{User.get_username(request)} changed the monitoring of page {pagename}.')
+            page = Page.select(request, pagename)
+            page.protected = False
+            for file in os.listdir('michelanglo_app/user-data-monitor'):
+                if file.find(pagename) == 0:
+                    os.remove(os.path.join('michelanglo_app/user-data-monitor', file))
+            return {'status': 'deprotected successfully'}
         else:
             return {'status': 'unknown cmd'}
 

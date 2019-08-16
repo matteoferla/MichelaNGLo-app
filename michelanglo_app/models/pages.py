@@ -42,6 +42,7 @@ class Page(Base):
     edited = Column(Boolean)
     encrypted = Column(Boolean)
     timestamp = Column(DateTime)
+    protected = Column(Boolean)
     settings = None  #watchout this ought to be a dict, but dict is mutable.
     key = None
     unencrypted_path = property(lambda self: os.path.join('michelanglo_app', 'user-data', self.identifier + '.p'))

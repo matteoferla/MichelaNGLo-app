@@ -10,15 +10,25 @@
 </%block>
 
 <%block name="main">
-   <div class="alert alert-success">
+    %if status == 'monitoring' or status == 'generating':
+    <div class="alert alert-success">
        <h4 class="alert-heading">Protected</h4>
-       <p>Your <a href="/data/${page}">page</a> is as publication-ready/published, so these conditions are enforced.</p>
+       <p>Your <a href="/data/${page}">page</a> is marked as publication-ready/published, so these conditions are enforced.</p>
        <hr/>
        <p>If you erroneously activated this feature press the following:
-           <button type="button" class="btn btn-danger" onclick="alert('does nothing')"><i class="far fa-lock-open"></i> Unprotect page</button></p>
-   </div>
+           <button type="button" class="btn btn-danger" onclick="alter_protection('deprotection')"><i class="far fa-lock-open"></i> Unprotect page</button></p>
+    </div>
+    %else:
+    <div class="alert alert-warning">
+       <h4 class="alert-heading">Unprotected</h4>
+       <p>Your <a href="/data/${page}">page</a> is not protected.</p>
+       <hr/>
+       <p>To activate this feature press the following:
+           <button type="button" class="btn btn-success" onclick="alter_protection('protection')"><i class="far fa-lock-open"></i> Unprotect page</button></p>
+    </div>
+    %endif
 
-   <p>You have marked your page as publication-ready/published and as consequence it must remain stable for many years, therefore the following are enforced:
+   <p>A page marked as publication-ready/published must remain stable for many years, therefore the following are enforced:
    </p>
        <ul>
        <li>It is deletion protected</li>
@@ -55,4 +65,20 @@
       <p>This page is not protected.</p>
    %endif
 
+</%block>
+
+
+<%block name='scripts'>
+    <script type="text/javascript">
+        window.alter_protection = (mode) => {
+            $.ajax({
+                type: "POST",
+                url: "/set",
+                data: {item: mode,
+                       page: "${page}"
+                       }
+            }).done(msg => ops.addToast('requested',mode, msg.status ,'bg-success'))
+                .fail(ops.addErrorToast);
+        };
+    </script>
 </%block>
