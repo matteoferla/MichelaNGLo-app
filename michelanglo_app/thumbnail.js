@@ -3,7 +3,7 @@ This nodejs script loads and saves the image to make a thumbnail for twitter & c
 */
 
 const puppeteer = require('puppeteer');
-const uuid = process.argv[2]
+const uuid = process.argv[2];
 const timeout = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 

@@ -136,13 +136,44 @@ def userdata_view(request):
             settings['structure_info'] = json.loads(settings['proteinJSON'])  ## regenerate each time for safety!
             return settings   ## renders via the "../templates/user_protein.mako"
 
-
+@view_config(route_name='monitor', renderer="../templates/monitor.mako")
+def monitor(request):
+    pagename = request.matchdict['id']
+    page = Page.select(request, pagename)
+    response_settings = {'project': 'Michelanglo', 'user': request.user,
+                         'page': pagename,
+                         'custom_messages': json.dumps(custom_messages),
+                         'meta_title': 'Michelaɴɢʟo: sculpting protein views on webpages without coding.',
+                         'meta_description': 'Convert PyMOL files, upload PDB files or submit PDB codes and ' + \
+                                             'create a webpage to edit, share or implement standalone on your site',
+                         'meta_image': '/static/tim_barrel.png',
+                         'meta_url': 'https://michelanglo.sgc.ox.ac.uk/'
+                         }
+    verdict = permission(request, page, 'view', key_label='key')
+    if verdict['status'] != 'OK':
+        request.response.status = 400
+        return render_to_response("../templates/404.mako", response_settings, request)
+    elif 'image' in request.params:
+        file = os.path.join('michelanglo_app','user-data-monitor',f"{page.identifier}-{request.params['image']}.png")
+        if os.path.exists(file):
+            return FileResponse(file)
+        else:
+            return FileResponse(os.path.join('michelanglo_app','static','broken.gif'))
+    else:
+        labelfile = os.path.join('michelanglo_app','user-data-monitor',page.identifier+'.json') ## this is not within hth pickle as nodejs makes it.
+        if os.path.exists(labelfile):
+            labels = json.load(open(labelfile))
+            return {'status': 'monitoring', 'labels': labels, **response_settings}
+        else:
+            #to do change to schedulere.
+            os.system(f'node michelanglo_app/monitor.js {pagename} &')
+            return {'status': 'generating', **response_settings}
 
 @view_config(route_name='userthumb')
 def thumbnail(request):
     pagename = request.matchdict['id']
     page = Page.select(request, pagename)
-    verdict = permission(request, page, 'view', key_label='key')
+    verdict = permission(request, page, 'monitor', key_label='key')
     if verdict['status'] != 'OK':
         request.response.status = 200 # we would block facebook and twitter otherwise...
         response = FileResponse(os.path.join('michelanglo_app', 'static', 'tim_barrel.png'))

@@ -165,6 +165,13 @@ def user_view(request):
 
 
 def permission(request, page, mode='edit', key_label='encryption_key'):
+    """
+    :param request:
+    :param page:
+    :param mode: Permission for view are laxer. Everything is the same as editing.
+    :param key_label:
+    :return:
+    """
     user = request.user
     if not page:
         request.response.status = 404

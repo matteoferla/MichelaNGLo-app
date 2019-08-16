@@ -39,6 +39,7 @@ def includeme(config):
     config.add_route('extended_menu', '/michelanglo_menu.js')
     config.add_route('userdata', '/data/{id}')
     config.add_route('userthumb', '/thumb/{id}')
+    config.add_route('monitor', '/monitor/{id}')
 
     #previously existent routes... deadlink possible:
     #config.add_route('sandbox', '/sandbox')
