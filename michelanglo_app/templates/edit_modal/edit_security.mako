@@ -55,6 +55,9 @@
         </div>
 
     </p>
+        <hr/>
+        <p>If you want to use a page in a publication the page must be guaranteed to not change. See <a href="/monitor/${page}" target="_blank">monitoring page</a>.</p>
+    </p>
 
 
     </div>

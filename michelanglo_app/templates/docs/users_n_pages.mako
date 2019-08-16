@@ -20,4 +20,5 @@
 
     ######################################################### Pages
     <%include file="docs_pages.mako"/>
+    <%include file="docs_protected.mako"/>
 </%block>
