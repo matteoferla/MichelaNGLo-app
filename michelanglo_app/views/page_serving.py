@@ -167,8 +167,6 @@ def monitor(request):
             labels = json.load(open(labelfile))
             return {'status': 'monitoring', 'labels': labels, **response_settings}
         else:
-            #to do change to schedulere.
-            os.system(f'node michelanglo_app/monitor.js {pagename} &')
             return {'status': 'generating', **response_settings}
 
 @view_config(route_name='userthumb')

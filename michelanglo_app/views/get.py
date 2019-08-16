@@ -136,6 +136,9 @@ def set_ajax(request):
             pagename = request.params['page']
             log.info(f'{User.get_username(request)} changed the monitoring of page {pagename}.')
             page = Page.select(request, pagename)
+            if not page.protected:
+                # to do change to scheduler.
+                os.system(f'node michelanglo_app/monitor.js {pagename} &')
             page.protected = True
             return {'status': 'protected successfully'}
         elif request.params['item'] == 'deprotection':

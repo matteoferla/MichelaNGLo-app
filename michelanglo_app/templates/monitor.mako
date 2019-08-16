@@ -15,16 +15,26 @@
        <h4 class="alert-heading">Protected</h4>
        <p>Your <a href="/data/${page}">page</a> is marked as publication-ready/published, so these conditions are enforced.</p>
        <hr/>
-       <p>If you erroneously activated this feature press the following:
+        %if user and user.role == 'admin':
+            <p>If you erroneously activated this feature press the following:
            <button type="button" class="btn btn-danger" onclick="alter_protection('deprotection')"><i class="far fa-lock-open"></i> Unprotect page</button></p>
+        %else:
+            <p>To request a change in status contact the admin with your request:
+           <button class="btn btn-outline-secondary my-1" type="button" data-toggle="modal" data-target="#chat_modal"><i class="far fa-lock-open"></i> Unprotect page</button></p>
+        %endif
     </div>
     %else:
     <div class="alert alert-warning">
        <h4 class="alert-heading">Unprotected</h4>
        <p>Your <a href="/data/${page}">page</a> is not protected.</p>
        <hr/>
-       <p>To activate this feature press the following:
-           <button type="button" class="btn btn-success" onclick="alter_protection('protection')"><i class="far fa-lock-open"></i> Unprotect page</button></p>
+        %if user and user.role == 'admin':
+            <p>To activate this feature press the following:
+           <button type="button" class="btn btn-success" onclick="alter_protection('protection')"><i class="far fa-lock"></i> Protect page</button></p>
+        %else:
+            <p>To request a change in status contact the admin with your request:
+           <button class="btn btn-outline-secondary my-1" type="button" data-toggle="modal" data-target="#chat_modal"><i class="far fa-lock"></i> Protect page</button></p>
+        %endif
     </div>
     %endif
 
