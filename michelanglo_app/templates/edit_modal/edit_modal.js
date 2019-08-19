@@ -71,8 +71,8 @@ $('#edit_submit').click(function () {
     try {
     ops.addToast('informare','Data submission','Your request is being processed','bg-info');
     if ($('#encryption').prop('checked')) {
-    if (! $('#encryption_key').val) {return 0}
-}
+        if (! $('#encryption_key').val) {return 0}
+    }
     if ($('#collapse_prolinks').prop('checked')) {prolinks.expandProlinks()}
     // convert description to markdown.
     var description = $($('#edit_description')[0].outerHTML.replace(/<br.*?>/g,'\n')).text(); //changed from html

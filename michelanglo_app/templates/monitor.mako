@@ -66,7 +66,7 @@
 </%block>
 
 
-<%block name='scripts'>
+<%block name='script'>
     <script type="text/javascript">
         window.alter_protection = (mode) => {
             $.ajax({

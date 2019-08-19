@@ -28,6 +28,7 @@ def userdata_view(request):
     elif verdict['status'] != 'OK' and not json_mode:
         response_settings = {'project': 'Michelanglo', 'user': request.user,
                              'page': pagename,
+                             'title': 'Error',
                              'custom_messages': json.dumps(custom_messages),
                              'meta_title': 'Michelaɴɢʟo: sculpting protein views on webpages without coding.',
                              'meta_description': 'Convert PyMOL files, upload PDB files or submit PDB codes and ' + \
@@ -35,17 +36,9 @@ def userdata_view(request):
                              'meta_image': '/static/tim_barrel.png',
                              'meta_url': 'https://michelanglo.sgc.ox.ac.uk/'
                              }
-        if request.response.status == 410:
+        if request.response.status_int == 410:
             return render_to_response("../templates/410.mako", response_settings, request)
-        elif request.response.status in (401, 403): #unknown or forbidden
-            response_settings = {'project': 'Michelanglo', 'user': request.user,
-                                 'page': pagename,
-                                 'meta_title': 'Michelaɴɢʟo: sculpting protein views on webpages without coding.',
-                                 'meta_description': 'Convert PyMOL files, upload PDB files or submit PDB codes and ' + \
-                                                     'create a webpage to edit, share or implement standalone on your site',
-                                 'meta_image': '/static/tim_barrel.png',
-                                 'meta_url': 'https://michelanglo.sgc.ox.ac.uk/'
-                                 }
+        elif request.response.status_int in (401, 403): #unknown or forbidden
             return render_to_response("../templates/encrypted.mako", response_settings, request)
         else:
             return render_to_response("../templates/404.mako", response_settings, request)
@@ -55,9 +48,11 @@ def userdata_view(request):
         if page.encrypted:
             settings['encryption_key'] = request.params['key']   ### For the Mako!
             settings['key'] = request.params['key']  #to be fixed...
+            settings['encrypted'] = True
         else:
             settings['encryption_key'] = None
             settings['key'] = None
+            settings['encrypted'] = False
         # first time flag
         if 'is_unseen' not in settings:
             settings['is_unseen'] = False
@@ -151,7 +146,7 @@ def monitor(request):
                          }
     verdict = permission(request, page, 'view', key_label='key')
     if verdict['status'] != 'OK':
-        request.response.status = 400
+        request.response.status_int = 400
         return render_to_response("../templates/404.mako", response_settings, request)
     elif 'image' in request.params:
             file = os.path.join('michelanglo_app','user-data-monitor',f"{page.identifier}-{request.params['image']}.png")

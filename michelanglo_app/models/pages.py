@@ -181,7 +181,7 @@ class Page(Base):
         request.dbsession.add(self)
 
     def __str__(self):
-        return str(Page.identifier)
+        return str(self.identifier)
 
     @classmethod
     def select(cls, request, identifier):

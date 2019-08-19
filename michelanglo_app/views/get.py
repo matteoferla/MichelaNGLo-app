@@ -60,10 +60,10 @@ def get_ajax(request):
             return render_to_response("../templates/part_error.mako", {'error': '404'}, request)
         elif not page.exists:
             return render_to_response("../templates/part_error.mako", {'error': '410'}, request)
-        elif page.encrypted and 'key' not in request.params:
+        elif page.encrypted and 'encryption_key' not in request.params:
             return render_to_response("../templates/part_error.mako", {'error': '403'}, request)
-        elif page.encrypted and 'key' in request.params:
-            page.key = request.params['key']
+        elif page.encrypted and 'encryption_key' in request.params:
+            page.key = request.params['encryption_key']
         else:
             pass #
         settings = page.load().settings
@@ -138,7 +138,7 @@ def set_ajax(request):
             page = Page.select(request, pagename)
             if not page.protected:
                 # to do change to scheduler.
-                os.system(f'node michelanglo_app/monitor.js {pagename} &')
+                os.system(f'node michelanglo_app/monitor.js {pagename} ref&')
             page.protected = True
             return {'status': 'protected successfully'}
         elif request.params['item'] == 'deprotection':

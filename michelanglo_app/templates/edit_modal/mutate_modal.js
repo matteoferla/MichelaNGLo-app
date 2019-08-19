@@ -13,8 +13,8 @@ $('#mutate_create').click((event) => {
             data: {
                 'name': name,
                 'page': "${page}",
-                %if key:
-                'key': "${key}",
+                %if encryption_key:
+                'encryption_key': "${encryption_key}",
                 %endif
                 'model': 0,
                 'chain': chain,

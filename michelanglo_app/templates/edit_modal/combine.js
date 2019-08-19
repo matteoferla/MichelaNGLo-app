@@ -7,8 +7,8 @@ window.combinePage = function (uuid) {
             dataType: 'json',
             data: {
                 'target_page': "${page}",
-                %if key:
-                'target_encryption_key': "${key}",
+                %if encryption_key:
+                'target_encryption_key': "${encryption_key}",
                 %endif
                 'donor_page': uuid,
                 'task': 'both',
@@ -30,8 +30,8 @@ window.copyJSPage = function (uuid) {
             dataType: 'json',
             data: {
                 'target_page': "${page}",
-                %if key:
-                'target_encryption_key': "${key}",
+                %if encryption_key:
+                'target_encryption_key': "${encryption_key}",
                 %endif
                 'donor_page': uuid,
                 'task': 'both',

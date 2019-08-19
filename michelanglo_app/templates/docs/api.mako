@@ -162,7 +162,7 @@ class MikeAPI:
     'viewport', 'image', 'uniform_non_carbon', 'verbose', 'validation', 'stick_format', 'save', 'backgroundcolor',
     'location_viewport', 'columns_viewport', 'columns_text', 'pdb', 'loadfun', 'proteinJSON', 'authors', 'editors',
     'description', 'title', 'visitors', 'authors', 'public', 'confidential', 'stick', 'data_other', 'date', 'page',
-    'key', 'encryption', 'freelyeditable', 'user', 'editable', 'no_user', 'no_buttons', 'no_analytics',
+    'encryption_key', 'encryption', 'freelyeditable', 'user', 'editable', 'no_user', 'no_buttons', 'no_analytics',
     'current_page'
     """
 

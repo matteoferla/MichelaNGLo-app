@@ -3,8 +3,8 @@ $('#getimplement').click(function () { //this is available to all in case a gues
         $('#implement_modal').modal('show');
         $.ajax({url: "/get",
                 data: {page: "${page}",
-                    %if key:
-                        key: "${key}",
+                    %if encryption_key:
+                        encryption_key: "${encryption_key}",
                     %endif
                        item: 'implement'},
                 method: 'POST'

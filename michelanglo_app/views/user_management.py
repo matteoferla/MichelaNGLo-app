@@ -173,35 +173,39 @@ def permission(request, page, mode='edit', key_label='encryption_key'):
     :return:
     """
     user = request.user
-    if not page:
-        request.response.status = 404
+    if page is None:
+        request.response.status_int = 404
         log.warn(f'{User.get_username(request)} requested a missing page {page}')
         return {'status': 'page not found'}
-    elif not page.exists:
-        request.response.status = 410
+    elif not page.exists: #but used to exist.
+        request.response.status_int = 410
         log.warn(f'{User.get_username(request)} requested a deleted page')
         return {'status': 'page no longer existent'}
-    elif page.encrypted and key_label in request.params:
-        request.response.status = 403
-        log.warn(f'{User.get_username(request)} requested an encrypted page {page.identifier} without key')
-        return {'status': 'page requires key'}
-    elif page.encrypted and key_label in request.params:
-        page.key = request.params[key_label].encode('uft-8')
+    elif page.encrypted:
+        if key_label not in request.params:
+            request.response.status_int = 403
+            log.warn(f'{User.get_username(request)} requested an encrypted page {page.identifier} without {key_label}')
+            return {'status': 'page requires key'}
+        else:
+            page.key = request.params[key_label].encode('utf-8')
+            try:
+                page.load()
+                request.response.status_int = 200
+                return {'status': 'OK'}  # valid key
+            except ValueError:
+                request.response.status_int = 403
+                log.warn(f'{User.get_username(request)} requested an encrypted page {page.identifier} with wrong key')
+                return {'status': 'page requires correct key'}
     else:
-        try:
-            page.load()
-        except ValueError:
-            request.response.status = 403
-            log.warn(f'{User.get_username(request)} requested an encrypted page {page.identifier} without wrong key')
-            return {'status': 'page requires correct key'}
+        page.load()
         if mode != 'view' and not user:
-            request.response.status = 401
+            request.response.status_int = 401
             log.warn(f'{User.get_username(request)} not authorised to {mode} page {page.identifier}')
             return {'status': f'not authorised to {mode} page without at least logging in'}
         elif mode != 'view' and not (page.identifier in user.owned_pages or
                                       user.role == 'admin' or page.settings['freelyeditable']):
             ## only owners and admins can edit freely.
-            request.response.status = 403
+            request.response.status_int = 403
             log.warn(f'{User.get_username(request)} not authorised to {mode} page {page.identifier}')
             return {'status': f'not authorised to {mode} page'}
         else:

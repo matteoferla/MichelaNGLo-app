@@ -15,7 +15,7 @@ configure_mappers()
 
 
 def get_engine(settings, prefix='sqlalchemy.'):
-    return engine_from_config(settings, prefix)
+    return engine_from_config(settings, prefix) ## settings = {'sqlalchemy.url': os.env['SQL_URL'], 'sqlalchemy.echo':'False'} basically.
 
 
 def get_session_factory(engine):

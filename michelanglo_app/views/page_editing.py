@@ -205,7 +205,7 @@ def delete(request):
         return {'status': malformed}
     page = Page.select(request, request.params['page'])
     log.info(f'{User.get_username(request)} is requesting to delete page {page}')
-    verdict = permission(request, page, 'del', key_label='key')
+    verdict = permission(request, page, 'del', key_label='encryption_key')
     if verdict['status'] != 'OK':
         return verdict
     elif page.protected:
@@ -226,7 +226,7 @@ def mutate(request):
     page = Page.select(request, request.params['page'])
     log.info(f'{User.get_username(request)} is making mutants page {page}')
     user = request.user
-    verdict = permission(request, page, 'del', key_label='key')
+    verdict = permission(request, page, 'del', key_label='encryption_key')
     if verdict['status'] != 'OK':
         return verdict
     else:
@@ -288,7 +288,7 @@ def rename(request):
         old_name = request.params['old_page']
         new_name = re.sub('\W','', request.params['new_page'])
         if 'key' in request.params:
-            key = request.params['key']
+            key = request.params['encryption_key']
         else:
             key = None
         old_page = Page(old_name, key=key)

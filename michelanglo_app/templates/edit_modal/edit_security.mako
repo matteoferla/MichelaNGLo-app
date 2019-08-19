@@ -14,7 +14,7 @@
           <div class="input-group-text px-2">
                 <div class="custom-control custom-switch">
               <input type="checkbox" class="custom-control-input user-editable-state" id="encryption"
-                 %if encryption:
+                 %if encrypted:
                     checked
                 %endif
                     >
@@ -24,7 +24,7 @@
       </div>
 
                 <input type="password" class="form-control" aria-label="encryption key" id="encryption_key" autocomplete="new-password"
-            %if encryption:
+            %if encrypted:
                 value="${encryption_key}"
             %else:
                 placeholder="key"
