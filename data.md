@@ -41,3 +41,22 @@ The class is `Pages` in in `mchelanglo_app/`.
 The encryption is done with an AES cipher using a SHA256 hash of the key as the AES key.
 As the encryption is done in CBC mode, the randomly chosen IV (kind of like salt) is stored at the front of the encrypted data as commonly done.
 
+The table at present looks like:
+
+
+    app_users=# \d+ pages
+    
+   Column   |            Type             | Collation | Nullable |               Default                | Storage  | Stats target | Description 
+------------|-----------------------------|-----------|----------|--------------------------------------|----------|--------------|-------------
+ id         | integer                     |           | not null | nextval('pages_index_seq'::regclass) | plain    |              | 
+ identifier | text                        |           | not null |                                      | extended |              | 
+ title      | text                        |           |          |                                      | extended |              | 
+ exists     | boolean                     |           |          | true                                 | plain    |              | 
+ edited     | boolean                     |           |          | false                                | plain    |              | 
+ encrypted  | boolean                     |           |          | false                                | plain    |              | 
+ timestamp  | timestamp without time zone |           | not null |                                      | plain    |              | 
+ protected  | boolean                     |           |          |                                      | plain    |              | 
+    
+    Indexes:
+    "pages_pkey" PRIMARY KEY, btree (id)
+    "pages_uuid_key" UNIQUE CONSTRAINT, btree (identifier)
