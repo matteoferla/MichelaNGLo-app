@@ -49,6 +49,8 @@ window.interactive_changer = () =>  {
         }
 
     }
+    let model = $('#markup_model').children(':selected').val();
+    if (model !== 'none') {attributes+= ` data-load="${"${model}"}"`}
     else {code = 'data-focus="'+mode+'"'}
     let id = 'viewport';
     let spanCode ='<span class="prolink" data-target="'+id+'" data-toggle="protein" '+code+' '+attributes+'>Try me as a span-element</span>';
@@ -96,6 +98,9 @@ window.interactive_builder = () => {
         $('#markup_view').val('['+NGL.getStage('viewport').viewerControls.getOrientation().elements.map((v) => Math.round(v*10)/10)+']');
         interactive_changer();
     });
+
+    let modelSelector = $('#markup_model');
+    myData.proteins.forEach(  ({value, type}) => modelSelector.append(`<option value="${"${value}"}">${"${value}"}</option>`) );
     //////////////// Ready ///////////////////////////
     //$('#markup_calculate').click(
     //load domain.

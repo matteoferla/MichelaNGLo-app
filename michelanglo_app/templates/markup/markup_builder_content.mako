@@ -22,7 +22,7 @@
 
     <%
         ##  id type placeholder title
-        buttons = (('selection','text', '1-10:A','NGL selection of residues to focus on. <code>1:A</code> will select residue 1 of chain A, <code>1-20:B</code> the residues 1 to 20 of chain B, <code>PLP</code> (or <code>[PLP]123:D</code>) will select the residue named PLP (a ligand).<br/>The logical operators <code>and</code> and <code>or</code> can also be used, e.g. <code>:B or :C</code> will select chains B & C. You can only select residues that exist in the structure, if not it will either show all or erroneously pan off camera.'),
+        buttons = (('selection','text', '1-10:A','NGL selection of residues to focus on. <code>1:A</code> will select residue 1 of chain A, <code>1-20:B</code> the residues 1 to 20 of chain B, <code>*</code> for everything, <code>PLP</code> (or <code>[PLP]123:D</code>) will select the residue named PLP (a ligand).<br/>The logical operators <code>and</code> and <code>or</code> can also be used, e.g. <code>:B or :C</code> will select chains B & C. You can only select residues that exist in the structure, if not it will either show all or erroneously pan off camera.'),
         ('color','text','yellow', 'The color to show. It is highly recommended to go for light colors as opposed to dark colors and preferable muted or pastel as opposed to primary. Say <span style="color: darkred">DarkRed</span> is hard to seem, <span style="color: red">Red</span> is too sharp, <span style="color: darkred">coral<Coral</span> or <span style="color: magenta">magenta</span> are better.'),
         ('title','text','bla bla', 'The text to show below the structure (optional)'),
         ('radius','number',4, 'How many &aring;ngstr&ouml;m to expand around the residue focused upon. 1.5 &Aring; will show residues that hydrogen bond (if hydrogens are shown), salt bridge or &pi; stack, 3&Aring; will show residues that hydrogen bond (within explicit hydrogens)'),
@@ -48,6 +48,13 @@
             </div>
         </div>
     </div>
+
+    <div class="col-12 col-md-6 mb-2" data-toggle="tooltip" title="There are multiple structures in this page. This allows you toggle between them. <code>No model specified</code> will use the currently shown model. If there is only one model and you will not add more ignore this." data-html=true data-placement="top">
+        <select class="custom-select" id="markup_model">
+          <option selected value="none" name="markup_model">No model specified</option>
+        </select>
+    </div>
+
     <div class="input-group mx-3">
       <div class="input-group-prepend">
         <span class="input-group-text" >Orientation</span>
