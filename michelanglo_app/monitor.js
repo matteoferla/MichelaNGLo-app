@@ -2,6 +2,7 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const uuid = process.argv[2];
+const prefix = process.argv[3];
 const timeout = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 //console.log('Loaded');
 //console.log(`Checking links for ${uuid}`);
@@ -39,13 +40,13 @@ const timeout = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     // start clicking!
     const nLinks = await page.evaluate( () => $('.prolink').length );
     const saver = (fn) => NGL.getStage().makeImage({trim: true, antialias: true, transparent: false}).then((blob) => NGL.download(blob, fn));
-    await page.evaluate(saver,`${uuid}-0.png`);
+    await page.evaluate(saver,`${prefix}${uuid}-0.png`);
     for (let i=0; i < Math.min(nLinks, 100); i++) {
         await page.evaluate((index) => $(`.prolink:eq(${index})`).click(), i);
         labels.push(await page.evaluate((index) => $(`.prolink:eq(${index})`).text(), i));
         //console.log(labels[i]);
         await timeout(3000); //safe side//
-        await page.evaluate(saver, `${uuid}-${i+1}.png`);
+        await page.evaluate(saver, `${prefix}${uuid}-${i+1}.png`);
     }
   await timeout(3000); //safe side//
   await browser.close();
