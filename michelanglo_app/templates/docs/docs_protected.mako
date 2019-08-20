@@ -6,7 +6,7 @@
    <li>A backup has been made</li>
    <li>prolink monitoring</li>
    </ul>
-<p>The system will monitor every month [TODO SET SCHEDULER] that the prolinks generate the same images and that the content is consistent with that stored.
+<p>The system will monitor every 10 days that the prolinks generate the same images and that the content is consistent with that stored.
    If something differs, the admin will be notified and action will be taken as follows:</p>
    <ol>
     <li><b>Bug</b>: the issue will be corrected if possible, else you will be contacted (extremely unlikely).</li>
