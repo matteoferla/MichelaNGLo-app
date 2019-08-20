@@ -787,7 +787,7 @@ class PyMolTranspiler:
     def parse_ss(self, data, **settings):
         def _deal_with():
             if ss_last == 'H':  # previous was the other type
-                self.ss.append('{typos}    {ss_count: >3}HA {resn_start} {chain}  {resi_start: >3}  {resn_end} {chain}  {resi_end: >3} {h_class: >2}                                  {length: >2}'.format(
+                self.ss.append('{typos}    {ss_count: >3}HA {resn_start} {chain} {resi_start: >4}  {resn_end} {chain} {resi_end: >4} {h_class: >2}                                  {length: >2}'.format(
                     typos='HELIX',
                     ss_count=ss_count[ss_last],
                     resn_start=resn_start,
@@ -800,7 +800,7 @@ class PyMolTranspiler:
                 ))
                 ss_count[ss_last] += 1
             elif ss_last == 'S':  # previous was the other type
-                self.ss.append('{typos}  {ss_count: >3} {ss_count: >2}S 1 {resn_start} {chain} {resi_start: >3}  {resn_end} {chain} {resi_end: >3}  0'.format(
+                self.ss.append('{typos}  {ss_count: >3} {ss_count: >2}S 1 {resn_start} {chain}{resi_start: >4}  {resn_end} {chain}{resi_end: >4}  0'.format(
                     typos='SHEET',
                     ss_count=ss_count[ss_last],
                     resn_start=resn_start,
