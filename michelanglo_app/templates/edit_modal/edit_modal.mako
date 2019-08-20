@@ -44,10 +44,16 @@
                     </div>
 
                        <div class="offset-1 col-11 pb-1">
-                        <%include file="../markup/markup_builder_btn.mako"/>
-                        <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#combine_modal"><i class="far fa-paperclip"></i> Add additional model</button>
-                        <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#mutate_modal"><i class="far fa-biohazard"></i> Make mutations</button>
-                           <button class="btn" data-toggle="tooltip" title="Collapse prolinks. Note that the formatting will be messed up if there are nested elements within a prolink.">
+                            <span data-toggle="tooltip" title="Create links that control the protein view (prolinks)">
+                                <%include file="../markup/markup_builder_btn.mako"/>
+                            </span>
+                           <span data-toggle="tooltip" title="Copy over into this page the structure (or the view only) from another page you have access to &mdash;added structure will appear as a different model (see fa-load in documentation).">
+                               <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#combine_modal"><i class="far fa-paperclip"></i> Add additional model</button>
+                           </span>
+                           <span data-toggle="tooltip" title="Create point mutations in this structure &mdash;mutant structure will appear as a different model (see fa-load in documentation)">
+                                <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#mutate_modal"><i class="far fa-biohazard"></i> Make mutations</button>
+                           </span>
+                               <button class="btn" data-toggle="tooltip" title="Collapse prolinks. Prolinks are the protein view links that can be created with the builder tool. They can be collapsed into a compact form or written in full as a HTML element. If you plan on moving them around, duplicating them or changing the values expand them. Otherwise keep this checked.">
                               <div class="input-group-prepend">
                                 <div class="input-group-text">
                                   <div class="custom-control custom-switch">
