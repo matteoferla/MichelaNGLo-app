@@ -13,3 +13,4 @@
     <li><b>Minor edit</b>*: no action. (&lowast;borrowing the definition from <a href="https://en.wikipedia.org/wiki/Help:Minor_edit">  Wikipedia <i class="far fa-external-link"></i></a>)</li>
     <li><b>Major edit</b>: you will be contacted to verify this was truly you.</li>
    </ol>
+<p>A page that is encrypted cannot obviously be monitored.</p>

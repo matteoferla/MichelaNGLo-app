@@ -1,4 +1,4 @@
-import json
+import json, pickle
 
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
@@ -11,7 +11,7 @@ import logging, json, os
 log = logging.getLogger(__name__)
 
 from . import custom_messages
-from ._common_methods import is_malformed
+from ._common_methods import is_malformed, is_js_true
 
 @view_config(route_name='userdata', renderer="../templates/user_protein.mako")
 def userdata_view(request):
@@ -149,18 +149,27 @@ def monitor(request):
         request.response.status_int = 400
         return render_to_response("../templates/404.mako", response_settings, request)
     elif 'image' in request.params:
-            file = os.path.join('michelanglo_app','user-data-monitor',f"{page.identifier}-{request.params['image']}.png")
+            if 'current' in request.params and is_js_true(request.params['current']):
+                file = os.path.join('michelanglo_app', 'user-data-monitor', f"tmp_{page.identifier}-{request.params['image']}.png")
+            else:
+                file = os.path.join('michelanglo_app','user-data-monitor',f"{page.identifier}-{request.params['image']}.png")
             if page.protected and os.path.exists(file):
                 return FileResponse(file)
             else:
+                print(file, os.path.exists(file))
                 return FileResponse(os.path.join('michelanglo_app', 'static', 'broken.gif'))
     elif not page.protected:
         return {'status': 'unprotected', **response_settings}
     else:
         labelfile = os.path.join('michelanglo_app','user-data-monitor', page.identifier+'.json') ## this is not within hth pickle as nodejs makes it.
+        verdictfile = os.path.join('michelanglo_app','user-data-monitor', 'verdict_'+page.identifier+'.p')
         if os.path.exists(labelfile):
             labels = json.load(open(labelfile))
-            return {'status': 'monitoring', 'labels': labels, **response_settings}
+            if os.path.exists(verdictfile):
+                validity = pickle.load(open(verdictfile, 'rb'))
+                return {'status': 'monitoring', 'labels': labels, 'validity': validity, **response_settings}
+            else:
+                return {'status': 'monitoring', 'labels': labels, 'validity': [None for l in labels], **response_settings}
         else:
             return {'status': 'generating', **response_settings}
 

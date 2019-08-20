@@ -43,15 +43,40 @@
 
    <h2>Prolink monitoring</h2>
    %if status == 'monitoring':
-       <p>The following images are monitored:</p>
+       <p>The following images are monitored.
+           <span class="bg-success text-light" data-toggle="tooltip" title="The image at the latest check is indentical to the reference one"> Consistent </span>
+           &nbsp;&nbsp;
+           <span class="bg-danger text-light" data-toggle="tooltip" title="The image at the latest check is not indentical to the reference one"> Mismatch </span>
+           &nbsp;&nbsp;
+           <span class="bg-warning text-light" data-toggle="tooltip" title="The validation process had a problem"> Error </span>
+           &nbsp;&nbsp;
+           <span class="bg-light" data-toggle="tooltip" title="No check has yet been done."> Unverified </span>
+
+       </p>
+
        <div class="row">
            %for i in range(len(labels)):
                <div class="col-12 col-xl-3">
-                   <div class="card mb-2">
+                   <%
+                       if len(validity) <= i:
+                             color = 'bg-warning'
+                       elif validity[i]:
+                             color = 'bg-success'
+                       elif validity[i] is False:
+                             color = 'bg-danger'
+                       else:
+                             color = ''
+                   %>
+                   <div class="card mb-2 ${color}">
                       <img class="card-img-top" src="/monitor/${page}?image=${i}" alt="${i}">
                       <div class="card-body">
                         <h5 class="card-title">Link &#8470; ${i+1}</h5>
                         <p class="card-text">${labels[i]}</p>
+                         %if len(validity) > i and validity[i] is False:
+                             <hr/>
+                                 <p>latest iamge:</p>
+                             <img class="card-img-top" src="/monitor/${page}?image=${i}&current=1" alt="${i}">
+                         %endif
                       </div>
                     </div>
                </div>

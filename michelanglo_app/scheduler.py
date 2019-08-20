@@ -1,4 +1,4 @@
-import os
+import os, json, imageio, pickle
 from .models import Page
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
@@ -10,7 +10,7 @@ from .views._common_methods import notify_admin
 from datetime import datetime,timedelta
 
 import logging
-log = logging.getLogger(__name__)
+log = logging.getLogger('apscheduler')
 
 
 def includeme(config):
@@ -23,8 +23,7 @@ def includeme(config):
     killfactory = lambda: kill_task(settings['scheduler.days_delete_unedited'], settings['scheduler.days_delete_untouched'])
     scheduler.add_job(killfactory, 'interval', days=1)
 
-    monitor_task()
-    scheduler.add_job(monitor_task, 'interval', days=30)
+    scheduler.add_job(monitor_task, 'interval', minutes=10)
 
     scheduler.start()
 
@@ -42,12 +41,12 @@ def kill_task(days_delete_unedited, days_delete_untouched):
     with transaction.manager:
         unedited_time = datetime.now() - timedelta(days=int(days_delete_unedited))
         n = 0
-        for page in sesh.query(Page).filter(and_(Page.exists is True, Page.edited is False, Page.timestamp < unedited_time)):
+        for page in sesh.query(Page).filter(and_(Page.exists == True, Page.edited == False, Page.timestamp < unedited_time)):
             log.info(f'Deleting unedited page {page.identifier} by {page}')
             n+=1
             #page.delete()
         untouched_time = datetime.now() - timedelta(days=int(days_delete_untouched))
-        for page in sesh.query(Page).filter(and_(Page.exists is True, Page.timestamp < untouched_time)):
+        for page in sesh.query(Page).filter(and_(Page.exists == True, Page.timestamp < untouched_time)):
             log.info(f'Deleting abbandonned page {page.identifier} ({page.timestamp})')
             # page.delete()
             n+=1
@@ -56,6 +55,26 @@ def kill_task(days_delete_unedited, days_delete_untouched):
 def monitor_task():
     sesh = get_session()
     with transaction.manager:
-        for page in sesh.query(Page).filter(and_(Page.exists is True, Page.protected is True)):
+        for page in sesh.query(Page).filter(and_(Page.exists == True, Page.protected == True)):
             log.info(f'Monitoring {page}.')
-    #notify_admin(f'Page monitoring successful.')
+            state = []
+            try:
+                if os.system(f'node michelanglo_app/monitor.js {page.identifier} tmp_'):
+                    raise ValueError(f'monitor crashed: node michelanglo_app/monitor.js {page.identifier} tmp_')
+                details = json.load(open(os.path.join('michelanglo_app','user-data-monitor', page.identifier+'.json')))
+                for i in range(len(details)):
+                    ref = os.path.join('michelanglo_app','user-data-monitor', f'{page.identifier}-{i}.png')
+                    new = os.path.join('michelanglo_app','user-data-monitor', f'tmp_{page.identifier}-{i}.png')
+                    assert os.path.exists(ref), 'Reference image does not exist'
+                    assert os.path.exists(new), 'Generated image does not exist'
+                    if (imageio.imread(ref) == imageio.imread(new)).all():
+                        state.append(True)
+                    else:
+                        state.append(False)
+            except Exception as err:
+                        msg = f'Page monitoring unsuccessful for {page.identifier} {err}'
+                        log.warning(msg)
+                        notify_admin(msg)
+            else:
+                log.info(f'Page monitoring successful for {page.identifier}')
+            pickle.dump(state, open(os.path.join('michelanglo_app', 'user-data-monitor', f'verdict_{page.identifier}.p'), 'wb'))

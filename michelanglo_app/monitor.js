@@ -1,8 +1,9 @@
+process.on('unhandledRejection', up => { throw up });
 //required!
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const uuid = process.argv[2];
-const prefix = process.argv[3];
+const prefix = process.argv.length === 4 ? process.argv[3] : '';
 const timeout = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 //console.log('Loaded');
 //console.log(`Checking links for ${uuid}`);
@@ -50,5 +51,5 @@ const timeout = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     }
   await timeout(3000); //safe side//
   await browser.close();
-  fs.writeFile(`./michelanglo_app/user-data-monitor/${uuid}.json`, JSON.stringify(labels), 'utf8', err => undefined);
+  fs.writeFile(`./michelanglo_app/user-data-monitor/${prefix}${uuid}.json`, JSON.stringify(labels), 'utf8', err => undefined);
 })();
