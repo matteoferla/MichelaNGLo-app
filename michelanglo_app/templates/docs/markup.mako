@@ -24,7 +24,6 @@
                 <h3>Aims</h3>
                 <p>This system to control the protein without any JS coding.</p>
                 <h3>Demo</h3>
-                <p><i class="far fa-hand-point-right"></i> This page is running on the <a href="static/michelanglo.js">file michelanglo.js</a></p>
                 <p>Let's look at the structure of GFP. Overall is <span class="prolink" data-toggle="protein" data-target="viewport" data-focus="domain" data-selection="11-228" data-color="lime">a &beta;-barrel</span>,
                     but sports <span class="prolink" data-toggle="protein" data-target="#viewport" data-selection="54-82" data-color="purple">a loop that traverses the core</span>.</p>
                 <p>In this loop, there are <span class="prolink" data-toggle="protein" data-target="#viewport"  data-focus="residue" data-selection="65-67" data-radius="2">three residues, SYG,</span> that mature to form a chromophore.</p>
@@ -39,8 +38,9 @@
 			<div id="viewport" style="width:100%; height: 0; padding-bottom: 100%; overflow: visible;"></div>
 		</div>
 <div class="col-12">
-
+<p><i class="far fa-hand-point-right"></i> This page is running on NGL extended with the <a href="static/michelanglo.js">file michelanglo.js</a></p>
                 <h3>Markup</h3>
+
                 <p>Following Bootstrap, the most common CSS framework, several <code>data-*</code> attributes are proposed and implemented to control what is shown. If you are unfamilar with the terms "attribute" or "element" see <a href="#basics">basics</a>.</p>
     <p>The first link is: <code>&lt;a href='#viewport' data-toggle="protein" data-focus="domain" data-selection="11-228:A" data-color="lime" &gt;a &beta;-barrel&lt;/a&gt;</code>. Actually, it is <code>&lt;span class="prolink" data-target="viewport" &hellip;&gt;&lt;/span&gt;</code> in order to add custom CSS styling (green).</p>
     <p>The attribute <code>data-toggle="protein"</code> is what tells the browser that the link controls the protein (<a href="#row_toggle">see below for more</a>), <code>data-focus="domain"</code> tells it how to zoom (domain | residue | clash | surface) to use, while <code>data-selection="11-228:A"</code> controls what to zoom into.</p>

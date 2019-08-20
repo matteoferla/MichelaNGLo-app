@@ -45,12 +45,12 @@
         },
         {
            "title": '<i class="far fa-map-marked-alt"></i> Control',
-            "text": 'Guide readers on shared pages by creating <span class="prolink" data-toggle="protein" data-focus="residue" data-selection="210:A" data-hetero=true>"prolinks" (protein view controlling links)</span> to control the protein views (<a href="/docs/markup">Example</a>)',
+            "text": 'Guide readers on shared pages by creating <span class="prolink" data-toggle="protein" data-focus="residue" data-selection="210:A" data-hetero=true>&ldquo;prolinks&rdquo;</span> (<a href="/docs/markup">protein view controlling links</a>) to control the protein views, including showing <span class="prolink" data-toggle="protein" data-focus="clash" data-selection="101:A" data-hetero=true>clashes</span> .',
 
         },
         {
            "title": '<i class="far fa-code"></i> Implement',
-            "text": 'Alternatively, follow the easy instructions to implement the view on your website',
+            "text": 'Alternatively, follow the instructions to implement the view on your website',
 
         },
         {
