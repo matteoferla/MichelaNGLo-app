@@ -74,7 +74,7 @@
                         <p class="card-text">${labels[i]}</p>
                          %if len(validity) > i and validity[i] is False:
                              <hr/>
-                                 <p>latest iamge:</p>
+                                 <p>latest image:</p>
                              <img class="card-img-top" src="/monitor/${page}?image=${i}&current=1" alt="${i}">
                          %endif
                       </div>

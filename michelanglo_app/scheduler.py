@@ -20,10 +20,9 @@ def includeme(config):
     scheduler = BackgroundScheduler()
 
     # adding settings to kill_task...
-    killfactory = lambda: kill_task(settings['scheduler.days_delete_unedited'], settings['scheduler.days_delete_untouched'])
-    scheduler.add_job(killfactory, 'interval', days=1)
-
-    scheduler.add_job(monitor_task, 'interval', minutes=10)
+    scheduler.add_job(kill_task, 'interval', days=1, args=[settings['scheduler.days_delete_unedited'], settings['scheduler.days_delete_untouched']])
+    scheduler.add_job(monitor_task, 'interval', days=30)
+    scheduler.add_job(monitor_task, 'date', run_date=datetime.now() + timedelta(minutes=1)) #run monitor_task once, in a minute.
 
     scheduler.start()
 
@@ -71,6 +70,8 @@ def monitor_task():
                         state.append(True)
                     else:
                         state.append(False)
+                        msg = f'Page monitoring unsuccessful for {page.identifier} image {i}'
+                        notify_admin(msg)
             except Exception as err:
                         msg = f'Page monitoring unsuccessful for {page.identifier} {err}'
                         log.warning(msg)

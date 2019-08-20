@@ -37,7 +37,7 @@ const timeout = (ms) => new Promise(resolve => setTimeout(resolve, ms));
     }
     });
     await page.setRequestInterception(true);
-    await timeout(3000); //safe side//
+    await timeout(4000); //safe side//
     // start clicking!
     const nLinks = await page.evaluate( () => $('.prolink').length );
     const saver = (fn) => NGL.getStage().makeImage({trim: true, antialias: true, transparent: false}).then((blob) => NGL.download(blob, fn));
@@ -46,10 +46,10 @@ const timeout = (ms) => new Promise(resolve => setTimeout(resolve, ms));
         await page.evaluate((index) => $(`.prolink:eq(${index})`).click(), i);
         labels.push(await page.evaluate((index) => $(`.prolink:eq(${index})`).text(), i));
         //console.log(labels[i]);
-        await timeout(3000); //safe side//
+        await timeout(4000); //safe side//
         await page.evaluate(saver, `${prefix}${uuid}-${i+1}.png`);
     }
-  await timeout(3000); //safe side//
+  await timeout(4000); //safe side//
   await browser.close();
   fs.writeFile(`./michelanglo_app/user-data-monitor/${prefix}${uuid}.json`, JSON.stringify(labels), 'utf8', err => undefined);
 })();

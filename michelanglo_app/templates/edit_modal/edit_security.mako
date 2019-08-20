@@ -33,7 +33,7 @@
     </div>
         <div class="valid-feedback" id="encryption_key_error">No key provided</div>
 
-            <p class="pt-3">Alternatively, If the worry is more collaborators sharing this information, you can enable a nice 'confidential' banner on top:
+        <p class="pt-3">Alternatively, If the worry is more collaborators sharing this information, you can enable a nice 'confidential' banner on top:</p>
     <div class="custom-control custom-switch">
           <input type="checkbox" class="custom-control-input user-editable-state" id="confidential"
                 %if confidential:
@@ -42,9 +42,8 @@
                     >
           <label class="custom-control-label" for="confidential">Confidential</label>
         </div>
-
-    </p>
-    <p>Lastly, you can make the page publicly listed. Currently search engines do not know about your page and cannot parse them. Enabling this will disable encryption.
+        <br/>
+    <p>Lastly, you can make the page publicly listed. Currently search engines do not know about your page and cannot parse them. Enabling this will disable encryption.</p>
         <div class="custom-control custom-switch">
           <input type="checkbox" class="custom-control-input user-editable-state" id="public"
                  %if public:
@@ -54,11 +53,8 @@
           <label class="custom-control-label" for="public">Public</label>
         </div>
 
-    </p>
-        <hr/>
-        <p>If you want to use a page in a publication the page must be guaranteed to not change. See <a href="/monitor/${page}" target="_blank">monitoring page</a>.</p>
-    </p>
-
-
     </div>
 </div>
+<hr/>
+<p>If you want to use a page in a publication the page must be guaranteed to not change. See <a href="/monitor/${page}" target="_blank">monitoring page</a>.</p>
+
