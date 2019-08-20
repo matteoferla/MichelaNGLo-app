@@ -16,7 +16,7 @@
              </small>
     </div>
     % if not no_buttons:
-        <%include file="layout_components/vertical_menu_buttons.mako" args='tour=False'/>
+        <%include file="layout_components/vertical_menu_buttons.mako" args='tour=True'/>
     % endif
 </div>
 
@@ -69,7 +69,11 @@
 
                     %if editable and not no_user:
                         <div class="float-right">
-                            <button type="button" class="btn btn-outline-primary my-1" id="edit_btn" data-target="#edit_modal" data-toggle="modal"><i class="far fa-edit"></i></button>
+                            <span title="Edit the content of this page" data-toggle="tooltip">
+                                <button type="button" class="btn btn-outline-primary my-1" id="edit_btn" data-target="#edit_modal" data-toggle="modal"><i class="far fa-edit"></i></button>
+                            </span>
+                            <br/>
+                            <button type="button" class="btn btn-outline-primary my-1" id="tour" title="Tutorial to explain how to navigate this page." data-toggle="tooltip" style="width: 2.75rem;"><i class="far fa-info"></i></button>
                         </div>
                     %endif
                 <p>${descr_mdowned|n}</p>
@@ -190,6 +194,6 @@ $(document).ready(function () {
     %endif
 
 }); //ready
-
+<%include file="edit_modal/tour.js"/>
 </script>
 </%block>

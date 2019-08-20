@@ -32,7 +32,7 @@
                             </div>
                          '>
         <i class="far fa-bars"></i></button>
-    <button class="btn btn-outline-secondary my-1" type="button" data-toggle="modal" data-target="#chat_modal">
+    <button class="btn btn-outline-secondary my-1" type="button" data-toggle="modal" data-target="#chat_modal" id="chat_modal_btn">
         <i class="far fa-life-ring"></i>
     </button>
 </div>

@@ -74,7 +74,7 @@ def anonymous_submission(request, settings, pagename):
     settings['freelyeditable'] = True
     settings['description'] = '## Description\n\n' + \
                               'Only <a href="#" class="text-secondary" data-toggle="modal" data-target="#login">logged-in users</a>' + \
-                              ' can edit data pages.\n\nThis page will be deleted in 24 hours.' + \
+                              ' can edit data pages.\n\nUnedited pages are deleted after a month, while other pages are deleted if unopened within a year.\n\n' + \
                               stringify_protein_description(settings)
     trashcan = get_trashcan(request)
     trashcan.owned.add(pagename)
@@ -85,7 +85,7 @@ def user_submission(request, settings, pagename):
     user = request.user
     user.owned.add(pagename)
     settings[
-        "description"] = 'Editable text. press pen to edit (permissions permitting).\n' + stringify_protein_description(
+        "description"] = 'Editable text. press pen to edit (permissions permitting).\n\nUnedited pages are deleted after a month, while other pages are deleted if unopened within a year.\n\n' + stringify_protein_description(
         settings)
     settings["authors"] = [user.name]
     request.dbsession.add(user)
