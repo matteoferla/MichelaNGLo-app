@@ -84,6 +84,9 @@ $('#edit_submit').click(function () {
 
     //console.log('new');
     $('#edit_submit').attr('disabled','disabled').children('.far').removeClass('fa-save').addClass('fa-circle-notch').addClass('fa-spin');
+    let new_editors = $('.user-editable-state:checked').map((idx, item) => $(item).data('user')).toArray();
+    let in_editor = $('#input_author').val();
+    if (in_editor) {new_editors.push(in_editor)}
     $.ajax({
         url: "/edit_user-page",
         type: 'POST',
@@ -101,7 +104,7 @@ $('#edit_submit').click(function () {
             'freelyeditable': $('#freelyeditable').prop('checked'),
             'proteinJSON': JSON.stringify($('[role="NGL"]').data('proteins')),
             'backgroundcolor': $('[role="NGL"]').data('backgroundcolor'),
-            'new_editors': JSON.stringify($('.user-editable-state:checked').map((idx, item) => $(item).data('user')).toArray()),
+            'new_editors': JSON.stringify(new_editors),
             'encryption': $('#encryption').prop('checked'),
             'encryption_key': $('#encryption_key').val(),
             'public': $('#public').prop('checked'),

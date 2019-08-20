@@ -67,14 +67,15 @@ def userdata_view(request):
         ### add new values
         if 'freelyeditable' not in settings:
             settings['freelyeditable'] = False
-        settings['user'] = request.user
         user = request.user
+        settings['user'] = user
         if user:
+            if pagename not in user.owned_pages:
+                user.visited.add(pagename)
+                settings['visitors'].append(user.name)
+                page.save(settings)
             if settings['freelyeditable']:
                 settings['editable'] = True
-                if pagename not in user.owned_pages:
-                    user.visited.add(pagename)
-                    settings['visitors'].append(user.name)
             elif user.role == 'admin':
                 # this means admin does not leave a trace upon inspection. Fine for admin bots. Bad human admin.
                 settings['editable'] = True

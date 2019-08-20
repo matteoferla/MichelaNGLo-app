@@ -31,8 +31,10 @@
               <input type="checkbox" class="custom-control-input user-editable-state" id="switch${author}" data-user="${author}">
               <label class="custom-control-label" for="switch${author}">can edit</label>
             </div>
+        </li>
     % endif
 %endfor
+    <li><span class="fa-li"  data-toggle="tooltip" title="Write user name. Beware of capitalisation."><i class="far fa-user-plus"></i></span> <div class="input-group-sm"><input type="text" id="input_author" class="form-control" placeholder="username"></div></li>
     </ul>
     </div>
 </div>
