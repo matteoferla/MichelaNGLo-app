@@ -190,7 +190,7 @@ $('#usespan').click(function () {
 
     window.currentRange.deleteContents();
     let span = '<span>'+addenda+'</span>';
-    $('#edit_description')[0].contains(document.getSelection().getRangeAt(0).commonAncestorContainer) ? window.currentRange.insertNode( $(span)[0] ) : $('#edit_description').prepend(span);
+    $('#edit_description')[0].contains(window.currentRange.commonAncestorContainer) ? window.currentRange.insertNode( $(span)[0] ) : $('#edit_description').prepend(span);
     //let d = $('#edit_description');
     //d.html(d.html()+'\n'+addenda);
     //$('[data-toggle="tooltip"]').tooltip();
