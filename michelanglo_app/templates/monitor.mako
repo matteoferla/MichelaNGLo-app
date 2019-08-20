@@ -6,7 +6,7 @@
             &mdash; Monitor
 </%block>
 <%block name="subtitle">
-            These are the images that are tracked
+            These are the images that are tracked.
 </%block>
 
 <%block name="main">

@@ -66,7 +66,9 @@ def monitor_task():
                     new = os.path.join('michelanglo_app','user-data-monitor', f'tmp_{page.identifier}-{i}.png')
                     assert os.path.exists(ref), 'Reference image does not exist'
                     assert os.path.exists(new), 'Generated image does not exist'
-                    if (imageio.imread(ref) == imageio.imread(new)).all():
+                    ref_img = imageio.imread(ref).flatten()
+                    new_img = imageio.imread(new).flatten()
+                    if sum(ref_img == new_img) / len(ref_img) > 0.99:
                         state.append(True)
                     else:
                         state.append(False)
