@@ -17,7 +17,7 @@
 
 <h4>Citation</h4>
     <ul>
-        <li><span class="text-danger">Unpublished.</span></li>
+        <li><a href="https://unioxfordnexus-my.sharepoint.com/:w:/g/personal/bioc1451_ox_ac_uk/EZeRF1-gzaFLlmVxlCsmQIwBilBFcLtxFxGBE5a56eX23Q?e=KaEDdd" target="_blank">Manuscript in preparation</a></li>
         <li><a href="https://dx.doi.org/10.1093/bioinformatics/bty419" target="_blank">AS Rose, AR Bradley, Y Valasatava, JM Duarte, A Prlić and PW Rose. NGL viewer: web-based molecular graphics for large complexes. Bioinformatics: bty419, 2018. <i class="far fa-external-link"></i></a></li>
     </ul>
 <h4>Licence</h4>
