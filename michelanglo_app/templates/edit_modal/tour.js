@@ -215,7 +215,7 @@ window.tour = new Tour({
         element: "#chat_modal_btn",
         title: "Questions?",
         content: 'If you still have questions feel free to contact the admin. Also, if can code and would like to do something that is not covered by the GUI, why not check out the <a href="/docs/api">API documentation</a>',
-        placement: "bottom"
+        placement: "left"
         }
 ]});
 
