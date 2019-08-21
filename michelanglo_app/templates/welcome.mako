@@ -76,7 +76,6 @@
             </div>
         </div>
         %endfor
-        <p class="w-100 text-muted" style="font-size: small; text-align: right;">Looking for the old welcome pages? <a href="/verbose">first</a> and <a href="/gimmicky">second</a>.</p>
     </div>
     </div>
 </%block>
