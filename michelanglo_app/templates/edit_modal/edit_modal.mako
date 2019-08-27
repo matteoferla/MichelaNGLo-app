@@ -1,6 +1,6 @@
 
 <div class="modal fade" tabindex="-1" role="dialog" id="edit_modal" style="overflow:scroll;">
-    <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title"><i class="far fa-pen-alt"></i> Edit</h5>
@@ -9,6 +9,8 @@
                 </button>
             </div>
             <div class="modal-body">
+                <div id="editor_first_block">
+
                 <div class="input-group mb-3" data-toggle="tooltip" title="This is the title of the page and will appear both as the title of the browser tab and as the header at the top of the page.">
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="title-addon1">Title</span>
@@ -18,53 +20,53 @@
 
                 <div class="row">
                     <div class="offset-1 col-11 pb-1">
-                        <div class="btn-group" role="group" aria-label="formatting" id="formatting">
-                          <button type="button" class="btn btn-outline-secondary" id="formatting_h3"><i class="far fa-h3"></i></button>
-                          <button type="button" class="btn btn-outline-secondary" id="formatting_bold"><i class="far fa-bold"></i></button>
-                          <button type="button" class="btn btn-outline-secondary" id="formatting_italic"><i class="far fa-italic"></i></button>
-                          <button type="button" class="btn btn-outline-secondary" id="formatting_link"><i class="far fa-link"></i></button>
-                          <button type="button" class="btn btn-outline-secondary" id="formatting_list"><i class="far fa-list"></i></button>
-                          <button type="button" class="btn btn-outline-secondary" id="formatting_list-ol"><i class="far fa-list-ol"></i></button>
-                          <button type="button" class="btn btn-outline-secondary" id="formatting_quote"><i class="far fa-quote-left"></i></button>
-                          <button type="button" class="btn btn-outline-secondary" id="formatting_code"><i class="far fa-code"></i></button>
-                            <!--
-                          <button type="button" class="btn btn-outline-secondary" id="formatting_sub"><i class="far fa-subscript"></i></button>
-                          <button type="button" class="btn btn-outline-secondary" id="formatting_super"><i class="far fa-superscript"></i></button>
-                          -->
-                          <button type="button" class="btn btn-outline-secondary" id="formatting_alpha">&alpha;</button>
-                          <button type="button" class="btn btn-outline-secondary" id="formatting_beta">&beta;</button>
-                          <button type="button" class="btn btn-outline-secondary" id="formatting_gamma">&gamma;</button>
-                          <button type="button" class="btn btn-outline-secondary" id="formatting_delta">&delta;</button>
-                          <button type="button" class="btn btn-outline-secondary" id="formatting_mu">&mu;</button>
-                          <button type="button" class="btn btn-outline-secondary" id="formatting_Aring">&Aring;</button>
-                          <button type="button" class="btn btn-outline-secondary" id="formatting_Delta">&Delta;</button>
-                          <button type="button" class="btn btn-outline-info" id="formatting_help"><i class="far fa-question"></i></button>
-                        </div>
-
+                    <div class="btn-group" role="group" aria-label="formatting" id="formatting">
+                      <button type="button" class="btn btn-outline-secondary" id="formatting_h3"><i class="far fa-h3"></i></button>
+                      <button type="button" class="btn btn-outline-secondary" id="formatting_bold"><i class="far fa-bold"></i></button>
+                      <button type="button" class="btn btn-outline-secondary" id="formatting_italic"><i class="far fa-italic"></i></button>
+                      <button type="button" class="btn btn-outline-secondary" id="formatting_link"><i class="far fa-link"></i></button>
+                      <button type="button" class="btn btn-outline-secondary" id="formatting_list"><i class="far fa-list"></i></button>
+                      <button type="button" class="btn btn-outline-secondary" id="formatting_list-ol"><i class="far fa-list-ol"></i></button>
+                      <button type="button" class="btn btn-outline-secondary" id="formatting_quote"><i class="far fa-quote-left"></i></button>
+                      <button type="button" class="btn btn-outline-secondary" id="formatting_code"><i class="far fa-code"></i></button>
+                        <!--
+                      <button type="button" class="btn btn-outline-secondary" id="formatting_sub"><i class="far fa-subscript"></i></button>
+                      <button type="button" class="btn btn-outline-secondary" id="formatting_super"><i class="far fa-superscript"></i></button>
+                      -->
+                      <button type="button" class="btn btn-outline-secondary" id="formatting_alpha">&alpha;</button>
+                      <button type="button" class="btn btn-outline-secondary" id="formatting_beta">&beta;</button>
+                      <button type="button" class="btn btn-outline-secondary" id="formatting_gamma">&gamma;</button>
+                      <button type="button" class="btn btn-outline-secondary" id="formatting_delta">&delta;</button>
+                      <button type="button" class="btn btn-outline-secondary" id="formatting_mu">&mu;</button>
+                      <button type="button" class="btn btn-outline-secondary" id="formatting_Aring">&Aring;</button>
+                      <button type="button" class="btn btn-outline-secondary" id="formatting_Delta">&Delta;</button>
+                      <button type="button" class="btn btn-outline-info" id="formatting_help"><i class="far fa-question"></i></button>
                     </div>
 
-                       <div class="offset-1 col-11 pb-1">
-                            <span data-toggle="tooltip" title="Create links that control the protein view (prolinks)">
-                                <%include file="../markup/markup_builder_btn.mako"/>
-                            </span>
-                           <span data-toggle="tooltip" title="Create point mutations in this structure &mdash;mutant structure will appear as a different model (see fa-load in documentation)">
-                                <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#mutate_modal" id="mutate_modal_btn"><i class="far fa-biohazard"></i> Make mutations</button>
-                           </span>
-                           <span data-toggle="tooltip" title="Copy over into this page the structure (or the view only) from another page you have access to &mdash;added structure will appear as a different model (see fa-load in documentation).">
-                               <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#combine_modal"  id="combine_modal_btn"><i class="far fa-paperclip"></i> Add additional model</button>
-                           </span>
-                               <button class="btn" data-toggle="tooltip" title="Collapse prolinks. Prolinks are the protein view links that can be created with the builder tool. They can be collapsed into a compact form or written in full as a HTML element. If you plan on moving them around, duplicating them or changing the values expand them. Otherwise keep this checked.">
-                              <div class="input-group-prepend">
-                                <div class="input-group-text">
-                                  <div class="custom-control custom-switch">
-                                      <input type="checkbox" id="collapse_prolinks" class="custom-control-input">
-                                        <label class="custom-control-label" for="collapse_prolinks">Collapse prolinks</label>
-                                      </div>
-                                    </div>
+                </div>
+
+                   <div class="offset-1 col-11 pb-1">
+                        <span data-toggle="tooltip" title="Create links that control the protein view (prolinks)">
+                            <%include file="../markup/markup_builder_btn.mako"/>
+                        </span>
+                       <span data-toggle="tooltip" title="Create point mutations in this structure &mdash;mutant structure will appear as a different model (see fa-load in documentation)">
+                            <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#mutate_modal" id="mutate_modal_btn"><i class="far fa-biohazard"></i> Make mutations</button>
+                       </span>
+                       <span data-toggle="tooltip" title="Copy over into this page the structure (or the view only) from another page you have access to &mdash;added structure will appear as a different model (see fa-load in documentation).">
+                           <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#combine_modal"  id="combine_modal_btn"><i class="far fa-paperclip"></i> Add additional model</button>
+                       </span>
+                           <button class="btn" data-toggle="tooltip" title="Collapse prolinks. Prolinks are the protein view links that can be created with the builder tool. They can be collapsed into a compact form or written in full as a HTML element. If you plan on moving them around, duplicating them or changing the values expand them. Otherwise keep this checked.">
+                          <div class="input-group-prepend">
+                            <div class="input-group-text">
+                              <div class="custom-control custom-switch">
+                                  <input type="checkbox" id="collapse_prolinks" class="custom-control-input">
+                                    <label class="custom-control-label" for="collapse_prolinks">Collapse prolinks</label>
+                                  </div>
                                 </div>
-                              </button>
-                    </div>
-                    </div>
+                            </div>
+                          </button>
+                </div>
+                </div>
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
                         <span class="input-group-text" aria-label="edit_description" aria-describedby="description-addon1">Sidebar<br/>Description</span>
@@ -74,7 +76,8 @@
                     %>
                     <div id="edit_description"
                          contenteditable="true"
-                         class="form-control border" style="height: 15rem; resize: vertical; overflow: auto; white-space: pre-wrap;">${escaped_description|n}</div>
+                         class="form-control border" style="height: 15rem; resize: vertical; overflow: auto; white-space: pre-wrap;">${escaped_description|n}
+                    </div>
                 </div>
 
                 <div class="row">
@@ -125,6 +128,7 @@
                     </div>
                 </div>
 
+                </div>
                 <hr/>
                 <%include file="page_users.mako"/>
                 <hr/>
@@ -132,6 +136,8 @@
                 <hr/>
                 <p><input type="checkbox" checked> <small>You declare that the content you are uploading does not contain copyrighted material
                     and that you are aware that the site admin can delete your page if deemed in breech of any law.</small></p>
+
+            </div>
                 <div class="modal-footer">
                     <div class="btn-group" role="group">
                         <button type="button" class="btn btn-success" id="edit_submit"><i class="far fa-save"></i> Save changes</button>
@@ -139,7 +145,6 @@
                         <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="far fa-sign-out"></i> Discard changes</button>
                     </div>
                 </div>
-            </div>
         </div>
     </div>
 </div>

@@ -44,14 +44,15 @@
 
         </div>
     <div class="row">
-        <div class="col-12" id="ext_links">
-
-        </div>
         <div class="col-12">
             <div id="fv"></div>
         </div>
 
         <div class="col-12" id="matches">
+
+        </div>
+
+        <div class="col-12" id="ext_links">
 
         </div>
     </div>
@@ -139,7 +140,7 @@
                                           gene.addClass('is-valid');
                                           window.uniprot = msg.uniprot;
                                           $('#uniprot').show().html('Uniprot: <a href="https://www.uniprot.org/uniprot/'+msg.uniprot+'" target="_blank">'+msg.uniprot+' <i class="far fa-external-link-alt"></i></a>');
-                                          $('#ext_links').html('<a>View <a href="www.rcsb.org/pdb/protein/'+msg.uniprot+'" target="_blank">PDB entry</a> for more information. If no structures are available see <a href="https://swissmodel.expasy.org/repository/uniprot/'+msg.uniprot+'" target="_blank">Swiss-Model entry</a>.</p>');
+                                          $('#ext_links').html('<p>For more information see the <a href="https://www.rcsb.org/pdb/protein/'+msg.uniprot+'" target="_blank">PDB entry <i class="far fa-external-link-alt"></i></a>. If no structures are available see <a href="https://swissmodel.expasy.org/repository/uniprot/'+msg.uniprot+'" target="_blank">Swiss-Model entry <i class="far fa-external-link-alt"></i></a>.</p>');
                                           let matches = $('#matches');
                                           if (msg.pdbs.length > 0) {
                                               matches.html(msg.pdbs.map(v => v+' <i class="fas fa-spinner fa-spin"></i>').join(' <br/> '));

@@ -118,5 +118,42 @@ window.interactive_builder = () => {
     sigs.dragged.add(alertDifference);
 };
 
+ $('#selection_modal').on('shown.bs.modal', () => {
+        // get the chainame:
+        let chainNames = NGL.getStage().getComponentByType('structure').structure.chainStore.chainname;
+        // chainname is a strange object. with repeats and blanks. kill blanks and duplicates:
+        chainNames = chainNames.filter(v => v>48).filter((v, i, a) => a.indexOf(v) === i);
+        // it's a uint8 array and needs converting to letter:
+        chainNames = Array.from(chainNames).map(v => String.fromCharCode(v));
+        // add elements
+        chainNames.forEach(v => $('#sele_chain').append(`<option value=":${'${v}'}">from chain ${'${v}'}</option>`));
+        chainNames.forEach(v => $('#sele_chain2').append(`<option value=":${'${v}'}">from chain ${'${v}'}</option>`));
+        $('#sele_chain option').eq(0).attr('selected', 'selected');
+        //option A
+        const optA = event => {
+            $('#markup_selection').val($('#sele_string').val());
+            interactive_changer();
+        };
+        $('#sele_string').on('keyup change input', optA);
+        $('#sele_string_btn').click(event => {optA(event); $('#selection_modal').modal('hide');});
+        //option B1
+        const optB1 = event => {
+            let sele = $('#sele_resi').val() + $('#sele_chain').val();
+            $('#markup_selection').val(sele);
+            interactive_changer();
+        };
+        $('#sele_resi,#sele_chain').on('keyup change input', optB1);
+        $('#sele_resi_btn').click(event => {optB1(event); $('#selection_modal').modal('hide');});
+        //option B2
+        const optB2 = event => {
+            let sele = $('#sele_from').val() +'-'+$('#sele_to').val()+ $('#sele_chain2').val();
+            $('#markup_selection').val(sele);
+            interactive_changer();
+        };
+        $('#sele_from,#sele_to,#sele_chain2').on('keyup change input', optB2);
+        $('#sele_range_btn').click(event => {optB2(event); $('#selection_modal').modal('hide');});
+    });
+
+
 
 

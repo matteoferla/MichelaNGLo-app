@@ -20,13 +20,27 @@
     </div>
     </div>
 
+    <div class="col-12 col-md-6 mb-2" data-toggle="tooltip" title="NGL selection of residues to focus on. <code>1:A</code> will select residue 1 of chain A, <code>1-20:B</code> the residues 1 to 20 of chain B, <code>*</code> for everything. You can only select residues that exist in the structure, if not it will either show all or erroneously pan off camera." data-html=true data-placement="top" >
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="markup_selection_addon">Selection</span>
+          </div>
+            <input type="text" class="form-control" placeholder="1-10:A" id="markup_selection" aria-describedby="markup_selection_addon">
+            <div class="input-group-append">
+                <button class="btn btn-outline-info" type="button" id="markup_selection_btn" data-toggle="modal" data-target="#selection_modal"><i class="far fa-question"></i></button>
+            </div>
+        </div>
+    </div>
+
+
     <%
-        ##  id type placeholder title
-        buttons = (('selection','text', '1-10:A','NGL selection of residues to focus on. <code>1:A</code> will select residue 1 of chain A, <code>1-20:B</code> the residues 1 to 20 of chain B, <code>*</code> for everything, <code>PLP</code> (or <code>[PLP]123:D</code>) will select the residue named PLP (a ligand).<br/>The logical operators <code>and</code> and <code>or</code> can also be used, e.g. <code>:B or :C</code> will select chains B & C. You can only select residues that exist in the structure, if not it will either show all or erroneously pan off camera.'),
-        ('color','text','yellow', 'The color to show. It is highly recommended to go for light colors as opposed to dark colors and preferable muted or pastel as opposed to primary. Say <span style="color: darkred">DarkRed</span> is hard to seem, <span style="color: red">Red</span> is too sharp, <span style="color: darkred">coral<Coral</span> or <span style="color: magenta">magenta</span> are better.'),
-        ('title','text','bla bla', 'The text to show below the structure (optional)'),
-        ('radius','number',4, 'How many &aring;ngstr&ouml;m to expand around the residue focused upon. 1.5 &Aring; will show residues that hydrogen bond (if hydrogens are shown), salt bridge or &pi; stack, 3&Aring; will show residues that hydrogen bond (within explicit hydrogens)'),
-        ('tolerance','number',1, 'How high to set the threshhold of marking a clash: leave at 1 if unsure &mdash;see "prolink" documentation for more.'))
+    ##  id type placeholder title
+    buttons = (
+                ('color','text','yellow', 'The color to show. It is highly recommended to go for light colors as opposed to dark colors and preferable muted or pastel as opposed to primary. Say <span style="color: darkred">DarkRed</span> is hard to seem, <span style="color: red">Red</span> is too sharp, <span style="color: darkred">coral<Coral</span> or <span style="color: magenta">magenta</span> are better.'),
+                ('title','text','bla bla', 'The text to show below the structure (optional)'),
+                ('radius','number',4, 'How many &aring;ngstr&ouml;m to expand around the residue focused upon. 1.5 &Aring; will show residues that hydrogen bond (if hydrogens are shown), salt bridge or &pi; stack, 3&Aring; will show residues that hydrogen bond (within explicit hydrogens)'),
+                ('tolerance','number',1, 'How high to set the threshhold of marking a clash: leave at 1 if unsure &mdash;see "prolink" documentation for more.')
+               )
     %>
 
 

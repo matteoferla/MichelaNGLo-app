@@ -1,4 +1,5 @@
 <div class="modal fade" tabindex="-1" role="dialog" id="markup_modal">
+    <br/>
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
         <div class="modal-header">
@@ -22,3 +23,5 @@
         </div>
   </div>
 </div>
+
+<%include file="markup_builder_select_modal.mako"/>

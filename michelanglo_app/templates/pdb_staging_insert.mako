@@ -16,6 +16,7 @@
         </div>
     </div>
 
+<%include file="markup/markup_builder_select_modal.mako"/>
 <!---
 
             <div class="input-group mb-3">
