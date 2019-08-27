@@ -32,7 +32,6 @@
               </div>
               <input id="sele_resi" type="number" class="form-control" placeholder="residue number" aria-label="residue" aria-describedby="sele_resi_addon">
               <select class="custom-select" id="sele_chain">
-                  <option value=" "><i>from all chains</i></option>
               </select>
               <div class="input-group-append">
                 <button class="btn btn-outline-success" type="button" id="sele_resi_btn" data-toggle="tooltip" title="Use selection"><i class="far fa-arrow-right"></i></button>
@@ -49,7 +48,6 @@
                 <span class="input-group-text rounded-0 border-left-0 border-right-0">&ndash;</span>
                 <input id="sele_to" type="number" class="form-control" placeholder="residue number" aria-label="residue" aria-describedby="sele_range_addon">
                 <select class="custom-select" id="sele_chain2">
-                  <option value=" "><i>from all chains</i></option>
               </select>
               <div class="input-group-append">
                 <button class="btn btn-outline-success" type="button" id="sele_range_btn" data-toggle="tooltip" title="Add element to selection"><i class="far fa-arrow-right"></i></button>

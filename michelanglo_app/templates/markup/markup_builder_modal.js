@@ -126,8 +126,9 @@ window.interactive_builder = () => {
         // it's a uint8 array and needs converting to letter:
         chainNames = Array.from(chainNames).map(v => String.fromCharCode(v));
         // add elements
-        chainNames.forEach(v => $('#sele_chain').append(`<option value=":${'${v}'}">from chain ${'${v}'}</option>`));
-        chainNames.forEach(v => $('#sele_chain2').append(`<option value=":${'${v}'}">from chain ${'${v}'}</option>`));
+        $('#sele_chain,#sele_chain2').html('<option value=" ">from all chains</option>');
+        chainNames.forEach(v => $('#sele_chain,#sele_chain2').append(`<option value=":${'${v}'}">from chain ${'${v}'}</option>`));
+        chainNames.forEach(v => $('').append(`<option value=":${'${v}'}">from chain ${'${v}'}</option>`));
         $('#sele_chain option').eq(0).attr('selected', 'selected');
         //option A
         const optA = event => {
