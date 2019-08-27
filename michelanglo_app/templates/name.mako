@@ -16,7 +16,7 @@
     <p>This form simply searches for PDBs that match your protein for your convenience. It does not account for homologues or models. Also it does not know if the protein has a shape-change, for which reading the litterature is required. For information on how to get the perfect model for your protein see <a href="/docs/gene">documentation</a>.</p>
     <div class="row">
 
-        <div class="col-12 col-lg-6">
+        <div class="col-12 col-lg-5">
             <div class="input-group mb-3" data-toggle="tooltip"
                                      title="Species">
                 <div class="input-group-prepend">
@@ -28,7 +28,7 @@
             </div>
         </div>
 
-        <div class="col-12 col-lg-6">
+        <div class="col-12 col-lg-5">
             <div class="input-group mb-3" data-toggle="tooltip"
                                      title="A gene name, protein name or Uniprot accession.">
                                     <div class="input-group-prepend">
@@ -38,6 +38,9 @@
                                     <div class="invalid-feedback" id="error_gene">Unrecognised name</div>
                                     <div class="valid-feedback" id="uniprot">Error</div>
                                 </div>
+        </div>
+        <div class="col-12 col-lg-2">
+            <button type="button" class="btn btn-outline-primary w-100" id="pdb_fetch" style="display: none;">Fetch</button>
         </div>
 
 
@@ -77,9 +80,7 @@
             species.removeClass('is-valid').removeClass('is-invalid').popover('dispose');
             if (window.species_xhr !== undefined) {
                 window.species_xhr.abort();}
-            $('#matches').html(' ');
-            $('#fv').html(' ');
-            $('#ext_links').html(' ');
+            window.reset_gene();
             window.species_xhr = $.ajax({url: "/choose_pdb",
                     data: {'item': 'match species',
                            'name': species.val()
@@ -122,11 +123,7 @@
             }
             let gene = $('#gene');
             let error_gene = $('#error_gene');
-            gene.removeClass('is-valid').removeClass('is-invalid');
-            error_gene.hide();
-            $('#matches').html(' ');
-            $('#fv').html(' ');
-            $('#ext_links').html(' ');
+            window.reset_gene();
             window.gene_xhr = $.ajax({url: "/choose_pdb",
                     data: {'item': 'match gene',
                            'gene': gene.val(),
@@ -139,15 +136,10 @@
                                           if (msg.corrected_gene) {gene.val(msg.corrected_gene)}
                                           gene.addClass('is-valid');
                                           window.uniprot = msg.uniprot;
+                                          window.pdbs = msg.pdbs;
                                           $('#uniprot').show().html('Uniprot: <a href="https://www.uniprot.org/uniprot/'+msg.uniprot+'" target="_blank">'+msg.uniprot+' <i class="far fa-external-link-alt"></i></a>');
-                                          $('#ext_links').html('<p>For more information see the <a href="https://www.rcsb.org/pdb/protein/'+msg.uniprot+'" target="_blank">PDB entry <i class="far fa-external-link-alt"></i></a>. If no structures are available see <a href="https://swissmodel.expasy.org/repository/uniprot/'+msg.uniprot+'" target="_blank">Swiss-Model entry <i class="far fa-external-link-alt"></i></a>.</p>');
-                                          let matches = $('#matches');
-                                          if (msg.pdbs.length > 0) {
-                                              matches.html(msg.pdbs.map(v => v+' <i class="fas fa-spinner fa-spin"></i>').join(' <br/> '));
-                                              get_pdbs(msg.pdbs);
-                                          } else {
-                                              matches.html('No crystal structures to show.');
-                                          }
+                                          $('#pdb_fetch').show();
+                                          if (event.keyCode === 13) {$('#pdb_fetch').click()}
                                       }
                                     },
                      error: ops.addErrorToast
@@ -182,8 +174,9 @@
                 },
                 error: (xhr) => {if (xhr.statusText =='abort' || xhr.status === 0 || xhr.readyState === 0) {return;} else {ops.addErrorToast(xhr)}}
             });
+        };
 
-            $.ajax({
+        window.get_uniprot = () => $.ajax({
                 url: "/choose_pdb",
                 data: {
                     'item': 'get_uniprot',
@@ -194,7 +187,6 @@
                 success: msg => eval(msg),
                 error: ops.addErrorToast
             });
-        };
 
         window.load_pdb = pdb => {
             $('#staging').show();
@@ -209,6 +201,28 @@
             $('html, body').animate({
                     scrollTop: $('#staging').offset().top
                 }, 2000);
+        };
+
+        $('#pdb_fetch').click(event => {
+            $(event.target).hide();
+            $('#ext_links').html('<p>For more information see the <a href="https://www.rcsb.org/pdb/protein/'+window.uniprot+'" target="_blank">PDB entry <i class="far fa-external-link-alt"></i></a>. If no structures are available see <a href="https://swissmodel.expasy.org/repository/uniprot/'+window.uniprot+'" target="_blank">Swiss-Model entry <i class="far fa-external-link-alt"></i></a>.</p>');
+            get_uniprot();
+            let matches = $('#matches');
+              if (window.pdbs.length > 0) {
+                  matches.html(window.pdbs.map(v => v+' <i class="fas fa-spinner fa-spin"></i>').join(' <br/> '));
+                  get_pdbs(window.pdbs);
+              } else {
+                  matches.html('No crystal structures to show.');
+              }
+        });
+
+        window.reset_gene = () => {
+            $('#gene').removeClass('is-valid').removeClass('is-invalid');
+            $('#error_gene').hide();
+            $('#matches').html(' ');
+            $('#fv').html(' ');
+            $('#ext_links').html(' ');
+            $('#pdb_fetch').hide();
         };
 
 

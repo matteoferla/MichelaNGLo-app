@@ -25,6 +25,7 @@ window.getModalContent = function (part) {
                 }).done( (msg) => {
                     $('#login .modal-content').detach();
                     $('#login .modal-dialog').append(msg);
+                    window.go_next();
                 }).fail((xhr) => $('#login .modal-body').append('<div class="alert alert-danger" role="alert">Something went wrong with your request.</div>'));
 };
 
@@ -137,4 +138,18 @@ window.doModalAction = function (action) {
                 }
             else {ops.addToast('userpageerror','Error '+msg.status,'An unknown error occured.');}
         })
-}
+};
+
+window.go_next = function () {
+    let ins = $('#login input');
+    ins.keydown(event => { //next on enter
+        if (event.which === 13) {
+            let index = ins.index(event.target) + 1;
+            if (index < ins.length) {ins.eq(index).focus();}
+            else {$('#login .btn-success').focus()}
+        }
+    });
+};
+
+window.go_next();
+

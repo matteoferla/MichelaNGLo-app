@@ -15,7 +15,7 @@
           <div class="input-group-append" id="button-addon4">
         <button class="btn btn-outline-secondary" type="button" onclick="doModalAction('forgot')">Submit</button>
   </div>
-        </div>E
+        </div>
       <div class="invalid-feedback" id="email_error">The email is invalid</div>
 
   </div>

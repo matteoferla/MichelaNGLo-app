@@ -20,7 +20,7 @@
     </div>
 % else:
     <div class="alert alert-danger" role="alert">
-        <h4 class="alert-heading">Error 501</h4>
-          You really really should not have got this. Would you mind emailing Matteo?
+        <h4 class="alert-heading">Other error</h4>
+          You really really should not have got this.
     </div>
 % endif

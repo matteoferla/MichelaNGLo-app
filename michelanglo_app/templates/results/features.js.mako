@@ -1,4 +1,4 @@
-
+### see get_uniprot item of choose_pdb route
 
 ### copied from results.js.mako in VENUS
 ###################################################
