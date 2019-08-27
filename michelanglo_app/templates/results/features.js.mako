@@ -151,7 +151,13 @@ window.ft = new FeatureViewer('${protein.sequence}',
 %endif
 
 ################### Structures #######################
-%for title, data in (("Crystal structures",protein.pdbs), ("Swissmodel", protein.swissmodel), ("Homologue structures", protein.pdb_matches)):
+<%
+    limited = 45
+    p = sorted(protein.pdbs, key=lambda n: n.y - n.x, reverse=True)[0:limited]
+    s = sorted(protein.swissmodel, key=lambda n: n.y - n.x, reverse=True)[0:limited-len(protein.pdbs)]
+    m = sorted(protein.pdb_matches, key=lambda n: n.y - n.x, reverse=True)[0:limited-len(protein.pdbs)-len(protein.swissmodel)]
+%>
+%for title, data in (("Crystal structures",p), ("Swissmodel", s), ("Homologue structures", m)):
     %if data:
     ft.addFeature({
         data: ${str([{'x': structure.x, 'y': structure.y, 'id': structure.id, 'description': structure.description} for structure in data])|n},
@@ -163,6 +169,10 @@ window.ft = new FeatureViewer('${protein.sequence}',
     });
     %endif
 %endfor
+
+%if len(p)+len(s)+len(m) >= limited:
+    $('#fv').prepend('<div class="alert alert-warning mb-3">The entry contains ${len(protein.pdbs)} PDB entries, but the feature viewer been limited to 45 (its max). For full list, see PDB website.</div>');
+%endif
 
 $('.pdb').click(function () {
     let id = $(this).attr('id').slice(1); //remove the first 'f'
