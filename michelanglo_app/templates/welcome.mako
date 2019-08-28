@@ -15,7 +15,7 @@
 
     <div class="col-12 col-md-5">
     <!-- ############################################ -->
-        <div id="viewport"></div>
+        <div id="viewport" class="w-100"></div>
         <div class="d-flex justify-content-center">
         <button type="button" class="btn btn-outline-secondary border-0" id="pause"><i class="far fa-pause"></i></button>
         <button type="button" class="btn btn-outline-secondary border-0" id="resume" style="display: none;"><i class="far fa-play"></i></button>

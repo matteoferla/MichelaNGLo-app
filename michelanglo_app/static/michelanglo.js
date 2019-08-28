@@ -526,6 +526,7 @@ $.prototype.viewport = function () {
              if ($(this).width() === 0) {$(this).css('width','100%');}
              if ($(this).height() === 0) {
                  let h = Math.min( $(this).width(), window.innerHeight - $(this).offset().top - 10 );
+                 h = Math.max(h, 300);
                  $(this).height(h);
                  //$(this).css('padding-bottom','100%');
                  if (NGL.Debug) {console.log('new viewport sizes:'+$(this).width()+'x'+$(this).height());}
