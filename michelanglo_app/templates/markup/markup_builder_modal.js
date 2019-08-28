@@ -30,10 +30,13 @@ window.interactive_changer = () =>  {
     if ($('#markup_hetero').prop('checked')) {
         attributes += 'data-hetero=true ';
     }
+    let mode = $('[name="markup_zoom"]:checked').attr('id');
     let sel_el = $('#markup_selection');
     if (!! sel_el.val()) {attributes += 'data-selection="'+sel_el.val()+'"'; sel_el.removeClass('is-invalid');}
-    else {sel_el.addClass('is-invalid'); attributes += 'data-selection="*"'}
-    let mode = $('[name="markup_zoom"]:checked').attr('id');
+    else {sel_el.addClass('is-invalid');
+          // load star if not residue...
+          if (mode === 'residue' || mode === 'clash') {attributes += 'data-selection="1:A"'} else {attributes += 'data-selection="*"'}
+          }
     let code;
     if (mode === 'default') {
         code = 'data-view="reset"';
