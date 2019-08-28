@@ -1,7 +1,7 @@
 <%inherit file="layout.mako"/>
 
 % if self.alert and self.alert() != '':
-<div class="row p-4">
+<div class="row p-4 d-none d-lg-block">
     <div class="col-lg-10 offset-lg-1">
         <%block name="alert"/>
     </div>

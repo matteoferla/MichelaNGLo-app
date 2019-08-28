@@ -270,13 +270,18 @@ pre {
 <footer class="footer">
       <div class="container-fluid">
           <div class="row" style="line-height: 1rem;">
-              <div class="col-5 offset-lg-1 text-muted p-3">
+              <div class="col-12 col-lg-5 offset-lg-1 text-muted p-3">
                   <small><a href="https://www.schrodinger.com/" target="_blank">PyMOL <i class="far fa-external-link-square"></i></a> is a trademark of <a href="https://pymol.org/2/" target="_blank">Schr&ouml;dinger , LLC <i class="far fa-external-link-square"></i></a>. The authors are not affiliated or involved with PyMOL or Schr&ouml;dinger.
                       <br/>Data is not kept for commercial, see data <a href="docs/users">policy documentation</a>.</small></div>
-              <div class="col-5 offset-lg-1 p-2">
+              <div class="d-none d-lg-block col-5 offset-lg-1 p-2">
                   <img src="/static/ox_full.svg" alt="University of Oxford" class="footer-logo" onclick="window.location.href = 'http://www.ox.ac.uk/';">&nbsp;&nbsp;&nbsp;
                   <img src="/static/OxfordBRC-logo-2019.png" alt="BRC"   class="footer-logo" onclick="window.location.href = 'https://oxfordbrc.nihr.ac.uk/';">&nbsp;&nbsp;&nbsp;
                   <img src="/static/SGC_reverse_trans.png" alt="SGC"   class="footer-logo" onclick="window.location.href = 'https://www.sgc.ox.ac.uk/';">
+              </div>
+              <div class="d-block d-lg-none col-12">
+                  <a href='http://www.ox.ac.uk/'>University of Oxford</a>
+                  <a href='https://oxfordbrc.nihr.ac.uk/'>BRC</a>
+                  <a href='https://www.sgc.ox.ac.uk/'>SGC</a>
               </div>
           </div>
 

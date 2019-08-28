@@ -66,7 +66,7 @@
          %>
         %for index, entry in enumerate(topics):
             <div class="row" id="topic_${index}">
-            <div class="col-4 text-right d-md-none d-lg-block"  style="margin: auto;">
+            <div class="col-4 text-right d-none d-lg-block"  style="margin: auto;">
                 <b>${entry['title']|n}</b>
             </div>
             <div class="col-12 col-lg-8">
