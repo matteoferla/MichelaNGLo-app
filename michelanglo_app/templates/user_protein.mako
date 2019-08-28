@@ -29,7 +29,7 @@
 
 <div class='row p-4'>
     % if columns_viewport>0:
-    <div class='col-${columns_viewport} ${part_order[0]}'>
+    <div class='col-12 col-lg-${columns_viewport} ${part_order[0]}'>
         <div class='card shadow'>
             <div class="card-body">
                 <div id="viewport" role="NGL" data-proteins='${proteinJSON|n}' data-backgroundcolor="${backgroundcolor}" ${data_other|n}>
@@ -43,7 +43,7 @@
     % endif
 
     %if columns_text>0:
-    <div class='col-${columns_text} ${part_order[1]}'>
+    <div class='col-12 col-lg-${columns_text} ${part_order[1]}'>
         <div class="card shadow" role="tooltip">
             <%
                 import markdown, re
@@ -61,9 +61,9 @@
             <div class="card-body">
             %if columns_viewport:
                 %if location_viewport == 'left':
-                    <div class="arrow-left"></div>
+                    <div class="arrow-left d-none d-lg-block"></div>
                 %else:
-                    <div class="arrow-right"></div>
+                    <div class="arrow-right d-none d-lg-block"></div>
                 %endif
             %endif
 
