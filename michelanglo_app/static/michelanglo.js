@@ -532,6 +532,9 @@ $.prototype.viewport = function () {
                  if (NGL.Debug) {console.log('new viewport sizes:'+$(this).width()+'x'+$(this).height());}
              }
         }
+        // set bare minima.
+        if ($(this).height() < 400) {$(this).height(400)}
+        if ($(this).width() < 300) {$(this).width(300)}
         // sort attributes
         if (! $(this).attr('id')) {$(this).attr('id','NGLViewport')}
         var backgroundcolor = $(this).data('backgroundcolor') || 'white';

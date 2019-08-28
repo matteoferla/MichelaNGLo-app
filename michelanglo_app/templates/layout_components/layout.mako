@@ -280,7 +280,9 @@ pre {
               </div>
               <div class="d-block d-lg-none col-12">
                   <a href='http://www.ox.ac.uk/'>University of Oxford</a>
+                   &mdash;
                   <a href='https://oxfordbrc.nihr.ac.uk/'>BRC</a>
+                   &mdash;
                   <a href='https://www.sgc.ox.ac.uk/'>SGC</a>
               </div>
           </div>
