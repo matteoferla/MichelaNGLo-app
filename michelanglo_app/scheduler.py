@@ -68,7 +68,9 @@ def monitor_task():
                     assert os.path.exists(new), 'Generated image does not exist'
                     ref_img = imageio.imread(ref).flatten()
                     new_img = imageio.imread(new).flatten()
-                    if sum(ref_img == new_img) / len(ref_img) > 0.99:
+                    if ref_img.shape != new_img.shape:
+                        state.append(False)
+                    elif sum(ref_img == new_img) / len(ref_img) > 0.99:
                         state.append(True)
                     else:
                         state.append(False)
