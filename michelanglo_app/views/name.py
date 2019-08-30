@@ -32,7 +32,7 @@ def choose_pdb(request):
             return {'taxid': organism[name]}
         elif name.title() in organism:
             return {'taxid': organism[name.title()]}
-        elif len(name) < 5:
+        elif len(name) < 4:
             return {'options': 'many'}
         else:
             lowname = name.lower()
@@ -49,7 +49,7 @@ def choose_pdb(request):
         if species == 9606:
             genedex = human
         else:
-            genedex = json.load(open(os.path.join('..', 'Michelanglo-data', 'gene2pdb', f'tax{species}_prot_namedex.json')))
+            genedex = json.load(open(os.path.join('..', 'Michelanglo-data', 'gene2uniprot', f'taxid{species}-names2uniprot.json')))
         if gene in genedex:
             u = genedex[gene]
             if u in uniprot2pdb:
@@ -70,6 +70,10 @@ def choose_pdb(request):
                 return {'uniprot': u, 'corrected_gene': g, 'pdbs': uniprot2pdb[u]}
             else:
                 return {'uniprot': u, 'corrected_gene': g, 'pdbs': []}
+        elif len(gene) > 4:
+            lowname = gene.lower()
+            options = [k for k in genedex if lowname in k.lower()]
+            return {'options': options}
         else:
             return {'invalid': True}
     elif request.params['item'] == 'get_pdbs':

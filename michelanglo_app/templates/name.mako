@@ -77,7 +77,7 @@
 
         $('#species').on('keyup', event => {
             let species = $('#species');
-            window.taxid ='ERROR';
+            window.taxidValue ='ERROR';
             $('#error_species,#taxid,#uniprot').hide();
             species.removeClass('is-valid').removeClass('is-invalid').popover('dispose');
             if (window.species_xhr !== undefined) {
@@ -89,7 +89,7 @@
                           },
                      method: 'POST',
                      success: msg => { if (msg.taxid !== undefined) {$('#taxid').show().text('Taxid: '+msg.taxid);
-                                                                        window.taxid = msg.taxid;
+                                                                        window.taxidValue = msg.taxid;
                                                                         species.addClass('is-valid');}
                                        else if (msg.options === 'many') {$('#error_species').show().text('Type more')}
                                        else {
@@ -102,7 +102,7 @@
                                                             placement: 'bottom',
                                                             html: true})
                                                    .popover('show');
-                                            $('.popover .list-group-item').click(event => {species.val($(event.target).text()); species.popover('dispose'); species.trigger('input');})
+                                            $('.popover .list-group-item').click(event => {species.val($(event.target).text()); species.popover('dispose'); species.trigger('keyup');})
                                        }
                                      },
                      error: (xhr) => {if (xhr.statusText =='abort' || xhr.status === 0 || xhr.readyState === 0) {return;} else {ops.addErrorToast(xhr)}}
@@ -110,34 +110,46 @@
     });
         // starting value. Cannot guarantee the default/stored value is correct.
         let species = $('#species');
-        if (species.val().toLowerCase() === 'human') {species.val('Human'); window.taxid=9606; species.addClass('is-valid'); $('#taxid').show().text('Taxid: 9606');}
+        if (species.val().toLowerCase() === 'human') {species.val('Human'); window.taxidValue=9606; species.addClass('is-valid'); $('#taxid').show().text('Taxid: 9606');}
         else { species.trigger('input');}
         // gene.
-        window.uniprot = 'ERROR';
+        window.uniprotValue = 'ERROR';
         $('#gene').on('keyup', event => {
             if (window.gene_xhr !== undefined) {
                 window.gene_xhr.abort();}
-            if (window.taxid === 'ERROR') {
+            if ((window.taxidValue === 'ERROR') || (window.taxidValue === undefined)) {
                 //ops.addToast('taxid','Issue','Please check species is correct.','bg-info');
-                $('#species').addClass('is-invalid');
-                $('#error_species').show().text('Unknown species');
+                $('#species').trigger('keyup');
                 return 0;
             }
             let gene = $('#gene');
+            gene.popover('dispose');
             let error_gene = $('#error_gene');
             window.reset_gene();
             window.gene_xhr = $.ajax({url: "/choose_pdb",
                     data: {'item': 'match gene',
                            'gene': gene.val(),
-                           'species': window.taxid
+                           'species': window.taxidValue
                           },
                      method: 'POST',
                      success: msg => {
                                       if (msg.invalid) {error_gene.show(); gene.addClass('is-invalid')}
+                                      else if (msg.options) {
+                                           const buttonise = el => `<a href='#' class="list-group-item list-group-item-action" name="genes">${'${el}'}</a>`;
+                                           let content;
+                                           if (msg.options.length > 10) {content = '<div class="list-group">' + msg.options.splice(0,10).map(buttonise).join('')+'</div>'.replace(/\s+/mg,' ');}
+                                           else {content = '<div class="list-group">' + msg.options.map(buttonise).join('')+'</div>'.replace(/\s+/mg,' ');}
+
+                                           gene.popover({content: content,
+                                                            placement: 'bottom',
+                                                            html: true})
+                                                   .popover('show');
+                                            $('.popover .list-group-item').click(event => {gene.val($(event.target).text()); gene.popover('dispose'); gene.trigger('keyup');})
+                                       }
                                       else {
                                           if (msg.corrected_gene) {gene.val(msg.corrected_gene)}
                                           gene.addClass('is-valid');
-                                          window.uniprot = msg.uniprot;
+                                          window.uniprotValue = msg.uniprot;
                                           window.pdbs = msg.pdbs;
                                           $('#uniprot').show().html('Uniprot: <a href="https://www.uniprot.org/uniprot/'+msg.uniprot+'" target="_blank">'+msg.uniprot+' <i class="far fa-external-link-alt"></i></a>');
                                           $('#pdb_fetch').show();
@@ -150,7 +162,7 @@
         });
 
         window.get_pdbs = pdbs => {
-            if (window.taxid === 'ERROR') {
+            if (window.taxidValue === 'ERROR') {
                 //ops.addToast('taxid','Issue','Please check species is correct.','bg-info');
                 $('#species').addClass('is-invalid');
                 $('#error_species').show().text('Unknown species');
@@ -163,8 +175,8 @@
                 data: {
                     'item': 'get_pdbs',
                     'entries': pdbs,
-                    'uniprot': window.uniprot,
-                    'species': window.taxid
+                    'uniprot': window.uniprotValue,
+                    'species': window.taxidValue
                 },
                 method: 'POST',
                 success: msg => {
@@ -182,8 +194,8 @@
                 url: "/choose_pdb",
                 data: {
                     'item': 'get_uniprot',
-                    'uniprot': window.uniprot,
-                    'species': window.taxid
+                    'uniprot': window.uniprotValue,
+                    'species': window.taxidValue
                 },
                 method: 'POST',
                 success: msg => eval(msg),
@@ -207,7 +219,7 @@
 
         $('#pdb_fetch').click(event => {
             $(event.target).hide();
-            $('#ext_links').html('<p>For more information see the <a href="https://www.rcsb.org/pdb/protein/'+window.uniprot+'" target="_blank">PDB entry <i class="far fa-external-link-alt"></i></a>. If no structures are available see <a href="https://swissmodel.expasy.org/repository/uniprot/'+window.uniprot+'" target="_blank">Swiss-Model entry <i class="far fa-external-link-alt"></i></a>.</p>');
+            $('#ext_links').html('<p>For more information see the <a href="https://www.rcsb.org/pdb/protein/'+window.uniprotValue+'" target="_blank">PDB entry <i class="far fa-external-link-alt"></i></a>. If no structures are available see <a href="https://swissmodel.expasy.org/repository/uniprot/'+window.uniprot+'" target="_blank">Swiss-Model entry <i class="far fa-external-link-alt"></i></a>.</p>');
             get_uniprot();
             let matches = $('#matches');
               if (window.pdbs.length > 0) {

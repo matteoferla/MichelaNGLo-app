@@ -3,6 +3,7 @@ window.ops={timer: null, i: 0};
 /// okay. this is a bit weird. but what happens is that during template construction the large toast.mako block gets added to the append. The character exacaping is weird. Not sure if needed.
 ops.addToast = function (id, title, body, bg) {
         id = id || 'T'+Date.now();
+        $('#'+id).detach(); //duplicate id??!
         $('#toaster').append(`<%include file="toast.mako" args="toast_id='${id}', toast_title='${title}', toast_body='${body}', toast_bg='${bg}', toast_autohide='true', toast_delay=5000 "/>`);
         $('#'+id).toast('show');
 
