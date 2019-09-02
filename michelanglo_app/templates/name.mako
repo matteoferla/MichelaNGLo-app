@@ -49,10 +49,19 @@
 
         </div>
     <div class="row">
+        <div id="fv_label" class="col-12" style="display: none;">
+        <h4>Length</h4>
+    <p>Two pieces of information are presented here to help you choose: the first is the length of the protein and the second is the partners if any in the structure.<br/>
+        Clicking on an entry in the PDB track (if structures are present) will load that protein structure.</p>
+        </div>
         <div class="col-12">
             <div id="fv"></div>
         </div>
 
+        <div id="matches_label" class="col-12"  style="display: none;">
+        <h4>Components</h4>
+    <p>Proteins can be crystallised with ligands or binding partners and it is often beneficial to choose a specific one.</p>
+        </div>
         <div class="col-12" id="matches">
 
         </div>
@@ -220,6 +229,9 @@
         $('#pdb_fetch').click(event => {
             $(event.target).hide();
             $('#ext_links').html('<p>For more information see the <a href="https://www.rcsb.org/pdb/protein/'+window.uniprotValue+'" target="_blank">PDB entry <i class="far fa-external-link-alt"></i></a>. If no structures are available see <a href="https://swissmodel.expasy.org/repository/uniprot/'+window.uniprot+'" target="_blank">Swiss-Model entry <i class="far fa-external-link-alt"></i></a>.</p>');
+
+            $('#fv_label').show();
+            $('#matches_label').show();
             get_uniprot();
             let matches = $('#matches');
               if (window.pdbs.length > 0) {
@@ -235,6 +247,8 @@
             $('#error_gene').hide();
             $('#matches').html(' ');
             $('#fv').html(' ');
+            $('#fv_label').hide();
+            $('#matches_label').hide();
             $('#ext_links').html(' ');
             $('#pdb_fetch').hide();
         };
