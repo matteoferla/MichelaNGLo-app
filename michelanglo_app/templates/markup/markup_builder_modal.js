@@ -20,7 +20,7 @@ $('#markup_modal').on('hide.bs.modal', function (e) {
 });
 
 // update on change (see interactive_builder)
-window.interactive_changer = () =>  {
+window.interactive_changer = (noRun) =>  {
     $('.is-invalid').removeClass('is-invalid');
     let attributes =['title', 'color','radius','tolerance','view'].reduce(function (c,key){
             var value= $('#markup_'+key).val();
@@ -32,10 +32,15 @@ window.interactive_changer = () =>  {
     }
     let mode = $('[name="markup_zoom"]:checked').attr('id');
     let sel_el = $('#markup_selection');
-    if (!! sel_el.val()) {attributes += 'data-selection="'+sel_el.val()+'"'; sel_el.removeClass('is-invalid');}
+    if ((!! sel_el.val()) && (NGL.getStage().getComponentByType('structure').structure.getView(new NGL.Selection(sel_el.val())).atomCount !== 0)) {
+        attributes += 'data-selection="'+sel_el.val()+'"';
+        $('.is-invalid').removeClass('is-invalid');
+    }
     else {sel_el.addClass('is-invalid');
           // load star if not residue...
-          if (mode === 'residue' || mode === 'clash') {attributes += 'data-selection="1:A"'} else {attributes += 'data-selection="*"'}
+          if (mode === 'residue' || mode === 'clash') {attributes += 'data-selection="hetero"'} else {attributes += 'data-selection="*"'}
+          let msele = $('[id^="sele_"]:focus');
+          if (msele) {msele.addClass('is-invalid')}
           }
     let code;
     if (mode === 'default') {
@@ -46,9 +51,8 @@ window.interactive_changer = () =>  {
     }
     else if (mode == 'orientation') {
         let view_el = $('#markup_view');
-        if (! view_el.val()) {view_el.addClass('is-invalid'); return 0;}
+        if (! view_el.val()) {view_el.addClass('is-invalid'); setInterval(() => view_el.removeClass('is-invalid'),1000); return 0;}
         else {code = 'data-view="'+view_el.val()+'"';
-        console.log(typeof view_el)
         }
 
     }
@@ -60,7 +64,7 @@ window.interactive_changer = () =>  {
     $('#results code').text(spanCode);
     //$('#results span').detach();
     //$('#results p').append(spanCode);
-    NGL.specialOps.prolink(spanCode);
+    if (! noRun) {NGL.specialOps.prolink(spanCode);}
     $('#differing_view').hide(); // Unfortunate side-effect is that the orientation is reset.
 };
 
@@ -113,8 +117,14 @@ window.interactive_builder = () => {
     // change on change.
     $('#markup_form [id^="markup_"]').on('keyup change input', interactive_changer);
     //alert view change.
-    $('#differing_view').show();
-    window.alertDifference = () => $('#differing_view').show();
+    $('#markup_freeze').prop("checked", false);
+    $('#differing_view').hide();
+    window.alertDifference = () => {
+        if ($('#markup_freeze').prop("checked") == true) {$('#differing_view').show()}
+        else {$('#markup_view').val('['+NGL.getStage('viewport').viewerControls.getOrientation().elements.map((v) => Math.round(v*10)/10)+']');
+                interactive_changer(true); //this will update the code but not run it.
+        }
+    };
     const sigs = NGL.getStage().mouseObserver.signals;
     sigs.scrolled.add(alertDifference);
     //sigs.moved.add(alertDifference);
@@ -122,16 +132,36 @@ window.interactive_builder = () => {
 };
 
  $('#selection_modal').on('shown.bs.modal', () => {
-        // get the chainame:
-        let chainNames = NGL.getStage().getComponentByType('structure').structure.chainStore.chainname;
-        // chainname is a strange object. with repeats and blanks. kill blanks and duplicates:
-        chainNames = chainNames.filter(v => v>48).filter((v, i, a) => a.indexOf(v) === i);
-        // it's a uint8 array and needs converting to letter:
-        chainNames = Array.from(chainNames).map(v => String.fromCharCode(v));
-        // add elements
         $('#sele_chain,#sele_chain2').html('<option value=" ">from all chains</option>');
-        chainNames.forEach(v => $('#sele_chain,#sele_chain2').append(`<option value=":${'${v}'}">from chain ${'${v}'}</option>`));
-        chainNames.forEach(v => $('').append(`<option value=":${'${v}'}">from chain ${'${v}'}</option>`));
+        //get names if present...
+        let structure = NGL.getStage().getComponentByType('structure').structure;
+        // get the chainame:
+        let chainNames = structure.chainStore.chainname;
+        // chainname is a structure where the first of each three entires is the actual chain letter as a int:
+        chainNames = chainNames.filter(v => v>48);
+        // chainNames is a uint8 array and needs converting to letter:
+        chainNames = Array.from(chainNames).map(v => String.fromCharCode(v));
+        let entityList =structure.entityList;
+        if (entityList.length > 0) {
+            for (let i=0; i< entityList.length; i++) {
+                //.map(v => structure.chainname[v])
+                for (let j=0; j < entityList[i].chainIndexList.length; j++) {
+                    if (entityList[i].entityType === 1) {
+                        let I = entityList[i].chainIndexList[j];
+                        let v = chainNames[I];  // let's pray to baby Jesus that order matches.
+                        let n = entityList[i].description;
+                        $('#sele_chain,#sele_chain2').append(`<option value=":${'${v}'}">from chain ${'${v}'} (${'${n}'})</option>`);
+                    }
+                }
+            }
+        }
+        else {
+             // chainNames sometimes has some repeats?! hetero?
+            chainNames = chainNames.filter((v, i, a) => a.indexOf(v) === i);
+            chainNames.sort().forEach(v => $('#sele_chain,#sele_chain2').append(`<option value=":${'${v}'}">from chain ${'${v}'}</option>`));
+        }
+        // add elements
+
         $('#sele_chain option').eq(0).attr('selected', 'selected');
         //option A
         const optA = event => {

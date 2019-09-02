@@ -33,6 +33,9 @@ $('#create').click(function () {
         });
 });
 
+
+$('#markup_model').detach();
+
 // fix location.
 $('#selection_modal .modal-dialog').removeClass('float-left').addClass('float-right').css('padding-right', '32px !important;');
-$('#selection_modal .fa-arrow-right').removeClass('fa-arrow-right').addClass('fa-arrow-left');
+$('#selection_modal .fa-arrow-right').removeClass('fa-arrow-right').addClass('fa-check');

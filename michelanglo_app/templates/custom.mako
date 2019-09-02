@@ -186,7 +186,7 @@ function valid_value(id){
 // submit for calculation
 $('#submit').click(function () {
     //get ready by cleaning up
-    ops.addToast('gogo','<i class="fas fa-cog fa-spin"></i> Calculations in progress','Results shown shortly');
+    ops.addToast('gogo','<i class="far fa-cog fa-spin"></i> Calculations in progress','Results shown shortly');
     $('#results').remove();
     stage=false;
     $('.is-invalid').removeClass('is-invalid');

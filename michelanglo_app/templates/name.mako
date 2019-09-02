@@ -218,8 +218,23 @@
             NGL.stageIds = {};
             $('#viewport').html('');
             $('#viewcode').text('<div role="NGL" data-load="'+pdb+'" ></div>');
-            NGL.specialOps.multiLoader('viewport',[{'type': 'rcsb','value': pdb}]);
+            let x = NGL.specialOps.multiLoader('viewport',[{'type': 'rcsb','value': pdb}]);
             NGL.specialOps.showTitle('viewport', 'Loaded: '+ pdb);
+            ///////////////////////////////////////////
+            $.ajax({
+                url: "/choose_pdb",
+                data: {
+                    'item': 'get_pdb',
+                    'entry': pdb
+                },
+                method: 'POST',
+                success: msg => {
+                    console.log(msg);
+                    console.log(myData);
+                    console.log(x);
+                }
+            });
+            //////////////////////////////////
             interactive_builder();
             $('html, body').animate({
                     scrollTop: $('#staging').offset().top
@@ -235,7 +250,7 @@
             get_uniprot();
             let matches = $('#matches');
               if (window.pdbs.length > 0) {
-                  matches.html(window.pdbs.map(v => v+' <i class="fas fa-spinner fa-spin"></i>').join(' <br/> '));
+                  matches.html(window.pdbs.map(v => v+' <i class="far fa-spinner fa-spin"></i>').join(' <br/> '));
                   get_pdbs(window.pdbs);
               } else {
                   matches.html('No crystal structures to show.');

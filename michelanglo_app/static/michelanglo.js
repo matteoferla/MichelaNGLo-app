@@ -15,7 +15,7 @@ NGL.specialOps = {'note': `This is a monkeypatch to allow HTML control of the st
 ** NGL.specialOps.removeImg() switches the image off
 ** NGL.specialOps._run_loadFx() and a few others.
 * NGL.Stage extra prototypes
-** NGL.Stage.prototype.getComponentByType allowing stage objects to return a component.
+** NGL.Stage.prototype.getComponentByType allowing stage objects to return a component. e.g. .getComponentByType('structure') to select the protein.
 ** NGL.Stage.prototype.removeComponentsbyName array version.
 ** NGL.Stage.prototype.removeClashes removes clashes and the rotation.
 * $.prototype.protein to enable a link --will run on click.

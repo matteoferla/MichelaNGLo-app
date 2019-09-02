@@ -27,7 +27,8 @@
           </div>
             <input type="text" class="form-control" placeholder="1-10:A" id="markup_selection" aria-describedby="markup_selection_addon">
             <div class="input-group-append">
-                <button class="btn btn-outline-info" type="button" id="markup_selection_btn" data-toggle="modal" data-target="#selection_modal"><i class="far fa-question"></i></button>
+                <button class="btn btn-outline-info" type="button" onclick="$('#markup_view').val(''); interactive_changer();"; title="Zoom to residue, discarding current orientation." data-toggle="tooltip"><i class="fas fa-crosshairs"></i></button>
+                <button class="btn btn-outline-info" type="button" id="markup_selection_btn" data-toggle="modal" data-target="#selection_modal"><span data-toggle="tooltip" title="Show simpler selection builder"><i class="far fa-question"></i></span></button>
             </div>
         </div>
     </div>
@@ -73,9 +74,14 @@
       <div class="input-group-prepend">
         <span class="input-group-text" >Orientation</span>
       </div>
-      <textarea class="form-control" aria-label="With textarea" rows="3" placeholder="4x4 matrix or 16x1 array" id="markup_view" style="font-size: 80%;"></textarea>
+      <textarea class="form-control" aria-label="With textarea" rows="1" placeholder="4x4 matrix or 16x1 array" id="markup_view" style="font-size: 80%;"></textarea>
         <div class="input-group-append">
-        <button class="btn btn-outline-info" id="markup_current">Get</button>
+          <div class="input-group-text px-2">
+                <div class="custom-control custom-switch">
+              <input type="checkbox" class="custom-control-input user-editable-state" id="markup_freeze">
+              <label class="custom-control-label" for="markup_freeze">Freeze</label>
+            </div>
+          </div></button>
       </div>
     </div>
     <div id="differing_view" class="alert alert-warning mx-3 w-100"><i class="far fa-exclamation-triangle"></i> The orientation of the protein differs from the stored one above.</div>

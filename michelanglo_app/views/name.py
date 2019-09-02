@@ -90,6 +90,17 @@ def choose_pdb(request):
             except KeyError:
                 pass # this protein was removed. We shalt speak of it.
         return {'descriptions': ' <br/> '.join(details)}
+    elif request.params['item'] == 'get_pdb':
+        malformed = is_malformed(request, 'entry')
+        if malformed:
+            return {'status': malformed}
+        entry = request.params['entry']
+        log.info(f'{User.get_username(request)} wants pdb info')
+        #PDBMeta is in common methods
+        try:
+            return PDBMeta(entry).describe()
+        except KeyError:
+            return {'status': "removed protein"}
     elif request.params['item'] == 'get_uniprot':
         uniprot = request.params['uniprot']
         log.info(f'{User.get_username(request)} wants uniprot data')

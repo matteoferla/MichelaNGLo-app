@@ -18,7 +18,7 @@
         <%def name="page_row(page, delete=True)">
             <li class="list-group-item" data-page="${page.identifier}">
                         %if page.edited:
-                            <i class="fas fa-pencil" data-toggle="tooltip" title="This page has been edited."></i>
+                            <i class="far fa-pencil" data-toggle="tooltip" title="This page has been edited."></i>
                         %endif
                         %if page.encrypted:
                             <i class="far fa-key" data-toggle="tooltip" title="This page has been encrypted."></i>

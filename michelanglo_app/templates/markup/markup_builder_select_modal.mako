@@ -4,14 +4,14 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Selection</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
 
           <h4><span class="text-muted">Option A.</span> Selection language</h4>
-          <p><i>For more information on the NGL selection language see <a href="https://nglviewer.org/ngl/api/manual/selection-language.html">NGL manual <i class="fas fa-external-link"></i></a></i></p>
+          <p><i>For more information on the NGL selection language see <a href="https://nglviewer.org/ngl/api/manual/selection-language.html">NGL manual <i class="far fa-external-link"></i></a></i></p>
         <p>This controls the residues to focus on. The selection uses the NGL selection language. <code>1:A</code> will select residue 1 of chain A, <code>1-20:B</code> the residues 1 to 20 of chain B, <code>*</code> for everything, <code>PLP</code> (or <code>[PLP]123:D</code>) will select the residue named PLP (a ligand).<br/>The logical operators <code>and</code> and <code>or</code> can also be used, e.g. <code>:B or :C</code> will select chains B & C. You can only select residues that exist in the structure, if not it will either show all or erroneously pan off camera.</p>
           <div class="input-group">
           <div class="input-group-prepend">
@@ -19,7 +19,8 @@
           </div>
             <input type="text" class="form-control" placeholder="1-10:A" id="sele_string" aria-describedby="sele_string_addon">
               <div class="input-group-append">
-                <button class="btn btn-outline-success" type="button" id="sele_string_btn" data-toggle="tooltip" title="Use selection"><i class="far fa-arrow-right"></i></button>
+                <button class="btn btn-outline-info" type="button" onclick="$('#markup_view').val(''); interactive_changer();"; title="Zoom to residue, discarding current orientation." data-toggle="tooltip"><i class="fas fa-crosshairs"></i></button>
+                <button class="btn btn-outline-success" type="button" id="sele_string_btn" data-toggle="tooltip" title="Use this selection"><i class="far fa-arrow-right"></i></button>
               </div>
         </div>
         <br/>
@@ -34,7 +35,9 @@
               <select class="custom-select" id="sele_chain">
               </select>
               <div class="input-group-append">
-                <button class="btn btn-outline-success" type="button" id="sele_resi_btn" data-toggle="tooltip" title="Use selection"><i class="far fa-arrow-right"></i></button>
+
+                <button class="btn btn-outline-info" type="button" onclick="$('#markup_view').val(''); interactive_changer();"; title="Zoom to residue, discarding current orientation." data-toggle="tooltip"><i class="fas fa-crosshairs"></i></button>
+                <button class="btn btn-outline-success" type="button" id="sele_resi_btn" data-toggle="tooltip" title="Use this selection"><i class="far fa-arrow-right"></i></button>
               </div>
             </div>
 
@@ -50,9 +53,12 @@
                 <select class="custom-select" id="sele_chain2">
               </select>
               <div class="input-group-append">
-                <button class="btn btn-outline-success" type="button" id="sele_range_btn" data-toggle="tooltip" title="Add element to selection"><i class="far fa-arrow-right"></i></button>
+                <button class="btn btn-outline-info" type="button" onclick="$('#markup_view').val(''); interactive_changer();"; title="Zoom to residue, discarding current orientation." data-toggle="tooltip"><i class="fas fa-crosshairs"></i></button>
+                <button class="btn btn-outline-success" type="button" id="sele_range_btn" data-toggle="tooltip" title="Use this selection"><i class="far fa-arrow-right"></i></button>
               </div>
             </div>
+          <hr>
+          <p>What to show <a href="#selection_modal" onclick="$('#residue').click();">residue</a> and not the <a href="#selection_modal" onclick="$('#domain').click();">domain</a>, or vice-versa? Then close this, and select the appropriate focusing mode (labelled "zoom to"). </p>
 
       </div>
     </div>

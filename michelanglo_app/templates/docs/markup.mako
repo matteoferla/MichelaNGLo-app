@@ -73,7 +73,7 @@
             <td><code>data-selection</code></td>
             <td> &mdash; (compulsory for <code>data-focus</code> instructions, use <code>'*'</code> to select all)</td>
             <td><code>data-focus</code></td>
-            <td>The selection is controlled with a <a href="http://nglviewer.org/ngl/api/manual/selection-language.html">valid NGL selection <i class="fas fa-external-link"></i></a>, for example a range is '1-20:A'.</td>
+            <td>The selection is controlled with a <a href="http://nglviewer.org/ngl/api/manual/selection-language.html">valid NGL selection <i class="far fa-external-link"></i></a>, for example a range is '1-20:A'.</td>
         </tr>
         <tr id="row_color">
             <td><code>data-color</code></td>
