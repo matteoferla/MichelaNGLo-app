@@ -25,7 +25,7 @@
           <div class="input-group-prepend">
             <span class="input-group-text" id="markup_selection_addon">Selection</span>
           </div>
-            <input type="text" class="form-control" placeholder="1-10:A" id="markup_selection" aria-describedby="markup_selection_addon">
+            <input type="text" class="form-control" placeholder="for example 1-10:A" id="markup_selection" aria-describedby="markup_selection_addon">
             <div class="input-group-append">
                 <button class="btn btn-outline-info" type="button" onclick="$('#markup_view').val(''); interactive_changer();"; title="Zoom to residue, discarding current orientation." data-toggle="tooltip"><i class="fas fa-crosshairs"></i></button>
                 <button class="btn btn-outline-info" type="button" id="markup_selection_btn" data-toggle="modal" data-target="#selection_modal"><span data-toggle="tooltip" title="Show simpler selection builder"><i class="far fa-question"></i></span></button>

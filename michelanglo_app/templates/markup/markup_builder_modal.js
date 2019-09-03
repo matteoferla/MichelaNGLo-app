@@ -1,5 +1,3 @@
-const show_input = (element) => $(element).parent().parent().show();
-const hide_input = (element) => $(element).parent().parent().hide();
 
 
 // this gets called only in modal mode. so it's fine.
@@ -72,32 +70,53 @@ window.interactive_changer = (noRun) =>  {
 window.interactive_builder = () => {
     //buttons.
     $('#markup_color').colorpicker();
-    $('#markup_title').parent().show();
-    $('#markup_selection,#markup_color,#markup_radius,#markup_tolerance').each(function () {hide_input(this)});
+    // make it more clear what is clicked!
     $('#markup_view_toggle label').click(function (){
         $('#markup_view_toggle label').each(function () {$(this).removeClass('btn-success').addClass('btn-secondary');});
         $(this).removeClass('btn-secondary').addClass('btn-success');
     });
     //make stuff toggle
-    $('[name="markup_zoom"]').change(function () {
-        $('#markup_selection,#markup_color,#markup_radius,#markup_tolerance,#markup_view').each(function () {
-            hide_input(this);
-            $(this).val('')});
-            $('#markup_view').attr('placeholder','optional 16x1 array');
-        if ($(this).attr('id') === 'domain') {$('#markup_selection,#markup_color,#markup_view').each(function () {show_input(this)});}
-        else if ($(this).attr('id') === 'residue') {$('#markup_selection,#markup_color,#markup_radius,#markup_view').each(function () {show_input(this)});}
-        else if ($(this).attr('id') === 'clash') {$('#markup_selection,#markup_color,#markup_radius,#markup_tolerance,#markup_view').each(function () {show_input(this)});}
-        else if ($(this).attr('id') === 'orientation') {$('#markup_view').each(function () {show_input(this)});
-                                                        $('#markup_view').attr('placeholder','16x1 array or the keywords "auto" or "reset"');}
-        else if ($(this).attr('id') === 'auto') {$('#markup_view').each(function () {show_input(this)});
-                                                        $('#markup_view').val('auto');}
-        else if ($(this).attr('id') === 'default') {$('#markup_view').each(function () {show_input(this)});
-                                                        $('#markup_view').val('default');}
-        else if ($(this).attr('id') === 'bfactor') {$('#markup_selection,#markup_color,#markup_radius,#markup_view').each(function () {show_input(this)});}
-        else if ($(this).attr('id') === 'surface') {$('#markup_view').each(function () {show_input(this)});}
+    ///const hide_input = (element) => $(element).parent().parent().hide();
+    const hide_input = (sele) => $(sele).each(function () {$(this).val(''); $(this).parent().parent().hide();});
+    //const show_input = (element) => $(element).parent().parent().show();
+    const show_input = (sele) => $(sele).each(function () {$(this).parent().parent().show()});
 
-        //
-    });
+    $('[name="markup_zoom"]').change(function () {
+        //show everything
+        show_input('#markup_selection,#markup_color,#markup_radius,#markup_tolerance,#markup_view,#markup_title');
+        //hide and clear unwanted
+        switch($(this).attr('id')) {
+          case 'domain':
+            hide_input('#markup_radius,#markup_tolerance');
+            break;
+          case 'residue':
+            hide_input('#markup_tolerance');
+            break;
+          case 'orientation':
+            hide_input('#markup_selection,#markup_color,#markup_radius,#markup_tolerance');
+            if (['', 'auto','default'].some(v => $('#markup_view').val() === v)) {$('#markup_view').val('['+NGL.getStage('viewport').viewerControls.getOrientation().elements.map((v) => Math.round(v*10)/10)+']');}
+            $('#markup_freeze').prop("checked", false);
+            break;
+          case 'auto':
+            hide_input('#markup_selection,#markup_color,#markup_radius,#markup_tolerance');
+            $('#markup_view').val('auto');
+            $('#markup_freeze').prop("checked", true);
+            break;
+          case 'default':
+            hide_input('#markup_selection,#markup_color,#markup_radius,#markup_tolerance');
+            $('#markup_view').val('default');
+            $('#markup_freeze').prop("checked", true);
+            break;
+          case 'bfactor':
+            hide_input('#markup_radius,#markup_tolerance');
+            break;
+          case 'surface':
+            hide_input('#markup_radius,#markup_tolerance');
+            break;
+          default:
+            // code block
+        }});
+
     //////////////// Get current view //////////////////////////////
     // this is not independent why? The element does not gets created on show. It's a modal not a tooltip.
     $('#markup_current').click(function () {

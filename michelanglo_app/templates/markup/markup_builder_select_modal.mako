@@ -17,7 +17,7 @@
           <div class="input-group-prepend">
             <span class="input-group-text" id="sele_string_addon">Selection line</span>
           </div>
-            <input type="text" class="form-control" placeholder="1-10:A" id="sele_string" aria-describedby="sele_string_addon">
+            <input type="text" class="form-control" placeholder="for example 1-10:A" id="sele_string" aria-describedby="sele_string_addon">
               <div class="input-group-append">
                 <button class="btn btn-outline-info" type="button" onclick="$('#markup_view').val(''); interactive_changer();"; title="Zoom to residue, discarding current orientation." data-toggle="tooltip"><i class="fas fa-crosshairs"></i></button>
                 <button class="btn btn-outline-success" type="button" id="sele_string_btn" data-toggle="tooltip" title="Use this selection"><i class="far fa-arrow-right"></i></button>
@@ -58,7 +58,7 @@
               </div>
             </div>
           <hr>
-          <p>What to show <a href="#selection_modal" onclick="$('#residue').click();">residue</a> and not the <a href="#selection_modal" onclick="$('#domain').click();">domain</a>, or vice-versa? Then close this, and select the appropriate focusing mode (labelled "zoom to"). </p>
+          <p>What to show <a href="#selection_modal" onclick="$('#residue').click(); interactive_changer();">residue</a> and not the <a href="#selection_modal" onclick="$('#domain').click(); interactive_changer();">domain</a>, or vice-versa? For the full list close this, and select the appropriate focusing mode (labelled "zoom to"). </p>
 
       </div>
     </div>

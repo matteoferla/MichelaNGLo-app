@@ -92,6 +92,7 @@
             if (window.species_xhr !== undefined) {
                 window.species_xhr.abort();}
             window.reset_gene();
+            if (species.val() === '') return 0;
             window.species_xhr = $.ajax({url: "/choose_pdb",
                     data: {'item': 'match species',
                            'name': species.val()
@@ -132,6 +133,8 @@
                 return 0;
             }
             let gene = $('#gene');
+
+            if (gene.val() === '') return 0;
             gene.popover('dispose');
             let error_gene = $('#error_gene');
             window.reset_gene();

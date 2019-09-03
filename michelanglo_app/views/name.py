@@ -70,7 +70,7 @@ def choose_pdb(request):
                 return {'uniprot': u, 'corrected_gene': g, 'pdbs': uniprot2pdb[u]}
             else:
                 return {'uniprot': u, 'corrected_gene': g, 'pdbs': []}
-        elif len(gene) > 4:
+        elif len(gene) > 2:
             lowname = gene.lower()
             options = [k for k in genedex if lowname in k.lower()]
             return {'options': options}
