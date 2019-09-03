@@ -193,6 +193,15 @@ $(document).ready(function () {
         ops.addToast('isWrong','<i class="far fa-bell"></i> Correct conversion?', 'If the conversion differs from what you were expecting <a href="#" data-toggle="modal" data-target="#wrong_modal"> click here.','bg-warning');
     %endif
 
+    if (window.location.search !== '') {
+        var urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('fbclid')) ops.addToast('fbclid','Debug','Hello Facebook user '+urlParams.get('fbclid'), 'bg-info');
+        if (urlParams.has('gclid')) ops.addToast('gclid','Debug','Hello Google user '+urlParams.get('gclid'), 'bg-info');
+        if (urlParams.has('prolink')) setTimeout(n => $('.prolink').eq(n).click(), 500, parseInt(urlParams.get('prolink')));
+
+    }
+
+
 }); //ready
 <%include file="edit_modal/tour.js"/>
 </script>

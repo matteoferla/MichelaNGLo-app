@@ -70,8 +70,14 @@
                    <div class="card mb-2 ${color}">
                       <img class="card-img-top" src="/monitor/${page}?image=${i}" alt="${i}">
                       <div class="card-body">
-                        <h5 class="card-title">Link &#8470; ${i+1}</h5>
-                        <p class="card-text">${labels[i]}</p>
+                        <h5 class="card-title">Link &#8470; ${i}</h5>
+                          <p class="card-text">${labels[i]}<br/>
+                              %if i == 0:
+                                  (<a href="/data/${page}?prolink=${i-1}">check</a>)
+                              %else:
+                                  (<a href="/data/${page}?prolink=${i-1}">check</a>)
+                              %endif
+                              </p>
                          %if len(validity) > i and validity[i] is False:
                              <hr/>
                                  <p>latest image:</p>
