@@ -171,7 +171,7 @@ window.ft = new FeatureViewer('${protein.sequence}',
 %endfor
 
 %if len(p)+len(s)+len(m) >= limited:
-    $('#fv').prepend('<div class="alert alert-warning mb-3">The entry contains ${len(protein.pdbs)} PDB entries, but the feature viewer been limited to 45 (its max). For full list, see PDB website.</div>');
+    $('#fv').prepend('<div class="alert alert-warning mb-3">The entry contains ${len(protein.pdbs)} PDB entries, but the feature viewer been limited to the 45 longest (its max). For full list, see PDB website.</div>');
 %endif
 
 $('.pdb').click(function () {
