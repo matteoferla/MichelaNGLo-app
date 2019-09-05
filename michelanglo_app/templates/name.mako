@@ -246,7 +246,7 @@
 
         $('#pdb_fetch').click(event => {
             $(event.target).hide();
-            $('#ext_links').html('<p>For more information see the <a href="https://www.rcsb.org/pdb/protein/'+window.uniprotValue+'" target="_blank">PDB entry <i class="far fa-external-link-alt"></i></a>. If no structures are available see <a href="https://swissmodel.expasy.org/repository/uniprot/'+window.uniprot+'" target="_blank">Swiss-Model entry <i class="far fa-external-link-alt"></i></a>.</p>');
+            $('#ext_links').html('<p>For more information see the <a href="https://www.rcsb.org/pdb/protein/'+window.uniprotValue+'" target="_blank">PDB entry <i class="far fa-external-link-alt"></i></a>. If no structures are available see <a href="https://swissmodel.expasy.org/repository/uniprot/'+window.uniprotValue+'" target="_blank">Swiss-Model entry <i class="far fa-external-link-alt"></i></a>.</p>');
 
             $('#fv_label').show();
             $('#matches_label').show();

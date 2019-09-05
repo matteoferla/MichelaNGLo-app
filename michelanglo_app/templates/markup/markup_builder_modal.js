@@ -18,7 +18,7 @@ $('#markup_modal').on('hide.bs.modal', function (e) {
 });
 
 // update on change (see interactive_builder)
-window.interactive_changer = (noRun) =>  {
+window.interactive_changer = (event, noRun) =>  {
     $('.is-invalid').removeClass('is-invalid');
     let attributes =['title', 'color','radius','tolerance','view'].reduce(function (c,key){
             var value= $('#markup_'+key).val();
@@ -141,7 +141,7 @@ window.interactive_builder = () => {
     window.alertDifference = () => {
         if ($('#markup_freeze').prop("checked") == true) {$('#differing_view').show()}
         else {$('#markup_view').val('['+NGL.getStage('viewport').viewerControls.getOrientation().elements.map((v) => Math.round(v*10)/10)+']');
-                interactive_changer(true); //this will update the code but not run it.
+                interactive_changer(undefined,true); //this will update the code but not run it.
         }
     };
     const sigs = NGL.getStage().mouseObserver.signals;
