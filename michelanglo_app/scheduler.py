@@ -43,7 +43,7 @@ def kill_task(days_delete_unedited, days_delete_untouched):
         for page in sesh.query(Page).filter(and_(Page.exists == True, Page.edited == False, Page.timestamp < unedited_time)):
             log.info(f'Deleting unedited page {page.identifier} by {page}')
             n+=1
-            #page.delete()
+            page.delete()
         untouched_time = datetime.now() - timedelta(days=int(days_delete_untouched))
         for page in sesh.query(Page).filter(and_(Page.exists == True, Page.timestamp < untouched_time)):
             log.info(f'Deleting abbandonned page {page.identifier} ({page.timestamp})')
