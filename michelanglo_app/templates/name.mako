@@ -50,7 +50,9 @@
         </div>
     <div class="row">
         <div id="fv_label" class="col-12" style="display: none;">
-        <h4>Length</h4>
+        <h5>Info</h5>
+        <p>Data loaded for <span id="label_protName">ERROR</span></p>
+        <h5>Length</h5>
     <p>Two pieces of information are presented here to help you choose: the first is the length of the protein and the second is the partners if any in the structure.<br/>
         Clicking on an entry in the PDB track (if structures are present) will load that protein structure.</p>
         </div>
@@ -58,7 +60,7 @@
             <div id="fv"></div>
         </div>
         <div id="matches_label" class="col-12"  style="display: none;">
-        <h4>Binding partners</h4>
+        <h5>Binding partners</h5>
             <p>Proteins can be crystallised with ligands or binding partners and it is often beneficial to choose a specific one.</p>
             <div id="partner_table"></div>
         </div>

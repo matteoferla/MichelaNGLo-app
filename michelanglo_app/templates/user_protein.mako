@@ -85,7 +85,7 @@
                 %if len(structure_info) == 1:
                     <a href="/save_pdb?uuid=${page}&key=${key}&index=0" class="btn btn-outline-success w-100 my-1"  download="model.pdb" data-toggle="tooltip" title="Download the structure from this page."><i class="far fa-map"></i> Download PDB file</a>
                 %else:
-                    <div class="dropdown">
+                    <div class="dropdown" id="downloadDropdown">
                       <button class="btn btn-outline-success dropdown-toggle w-100 my-1 " type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-toggle="tooltip" title="Download the nth structure from this page.">
                         <i class="far fa-map"></i> Download PDB file
                       </button>

@@ -227,10 +227,11 @@ $('.swiss').click(function () {
     load_pdb(entries[id]);
 });
 
+$('#label_protName').html("${protein.recommended_name} (encoded by <i>${protein.gene_name}</i>)");
 
 window.pdbOptions = ${json.dumps([s.__dict__ for s in protein.pdbs])|n};
 if (pdbOptions.length) {
-    $('#partner_table').html(`<table class="table table-hover"><thead class="thead-light"><tr>
+    $('#partner_table').html(`<table class="table table-hover" style="table-layout: fixed;"><thead class="thead-light"><tr>
                                         <th data-toggle="tooltip" title="PDB code of the structure. See RCSB PDB database for more.">Code</th>
                                         <th data-toggle="tooltip" title="The resolution of the structure. The lower the better. Say an electron microscopy structure at 3 &Aring; will be poor, while a proton beam structure at 1 &Aring; will even have hydrogens. Generally anything below 2 &Aring; is acceptable.">Resolution</th>
                                         <th data-toggle="tooltip" title="How much of the whole protein is covered (structures are often parts of a protein)">Span</th>
@@ -242,21 +243,28 @@ if (pdbOptions.length) {
     const table = $('#partner_table tbody');
     const protLen = ${len(protein)};
     pdbOptions.forEach(v => {
-
+                        if (v.chain_definitions === null) return 0;
                         //protein in question
                         let myChain = v.chain_definitions.filter(d => d.uniprot === uniprotValue).map(d => 'Chain '+d.chain).join(' + ');
                         let partners = v.chain_definitions.filter(d => d.uniprot !== uniprotValue).map(d => 'Chain '+d.chain+': '+d.uniprot).join(' + ');
                         let res = (v.resolution === -1) ? 'NMR' : v.resolution + '&Aring;';
                         let off = v.offset;
                         table.append(`<tr onclick="load_pdb('${'${v.code}'}')">
-                                            <td></td>
+                                            <td>${'${v.code}'}</td>
                                             <td>${'${res}'}</td>
-                                            <th data-toggle="tooltip" title="${'${v.x}-${v.y}'}"><svg height="1em" id="span_${'${v.code}'}"></svg></th>
+                                            <th data-toggle="tooltip" title="${'${v.x}-${v.y}'}"><svg height="1em" width="100%" id="span_${'${v.code}'}"></svg></th>
                                             <td>${'${off}'}</td>
                                             <td>${'${myChain}'}</td>
                                             <td>${'${partners}'}</td>
-                                            <td>TBD</td>
+                                            <td id="lig_${'${v.code}'}"><i class="fas fa-spinner fa-spin"></i></td>
                                           </tr>`);
+                        $.getJSON({url: 'http://www.ebi.ac.uk/pdbe/api/pdb/entry/molecules/'+v.code, dataType: 'jsonp'})
+                            .then(response => $('#lig_'+v.code).html(  response[v.code.toLowerCase()].filter(e=>e.molecule_type !== 'polypeptide(L)')
+                                                                                                     .filter(e=> ! ['HOH', 'NA', 'GOL', 'CL', 'MG', 'K', 'BME', 'EDO', 'DMS', 'PGE'].includes(e.chem_comp_ids[0]))
+                                                                                                     .map(e => e.molecule_name[0].toLowerCase()+' ('+e.chem_comp_ids[0]+' in chain '+e.in_chains.join('&')+')')
+                                                                                                     .join(' + ')
+                                                                    )
+                                    );
                         let svg=d3.select('#span_'+v.code);
                         // midline
                         svg.append("svg:line")
@@ -277,7 +285,7 @@ if (pdbOptions.length) {
                                 .attr('fill','gainsboro');
     });
     // add glove. Do this properly in a bit.
-    $('#partner_table tr').hover(e => $(e.target).css('cursor','pointer'));
+    $('#partner_table tbody tr').hover(e => $(e.target).css('cursor','pointer'));
 
 } else {
 $('#partner_table').html('<p>No crystal structures to show.</p>');
