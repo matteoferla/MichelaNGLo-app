@@ -1,4 +1,7 @@
 ### see get_uniprot item of choose_pdb route
+<%!
+    import json
+%>
 
 ### copied from results.js.mako in VENUS
 ###################################################
@@ -13,6 +16,10 @@ window.ft = new FeatureViewer('${protein.sequence}',
                 zoomMax:50 //define the maximum range of the zoom
             });
 
+const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')').parent().tooltip({title: text, trigger: 'hover focus'});
+
+
+
 ################### Own SNV #######################
 ## DISABLED.
 
@@ -26,6 +33,7 @@ window.ft = new FeatureViewer('${protein.sequence}',
         type: "rect",
         filter: "Domain"
     });
+    addFeatureTooltip("Domain", "Domain annotation from Uniprot entry, derived in turn from PFam");
 %endif
 
 <%
@@ -58,6 +66,8 @@ window.ft = new FeatureViewer('${protein.sequence}',
         type: "rect",
         filter: "Domain"
     });
+
+    addFeatureTooltip("region of interest", "A collection of various Uniprot annotations: 'transmembrane region','intramembrane region','region of interest','peptide','site','active site','binding site','calcium-binding region','zinc finger region','metal ion-binding site','DNA-binding region','lipid moiety-binding region', 'nucleotide phosphate-binding region'");
 %endif
 
 %if combo_other:
@@ -69,6 +79,7 @@ window.ft = new FeatureViewer('${protein.sequence}',
         type: "rect",
         filter: "Domain"
     });
+    addFeatureTooltip("other regions", "A collection of various Uniprot annotations: 'propeptide','signal peptide','repeat','coiled-coil region','compositionally biased region','short sequence motif','topological domain','transit peptide'");
 %endif
 
 %if combo_ptm:
@@ -80,6 +91,7 @@ window.ft = new FeatureViewer('${protein.sequence}',
         type: "unique",
         filter: "Modified"
     });
+    addFeatureTooltip("Modified residues", "A collection of various Uniprot annotations: 'initiator methionine','modified residue','glycosylation site','non-standard amino acid'");
 %endif
 
 %if combo_ss:
@@ -91,6 +103,7 @@ window.ft = new FeatureViewer('${protein.sequence}',
         type: "rectangle",
         filter: "Domain"
     });
+    addFeatureTooltip("Secondary structure", "A collection of 'helix', 'turn', 'strand' Uniprot annotations.");
 %endif
 
 
@@ -104,6 +117,7 @@ window.ft = new FeatureViewer('${protein.sequence}',
         type: "unique",
         filter: "Modified"
     });
+    addFeatureTooltip("seq. variant","Sequence variants from Uniprot, which is includes very common SNPs and pathogenic SNPs");
 %endif
 
 %if 'splice variant' in protein.features:
@@ -115,17 +129,19 @@ window.ft = new FeatureViewer('${protein.sequence}',
         type: "rectangle",
         filter: "Domain"
     });
+    addFeatureTooltip("splice variant","Splice variant from Uniprot");
 %endif
 
 %if protein.gNOMAD:
     ft.addFeature({
-        data: ${str(protein.gNOMAD)|n},
+        data: ${str([dict(snp._asdict()) for snp in protein.gNOMAD])|n},
         name: "gNOMAD",
         className: "modified",
         color: "skyblue",
         type: "unique",
         filter: "Modified"
     });
+    addFeatureTooltip("gNOMAD","gNOMAD variant (i.e. variant in the healthy human population)");
 %endif
 
 %if 'disulfide bond' in protein.features:
@@ -137,6 +153,7 @@ window.ft = new FeatureViewer('${protein.sequence}',
         type: "path",
         filter: "Modified Residue"
     });
+    addFeatureTooltip("gNOMAD","gNOMAD variant (i.e. variant in the healthy human population)");
 %endif
 
 %if 'cross-link' in protein.features:
@@ -148,6 +165,31 @@ window.ft = new FeatureViewer('${protein.sequence}',
         type: "path",
         filter: "Modified Residue"
     });
+    addFeatureTooltip("disulfide bond","Disulfide bond in Uniprot entry. It may or may not be present under all conditions");
+%endif
+
+%if protein.properties:
+    ft.addFeature({
+        data: ${str([{'x': i+4, 'y': score} for i, score in enumerate(protein.properties["kd"])])|n},
+        name: "Hydrophobilicity",
+        className: "kyledolittle",
+        color: "#008080",
+        type: "line",
+        height: 1,
+        filter: "type2"
+    });
+    addFeatureTooltip("Hydrophobilicity","Kyle-Dolitte hydrophobilicity index: high hydrophobility generally means a structured protein");
+
+        ft.addFeature({
+        data: ${str([{'x': i+4, 'y': score - 1} for i, score in enumerate(protein.properties["Flex"])])|n},
+        name: "Flexibility",
+        className: "kyledolittle",
+        color: "#ff7f50", //coral
+        type: "line",
+        height: 1,
+        filter: "type2"
+    });
+    addFeatureTooltip("Flexibility","Flexibility predicted by amino acid identity. low flexibility generally means a structured protein");
 %endif
 
 ################### Structures #######################
@@ -157,16 +199,16 @@ window.ft = new FeatureViewer('${protein.sequence}',
     s = sorted(protein.swissmodel, key=lambda n: n.y - n.x, reverse=True)[0:limited-len(protein.pdbs)]
     m = sorted(protein.pdb_matches, key=lambda n: n.y - n.x, reverse=True)[0:limited-len(protein.pdbs)-len(protein.swissmodel)]
 %>
-%for title, data in (("Crystal structures",p), ("Swissmodel", s), ("Homologue structures", m)):
+%for title, data, color, classname in (("Crystal structures",p, 'lime', 'pdb'), ("Swissmodel", s, 'GreenYellow', 'swiss'), ("Homologue structures", m, 'khaki', 'homo')):
     %if data:
     ft.addFeature({
-        data: ${str([{'x': structure.x, 'y': structure.y, 'id': structure.id, 'description': structure.description} for structure in data])|n},
+        data: ${str([structure.to_dict() for structure in data])|n},
         name: "${title}",
-        className: "pdb",
-        color: "lime",
+        className: "${classname}",
+        color: "${color}",
         type: "rect",
         filter: "Domain"
-    });
+    }); addFeatureTooltip("${title}", "Click on the span to load this structure.")
     %endif
 %endfor
 
@@ -178,3 +220,65 @@ $('.pdb').click(function () {
     let id = $(this).attr('id').slice(1); //remove the first 'f'
     load_pdb(id.split('_')[0]);
 });
+
+$('.swiss').click(function () {
+    const entries = ${str({s.id: s.url for s in protein.swissmodel})|n};
+    let id = $(this).attr('id').slice(1); //remove the first 'f'
+    load_pdb(entries[id]);
+});
+
+
+window.pdbOptions = ${json.dumps([s.__dict__ for s in protein.pdbs])|n};
+if (pdbOptions.length) {
+    $('#partner_table').html(`<table class="table table-hover"><thead class="thead-light"><tr>
+                                        <th data-toggle="tooltip" title="PDB code of the structure. See RCSB PDB database for more.">Code</th>
+                                        <th data-toggle="tooltip" title="The resolution of the structure. The lower the better. Say an electron microscopy structure at 3 &Aring; will be poor, while a proton beam structure at 1 &Aring; will even have hydrogens. Generally anything below 2 &Aring; is acceptable.">Resolution</th>
+                                        <th data-toggle="tooltip" title="How much of the whole protein is covered (structures are often parts of a protein)">Span</th>
+                                        <th data-toggle="tooltip" title="The residue index within the structure may differ from the one of the protein as a whole. Add this number to the PDB index to get the whole protein index">Offset</th>
+                                        <th data-toggle="tooltip" title="What chain is my protein?">Protein of interest</th>
+                                        <th data-toggle="tooltip" title="What other proteins are there?">Bound partner(s)</th>
+                                        <th data-toggle="tooltip" title="What small molecules are in the structure?">Ligand(s)</th>
+                                </tr></thead><tbody></tbody></table>`);
+    const table = $('#partner_table tbody');
+    const protLen = ${len(protein)};
+    pdbOptions.forEach(v => {
+
+                        //protein in question
+                        let myChain = v.chain_definitions.filter(d => d.uniprot === uniprotValue).map(d => 'Chain '+d.chain).join(' + ');
+                        let partners = v.chain_definitions.filter(d => d.uniprot !== uniprotValue).map(d => 'Chain '+d.chain+': '+d.uniprot).join(' + ');
+                        let res = (v.resolution === -1) ? 'NMR' : v.resolution + '&Aring;';
+                        let off = v.offset;
+                        table.append(`<tr onclick="load_pdb('${'${v.code}'}')">
+                                            <td></td>
+                                            <td>${'${res}'}</td>
+                                            <th data-toggle="tooltip" title="${'${v.x}-${v.y}'}"><svg height="1em" id="span_${'${v.code}'}"></svg></th>
+                                            <td>${'${off}'}</td>
+                                            <td>${'${myChain}'}</td>
+                                            <td>${'${partners}'}</td>
+                                            <td>TBD</td>
+                                          </tr>`);
+                        let svg=d3.select('#span_'+v.code);
+                        // midline
+                        svg.append("svg:line")
+                                .attr("x1", 0)
+                                .attr("y1", "0.5em")
+                                .attr("x2", "100%")
+                                .attr("y2", "0.5em")
+                                .attr("stroke-width",3)
+                                .attr('stroke','silver');
+                        let group=svg.append("g");
+                        group.append('rect')
+                                .attr('x',(parseFloat(v.x)/protLen*100).toString()+"%")
+                                .attr('width',((parseFloat(v.y)-parseFloat(v.x))/protLen*100).toString()+'%')
+                                .attr("y", "0.1em")
+                                .attr("height", "0.8em")
+                                .attr("stroke-width",1)
+                                .attr('stroke','black')
+                                .attr('fill','gainsboro');
+    });
+    // add glove. Do this properly in a bit.
+    $('#partner_table tr').hover(e => $(e.target).css('cursor','pointer'));
+
+} else {
+$('#partner_table').html('<p>No crystal structures to show.</p>');
+}

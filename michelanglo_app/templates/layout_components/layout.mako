@@ -157,11 +157,11 @@
   transform: rotateX(180deg);
 }
 
-.pdb {
+.pdb,.swiss,.itasser,.phyre {
     cursor: pointer;
 }
 
-.pdb:hover {
+.pdb:hover,.swiss:hover,.:hover,.phyre:hover {
     fill: GreenYellow;
 }
 

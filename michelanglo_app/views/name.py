@@ -3,18 +3,15 @@ from pyramid.view import view_config
 from pyramid.renderers import render_to_response
 import json, os
 from protein.generate import ProteinGatherer
-ProteinGatherer.settings.data_folder = os.environ['PROTEIN_DATA']
-
-
-print('Michelanglo-data is at present hard coded as ../Michelanglo-data')
-organism = json.load(open(os.path.join('..', 'Michelanglo-data','organism.json')))
-human = json.load(open(os.path.join('..', 'Michelanglo-data', 'gene2uniprot', 'taxid9606-names2uniprot.json')))
-uniprot2pdb = json.load(open(os.path.join('..', 'Michelanglo-data', 'uniprot2pdb.json')))
+ProteinGatherer.settings.init(os.environ['PROTEIN_DATA'])
+## the folder dictionary has the cross ref files.
+organism = json.load(open(os.path.join(ProteinGatherer.settings.dictionary_folder,'organism.json')))
+human = json.load(open(os.path.join(ProteinGatherer.settings.dictionary_folder, 'taxid9606-names2uniprot.json')))
+uniprot2pdb = json.load(open(os.path.join(ProteinGatherer.settings.dictionary_folder, 'uniprot2pdb.json')))
 
 @view_config(route_name='choose_pdb', renderer='json')
 def choose_pdb(request):
     """
-
     :param request: item = match species | match gene; name: species str to be matched; get {species: taxid; gene: str)
     :return:
     """
@@ -77,6 +74,7 @@ def choose_pdb(request):
         else:
             return {'invalid': True}
     elif request.params['item'] == 'get_pdbs':
+        ### gets the metadata for a given PDB list
         malformed = is_malformed(request, 'entries', 'uniprot')
         if malformed:
             return {'status': malformed}
@@ -91,6 +89,7 @@ def choose_pdb(request):
                 pass # this protein was removed. We shalt speak of it.
         return {'descriptions': ' <br/> '.join(details)}
     elif request.params['item'] == 'get_pdb':
+        ### gets the metadata for a given PDB code
         malformed = is_malformed(request, 'entry')
         if malformed:
             return {'status': malformed}
@@ -102,9 +101,18 @@ def choose_pdb(request):
         except KeyError:
             return {'status': "removed protein"}
     elif request.params['item'] == 'get_uniprot':
+        malformed = is_malformed(request, 'uniprot', 'species')
+        if malformed:
+            return {'status': malformed}
         uniprot = request.params['uniprot']
+        taxid = request.params['species']
         log.info(f'{User.get_username(request)} wants uniprot data')
-        protein = ProteinGatherer(uniprot=uniprot).parse_uniprot()
+        protein = ProteinGatherer(uniprot=uniprot, taxid=taxid)
+        try:
+            protein.load()
+        except:
+            log.warn(f'There was no pickle for uniprot {uniprot} taxid {taxid}')
+            protein.get_uniprot()
         return render_to_response("../templates/results/features.js.mako", {'protein': protein}, request)
     else:
         request.response.status = 400
