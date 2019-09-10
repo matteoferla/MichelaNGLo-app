@@ -1,6 +1,7 @@
 <h4>Users</h4>
 <p>By registering the views generated can be retrieved at a latter date.</p>
 <p>The sharable links can be viewed by anyone with the link, however, only the registered creator of the page can edit it or promote a registered user who visited the page to edit it.</p>
+<p>NB. Your username is visible on the pages you create, therefore if you create a page and share it it will be visible.</p>
 <h5>Admin help</h5>
 <p>A registered user cannot insert script tags when editing for security reasons. If you require to do so, the site admin can promote your account.</p>
 <p>Passwords are hashed, so if forgotten they cannot be retrieved. The site admin can however reset your password.</p>

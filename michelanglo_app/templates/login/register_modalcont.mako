@@ -47,6 +47,9 @@
           </div>
 
       </div>
+      <div class="alert alert-info">By registering you agree to the <a href="/docs/users" target="_blank">Ts & Cs</a> of the site.
+          <span class="text-muted">Registration is free, we don't use the data for commercial purposes and we will keep your protein private (unless otherwise stated).</span>
+      </div>
 
   </div>
   <div class="modal-footer">
