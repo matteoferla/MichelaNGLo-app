@@ -37,6 +37,7 @@ else:
     __main__.pymol_argv = ['pymol', '-qc']
 import pymol
 pymol.finish_launching()
+pymol.cmd.set('fetch_path', os.getcwd()+'/michelanglo_app/temp')
 
 from Bio.Data.IUPACData import protein_letters_1to3 as p1to3
 

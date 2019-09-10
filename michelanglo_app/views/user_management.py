@@ -62,11 +62,11 @@ def user_view(request):
     # sort out inputs
     action   = request.params['action']
     if 'username' in request.params:
-        username = sanitise_text(request.params['username'])
+        username = sanitise_text(request.params['username']).strip()
     else:
         username ='ERROR'
     if 'password' in request.params:
-        password = sanitise_text(request.params['password'])
+        password = sanitise_text(request.params['password']).strip()
     else:
         password = ''
 
