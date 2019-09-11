@@ -70,7 +70,7 @@ def userdata_view(request):
         user = request.user
         settings['user'] = user
         if user:
-            if pagename not in user.owned_pages:
+            if pagename not in user.owned.pages:
                 user.visited.add(pagename)
                 settings['visitors'].append(user.name)
                 page.save(settings)
@@ -79,9 +79,9 @@ def userdata_view(request):
             elif user.role == 'admin':
                 # this means admin does not leave a trace upon inspection. Fine for admin bots. Bad human admin.
                 settings['editable'] = True
-            elif pagename in user.owned_pages:
+            elif pagename in user.owned.pages:
                 settings['editable'] = True
-            elif pagename in user.owned_pages:
+            elif pagename in user.owned.pages:
                 settings['editable'] = False
             else:
                 user.visited.add(pagename)
@@ -180,8 +180,10 @@ def thumbnail(request):
     page = Page.select(request, pagename)
     verdict = permission(request, page, 'view', key_label='key')
     if verdict['status'] != 'OK':
-        request.response.status = 200 # we would block facebook and twitter otherwise...
+        request.response.status = 200 # we would block facebook and twitter otherwise as they redirect.
         response = FileResponse(os.path.join('michelanglo_app', 'static', 'tim_barrel.png'))
+    elif os.path.exists(page.thumb_path):
+        response = FileResponse(page.thumb_path)
     elif not os.system(f'node michelanglo_app/thumbnail.js {pagename}'):
         response = FileResponse(page.thumb_path)
     else:

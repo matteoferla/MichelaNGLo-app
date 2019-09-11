@@ -15,12 +15,4 @@ def get_trashcan(request):
         request.dbsession.add(trashcan)
         return trashcan
 
-def get_public(request):
-    public = request.dbsession.query(User).filter_by(name='public').first()
-    if public:
-        return public
-    else:
-        #someone deleted the public!
-        public = User(name='public', role='public', password_hash='$2b$12$EaadzvGZ3hd60a3dfqTrkOAstBQtzjTXVdG0OFm0O.pTibjK3OIn6')
-        request.dbsession.add(public)
-        return public
+

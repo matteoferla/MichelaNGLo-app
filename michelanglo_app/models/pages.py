@@ -37,12 +37,13 @@ class Page(Base):
     __tablename__ = 'pages'
     id = Column(Integer, primary_key=True)
     identifier = Column(Text, nullable=False, unique=True)
-    title = Column(Text)
-    exists = Column(Boolean)
-    edited = Column(Boolean)
-    encrypted = Column(Boolean)
-    timestamp = Column(DateTime)
-    protected = Column(Boolean)
+    title = Column(Text, default='')
+    exists = Column(Boolean, default=True)
+    edited = Column(Boolean, default=False)
+    encrypted = Column(Boolean, default=False)
+    timestamp = Column(DateTime, nullable=False) #, default=datetime.datetime.utcnow)
+    protected = Column(Boolean, default=False)
+    privacy = Column(Text, default='private') #private | public | published | sgc
     settings = None  #watchout this ought to be a dict, but dict is mutable.
     key = None
     unencrypted_path = property(lambda self: os.path.join('michelanglo_app', 'user-data', self.identifier + '.p'))
@@ -148,6 +149,12 @@ class Page(Base):
         else:
             print('DEBUG.... DELETION OF A NON EXISTANT PAGE IS IMPOSSIBLE')
         return self
+
+    def is_public(self):
+        if self.privacy == 'private':
+            return False
+        else:
+            return True
 
     @staticmethod
     def sanitise_URL(page):

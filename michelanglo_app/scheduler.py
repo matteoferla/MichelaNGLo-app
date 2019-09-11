@@ -1,5 +1,5 @@
 import os, json, imageio, pickle
-from .models import Page
+from .models import Page, User
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql.expression import and_
@@ -19,11 +19,14 @@ def includeme(config):
     settings = config.get_settings()
     scheduler = BackgroundScheduler()
 
-    # adding settings to kill_task...
+    #### PERIODIC TASKS ####################################################
     scheduler.add_job(kill_task, 'interval', days=1, args=[settings['scheduler.days_delete_unedited'], settings['scheduler.days_delete_untouched']])
     scheduler.add_job(monitor_task, 'interval', days=30)
-    scheduler.add_job(monitor_task, 'date', run_date=datetime.now() + timedelta(minutes=1)) #run monitor_task once, in a minute.
-
+    scheduler.add_job(daily_task, 'interval', days=1)
+    #### START UP TASKS ####################################################
+    scheduler.add_job(monitor_task, 'date', run_date=datetime.now() + timedelta(minutes=1))
+    #scheduler.add_job(sanitycheck_task, 'date', run_date=datetime.now() + timedelta(minutes=2))
+    #### GO! ####################################################
     scheduler.start()
 
 def get_session(): ## not request bound.
@@ -31,6 +34,15 @@ def get_session(): ## not request bound.
                                 prefix='sqlalchemy.')
     Session = sessionmaker(bind=engine)
     return Session()
+
+def daily_task():
+    ## odds and ends
+    # change all new users to basic users.
+    sesh = get_session()
+    with transaction.manager:
+        for row in sesh.query(User).filter_by(role='new'):
+            row.role = 'basic'
+    # PDB?
 
 def spam_task(days_delete_unedited, days_delete_untouched):
     notify_admin(f'{days_delete_unedited} and {days_delete_untouched}')
@@ -83,3 +95,13 @@ def monitor_task():
             else:
                 log.info(f'Page monitoring successful for {page.identifier}')
             pickle.dump(state, open(os.path.join('michelanglo_app', 'user-data-monitor', f'verdict_{page.identifier}.p'), 'wb'))
+
+def sanitycheck_task():
+    #verify that the database pages table and the pickles files are consistent.
+    #why? In case I add a pickle manually.
+    #actually how would I do that? It would require rsync the data to /temp and then moving it as the correct user.
+    #it would be way easier to fix it by API.
+    #also, who would win in case of conflict?
+    #I need to think about this more.
+    pass
+

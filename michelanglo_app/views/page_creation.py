@@ -2,7 +2,7 @@ from pyramid.view import view_config
 from pyramid.renderers import render_to_response
 import traceback
 from ..models import Page, User
-from ..models.trashcan_public import get_trashcan, get_public
+from ..models.trashcan import get_trashcan
 from ..transplier import PyMolTranspiler
 import uuid
 import shutil

@@ -2,7 +2,7 @@ from pyramid.view import view_config
 from pyramid.renderers import render_to_response
 from ..models.pages import Page
 from ..models.user import User
-from ..models.trashcan_public import get_trashcan, get_public
+from ..models.trashcan import get_trashcan
 from .user_management import permission
 from ..transplier import PyMolTranspiler
 import os
@@ -60,25 +60,18 @@ def edit(request):
                 if key in request.params:
                     page.settings[key] = Page.sanitise_HTML(request.params[key])
         page.settings['confidential'] = is_js_true(request.params['confidential'])
-        public_from_private = 'public' in page.settings and not page.settings['public'] and is_js_true(
-            request.params['public'])  # was private public but is now.
-        public_from_nothing = 'public' not in page.settings and is_js_true(
-            request.params['public'])  # was not decalred but is now.
-        private_from_public = 'public' in page.settings and page.settings['public'] and not is_js_true(
-            request.params['public'])
-        if public_from_private or public_from_nothing:
-            public = get_public(request)
-            public.visited.add(page.identifier)
-            request.dbsession.add(public)
-        elif not is_js_true(request.params['public']):
-            public = get_public(request)
-            if page.identifier in public.visited_pages:
-                public.visited.remove(page.identifier)
-                request.dbsession.add(public)
+        if page.privacy == '' or page.privacy is None:
+            page.privacy = 'private'
+            log.warn('A page had no privacy setting. How?')
+        if user.role == 'admin' and request.params['public'] not in (None, False, True, 'false','true'):
+            ## only admin can set to anything that is not private | public
+            page.privacy = request.params['public'].lower()
+        elif is_js_true(request.params['public']):
+            page.privacy = 'public'
         else:
-            pass
-        page.settings['public'] = is_js_true(request.params['public'])
-        if not page.settings['public']:
+            page.privacy = 'private'
+        page.settings['public'] = page.is_public()
+        if not page.is_public():
             page.settings['freelyeditable'] = is_js_true(request.params['freelyeditable'])
         else:
             page.settings['freelyeditable'] = False

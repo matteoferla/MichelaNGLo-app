@@ -43,7 +43,7 @@
           <label class="custom-control-label" for="confidential">Confidential</label>
         </div>
         <br/>
-    <p>Lastly, you can make the page publicly listed. Currently search engines do not know about your page and cannot parse them. Enabling this will disable encryption.</p>
+    <p>Lastly, you can make the page publicly listed. Search engines do not and cannot know about your page and cannot parse them otherwise. Enabling this will disable encryption.</p>
         <div class="custom-control custom-switch">
           <input type="checkbox" class="custom-control-input user-editable-state" id="public"
                  %if public:

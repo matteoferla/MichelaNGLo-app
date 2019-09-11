@@ -100,12 +100,13 @@ def user_view(request):
             request.response.status = 403
             return {'status': 'forbidden'}
         else:
-            if username == 'admin': #once only.
+            if username == 'admin': #once only...
                 new_user = User(name=username, role='admin')
             else:
-                new_user = User(name=username, role='basic', email=request.params['email'])
+                new_user = User(name=username, role='new', email=request.params['email'])
             new_user.set_password(password)
             request.dbsession.add(new_user)
+            new_user = request.dbsession.query(User).filter_by(name=username).first()
             headers = remember(request, new_user.id)
             request.response.headerlist.extend(headers)
             return {'status': 'registered', 'name': new_user.name, 'rank': new_user.role}
@@ -202,7 +203,7 @@ def permission(request, page, mode='edit', key_label='encryption_key'):
             request.response.status_int = 401
             log.warn(f'{User.get_username(request)} not authorised to {mode} page {page.identifier}')
             return {'status': f'not authorised to {mode} page without at least logging in'}
-        elif mode != 'view' and not (page.identifier in user.owned_pages or
+        elif mode != 'view' and not (page.identifier in user.owned.pages or
                                       user.role == 'admin' or page.settings['freelyeditable']):
             ## only owners and admins can edit freely.
             request.response.status_int = 403

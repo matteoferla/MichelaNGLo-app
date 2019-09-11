@@ -10,9 +10,25 @@
 </%block>
 
 <%block name="main">
-        <div class="list-group">
-    % for page in public_pages:
-        <a href="/data/${page.identifier}" class="list-group-item list-group-item-action">${page.title}</a>
-    % endfor
-        </div>
+
+    <div class="card-deck">
+                % for page in sorted(public_pages, reverse=True, key=lambda p: ['published','sgc','public'].index(p.privacy) if p.privacy in ['published','sgc','public'] else 10):
+                    <div class="card hypercard" onclick="window.location='/data/${page.identifier}'">
+                          <img src="/thumb/${page.identifier}" class="card-img-top p-4" alt="thumbnail of ${page.title}">
+                          <div class="card-body">
+                            <h5 class="card-title">${page.title}</h5>
+                              %if page.privacy == 'public':
+                                <p class="card-text text-muted">This page was created by a user.</p>
+                              %elif page.privacy == 'published':
+                                <p class="card-text text-muted">This user-created page appears in a publication.</p>
+                              %elif page.privacy == 'sgc':
+                                <p class="card-text text-muted">This page features an Target Enabling Package from the SGC.</p>
+                              %endif
+                          </div>
+                            <div class="card-footer">
+                                      <small class="text-muted"><span class="text-muted">ID:</span> ${page.identifier}</small>
+                            </div>
+                        </div>
+                % endfor
+            </div>
 </%block>

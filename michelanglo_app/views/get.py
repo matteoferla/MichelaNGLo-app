@@ -1,22 +1,13 @@
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
 from ..models import Page, User
-from ..models.trashcan_public import get_trashcan, get_public
-from ..transplier import PyMolTranspiler
-import uuid
-import shutil
 import os
-import io
-import json
 
 import logging
 log = logging.getLogger(__name__)
 from ._common_methods import is_malformed, notify_admin
 
 from . import custom_messages
-
-#from pprint import PrettyPrinter
-#pprint = PrettyPrinter()
 
 
 @view_config(route_name='get')
@@ -99,7 +90,7 @@ def get_pages(request):
         to_list = lambda x: [p.identifier for p in x]  ## crap name. converts the objects to names only.
         data['owned'] = to_list(user.owned.select(request))
         data['visited'] = to_list(user.visited.select(request))
-    data['public'] = to_list(get_public(request).visited.select(request))
+    data['public'] = to_list(request.dbsession.query(Page).filter(Page.privacy != 'private').all())
     return data
 
 @view_config(route_name='set', renderer='json')

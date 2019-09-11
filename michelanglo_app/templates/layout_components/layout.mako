@@ -243,6 +243,13 @@ pre {
   box-shadow: 0 0 3px rgba(0,0,0,.3);
 }
 
+.hypercard:hover {
+    cursor: pointer;
+    border-width: 2px;
+    background: whitesmoke;
+}
+.hypercard > img:hover {opacity: 0.7;
+                        }
 
 ::placeholder {
   color: gainsboro !important; /* normally BS is #6c757d */

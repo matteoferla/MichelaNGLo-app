@@ -12,3 +12,16 @@ They a `password_hash` and methods to interact with it.
 They have two strings `visited_pages` and `owned_pages`. These are space-separated Page uuids.
 The methods to interact with these is `get_visited_pages`/`get_owned_pages` and `add_visited_page`/`add_owned_page`.
 
+
+## Note to self
+
+To manually check or amend the pg DB...
+
+    $ sudo su - postgres
+    $ psql
+    # \l
+    # \c <dbname>
+    # \dt
+    # \d <tablename>
+    # normal SQL statement;
+    # \q
