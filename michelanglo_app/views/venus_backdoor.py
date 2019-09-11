@@ -1,3 +1,6 @@
+#### this view is no longer used.
+
+
 from pyramid.view import view_config
 from pyramid.security import remember
 import os, pickle, uuid
@@ -6,7 +9,7 @@ from ..models import User, Page
 import logging
 log = logging.getLogger(__name__)
 
-@view_config(route_name='venus', renderer="json")
+#@view_config(route_name='venus', renderer="json")
 def backdoor_for_venus(request):
     """
     Two layers of security. A shared environment variable and REMOTE_ADDR 127.0.0.1

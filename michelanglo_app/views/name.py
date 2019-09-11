@@ -1,13 +1,9 @@
 from ._common_methods import *
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
-import json, os
-from protein.generate import ProteinGatherer
-ProteinGatherer.settings.init(os.environ['PROTEIN_DATA'])
-## the folder dictionary has the cross ref files.
-organism = json.load(open(os.path.join(ProteinGatherer.settings.dictionary_folder,'organism.json')))
-human = json.load(open(os.path.join(ProteinGatherer.settings.dictionary_folder, 'taxid9606-names2uniprot.json')))
-uniprot2pdb = json.load(open(os.path.join(ProteinGatherer.settings.dictionary_folder, 'uniprot2pdb.json')))
+
+from .uniprot_data import *
+#ProteinCore organism human uniprot2pdb
 
 @view_config(route_name='choose_pdb', renderer='json')
 def choose_pdb(request):
@@ -107,7 +103,7 @@ def choose_pdb(request):
         uniprot = request.params['uniprot']
         taxid = request.params['species']
         log.info(f'{User.get_username(request)} wants uniprot data')
-        protein = ProteinGatherer(uniprot=uniprot, taxid=taxid)
+        protein = ProteinCore(uniprot=uniprot, taxid=taxid)
         try:
             protein.load()
         except:

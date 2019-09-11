@@ -6,17 +6,14 @@
             <%include file="layout_components/vertical_menu_buttons.mako" args='tour=False'/>
 </%block>
 <%block name="title">
-            &mdash; Name to PDB
+            &mdash; VENUS MOD
 </%block>
 <%block name="subtitle">
-            Get a model of a protein by querying a name
+            ???????????
 </%block>
 
 <%block name="main">
-    <p>This convinient form simply searches for PDBs that match your protein, while for a more comprehensive search use the <a href="https://www.rcsb.org/" target="_blank">PDB database <i class="far fa-external-link"></i></a>.<br/>
-        If you already know the PDB code of your protein see <a href="/pdb">PDB conversion page</a>.
-        <br/>
-        For more information about choosing a model see <a href="/docs/gene">documentation</a>.</p>
+    <p>TEST.</p>
     <div class="row">
         <div class="col-12 col-lg-5">
             <div class="input-group mb-3" data-toggle="tooltip"
@@ -42,35 +39,8 @@
                                 </div>
         </div>
         <div class="col-12 col-lg-2">
-            <button type="button" class="btn btn-outline-primary w-100" id="pdb_fetch" style="display: none;">Fetch</button>
+            <button type="button" class="btn btn-outline-primary w-100" id="pdb_fetch" style="display: none;">Analyse</button>
         </div>
-
-
-
-        </div>
-    <div class="row">
-        <div id="fv_label" class="col-12" style="display: none;">
-        <h5>Info</h5>
-        <p>Data loaded for <span id="label_protName">ERROR</span></p>
-        <h5>Length</h5>
-    <p>Two pieces of information are presented here to help you choose: the first is the length of the protein and the second is the partners if any in the structure.<br/>
-        Clicking on an entry in the PDB track (if structures are present) will load that protein structure.</p>
-        </div>
-        <div class="col-12">
-            <div id="fv"></div>
-        </div>
-        <div id="matches_label" class="col-12"  style="display: none;">
-        <h5>Binding partners</h5>
-            <p>Proteins can be crystallised with ligands or binding partners and it is often beneficial to choose a specific one.</p>
-            <div id="partner_table"></div>
-        </div>
-
-        <div class="col-12" id="ext_links">
-
-        </div>
-    </div>
-    <div id="staging" style="display: none;">
-        <%include file="pdb_staging_insert.mako"/>
     </div>
 
 </%block>
