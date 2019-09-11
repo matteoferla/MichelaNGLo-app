@@ -21,7 +21,7 @@ from pprint import PrettyPrinter
 pprint = PrettyPrinter().pprint
 
 
-view_config(route_name='venus_random', renderer="../templates/venus_main.mako")
+view_config(route_name='venus', renderer="../templates/venus/venus_main.mako")
 def venus_view(request):
     return {'project': 'VENUS',
              'user': request.user,

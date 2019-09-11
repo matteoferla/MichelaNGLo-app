@@ -103,12 +103,12 @@ def choose_pdb(request):
         uniprot = request.params['uniprot']
         taxid = request.params['species']
         log.info(f'{User.get_username(request)} wants uniprot data')
-        protein = ProteinCore(uniprot=uniprot, taxid=taxid)
+
         try:
-            protein.load()
+            protein = ProteinCore(uniprot=uniprot, taxid=taxid).load()
         except:
-            log.warn(f'There was no pickle for uniprot {uniprot} taxid {taxid}')
-            protein.get_uniprot()
+            log.error(f'There was no pickle for uniprot {uniprot} taxid {taxid}. TREMBL code via API?')
+            protein = ProteinGatherer(uniprot=uniprot, taxid=taxid).get_uniprot()
         return render_to_response("../templates/results/features.js.mako", {'protein': protein}, request)
     else:
         request.response.status = 400

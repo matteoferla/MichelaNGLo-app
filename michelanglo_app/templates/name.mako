@@ -51,7 +51,7 @@
     <div class="row">
         <div id="fv_label" class="col-12" style="display: none;">
         <h5>Info</h5>
-        <p>Data loaded for <span id="label_protName">ERROR</span></p>
+        <p>Data loaded for <span id="label_protName"><i class="fas fa-spinner fa-spin"></i></span></p>
         <h5>Length</h5>
     <p>Two pieces of information are presented here to help you choose: the first is the length of the protein and the second is the partners if any in the structure.<br/>
         Clicking on an entry in the PDB track (if structures are present) will load that protein structure.</p>
