@@ -12,7 +12,7 @@
 <%block name="main">
 
     <div class="card-deck">
-                % for page in sorted(public_pages, reverse=True, key=lambda p: ['published','sgc','public'].index(p.privacy) if p.privacy in ['published','sgc','public'] else 10):
+                % for i, page in enumerate(sorted(public_pages, key=lambda p: ['published','sgc','public'].index(p.privacy) if p.privacy in ['published','sgc','public'] else 10)):
                     <div class="card hypercard" onclick="window.location='/data/${page.identifier}'">
                           <img src="/thumb/${page.identifier}" class="card-img-top p-4" alt="thumbnail of ${page.title}">
                           <div class="card-body">
@@ -29,6 +29,18 @@
                                       <small class="text-muted"><span class="text-muted">ID:</span> ${page.identifier}</small>
                             </div>
                         </div>
+                    %if i % 6 == 5:
+                        <div class="w-100 d-none d-xl-block"><!-- wrap every 6 on xl--></div>
+                    %endif
+                    %if i % 4 == 3:
+                        <div class="w-100 d-none d-lg-block d-xl-none pb-3"><!-- wrap every 4 on lg--></div>
+                    %endif
+                    %if i % 3 == 2:
+                        <div class="w-100 d-none d-md-block d-lg-none pb-3"><!-- wrap every 3 on md--></div>
+                    %endif
+                    %if i % 2 == 1:
+                        <div class="w-100 d-none d-sm-block d-md-none pb-3"><!-- wrap every 2 on sm--></div>
+                    %endif
                 % endfor
             </div>
 </%block>
