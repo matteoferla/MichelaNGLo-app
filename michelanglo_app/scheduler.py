@@ -24,7 +24,7 @@ def includeme(config):
     scheduler.add_job(monitor_task, 'interval', days=30)
     scheduler.add_job(daily_task, 'interval', days=1)
     #### START UP TASKS ####################################################
-    scheduler.add_job(monitor_task, 'date', run_date=datetime.now() + timedelta(minutes=1))
+    scheduler.add_job(monitor_task, 'date', run_date=datetime.now() + timedelta(minutes=60))
     #scheduler.add_job(sanitycheck_task, 'date', run_date=datetime.now() + timedelta(minutes=2))
     #### GO! ####################################################
     scheduler.start()

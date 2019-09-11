@@ -20,9 +20,9 @@ log = logging.getLogger(__name__)
 from pprint import PrettyPrinter
 pprint = PrettyPrinter().pprint
 
-
-view_config(route_name='venus', renderer="../templates/venus/venus_main.mako")
+@view_config(route_name='venus', renderer="../templates/venus/venus_main.mako")
 def venus_view(request):
+    print('hello')
     return {'project': 'VENUS',
              'user': request.user,
              'bootstrap': 4,
@@ -57,7 +57,7 @@ def random_view(request):
             continue
 
 ############################### Analyse the mutation
-@view_config(route_name='venus_analyse', renderer="../templates/venus_results.mako")
+@view_config(route_name='venus_analyse', renderer="../templates/venus/venus_results.mako")
 def analyse_view(request):
     log.info(f'Analysis requested by {User.get_username(request)}')
     malformed = is_malformed(request, 'uniprot', 'species', 'mutation')
@@ -70,13 +70,15 @@ def analyse_view(request):
     try:
         protein.load()
     except:
-        log.warn(f'There was no pickle for uniprot {uniprot} taxid {taxid}')
-        protein.get_uniprot()
-    if not protein.check_mutation(mutation):
+        log.error(f'There was no pickle for uniprot {uniprot} taxid {taxid}. TREMBL code via API?')
+        protein = ProteinGatherer(uniprot=uniprot, taxid=taxid).get_uniprot()
+    protein.mutation = mutation
+    if not protein.check_mutation():
         log.info('protein mutation discrepancy error')
-        return {}
+        return render_to_response("json", {'error': 'mutation', 'msg': protein.mutation_discrepancy()}, request)
     else:
-        log.info('HEYA!')
+        protein.predict_effect()
+        return {'protein': protein, 'home': '/'}
 
 
 
