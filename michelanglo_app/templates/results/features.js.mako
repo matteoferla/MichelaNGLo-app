@@ -1,3 +1,9 @@
+####### THIS IS A JS FILE ##########################
+####### THE EXTENSION IS MAKO AS THE RENDERER IS MAKO
+####### THIS IS NOT GREAT CODING.
+
+
+
 ### see get_uniprot item of choose_pdb route
 <%!
     import json

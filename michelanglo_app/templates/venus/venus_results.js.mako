@@ -8,9 +8,8 @@ $('#main_card').hide(1000);
 myData = {currentIndex: -1, proteins: [], id: "viewport", backgroundColor: "white", currentChain: 'A'};
 
 
-<%include file="../results/features.js"/>
-
-################### Own SNV #######################
+get_uniprot().then(msg => {
+    ################### Own SNV #######################
 %if protein.mutation is not None:
 	ft.addFeature({
         data: [{'x':${protein.mutation.residue_index},'y': ${protein.mutation.residue_index}, 'id': 'our_${protein.mutation.residue_index}', 'description': 'p.${str(protein.mutation)}'}],
@@ -71,6 +70,10 @@ $('.pdb').click(function () {
 });
 
 
+});  //then end.
+
+
+
 ###  structure ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ###
 ### python proteins.pdbs was a list of {'description': elem.attrib['id'], 'id': elem.attrib['id']+'_'+chainid, 'x': loca[0], 'y': loca[1]}
 ### JS proteins is a list of {name: 'unique_name', type: 'rcsb' (default) | 'file' | 'data', value: xxx, 'ext': 'pdb' , loadFx: xxx}
@@ -122,7 +125,7 @@ var collectedData = [];
 
 */
 
-$('.prolink').each((i,e) => $(e).data('selection',$(e).data('selection').replace(/:\w+/,':'+myData.currentChain)));
+//$('.prolink').each((i,e) => $(e).data('selection',$(e).data('selection').replace(/:\w+/,':'+myData.currentChain)));
 $('#results [data-toggle="protein"]').protein();
 $('[data-toggle="tooltip"]').tooltip();
 

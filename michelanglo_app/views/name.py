@@ -109,7 +109,7 @@ def choose_pdb(request):
         except:
             log.error(f'There was no pickle for uniprot {uniprot} taxid {taxid}. TREMBL code via API?')
             protein = ProteinGatherer(uniprot=uniprot, taxid=taxid).get_uniprot()
-        return render_to_response("../templates/results/features.js", {'protein': protein}, request)
+        return render_to_response("../templates/results/features.js.mako", {'protein': protein}, request)
     else:
         request.response.status = 400
         return {'status': 'unknown cmd'}

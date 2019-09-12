@@ -170,9 +170,8 @@ window.load_pdb = pdb => {
     }); */
     //////////////////////////////////
     interactive_builder();
-    $('html, body').animate({
-            scrollTop: $('#staging').offset().top
-        }, 2000);
+    if ($('#staging').length) $('html, body').animate({scrollTop: $('#staging').offset().top
+                                                }, 2000);
 };
 
 $('#pdb_fetch').click(event => {
