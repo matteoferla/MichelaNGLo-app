@@ -22,7 +22,6 @@ pprint = PrettyPrinter().pprint
 
 @view_config(route_name='venus', renderer="../templates/venus/venus_main.mako")
 def venus_view(request):
-    print('hello')
     return {'project': 'VENUS',
              'user': request.user,
              'bootstrap': 4,

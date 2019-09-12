@@ -125,15 +125,15 @@
                                 <ul class="fa-ul">
                                 % for m in neighbours:
                                     <li>
-                                        %if m['impact'] == 'HIGH':
+                                        %if m.impact == 'HIGH':
                                             <span class="fa-li" data-toggle="tooltip" title="impact: high"><i class="far fa-exclamation-triangle"></i></span>
-                                        %elif m['impact'] == 'MODERATE':
+                                        %elif m.impact == 'MODERATE':
                                             <span class="fa-li" data-toggle="tooltip" title="impact: moderate"><i class="far fa-info-circle"></i></span>
                                         %else:
-                                            <span class="fa-li" data-toggle="tooltip" title="impact: ${m['impact'].lower()}"><i class="far fa-comment"></i></span>
+                                            <span class="fa-li" data-toggle="tooltip" title="impact: ${m.impact.lower()}"><i class="far fa-comment"></i></span>
                                         %endif
 
-                                        <span ${prolink|n} data-focus="residue" data-selection="${m['x']}:CURRENTCHAIN">${m['description']}</span>
+                                        <span ${prolink|n} data-focus="residue" data-selection="${m.x}:CURRENTCHAIN">${m.description}</span>
                                     </li>
                                 % endfor
                                 </ul>

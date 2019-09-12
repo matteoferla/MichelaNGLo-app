@@ -36,6 +36,7 @@ $('#species').on('keyup', event => {
 let species = $('#species');
 if (species.val().toLowerCase() === 'human') {species.val('Human'); window.taxidValue=9606; species.addClass('is-valid'); $('#taxid').show().text('Taxid: 9606');}
 else { species.trigger('input');}
+
 // gene.
 window.uniprotValue = 'ERROR';
 $('#gene').on('keyup', event => {
@@ -86,6 +87,19 @@ $('#gene').on('keyup', event => {
             });
 
 });
+
+window.reset_gene = () => {
+    $('#gene').removeClass('is-valid').removeClass('is-invalid');
+    $('#error_gene').hide();
+    $('#matches').html(' ');
+    $('#fv').html(' ');
+    $('#fv_label').hide();
+    $('#matches_label').hide();
+    $('#ext_links').html(' ');
+    $('#pdb_fetch').hide();
+};
+
+if ($('#gene').val()) $('#gene').trigger('keyup');
 
 window.get_pdbs = pdbs => {
     //this gets the PBDe data.
@@ -176,14 +190,3 @@ $('#pdb_fetch').click(event => {
           matches.html('No crystal structures to show.');
       }
 });
-
-window.reset_gene = () => {
-    $('#gene').removeClass('is-valid').removeClass('is-invalid');
-    $('#error_gene').hide();
-    $('#matches').html(' ');
-    $('#fv').html(' ');
-    $('#fv_label').hide();
-    $('#matches_label').hide();
-    $('#ext_links').html(' ');
-    $('#pdb_fetch').hide();
-};
