@@ -42,7 +42,7 @@ def choose_pdb(request):
         if species == 9606:
             genedex = human
         else:
-            genedex = json.load(open(os.path.join('..', 'Michelanglo-data', 'gene2uniprot', f'taxid{species}-names2uniprot.json')))
+            genedex = json.load(open(os.path.join(ProteinCore.settings.dictionary_folder, f'taxid{species}-names2uniprot.json')))
         if gene in genedex:
             u = genedex[gene]
             if u in uniprot2pdb:
