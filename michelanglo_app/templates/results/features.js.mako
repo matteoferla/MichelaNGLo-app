@@ -258,7 +258,7 @@ if (pdbOptions.length) {
                                             <td>${'${partners}'}</td>
                                             <td id="lig_${'${v.code}'}"><i class="fas fa-spinner fa-spin"></i></td>
                                           </tr>`);
-                        $.getJSON({url: 'http://www.ebi.ac.uk/pdbe/api/pdb/entry/molecules/'+v.code, dataType: 'jsonp'})
+                        $.getJSON({url: 'https://www.ebi.ac.uk/pdbe/api/pdb/entry/molecules/'+v.code, dataType: 'jsonp'})
                             .then(response => $('#lig_'+v.code).html(  response[v.code.toLowerCase()].filter(e=>e.molecule_type !== 'polypeptide(L)')
                                                                                                      .filter(e=> ! ['HOH', 'NA', 'GOL', 'CL', 'MG', 'K', 'BME', 'EDO', 'DMS', 'PGE'].includes(e.chem_comp_ids[0]))
                                                                                                      .map(e => e.molecule_name[0].toLowerCase()+' ('+e.chem_comp_ids[0]+' in chain '+e.in_chains.join('&')+')')
