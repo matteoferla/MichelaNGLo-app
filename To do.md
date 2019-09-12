@@ -1,6 +1,6 @@
 ## Reported bugs
 
 * Download a totally offline version of page **BDM**
-* Kill NMR states **MPF**
-* Messages of progress are crap. The problem is that the log is committed (stringified actually) when the respose is give. Switching to a unique log is a better option. **MPF**
-* Mobile: what to do? **MPF**
+* What happened to splice isoforms data? --- I must have introduced a bug in the Uniprot parser...
+* What happened to PTM from Phosphosite plus. --- not run. duh.
+* deal with offset.
