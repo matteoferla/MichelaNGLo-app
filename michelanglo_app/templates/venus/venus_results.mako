@@ -49,7 +49,7 @@
                         </h6></div>
 
                         ###################### arrow ###################################
-                        ## todo move to stylesheet.
+
 
                       <div class="card-body">
                         <div class="arrow-right"></div><div class="arrow-right2"></div>
@@ -57,6 +57,15 @@
                           ###################### end of arrow ###################################
 
                         <div id="fv"></div>
+
+                          <div>
+                              <button class="btn btn-outline-secondary bindersCollapse collapse show" data-toggle="collapse" data-target=".bindersCollapse"><i class="far fa-eye"></i> Show PDB structure details</button>
+                              <button class="btn btn-outline-secondary bindersCollapse collapse" data-toggle="collapse" data-target=".bindersCollapse"><i class="far fa-eye-slash"></i> Hide PDB structure details</button>
+                          </div>
+                          <div id="matches_collapse" class="col-12 collapse bindersCollapse">
+                            <p>Proteins can be crystallised with ligands or binding partners and it is often beneficial to choose a specific one.</p>
+                            <div id="partner_table"></div>
+                        </div>
                       </div>
                     </div>
                 </div>
