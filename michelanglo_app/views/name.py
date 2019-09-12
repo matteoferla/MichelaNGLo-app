@@ -96,6 +96,7 @@ def choose_pdb(request):
             return PDBMeta(entry).describe()
         except KeyError:
             return {'status': "removed protein"}
+    ####### get_uniprot: uniprot > feature map as a js to excecute
     elif request.params['item'] == 'get_uniprot':
         malformed = is_malformed(request, 'uniprot', 'species')
         if malformed:
@@ -110,6 +111,16 @@ def choose_pdb(request):
             log.error(f'There was no pickle for uniprot {uniprot} taxid {taxid}. TREMBL code via API?')
             protein = ProteinGatherer(uniprot=uniprot, taxid=taxid).get_uniprot()
         return render_to_response("../templates/results/features.js.mako", {'protein': protein}, request)
+    ######### get_name: uniprot > json of name
+    elif request.params['item'] == 'get_name':   ### a smaller version...
+        malformed = is_malformed(request, 'uniprot', 'species')
+        if malformed:
+            return {'status': malformed}
+        uniprot = request.params['uniprot']
+        taxid = request.params['species']
+        log.info(f'{User.get_username(request)} wants uniprot data')
+        protein = ProteinCore(uniprot=uniprot, taxid=taxid).load()
+        return {'uniprot': uniprot, 'gene_name': protein.gene_name, 'recommended_name': protein.recommended_name, 'length': len(protein)}
     else:
         request.response.status = 400
         return {'status': 'unknown cmd'}

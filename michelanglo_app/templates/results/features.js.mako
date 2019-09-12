@@ -248,13 +248,18 @@ if (pdbOptions.length) {
                                 </tr></thead><tbody></tbody></table>`);
     const table = $('#partner_table tbody');
     const protLen = ${len(protein)};
+    let partnerNames = [];
     pdbOptions.forEach(v => {
                         if (v.chain_definitions === null) return 0;
                         //protein in question
                         let myChain = v.chain_definitions.filter(d => d.uniprot === uniprotValue).map(d => 'Chain '+d.chain).join(' + ');
-                        let partners = v.chain_definitions.filter(d => d.uniprot !== uniprotValue).map(d => 'Chain '+d.chain+': '+d.uniprot).join(' + ');
+                        let partners = v.chain_definitions.filter(d => d.uniprot !== uniprotValue)
+                                                           .map(d => 'Chain '+d.chain+': <span name="'+d.uniprot+'"></span>')
+                                                           .join(' + ');
                         let res = (v.resolution === -1) ? 'NMR' : v.resolution + '&Aring;';
                         let off = v.offset;
+                        partnerNames = partnerNames.concat(v.chain_definitions.filter(d => d.uniprot !== uniprotValue)
+                                                                  .map(d => d.uniprot));
                         table.append(`<tr onclick="load_pdb('${'${v.code}'}')">
                                             <td>${'${v.code}'}</td>
                                             <td>${'${res}'}</td>
@@ -264,13 +269,14 @@ if (pdbOptions.length) {
                                             <td>${'${partners}'}</td>
                                             <td id="lig_${'${v.code}'}"><i class="fas fa-spinner fa-spin"></i></td>
                                           </tr>`);
-                        $.getJSON({url: 'https://www.ebi.ac.uk/pdbe/api/pdb/entry/molecules/'+v.code, dataType: 'jsonp'})
+                        $.getJSON({url: 'https://www.ebi.ac.uk/pdbe/api/pdb/entry/molecules/'+v.code, dataType: 'json', crossOrigin: true})
                             .then(response => $('#lig_'+v.code).html(  response[v.code.toLowerCase()].filter(e=>e.molecule_type !== 'polypeptide(L)')
                                                                                                      .filter(e=> ! ['HOH', 'NA', 'GOL', 'CL', 'MG', 'K', 'BME', 'EDO', 'DMS', 'PGE'].includes(e.chem_comp_ids[0]))
                                                                                                      .map(e => e.molecule_name[0].toLowerCase()+' ('+e.chem_comp_ids[0]+' in chain '+e.in_chains.join('&')+')')
                                                                                                      .join(' + ')
                                                                     )
                                     );
+
                         let svg=d3.select('#span_'+v.code);
                         // midline
                         svg.append("svg:line")
@@ -290,6 +296,25 @@ if (pdbOptions.length) {
                                 .attr('stroke','black')
                                 .attr('fill','gainsboro');
     });
+    // partner fix...
+    console.log(partnerNames);
+    partnerNames.filter((v, i, a) => a.indexOf(v) === i)
+                .forEach( v => $.getJSON({url: '/choose_pdb',
+                                          data: {item: 'get_name',
+                                                 species: taxidValue,
+                                                 uniprot: v
+                                                }
+                                          })
+                                .then(response => {
+                                    let target = $('span[name="'+response.uniprot+'"]');
+                                    target.css('text-decoration-line','underline');
+                                    target.css('text-decoration-style','dotted');
+                                    target.html(response.gene_name);
+                                    //{'gene_name': protein.gene_name, 'recommended_name': protein.recommended_name, 'length': len(protein)}
+                                    target.tooltip({title: `${'${response.gene_name} (${response.recommended_name})'}`});
+                                    })
+							);
+
     // add glove. Do this properly in a bit.
     $('#partner_table tbody tr').hover(e => $(e.target).css('cursor','pointer'));
 
