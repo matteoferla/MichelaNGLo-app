@@ -8,7 +8,7 @@
 </div>
 % endif
 
-<div class="row py-4">
+<div class="row py-4" id="main_card">
         <div class="col-lg-10 offset-lg-1">
             <div class="card my-5 shadow">
                 <div class="card-header">

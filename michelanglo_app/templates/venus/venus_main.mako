@@ -41,7 +41,7 @@
 
         <div class="col-12 col-lg-4">
             <div class="input-group mb-3" data-toggle="tooltip"
-                                     title="A protein mutation within the chosen gene (e.g. p.A20W)">
+                                     title="A protein mutation within the canonical transcript of the chosen gene (e.g. p.A20W)">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">Mutation</span>
                                 </div>

@@ -18,7 +18,7 @@
                 </div>
     <div class="row">
                 <!-- Main text -->
-                <div class="col-6 mb-4 pl-4">
+                <div class="col-6 mb-4 py-4">
                     <div class="card shadow-sm bg-light">
                         <div class="card-body  text-center">
                             <div class="btn-group" role="group" aria-label="Basic example">
@@ -36,6 +36,31 @@
                     </div>
                 </div>
     </div>
+
+
+    <div class="row">
+                <!-- Feature -->
+                <div class="col-6 mb-4 pl-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header"><h5 class="card-title">
+                            <i class="far fa-dna"></i> Features
+                        </h5><h6 class="card-subtitle mb-2 text-muted">
+                            (Click on a feature to visualise it on the structure)
+                        </h6></div>
+
+                        ###################### arrow ###################################
+                        ## todo move to stylesheet.
+
+                      <div class="card-body">
+                        <div class="arrow-right"></div><div class="arrow-right2"></div>
+
+                          ###################### end of arrow ###################################
+
+                        <div id="fv"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
 
     <div class="row">
                 <div class="col-6 mb-4 pl-4">
@@ -177,30 +202,6 @@
                       </div>
                     </div>
     </div>
-
-    <div class="row">
-                <!-- Feature -->
-                <div class="col-6 mb-4 pl-4">
-                    <div class="card shadow-sm">
-                        <div class="card-header"><h5 class="card-title">
-                            <i class="far fa-dna"></i> Features
-                        </h5><h6 class="card-subtitle mb-2 text-muted">
-                            (Click on a feature to visualise it on the structure)
-                        </h6></div>
-
-                        ###################### arrow ###################################
-                        ## todo move to stylesheet.
-
-                      <div class="card-body">
-                        <div class="arrow-right"></div><div class="arrow-right2"></div>
-
-                          ###################### end of arrow ###################################
-
-                        <div id="fv"></div>
-                      </div>
-                    </div>
-                </div>
-            </div>
 
 <%include file="venus_results.js.mako" args="protein=protein, home=''"/>
 ######<%include file="report/create_modal.mako"/>
