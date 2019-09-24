@@ -1,3 +1,5 @@
+//<%text>
+
 $('#species').on('keyup', event => {
             let species = $('#species');
             window.taxidValue ='ERROR';
@@ -17,7 +19,7 @@ $('#species').on('keyup', event => {
                                                                         species.addClass('is-valid');}
                                        else if (msg.options === 'many') {$('#error_species').show().text('Type more')}
                                        else {
-                                           const buttonise = el => `<a href='#' class="list-group-item list-group-item-action" name="species">${'${el}'}</a>`;
+                                           const buttonise = el => `<a href='#' class="list-group-item list-group-item-action" name="species">${el}</a>`;
                                            let content;
                                            if (msg.options.length > 10) {content = '<div class="list-group">' + msg.options.splice(0,10).map(buttonise).join('')+'</div>'.replace(/\s+/mg,' ');}
                                            else {content = '<div class="list-group">' + msg.options.map(buttonise).join('')+'</div>'.replace(/\s+/mg,' ');}
@@ -62,7 +64,7 @@ $('#gene').on('keyup', event => {
              success: msg => {
                               if (msg.invalid) {error_gene.show(); gene.addClass('is-invalid')}
                               else if (msg.options) {
-                                   const buttonise = el => `<a href='#' class="list-group-item list-group-item-action" name="genes">${'${el}'}</a>`;
+                                   const buttonise = el => `<a href='#' class="list-group-item list-group-item-action" name="genes">${el}</a>`;
                                    let content;
                                    if (msg.options.length > 10) {content = '<div class="list-group">' + msg.options.splice(0,10).map(buttonise).join('')+'</div>'.replace(/\s+/mg,' ');}
                                    else {content = '<div class="list-group">' + msg.options.map(buttonise).join('')+'</div>'.replace(/\s+/mg,' ');}
@@ -153,22 +155,7 @@ window.load_pdb = pdb => {
     $('#viewcode').text('<div role="NGL" data-load="'+pdb+'" ></div>');
     let x = (pdb.length === 4) ? NGL.specialOps.multiLoader('viewport',[{'type': 'rcsb','value': pdb}]) : NGL.specialOps.multiLoader('viewport',[{'type': 'file','value': pdb}]);
     NGL.specialOps.showTitle('viewport', 'Loaded: '+ pdb);
-    ///////////////////////////////////////////
-    /*
-    $.ajax({
-        url: "/choose_pdb",
-        data: {
-            'item': 'get_pdb',
-            'entry': pdb
-        },
-        method: 'POST',
-        success: msg => {
-            console.log(msg);
-            console.log(myData);
-            console.log(x);
-        }
-    }); */
-    //////////////////////////////////
+    renumber_alerter(pdb);
     interactive_builder();
     if ($('#staging').length) $('html, body').animate({scrollTop: $('#staging').offset().top}, 2000);
 };
@@ -188,3 +175,9 @@ $('#pdb_fetch').click(event => {
           matches.html('No crystal structures to show.');
       }
 });
+
+
+
+// renumber button moved to pdb staging insert as it's shared.
+
+//</%text>

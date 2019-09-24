@@ -6,10 +6,10 @@ __doc__ = \
     """
 __author__ = "Matteo Ferla. [Github](https://github.com/matteoferla)"
 __email__ = "matteo.ferla@gmail.com"
-__date__ = "${DATE}"
+__date__ = "2019 A.D."
 __license__ = "Cite me!"
 __copyright__ = 'GNU'
-__version__ = "0"
+__version__ = "2"
 
 import argparse, os, re, threading
 from copy import deepcopy
@@ -438,20 +438,45 @@ class PyMolTranspiler:
     @PyMolTranspilerDeco
     def load_pdb(cls, file):
         """
-        Loads a pdb into a transpiler obj.
-        This causes a segmentation fault at the fix structure step.
+        Loads a pdb file into a transpiler obj. and fixes it.
         :param file: str file name
         :return: self
         """
         self = cls(run_analysis=False) #this is so badly done.
+        pymol.cmd.load(file)
         with open(file) as w:
             self.raw_pdb = w.read()
-        pymol.cmd.load(file)
         self.fix_structure()
         myspace = {'data': []}
         # myspace['data'] is the same as self.atoms, which is "kind of the same" as pymol.cmd.get_model('..').atoms
         pymol.cmd.iterate('all', self._iterate_cmd, space=myspace)
         self.parse_ss(myspace['data'])
+        return self
+
+    @classmethod
+    @PyMolTranspilerDeco
+    def renumber(cls, pdb, definitions):
+        """
+        Fetches a pdb file into a transpiler obj.
+        :param file: str file name
+        :param definitions: Structure.chain_definitions
+        [{'chain': 'A', 'uniprot': 'Q9BZ29', 'x': 1605, 'y': 2069, 'offset': 1604, 'range': '1605-2069', 'name': None, 'description': None},
+        :return: self
+        """
+        self = cls(run_analysis=False) #this is so badly done.
+        pymol.cmd.fetch(pdb, type='pdb')  ## using PDB for simplicity. Using CIF may be nicer...
+        file = os.path.join('michelanglo_app', 'temp', pdb.lower()+'.pdb')
+        for chain in definitions:
+            print(chain)
+            if chain["offset"] != 0:
+                pymol.cmd.alter(f'chain {chain["chain"]}', f'resi=str(int(resi)+{chain["offset"]})')
+        self.fix_structure()
+        self.parse_ss()
+        pymol.cmd.sort()
+        pymol.cmd.save(file)
+        with open(file) as w:
+            self.raw_pdb = w.read()
+        os.remove(file)
         return self
 
     @staticmethod
@@ -785,10 +810,10 @@ class PyMolTranspiler:
                             self.serial_mapping[serial] = self.swatch[color_id].hex
         return self
 
-    def parse_ss(self, data, **settings):
+    def parse_ss(self, data=None, **settings):
         def _deal_with():
             if ss_last == 'H':  # previous was the other type
-                self.ss.append('{typos}    {ss_count: >3}HA {resn_start} {chain} {resi_start: >4}  {resn_end} {chain} {resi_end: >4} {h_class: >2}                                  {length: >2}'.format(
+                self.ss.append('{typos}  {ss_count: >3} {ss_count: >3} {resn_start} {chain} {resi_start: >4}  {resn_end} {chain} {resi_end: >4} {h_class: >2}                                  {length: >2}'.format(
                     typos='HELIX',
                     ss_count=ss_count[ss_last],
                     resn_start=resn_start,
@@ -814,6 +839,11 @@ class PyMolTranspiler:
                 ))
                 ss_count[ss_last] += 1
 
+        self.ss = []
+        if data is None:
+            myspace = {'data': []}
+            pymol.cmd.iterate('all', self._iterate_cmd, space=myspace)
+            data = myspace['data']
         ss_last = 'L'
         resi_start = '0'
         resn_start = 'XXX'

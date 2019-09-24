@@ -3,7 +3,7 @@ This page loads the data from the protein-data module as is used by both name.py
 """
 
 import os, json
-from protein import ProteinCore, global_settings
+from protein import ProteinCore, global_settings, Structure
 from protein.generate import ProteinGatherer
 
 global_settings.init(os.environ['PROTEIN_DATA'])

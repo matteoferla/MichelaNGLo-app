@@ -18,6 +18,7 @@ def includeme(config):
     config.add_route('convert_pse', '/convert_pse')
     config.add_route('convert_pdb', '/convert_pdb')
     config.add_route('convert_mesh', '/convert_mesh')
+    config.add_route('renumber', '/renumber')
     config.add_route('choose_pdb', '/choose_pdb')
     config.add_route('task_check','/task_check')
     config.add_route('save_pdb', '/save_pdb')

@@ -59,7 +59,14 @@ def kill_task(days_delete_unedited, days_delete_untouched):
         untouched_time = datetime.now() - timedelta(days=int(days_delete_untouched))
         for page in sesh.query(Page).filter(and_(Page.exists == True, Page.timestamp < untouched_time)):
             log.info(f'Deleting abbandonned page {page.identifier} ({page.timestamp})')
-            page.delete()
+            try:
+                page.delete()
+            except FileNotFoundError:
+                ## file has been deleted manually!?
+                ## this is a pretty major incident.
+                page.exists = False
+                log.warn(f'{page.identifier} does not exist.')
+                notify_admin(f'{page.identifier} does not exist.')
             n+=1
         notify_admin(f'Deleted {n} pages in cleanup.')
 

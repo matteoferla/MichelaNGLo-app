@@ -86,16 +86,19 @@ def choose_pdb(request):
         return {'descriptions': ' <br/> '.join(details)}
     elif request.params['item'] == 'get_pdb':
         ### gets the metadata for a given PDB code
-        malformed = is_malformed(request, 'entry')
+        malformed = is_malformed(request, 'pdb')
         if malformed:
             return {'status': malformed}
-        entry = request.params['entry']
+        pdb = request.params['pdb']
         log.info(f'{User.get_username(request)} wants pdb info')
-        #PDBMeta is in common methods
-        try:
-            return PDBMeta(entry).describe()
-        except KeyError:
-            return {'status': "removed protein"}
+        if 1 == 0: #via PDBe. PDBMeta is in common methods
+            try:
+                return PDBMeta(entry).describe()
+            except KeyError:
+                return {'status': "removed protein"}
+        else:
+            definitions = Structure(id=pdb, description='', x=0, y=0, code=pdb).lookup_sifts().chain_definitions
+            return {'pdb': pdb, 'chains': definitions}
     ####### get_uniprot: uniprot > feature map as a js to excecute
     elif request.params['item'] == 'get_uniprot':
         malformed = is_malformed(request, 'uniprot', 'species')
@@ -108,8 +111,12 @@ def choose_pdb(request):
         try:
             protein = ProteinCore(uniprot=uniprot, taxid=taxid).load()
         except:
-            log.error(f'There was no pickle for uniprot {uniprot} taxid {taxid}. TREMBL code via API?')
-            protein = ProteinGatherer(uniprot=uniprot, taxid=taxid).get_uniprot()
+            log.error(f'There was no pickle for uniprot {uniprot} taxid {taxid}. TREMBL code via API??')
+            try:
+                protein = ProteinGatherer(uniprot=uniprot, taxid=taxid).get_uniprot()
+            except:
+                request.response.status = 410 #malformed
+                return {'status': 'Unknown Uniprot code.'}
         return render_to_response("../templates/results/features.js.mako", {'protein': protein}, request)
     ######### get_name: uniprot > json of name
     elif request.params['item'] == 'get_name':   ### a smaller version...

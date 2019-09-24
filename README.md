@@ -37,7 +37,7 @@ If needed, this piece of code can include the PDB data itself, thus removing the
 
 Whereas, the most commonly used protein viewing software is PyMol, most researchers render a view and label/draw upon it in Paint/Powerpoint/Photoshop.
 
-Consequently, the code allows users to generate code than when a given static image is clicked it results in a NGL viewer div. Example: [demo](http://www.matteoferla.com/LZTR1.html).
+Consequently, the code allows users to generate code than when a given static image is clicked it results in a NGL viewer div. Example: [demo](https://michelanglo.sgc.ox.ac.uk/LZTR1.html).
 
 The mouse image can be found [here](images/clickmap.jpg).
 

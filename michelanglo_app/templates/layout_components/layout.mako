@@ -313,14 +313,14 @@ pre {
 % if not remote:
     <script type="text/javascript" src="/static/michelanglo.js"></script>
     <script type="text/javascript" src="/static/michelanglo_menu.js"></script>
+    <script src="/static/ThirdParty/bootstrap-tourist/bootstrap-tourist.js"></script>
 % else:
     <script type="text/javascript" src="https://michelanglo.sgc.ox.ac.uk/michelanglo.js"></script>
     <script type="text/javascript" src="https://michelanglo.sgc.ox.ac.uk/michelanglo_menu.js"></script>
+    <!-- no turist -->
 % endif
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/3.0.0-beta.3/js/bootstrap-colorpicker.min.js"></script>
-
-<script src="/static/ThirdParty/bootstrap-tourist/bootstrap-tourist.js"></script>
 <%block name="script"/>
 % if not no_user:
     <%include file="../login/user_modal.mako"/>

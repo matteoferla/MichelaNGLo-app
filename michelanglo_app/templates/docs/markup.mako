@@ -158,7 +158,7 @@
                 <pre><code>
 &lt;script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"&gt;&lt;/script&gt;
 &lt;script src="https://unpkg.com/ngl@2.0.0-dev.34/dist/ngl.js" type="text/javascript"&gt;&lt;/script&gt;
-&lt;script src="https://www.matteoferla.com/ngl.extended.js" type="text/javascript"&gt;&lt;/script&gt;
+&lt;script src="https://michelanglo.sgc.ox.ac.uk/michelanglo.js" type="text/javascript"&gt;&lt;/script&gt;
                 </code></pre>
     <p>The CDN for <code>michelanglo.js</code> is <code>michelanglo.sgc.ox.ac.uk/michelanglo.js</code>, but if you are checking this out, you can sneakily use the last address, but please do not use it in production.</p>
             <p>&lowast;One issue is holding onto the stage object in JS. Therefore the stage is added as follows: <code>NGL.stageIds['viewport'] = new Stage( ...</code>. However, a better feature is using the <code>NGL.specialOps.multiLoad</code>, which handles it.</p>

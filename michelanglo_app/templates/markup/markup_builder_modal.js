@@ -130,7 +130,8 @@ window.interactive_builder = () => {
     //////////////// Ready ///////////////////////////
     //$('#markup_calculate').click(
     //load domain.
-    $('#markup_view_toggle label').first().trigger('click');
+    $('#markup_view_toggle label').first().click();
+    $('#viewport').focus(); //move the focus away from the first label so that there is no tooltip!
     $('#markup_selection').parent().parent().show();
     $('#markup_color').parent().parent().show();
     // change on change.

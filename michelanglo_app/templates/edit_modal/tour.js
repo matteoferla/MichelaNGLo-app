@@ -6,6 +6,7 @@
 </%doc>
 */
 
+%if not remote:
 window.tour = new Tour({
     framework: "bootstrap4",
     debug: false,
@@ -218,7 +219,7 @@ window.tour = new Tour({
         placement: "left"
         }
 ]});
-
 $('#tour').click(function () {
     if (tour.ended()) {tour.restart();} else {tour.start()}
 });
+%endif

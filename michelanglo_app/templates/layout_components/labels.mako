@@ -41,7 +41,7 @@ uniform_non_carbon='''<p>It is unlikely that one purposefully wants a non-carbon
 
 image='''<p>Use a static image that when clicked becomes the NGL interactive protein.</p>
 <p>Whereas, the most commonly used protein viewing software is PyMol, most researchers render a view and label/draw upon it in Paint/Powerpoint/Photoshop.</p>
-<p>Consequently, the code allows users to generate code than when a given static image is clicked it results in a NGL viewer div. <a href='http://www.matteoferla.com/LZTR1.html' target='_blank'>See here for an example <i class="far fa-external-link-square"></i></a>.
+<p>Consequently, the code allows users to generate code than when a given static image is clicked it results in a NGL viewer div. <a href='http://michelanglo.sgc.ox.ac.uk/LZTR1.html' target='_blank'>See here for an example <i class="far fa-external-link-square"></i></a>.
 The mouse image informing visitors of how to switch can be found <a href="/images/clickmap.jpg" download="clickmap.jpg">here</a>.'''
 
 sticks='''<p>The equivalent of PyMOL sticks is liquorice in NGL, however, hyperball looks a lot nicer.

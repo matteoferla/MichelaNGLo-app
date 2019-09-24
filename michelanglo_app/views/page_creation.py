@@ -3,6 +3,7 @@ from pyramid.renderers import render_to_response
 import traceback
 from ..models import Page, User
 from ..models.trashcan import get_trashcan
+from protein import Structure
 from ..transplier import PyMolTranspiler
 import uuid
 import shutil
@@ -46,26 +47,30 @@ def save_file(request, extension, field='file'):
 #### Page <> User DB
 
 def stringify_protein_description(settings):
+    ### kicks in at the anonymous/user submission step.
     descr = ''
     if 'descriptors' in settings:
         # {'peptide': [f'{first_resi}-{last_resi}:{chain}', ..], 'hetero': [f'[{resn}]{resi}:{chain}', ..]}
         template = '<span class="prolink" data-toggle="protein" data-target="viewport" data-focus="{focus}" data-selection="{selection}">{label}</span>'
         descr += '\n\n### peptide and nucleic acid chains\n\n'
-        if settings['descriptors']['peptide']:
+        if 'peptide' in settings['descriptors'] and settings['descriptors']['peptide']:
             for p, n in settings['descriptors']['peptide']:
                 if n:
                     descr += '* ' + template.format(focus='domain', selection=p, label=f'{n} ({p})') + '\n'
                 else:
                     descr += '* ' + template.format(focus='domain', selection=p, label=p) + '\n'
-        waterless = [(p, n) for p, n in settings['descriptors']['hetero'] if
-                     p.find('HOH') == -1 and p.find('WAT') == -1]
-        if waterless:  # {('ORO and :A', None), ('SO4 and :A', None), etc.
-            descr += '\n\n### ligands\n\n'
-            for p, n in waterless:
-                if n:
-                    descr += '* ' + template.format(focus='residue', selection=p, label=f'{n} ({p})') + '\n'
-                else:
-                    descr += '* ' + template.format(focus='residue', selection=p, label=p) + '\n'
+        if 'hetero' in settings['descriptors']:
+            waterless = [(p, n) for p, n in settings['descriptors']['hetero'] if
+                         p.find('HOH') == -1 and p.find('WAT') == -1]
+            if waterless:  # {('ORO and :A', None), ('SO4 and :A', None), etc.
+                descr += '\n\n### ligands\n\n'
+                for p, n in waterless:
+                    if n:
+                        descr += '* ' + template.format(focus='residue', selection=p, label=f'{n} ({p})') + '\n'
+                    else:
+                        descr += '* ' + template.format(focus='residue', selection=p, label=p) + '\n'
+        if 'text' in settings['descriptors'] and settings['descriptors']['text']:
+            descr += settings['descriptors']['text']
     return descr
 
 
@@ -235,25 +240,56 @@ def convert_pdb(request):
                 'page': pagename, 'editable': True,
                 'backgroundcolor': 'white', 'validation': None, 'js': None, 'pdb': [], 'loadfun': ''}
     if request.params['mode'] == 'code':
-        if len(request.params['pdb']) == 4:
-            settings['proteinJSON'] = '[{{"type": "rcsb", "value": "{0}"}}]'.format(request.params['pdb'])  # PDB code.
-            settings['descriptors'] = PDBMeta(request.params['pdb']).describe()
+        pdb = request.params['pdb']
+        if len(pdb) == 4:
+            settings['proteinJSON'] = '[{{"type": "rcsb", "value": "{0}"}}]'.format(pdb)  # PDB code.
+            settings['descriptors'] = PDBMeta(pdb).describe()
+            settings['title'] = f'User created page (PDB: {pdb})'
         else:
-            settings['proteinJSON'] = '[{{"type": "file", "value": "{0}"}}]'.format(request.params['pdb'])  # url
-    else:
+            settings['proteinJSON'] = '[{{"type": "file", "value": "{0}"}}]'.format(pdb)  # url
+            settings['title'] = 'User submitted structure (from external PDB)'
+            settings['descriptors'] = {'text': f'PDB loaded from {pdb}'}
+    elif request.params['mode'] == 'renumbered':
+        ### same as file but with mod.
+        settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true}]'
+        pdb_data = request.params['pdb'].replace("'",'').replace('"','') #XSS treat.
+        settings['pdb'] = [('pdb', pdb_data)]
+        settings['js'] = 'external'
+        code = re.match('REMARK 100 THIS ENTRY IS RENUMBERED FROM (\w+)\.', pdb_data).group(1)
+        settings['title'] = f'User submitted structure (from renumbered PDB {code})'
+        ### this is mad wasteful. TO DO Fix.
+        definitions = Structure(id=code, description='', x=0, y=0, code=code).lookup_sifts().chain_definitions
+        settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true}]'
+        settings['descriptors'] = {'peptide': [(':'+d['chain'], f"{d['uniprot']} [offset by {d['offset']}]") for d in definitions]}
+        settings['title'] = f'User created page (PDB: {code} renumbered to match protein)'
+    else: #file
         settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true}]'
         filename = save_file(request, 'pdb', field='pdb')
-        raw_pdb = open(filename).read()
+        trans = PyMolTranspiler.load_pdb(file=filename)
         os.remove(filename)
-        # trans = PyMolTranspiler.load_pdb(file=filename[:5])
-        # settings['pdb'] = [('pdb', '\n'.join(trans.ss)+'\n'+trans.raw_pdb)]
-        ## these lines are blanked out because there is a problem with the conversion to fix a few things.
-        settings['pdb'] = [('pdb', raw_pdb)]
+        if 'HELIX' in trans.raw_pdb or 'SHEET' in trans.raw_pdb:
+            settings['pdb'] = [('pdb', trans.raw_pdb)]
+        else:
+            settings['pdb'] = [('pdb', '\n'.join(trans.ss)+'\n'+trans.raw_pdb)]
         settings['js'] = 'external'
-    settings['title'] = 'User submitted structure (from PDB)'
+        settings['title'] = 'User submitted structure (from uploaded PDB)'
     commit_submission(request, settings, pagename)
     return {'page': pagename}
 
+@view_config(route_name='renumber', renderer="json")
+def renumber(request):
+    malformed = is_malformed(request, 'pdb')
+    if malformed:
+        return {'status': malformed}
+    pdb = request.params['pdb']
+    if len(pdb) != 4 or re.search('\W', pdb) is not None:
+        request.response.status = 422
+        return {'status': f'{pdb} is not PDB code'}
+    definitions = Structure(id=pdb, description='', x=0, y=0, code=pdb).lookup_sifts().chain_definitions
+    trans = PyMolTranspiler.renumber(pdb, definitions)
+    return {'pdb': f'REMARK 100 THIS ENTRY IS RENUMBERED FROM {pdb}.\n' +
+                   '\n'.join(trans.ss) +
+                   '\n'+trans.raw_pdb}
 
 @view_config(route_name='task_check', renderer="json")
 def status_check_view(request):

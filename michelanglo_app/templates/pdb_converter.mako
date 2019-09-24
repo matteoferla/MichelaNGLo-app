@@ -85,9 +85,11 @@
             return false;
         }
         start_stage_two();
+        let pdb = $('#pdb').val();
         $('#viewcode').text('<div role="NGL" data-load="'+$('#pdb').val()+'" ></div>');
-        NGL.specialOps.multiLoader('viewport',[{'type': 'rcsb','value': $('#pdb').val()}]);
+        NGL.specialOps.multiLoader('viewport',[{'type': 'rcsb','value': pdb}]);
         NGL.specialOps.showTitle('viewport', 'Loaded: '+ $('#pdb').val() );
+        renumber_alerter(pdb);
         interactive_builder();
     });
 
@@ -110,14 +112,14 @@
         $('#upload_pdb+.custom-file-label').html(filename);
         } // else? nothing added. user chickened out.
         start_stage_two();
+        let pdb = $('#pdb').val();
         $('#viewcode').text('<div role="NGL" data-proteins=\'[{"type": "data", "value": "pdbString", "isVariable": true}]\'></div>');
         NGL.specialOps.multiLoader('viewport',[{'type': 'file','value': $('#upload_pdb')[0].files[0]}]);
-        NGL.specialOps.showTitle('viewport', 'Loaded: '+ $('#pdb').val() );
+        NGL.specialOps.showTitle('viewport', 'Loaded: '+ pdb );
         interactive_builder();
     });
 
     <%include file="pdb_staging_insert.js"/>
-
 
     </script>
 </%block>
