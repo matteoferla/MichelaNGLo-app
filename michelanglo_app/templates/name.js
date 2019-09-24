@@ -148,7 +148,7 @@ window.get_uniprot = () => $.ajax({
 
 window.load_pdb = pdb => {
     $('#staging').show();
-    window.pdb = pdb;
+    window.pdbCode = pdb;
     window.myData = undefined;
     NGL.stageIds = {};
     $('#viewport').html('');

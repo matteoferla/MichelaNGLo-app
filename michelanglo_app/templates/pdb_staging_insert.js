@@ -10,7 +10,7 @@ $('#create').click(function (event) {
     if (window.mode === undefined) {
         // we are in name.mako
         window.mode = 'code';
-        data.append('pdb',window.pdb);
+        data.append('pdb',window.pdbCode);
     } else if (window.mode === 'code') {data.append('pdb',$('#pdb').val());}
     else if (window.mode === 'renumbered') {data.append('pdb', window.pdbString);}
     else {data.append('pdb',$('#upload_pdb')[0].files[0]);}
@@ -72,7 +72,7 @@ $('#renumber').click(event => {
     $.post({
                 url: "/renumber",
                 data: {
-                    'pdb': window.pdb
+                    'pdb': window.pdbCode
                 },
                 success: msg => {
                     $('#renumber_alert').removeClass('show');

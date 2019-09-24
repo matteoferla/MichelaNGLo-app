@@ -85,11 +85,11 @@
             return false;
         }
         start_stage_two();
-        let pdb = $('#pdb').val();
+        window.pdbCode = $('#pdb').val();
         $('#viewcode').text('<div role="NGL" data-load="'+$('#pdb').val()+'" ></div>');
-        NGL.specialOps.multiLoader('viewport',[{'type': 'rcsb','value': pdb}]);
-        NGL.specialOps.showTitle('viewport', 'Loaded: '+ $('#pdb').val() );
-        renumber_alerter(pdb);
+        NGL.specialOps.multiLoader('viewport',[{'type': 'rcsb','value': pdbCode}]);
+        NGL.specialOps.showTitle('viewport', 'Loaded: '+ pdbCode );
+        renumber_alerter(pdbCode);
         interactive_builder();
     });
 
