@@ -163,9 +163,10 @@ class Page(Base):
     @staticmethod
     def sanitise_HTML(code):
         def substitute(code, pattern, message):
-            code = re.sub(f'<[^>]*?{pattern}[\s\S]*?>', message, code, re.IGNORECASE | re.MULTILINE | re.DOTALL)
-            pseudo = re.sub('''(<[^>]*?)['`"][\s\S]*?['`"]''', r'\1', code, re.IGNORECASE | re.MULTILINE | re.DOTALL)
-            if re.search(f'<[^>]*?{pattern}[\s\S]*?>', pseudo):  # go extreme.
+            code = re.sub(f'<[^>\w]*?\W{pattern}[\s\S]*?>', message, code, re.IGNORECASE | re.MULTILINE | re.DOTALL)
+            code = re.sub(f'<{pattern}[\s\S]*?>', message, code, re.IGNORECASE | re.MULTILINE | re.DOTALL)
+            pseudo = re.sub('''(<[^>\w]*?)['`"][\s\S]*?['`"]''', r'\1', code, re.IGNORECASE | re.MULTILINE | re.DOTALL)
+            if re.search(f'<[^>]*?\W{pattern}[\s\S]*?>', pseudo) or re.search(f'<{pattern}[\s\S]*?>', pseudo):  # go extreme.
                 code = re.sub(pattern, message, code, re.IGNORECASE | re.MULTILINE | re.DOTALL)
             return code
 
@@ -173,7 +174,7 @@ class Page(Base):
         for character in ('\t', '#x09;', '&#x0A;', '&#x0D;', '\0'):
             code = code.replace(character, ' ' * 4)
         code = code.replace(character, ' ' * 4)
-        for tag in ('script', 'iframe', 'object', 'link', 'style', 'meta', 'frame', 'embed'):
+        for tag in ('script', 'iframe', 'object', ' link', 'style', 'meta', 'frame', 'embed'):
             code = substitute(code, tag, tag.upper() + ' BLOCKED')
         for attr in ('javascript', 'vbscript', 'livescript', 'xss', 'seekSegmentTime', '&{', 'expression'):
             code = substitute(code, attr, attr.upper() + ' BLOCKED')
