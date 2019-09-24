@@ -106,7 +106,7 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
         name: "Secondary structure",
         className: "domain",
         color: "olive",
-        type: "rectangle",
+        type: "rect",
         filter: "Domain"
     });
     addFeatureTooltip("Secondary structure", "A collection of 'helix', 'turn', 'strand' Uniprot annotations.");
@@ -129,13 +129,13 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
 %if 'splice variant' in protein.features:
     ft.addFeature({
         data: ${str(protein.features['splice variant'])|n},
-        name: "splice variant",
+        name: "Splice variant",
         className: "domain",
         color: "sandybrown",
-        type: "rectangle",
+        type: "rect",
         filter: "Domain"
     });
-    addFeatureTooltip("splice variant","Splice variant from Uniprot");
+    addFeatureTooltip("Splice variant","Regions that differ/absent in splice variants (according to Uniprot)");
 %endif
 
 %if protein.gNOMAD:
