@@ -97,7 +97,7 @@ class Page(Base):
         for fun, keys in ((list, ('editors', 'visitors', 'authors')),
                       (bool, ('image', 'uniform_non_carbon', 'verbose', 'validation', 'save', 'public','confidential', 'encryption')),
                       (str, ('viewport', 'stick', 'backgroundcolor', 'loadfun', 'proteinJSON', 'pdb', 'description', 'title', 'data_other')),
-                      (list, ('revisions'))):
+                      (list, ('revisions',))):
             for key in keys:
                 if key not in settings:
                     settings[key] = fun()
