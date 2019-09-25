@@ -11,6 +11,10 @@
 <h4>Viewport</h4>
 <p>Add where need the following for the viewport:</p>
 
+<%
+    viewport = 'viewport'
+%>
+
 
 % if image:
    <pre>${copy_btn('viewport_code')}<code id="viewport_code">&lt;div id="${viewport}" role="NGL" data-proteins='${proteinJSON}' data-backgroundcolor="${backgroundcolor}">&lt;img src="path/to_your_image.jpg" width="200px">&lt;/div></code></pre>
@@ -53,6 +57,30 @@ Below these add the following to all the custom representation and view of the p
 
 %endif
 
+
+###################### description
+
+<%
+    import markdown, re
+    descr_mdowned = markdown.markdown(description)
+%>
+<h4>Description</h4>
+Lastly, if you want to use the text you created with all the prolinks add the following:
+<pre style="overflow: scroll; height: 5.5rem;">${copy_btn('desc_code')}<code id="desc_code">${descr_mdowned|n}</code></pre>
+<p>Do note that you will need to add style to the <code>class="prolinks"</code>. Within Michelanglo, the style is simply:</p>
+<pre>${copy_btn('green_code')}<code id="green_code">&lt;style>
+    .prolink {
+	color: mediumseagreen;
+    }
+
+    .prolink:hover {
+        color: seagreen;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+&lt;/style>
+</code></pre>
+<p>But you can do what ever you fancy from a very in teal, mustard or coral to a very 90s web neon green, yellow and pink...</p>
 <!--
 <h3 data-toggle="collapse" data-target=".docs_raw" style="cursor: pointer;">
    <span class="collapse show docs_raw">Show</span>

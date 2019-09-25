@@ -9,7 +9,7 @@ from ._common_methods import is_malformed, notify_admin
 
 from . import custom_messages
 
-
+#### note that a few non-setting get json funs are actually hiding in name.py.
 @view_config(route_name='get')
 def get_ajax(request):
     malformed = is_malformed(request, 'item')
