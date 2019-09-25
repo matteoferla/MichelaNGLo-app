@@ -96,12 +96,13 @@ class Page(Base):
             settings['title'] = 'Warning: Your title has been somehow lost'
         for fun, keys in ((list, ('editors', 'visitors', 'authors')),
                       (bool, ('image', 'uniform_non_carbon', 'verbose', 'validation', 'save', 'public','confidential', 'encryption')),
-                      (str, ('viewport', 'stick', 'backgroundcolor', 'loadfun', 'proteinJSON', 'pdb', 'description', 'title', 'data_other'))):
+                      (str, ('viewport', 'stick', 'backgroundcolor', 'loadfun', 'proteinJSON', 'pdb', 'description', 'title', 'data_other')),
+                      (list, ('revisions'))):
             for key in keys:
                 if key not in settings:
                     settings[key] = fun()
         # metadata
-        settings['date'] = str(datetime.datetime.now())  # redundant and disused.
+        settings['date'] = str(datetime.datetime.now())  # redundant
         settings['page'] = self.identifier
         if self.encrypted:
             settings['key'] = self.key # is this wise? It will be encrypted in. So should be. This is so it the mako template requests are good.

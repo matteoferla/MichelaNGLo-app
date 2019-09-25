@@ -271,3 +271,11 @@ $('#freelyeditable').change(function() {
         $('#authorlist').show(1000);
     }
 });
+
+window.revisions = ${str([r['text'].replace('<br/>','\n').replace('<br>','\n').replace('&','&amp;').replace('>','&gt;').replace('<','&lt;').replace('\n','<br/>') for r in revisions])|n}
+window.loadPastVersion = (i) => {
+    if (! confirm('Do you want to revert the description to this version?')) return 0;
+    let r = revisions.push($('#edit_description').html()) -1;
+    $('#edit_description').html(revisions[i]);
+    $('#revision_menu').append(`<a class="dropdown-item" href="#" onclick="loadPastVersion(${'${r}'})">unsaved version.</a>`);
+};

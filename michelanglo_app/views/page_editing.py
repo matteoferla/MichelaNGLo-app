@@ -45,6 +45,10 @@ def edit(request):
             # got it out of trashcan.
             page.settings['authors'].remove('anonymous')
             get_trashcan(request).owned.remove(page.identifier)
+        # make a backup
+        if 'revisions' not in page.settings:
+            page.settings['revisions'] = []
+        page.settings['revisions'].append({'user': user.name, 'time': page.timestamp, 'text': page.settings['description']})
         # only admins and friends can edit html fully
         if user.role in ('admin', 'friend'):
             for key in ('loadfun', 'title', 'description'):

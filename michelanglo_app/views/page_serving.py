@@ -67,6 +67,8 @@ def userdata_view(request):
         ### add new values
         if 'freelyeditable' not in settings:
             settings['freelyeditable'] = False
+        if 'revisions' not in settings:
+            settings['revisions'] = []
         user = request.user
         settings['user'] = user
         if user:
