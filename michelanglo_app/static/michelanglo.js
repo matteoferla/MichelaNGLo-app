@@ -474,16 +474,17 @@ NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
 
     // prep the action
     function move() {
+        let stage = NGL.getStage(id);
         if (view === 'auto') { //special view case.
-            protein.addRepresentation("cartoon", {smoothSheet: true});
-            NGL.getStage(id).autoView(2000);
+            stage.getComponentByType('structure').addRepresentation("cartoon", {smoothSheet: true});
+            stage.autoView(2000);
         }
         else if (view === 'reset') { //special view case.
-            NGL.specialOps._run_loadFx(NGL.getStage(id).getComponentByType('structure'), myData.proteins[myData.currentIndex].loadFx);
+            NGL.specialOps._run_loadFx(stage.getComponentByType('structure'), myData.proteins[myData.currentIndex].loadFx);
         }
         else if ((!! view) && (view !== 'auto') && (typeof view === "string") && (view.match(/^\w+$/) !== null)) { //not auto but different custom fx.
             if (typeof window[view] === 'function') {
-                window[view](NGL.getStage(id).getComponentByType('structure'));
+                window[view](stage.getComponentByType('structure'));
             }
         }
         else if ((!! view) && (! selection)) {  //view, no selection.
@@ -507,7 +508,7 @@ NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
         else if (structure !== undefined) { console.log('Please add view-reset if you are changing structure as its too ambiguous otherwise.');}
         else {throw 'ValueError: odd data-focus tag.'}
         // hetero flag is a hack.
-        if (!! hetero) {NGL.getStage(id).getComponentByType('structure').addRepresentation( "licorice", {colorScheme: "element", multipleBond: "symmetric", sele: "hetero"})}
+        if (!! hetero) {stage.getComponentByType('structure').addRepresentation( "licorice", {colorScheme: "element", multipleBond: "symmetric", sele: "hetero"})}
     }
     // action!
     if (structure !== undefined) {
