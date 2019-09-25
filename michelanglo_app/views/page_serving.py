@@ -124,6 +124,8 @@ def userdata_view(request):
             settings['user'] = User.get_username(request)  # user isn't json serialisable
             # print('pageserve', 'request', type(settings['proteinJSON']))
             settings['proteinJSON'] = settings['proteinJSON']  # json.dumps() #because this is done badly.
+            for r in settings['revisions']:
+                r['time'] = str(r['time'])  #patch. please delete me soon.
             return render_to_response("json", settings, request)
         else:
             settings['meta_title'] = 'Michelaɴɢʟo user-created page: ' + settings['title']

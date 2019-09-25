@@ -198,7 +198,13 @@ def permission(request, page, mode='edit', key_label='encryption_key'):
                 log.warn(f'{User.get_username(request)} requested an encrypted page {page.identifier} with wrong key')
                 return {'status': 'page requires correct key'}
     else:
-        page.load()
+        try:
+            page.load()
+        except FileNotFoundError:
+            page.exists = False
+            request.response.status_int = 404
+            log.error(f'Page not found {page.identifier}')
+            return {'status': 'Page not found!'}
         if mode != 'view' and not user:
             request.response.status_int = 401
             log.warn(f'{User.get_username(request)} not authorised to {mode} page {page.identifier}')

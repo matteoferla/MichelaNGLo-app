@@ -48,7 +48,7 @@ def edit(request):
         # make a backup
         if 'revisions' not in page.settings:
             page.settings['revisions'] = []
-        page.settings['revisions'].append({'user': user.name, 'time': page.timestamp, 'text': page.settings['description']})
+        page.settings['revisions'].append({'user': user.name, 'time': str(page.timestamp), 'text': page.settings['description']})
         # only admins and friends can edit html fully
         if user.role in ('admin', 'friend'):
             for key in ('loadfun', 'title', 'description'):
