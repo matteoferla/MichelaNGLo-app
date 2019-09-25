@@ -65,7 +65,7 @@ def my_view(request):
     elif page == 'gallery':
         reply['public_pages'] = request.dbsession.query(Page)\
                                                     .filter(Page.privacy != 'private')\
-                                                    .filter(Page.exists is True)\
+                                                    .filter(Page.exists == True)\
                                                     .all()
         return reply
     elif page == 'admin':
