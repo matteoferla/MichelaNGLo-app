@@ -41,6 +41,7 @@ def edit(request):
         # add author if user was an upgraded to editor by the original author. There are three lists: authors (can and have edited, editors can edit, visitors visit.
         if user.name not in page.settings['authors']:
             page.settings['authors'].append(user.name)
+            user.owned.add(page.identifier)
         if 'anonymous' in page.settings['authors']:
             # got it out of trashcan.
             page.settings['authors'].remove('anonymous')
