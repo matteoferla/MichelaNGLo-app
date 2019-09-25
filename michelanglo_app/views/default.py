@@ -63,7 +63,10 @@ def my_view(request):
     if page == 'docs':
         return route_docs(request, reply)
     elif page == 'gallery':
-        reply['public_pages'] = request.dbsession.query(Page).filter(Page.privacy != 'private').all()
+        reply['public_pages'] = request.dbsession.query(Page)\
+                                                    .filter(Page.privacy != 'private')\
+                                                    .filter(Page.exists is True)\
+                                                    .all()
         return reply
     elif page == 'admin':
         reply['users'] = request.dbsession.query(User).all()
