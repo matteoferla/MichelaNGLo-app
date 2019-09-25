@@ -13,7 +13,7 @@
 
     <div class="card-deck">
                 % for i, page in enumerate(sorted(public_pages, key=lambda p: ['published','sgc','public'].index(p.privacy) if p.privacy in ['published','sgc','public'] else 10)):
-                    <div class="card hypercard" onclick="window.location='/data/${page.identifier}'">
+                    <div class="card hypercard mb-4" onclick="window.location='/data/${page.identifier}'">
                           <img src="/thumb/${page.identifier}" class="card-img-top p-4" alt="thumbnail of ${page.title}">
                           <div class="card-body">
                             <h5 class="card-title">${page.title}</h5>

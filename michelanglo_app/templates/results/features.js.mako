@@ -236,6 +236,7 @@ $('.swiss').click(function () {
 $('#label_protName').html("${protein.recommended_name} (encoded by <i>${protein.gene_name}</i>)");
 
 window.pdbOptions = ${json.dumps([s.__dict__ for s in protein.pdbs])|n};
+
 if (pdbOptions.length) {
     $('#partner_table').html(`<table class="table table-hover" style="table-layout: fixed;"><thead class="thead-light"><tr>
                                         <th data-toggle="tooltip" title="PDB code of the structure. See RCSB PDB database for more.">Code</th>
@@ -249,6 +250,7 @@ if (pdbOptions.length) {
     const table = $('#partner_table tbody');
     const protLen = ${len(protein)};
     let partnerNames = [];
+    //<%text>
     pdbOptions.forEach(v => {
                         if (v.chain_definitions === null) return 0;
                         //protein in question
@@ -260,14 +262,14 @@ if (pdbOptions.length) {
                         let off = v.offset;
                         partnerNames = partnerNames.concat(v.chain_definitions.filter(d => d.uniprot !== uniprotValue)
                                                                   .map(d => d.uniprot));
-                        table.append(`<tr onclick="load_pdb('${'${v.code}'}')">
-                                            <td>${'${v.code}'}</td>
-                                            <td>${'${res}'}</td>
-                                            <th data-toggle="tooltip" title="${'${v.x}-${v.y}'}"><svg height="1em" width="100%" id="span_${'${v.code}'}"></svg></th>
-                                            <td>${'${off}'}</td>
-                                            <td>${'${myChain}'}</td>
-                                            <td>${'${partners}'}</td>
-                                            <td id="lig_${'${v.code}'}"><i class="fas fa-spinner fa-spin"></i></td>
+                        table.append(`<tr onclick="load_pdb('${v.code}')">
+                                            <td>${v.code}</td>
+                                            <td>${res}</td>
+                                            <th data-toggle="tooltip" title="${v.x}-${v.y}"><svg height="1em" width="100%" id="span_${v.code}"></svg></th>
+                                            <td>${off}</td>
+                                            <td>${myChain}</td>
+                                            <td>${partners}</td>
+                                            <td id="lig_${v.code}"><i class="fas fa-spinner fa-spin"></i></td>
                                           </tr>`);
                         $.getJSON({url: 'https://www.ebi.ac.uk/pdbe/api/pdb/entry/molecules/'+v.code, dataType: 'json', crossOrigin: true})
                             .then(response => $('#lig_'+v.code).html(  response[v.code.toLowerCase()].filter(e=>e.molecule_type !== 'polypeptide(L)')
@@ -311,13 +313,13 @@ if (pdbOptions.length) {
                                     target.css('text-decoration-style','dotted');
                                     target.html(response.gene_name);
                                     //{'gene_name': protein.gene_name, 'recommended_name': protein.recommended_name, 'length': len(protein)}
-                                    target.tooltip({title: `${'${response.gene_name} (${response.recommended_name})'}`});
+                                    target.tooltip({title: `${response.gene_name} (${response.recommended_name})`});
                                     })
 							);
 
     // add glove. Do this properly in a bit.
     $('#partner_table tbody tr').hover(e => $(e.target).css('cursor','pointer'));
-
+    //</%text>
 } else {
 $('#partner_table').html('<p>No crystal structures to show.</p>');
 }

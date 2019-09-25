@@ -268,6 +268,7 @@ NGL.specialOps._run_loadFx = function (protein, fx) {
            setTimeout(() => NGL.specialOps._run_loadFx(protein, fxname),500)} //ansync issue.
        } //prevent XSS
     else {
+        //blank? chainbow.
         protein.addRepresentation("cartoon", {smoothSheet: true}); protein.autoView();
     }
     return protein;
@@ -474,6 +475,7 @@ NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
     // prep the action
     function move() {
         if (view === 'auto') { //special view case.
+            protein.addRepresentation("cartoon", {smoothSheet: true});
             NGL.getStage(id).autoView(2000);
         }
         else if (view === 'reset') { //special view case.
