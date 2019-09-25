@@ -204,7 +204,7 @@ def permission(request, page, mode='edit', key_label='encryption_key'):
             log.warn(f'{User.get_username(request)} not authorised to {mode} page {page.identifier}')
             return {'status': f'not authorised to {mode} page without at least logging in'}
         elif mode != 'view' and not (page.identifier in user.owned.pages or
-                                      user.role == 'admin' or page.settings['freelyeditable']):
+                                      user.role == 'admin' or ('freelyeditable' in page.settings and page.settings['freelyeditable'])):
             ## only owners and admins can edit freely.
             request.response.status_int = 403
             log.warn(f'{User.get_username(request)} not authorised to {mode} page {page.identifier}')
