@@ -29,7 +29,7 @@ process.on('UnhandledPromiseRejectionWarning', err => process.exit(1) ); //this 
   //page.on("error", errorLogger);
   await page.click('body');
   await timeout(3000); //safe side.
-  await page._client.send('Page.setDownloadBehavior', {behavior: 'allow', downloadPath: './michelanglo_app/user-data/'});
+  await page._client.send('Page.setDownloadBehavior', {behavior: 'allow', downloadPath: './michelanglo_app/user-data-thumb/'});
   let blob = await page.evaluate(
 				(uuid) => NGL.getStage()
 					     .makeImage( {trim: true, antialias: true, transparent: false})
