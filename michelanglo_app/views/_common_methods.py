@@ -59,7 +59,10 @@ class PDBMeta:
             self.code = entry
             self.chain = '?'
         reply = requests.get(f'http://www.ebi.ac.uk/pdbe/api/pdb/entry/molecules/{self.code}').json()
-        self.data = reply[self.code.lower()]
+        if reply:
+            self.data = reply[self.code.lower()]
+        else:
+            self.data = []
 
     def get_data_by_chain(self, chain=None):
         if not chain:
