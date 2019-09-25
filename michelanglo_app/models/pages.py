@@ -48,7 +48,7 @@ class Page(Base):
     key = None
     unencrypted_path = property(lambda self: os.path.join('michelanglo_app', 'user-data', self.identifier + '.p'))
     encrypted_path = property(lambda self: os.path.join('michelanglo_app', 'user-data', self.identifier + '.ep'))
-    thumb_path = property(lambda self: os.path.join('michelanglo_app', 'user-data', self.identifier + '.png'))
+    thumb_path = property(lambda self: os.path.join('michelanglo_app', 'user-data-thumb', self.identifier + '.png'))
     path = property(lambda self: self.encrypted_path if self.encrypted is True else self.unencrypted_path)
 
     def __init__(self, identifier, key=None):

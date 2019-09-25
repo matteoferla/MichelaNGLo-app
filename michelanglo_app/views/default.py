@@ -9,6 +9,9 @@ import logging
 log = logging.getLogger(__name__)
 
 ### make folder if exists... MAKE SURE IT IS EXCLUDED FROM GIT!
+for folder in ('user-data', 'user-data-thumb', 'user-data-monitor'):
+    if not os.path.isdir(os.path.join('michelanglo_app',folder)):
+        os.mkdir(os.path.join('michelanglo_app', folder))
 if os.path.isdir(os.path.join('michelanglo_app','temp')):
     for file in os.listdir(os.path.join('michelanglo_app','temp')):
         os.remove(os.path.join('michelanglo_app','temp',file))
@@ -21,6 +24,7 @@ else:
 @notfound_view_config(renderer="../templates/404.mako")
 @view_config(route_name='admin', renderer='../templates/admin.mako', http_cache=0)
 @view_config(route_name='gallery', renderer="../templates/gallery.mako")
+@view_config(route_name='personal', renderer="../templates/gallery.mako")
 @view_config(route_name='custom', renderer="../templates/custom.mako")
 @view_config(route_name='home', renderer="../templates/welcome.mako")
 @view_config(route_name='home_gimmicky', renderer="../templates/welcome_gimmicky.mako")
@@ -63,10 +67,19 @@ def my_view(request):
     if page == 'docs':
         return route_docs(request, reply)
     elif page == 'gallery':
-        reply['public_pages'] = request.dbsession.query(Page)\
+        reply['pages'] = request.dbsession.query(Page)\
                                                     .filter(Page.privacy != 'private')\
                                                     .filter(Page.exists == True)\
                                                     .all()
+        reply['sottotitolo'] = 'Here are links to created pages flagged as public'
+        return reply
+    elif page == 'personal':
+        if user:
+            reply['pages'] = user.owned.select(request)
+            reply['sottotitolo'] = 'Here are links to pages edited by you'
+        else:
+            reply['pages'] = []
+            reply['sottotitolo'] = 'Here are links to pages edited by you'
         return reply
     elif page == 'admin':
         reply['users'] = request.dbsession.query(User).all()

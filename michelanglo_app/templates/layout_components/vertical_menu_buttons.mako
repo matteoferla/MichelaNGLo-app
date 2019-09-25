@@ -13,6 +13,7 @@
             data-content='<div class="list-group list-group-flush">
                             <%
                             menu_opts = (('Home','/','far fa-home'),
+                               ('Your pages','/personal','far fa-unlock'),
                                ('Convert PyMol file','/pymol','far fa-hammer'),
                                ('Convert PDB file','/pdb','far fa-wrench'),
                                ('Name to PDB', '/name', 'far fa-id-badge'),

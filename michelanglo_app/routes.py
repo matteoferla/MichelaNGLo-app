@@ -13,6 +13,7 @@ def includeme(config):
     config.add_route('pymol', '/pymol')  ### pymol converter
     config.add_route('name', '/name')  ### gene name.
     config.add_route('gallery', '/gallery')  ###
+    config.add_route('personal', '/personal')
     config.add_route('docs', '/docs/{id}')
     config.add_route('main_docs', '/docs')
     config.add_route('convert_pse', '/convert_pse')

@@ -6,13 +6,13 @@
             &mdash; Gallery
 </%block>
 <%block name="subtitle">
-            Here are links to created pages flagged as public
+            ${sottotitolo}
 </%block>
 
 <%block name="main">
 
     <div class="card-deck">
-                % for i, page in enumerate(sorted(public_pages, key=lambda p: ['published','sgc','public'].index(p.privacy) if p.privacy in ['published','sgc','public'] else 10)):
+                % for i, page in enumerate(sorted(pages, key=lambda p: ['published','sgc','public', 'private'].index(p.privacy) if p.privacy in ['published','sgc','public'] else 10)):
                     <div class="card hypercard mb-4" onclick="window.location='/data/${page.identifier}'">
                           <img src="/thumb/${page.identifier}" class="card-img-top p-4" alt="thumbnail of ${page.title}">
                           <div class="card-body">

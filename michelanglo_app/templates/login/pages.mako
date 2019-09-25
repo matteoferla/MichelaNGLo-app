@@ -1,4 +1,4 @@
-<div id="pages-content">
+<div id="pages-content" style="max-height: 70vh; overflow: scroll;">
 
     %if user:
         ################ admin
@@ -6,6 +6,9 @@
             <h6>Admin console</h6>
             <p><a href="/admin">Click here to go to admin console.</a></p>
         %endif
+
+        <h6>Personal gallery</h6>
+        <p><a href="/personal">Click here to go to personal gallery.</a></p>
 
         <%
             owned = user.owned.select(request)
