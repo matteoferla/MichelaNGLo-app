@@ -67,7 +67,10 @@ def edit(request):
             ## only admin can set to anything that is not private | public
             page.privacy = request.params['public'].lower()
         elif is_js_true(request.params['public']):
-            page.privacy = 'public'
+            if page.privacy not in ('public', 'private'):
+                pass # keep page privacy. admin set it to published or sgc.
+            else:
+                page.privacy = 'public'
         else:
             page.privacy = 'private'
         page.settings['public'] = page.is_public()
