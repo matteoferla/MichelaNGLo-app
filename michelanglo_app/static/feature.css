@@ -1,0 +1,164 @@
+/* minor tweaks to https://github.com/calipho-sib/feature-viewer/blob/master/css/style.css to make it work with BS4. */
+
+.variant{
+    stroke:rgba(0,255,154,0.6);
+    stroke-width:1px;
+}
+/*
+.active {
+    z-index: 1;
+}
+*/
+
+.brush .extent{
+    stroke: #fff;
+    fill-opacity: .125;
+    shape-rendering: crispEdges;
+}
+
+.point {
+    fill: #2f225d;
+    stroke: #afa2dc;
+}
+
+.selected {
+    fill: #afa2dc;
+    stroke: #2f225d;
+}
+
+.clear-button {
+    font: 14px sans-serif;
+    cursor: pointer;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.axis {
+    font: 10px sans-serif;
+}
+.d3-tip {
+    line-height: 1;
+    font-weight: bold;
+    padding: 12px;
+/*    background: rgba(0, 0, 0, 0.8);*/
+    background: #eee;
+/*    color: #fff;*/
+    color: black;
+    border-radius: 2px;
+}
+
+/*Creates a small triangle extender for the tooltip - left*/
+.tooltip2:after {
+    box-sizing: border-box;
+    display: inline;
+    font-size: 10px;
+    width: 100%;
+    line-height: 1;
+    color: #eee;
+    content: "\25BC";
+    position: absolute;
+    text-align: left;
+    margin: -1px 0 0 0;
+    bottom: -8px;
+    left: 10px;
+    z-index:11;
+}
+/*Creates a small triangle extender for the tooltip - left */
+.tooltip2:before {
+    box-sizing: border-box;
+    display: inline;
+    font-size: 10px;
+    width: 100%;
+    line-height: 1;
+    color: rgba(0, 0, 0, 0.6);
+    content: "\25BC";
+    position: absolute;
+    text-align: left;
+    margin: -1px 0 0 0;
+    bottom: -9px;
+    left: 10px;
+    z-index:10;
+}
+.tooltip3:after {
+    box-sizing: border-box;
+    display: inline;
+    font-size: 10px;
+    width: 100%;
+    line-height: 1;
+    color: #eee;
+    content: "\25BC";
+    position: absolute;
+    text-align: right;
+    margin: -1px 0 0 0;
+    bottom: -8px;
+    right: 10px;
+    z-index:11;
+}
+.tooltip3:before {
+    box-sizing: border-box;
+    display: inline;
+    font-size: 10px;
+    width: 100%;
+    line-height: 1;
+    color: rgba(0, 0, 0, 0.6);
+    content: "\25BC";
+    position: absolute;
+    text-align: right;
+    margin: -1px 0 0 0;
+    bottom: -9px;
+    right: 10px;
+    z-index:10;
+}
+
+.yaxis{
+    background-color:green;
+}
+
+.header-help{
+/*    color: #C50063;*/
+/*
+    color: #108D9F;
+    border-color:#0F8292;
+*/
+}
+.header-help .state{
+    min-width:26px;
+    display:inline-block;
+}
+
+.header-help:hover{
+/*    color: #98004C;*/
+/*    color: #0F8292;*/
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.header-help:focus{
+/*    color: #0F8292;*/
+}
+
+.popover-title{
+    text-align: center;
+/*    background-color: rgba(197, 0, 99, 0.1);*/
+}
+
+.label-as-badge {
+/*
+    border-radius: 1em;
+    font-size:0.7em;
+*/
+/*    background-color: #C50063;*/
+}
+
+path.domain {
+    fill:none;
+}
+
+rect{
+    rx:2;
+}

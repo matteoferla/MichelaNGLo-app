@@ -63,7 +63,7 @@ window.renumber_alerter = (pdb) => {
                                     else {$('#renumber_alert').removeClass('show');}
                                 }
                             })
-else $('#renumber_alert').removeClass('show');
+    else $('#renumber_alert').removeClass('show');
 };
 
 // deal with click of alert.
