@@ -99,4 +99,4 @@ class User(Base):
         else:
             return '/'.join([request.environ[x] for x in ("REMOTE_ADDR",
                                                           "HTTP_X_FORWARDED_FOR",
-                                                          "HTTP_CLIENT_IP") if x in request.environ])
+                                                          "HTTP_CLIENT_IP") if x in request.environ and request.environ[x] != '127.0.0.1'])
