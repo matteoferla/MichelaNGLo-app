@@ -31,7 +31,7 @@ $('#species').on('keyup', event => {
                                             $('.popover .list-group-item').click(event => {species.val($(event.target).text()); species.popover('dispose'); species.trigger('keyup');})
                                        }
                                      },
-                     error: (xhr) => {if (xhr.statusText =='abort' || xhr.status === 0 || xhr.readyState === 0) {return;} else {ops.addErrorToast(xhr)}}
+                     error: (xhr) => {if (xhr.statusText ==='abort' || xhr.status === 0 || xhr.readyState === 0) {return;} else {ops.addErrorToast(xhr)}}
             });
     });
 // starting value. Cannot guarantee the default/stored value is correct.
@@ -85,7 +85,7 @@ $('#gene').on('keyup', event => {
                                   if (event.keyCode === 13) {$('#pdb_fetch').click()}
                               }
                             },
-             error: ops.addErrorToast
+             error: (xhr) => {if (xhr.statusText ==='abort' || xhr.status === 0 || xhr.readyState === 0) {return;} else {ops.addErrorToast(xhr)}}
             });
 
 });
@@ -130,7 +130,7 @@ window.get_pdbs = pdbs => {
             }
             else {ops.addToast('issue', 'Issue', JSON.stringify(msg),'bg-danger');}
         },
-        error: (xhr) => {if (xhr.statusText =='abort' || xhr.status === 0 || xhr.readyState === 0) {return;} else {ops.addErrorToast(xhr)}}
+        error: (xhr) => {if (xhr.statusText ==='abort' || xhr.status === 0 || xhr.readyState === 0) {return;} else {ops.addErrorToast(xhr)}}
     });
 };
 
