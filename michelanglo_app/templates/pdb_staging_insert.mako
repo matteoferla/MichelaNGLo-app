@@ -9,8 +9,8 @@
     <span aria-hidden="true">&times;</span>
   </button>
     <h5 class="alert-heading">Residue numbering mismatch</h5>
-    The residue numbers in the PDB file and those in Uniprot differ for <span id="renumber_details">some chains</span> <span data-toggle="tooltip" title="The reasons for this stem from the crystallisation requirements, such as a fragment of the whole protein is expressed and crystallised, fusion protein etc. Simply put, if you care about the protein residues as they are for the whole protein the check the box (most likely case)."><i class="far fa-question-circle"></i></span> <br/>
-    Press here to make the residues in the structure to match Uniprot: <button type="button" class="btn btn-success" id="renumber">Renumber</button>
+    The residue numbers in the PDB file and those in Uniprot differ for <span id="renumber_details">some chains</span> <span data-toggle="tooltip" title="The reasons for this stem from the crystallisation requirements, such as a fragment of the whole protein is expressed and crystallised, fusion protein etc. Herein by offset it is intended the number to be added to the PDB residue index to get the Uniprot index, namely say a fragment spanning residues 100-200 was crystallised and the structure deposited started at 1, there would be an offset of 99, wherein residue 100 in the full protein sequence is residue 1 in the structure. Simply put, if you care about the protein residues as they are for the whole protein the check the box (most likely case). "><i class="far fa-question-circle"></i></span> <br/>
+    Press here to make the residues in the structure to match Uniprot (irreversible): <button type="button" class="btn btn-success" id="renumber">Renumber</button>
 </div>
 
 <div class="row">

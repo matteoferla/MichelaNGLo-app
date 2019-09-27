@@ -58,7 +58,7 @@ window.renumber_alerter = (pdb) => {
                                     let chains = msg.chains;
                                     if (chains.map(v => v.offset).some(v => v !== 0)) {
                                         $('#renumber_alert').addClass('show');
-                                        $('#renumber_details').html('chains '+chains.map(v => v.offset ? `${v.chain} (${v.uniprot}; offset of ${v.offset})` : `${v.chain} (${v.uniprot}; aligned)`).join('; '));
+                                        $('#renumber_details').html('chains '+chains.map(v => v.offset ? `${v.chain} (<a href="https://www.uniprot.org/uniprot/${v.uniprot}">Uniprot:${v.uniprot} <i class="far fa-external-link"></i></a>; offset of ${v.offset})` : `${v.chain} (${v.uniprot}; aligned)`).join('; '));
                                     }
                                     else {$('#renumber_alert').removeClass('show');}
                                 }
