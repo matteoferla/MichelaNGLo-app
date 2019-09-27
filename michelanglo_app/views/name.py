@@ -126,7 +126,11 @@ def choose_pdb(request):
         uniprot = request.params['uniprot']
         taxid = request.params['species']
         log.info(f'{User.get_username(request)} wants uniprot data')
-        protein = ProteinCore(uniprot=uniprot, taxid=taxid).load()
+        try:
+            protein = ProteinCore(uniprot=uniprot, taxid=taxid).load()
+        except: # to do fix this.
+            return {'uniprot': uniprot, 'gene_name': '???', 'recommended_name': 'different species',
+                    'length': -1}
         return {'uniprot': uniprot, 'gene_name': protein.gene_name, 'recommended_name': protein.recommended_name, 'length': len(protein)}
     else:
         request.response.status = 400
