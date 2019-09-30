@@ -108,7 +108,8 @@ $('#edit_submit').click(function () {
             'encryption': $('#encryption').prop('checked'),
             'encryption_key': $('#encryption_key').val(),
             'public': $('#public').prop('checked'),
-            'confidential': $('#confidential').prop('checked')
+            'confidential': $('#confidential').prop('checked'),
+            'model': $('#model').prop('checked')
         }
         })
         .done((msg) => location.reload())

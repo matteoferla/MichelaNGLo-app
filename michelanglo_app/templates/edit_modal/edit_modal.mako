@@ -143,6 +143,16 @@
 
                 </div>
                 <hr/>
+                <p>Structures obtained from threading or, worse, <i>ab initio</i> methods are less accurate than X-ray crystal structures. Consequently, an explicit warning is handy:</p>
+                <div class="custom-control custom-switch">
+                  <input type="checkbox" class="custom-control-input user-editable-state" id="model"
+                         %if model:
+                            checked
+                         %endif
+                            >
+                  <label class="custom-control-label" for="model">Model warning</label>
+                </div>
+                <hr/>
                 <%include file="page_users.mako"/>
                 <hr/>
                 <%include file="edit_security.mako"/>

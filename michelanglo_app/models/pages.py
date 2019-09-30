@@ -61,6 +61,21 @@ class Page(Base):
             self.key = None
         self.settings = {}
 
+    def fill_defaults(self, settings=None):
+        if settings is None:
+            settings = self.settings
+        for fun, keys in ((list, ('editors', 'visitors', 'authors')),
+                          (bool, (
+                          'image', 'uniform_non_carbon', 'verbose', 'validation', 'save', 'public', 'confidential',
+                          'encryption', 'model')),
+                          (str, ('viewport', 'stick', 'backgroundcolor', 'loadfun', 'proteinJSON', 'pdb', 'description',
+                                 'title', 'data_other')),
+                          (list, ('revisions',))):
+            for key in keys:
+                if key not in settings:
+                    settings[key] = fun()
+        return self
+
     def load(self):
         if self.exists:
             if self.encrypted:
@@ -78,6 +93,7 @@ class Page(Base):
             raise FileExistsError(f'File {self.identifier} exists but is not in the DB!')
         else:
             raise FileNotFoundError(f'File {self.identifier} ought to exist?')
+        self.fill_defaults()
         return self
 
     def save(self, settings=None):
@@ -94,13 +110,7 @@ class Page(Base):
             settings['description'] = 'Warning: Description lost??!'
         if 'title' not in settings:
             settings['title'] = 'Warning: Your title has been somehow lost'
-        for fun, keys in ((list, ('editors', 'visitors', 'authors')),
-                      (bool, ('image', 'uniform_non_carbon', 'verbose', 'validation', 'save', 'public','confidential', 'encryption')),
-                      (str, ('viewport', 'stick', 'backgroundcolor', 'loadfun', 'proteinJSON', 'pdb', 'description', 'title', 'data_other')),
-                      (list, ('revisions',))):
-            for key in keys:
-                if key not in settings:
-                    settings[key] = fun()
+        self.fill_defaults(settings)
         # metadata
         settings['date'] = str(datetime.datetime.now())  # redundant
         settings['page'] = self.identifier
