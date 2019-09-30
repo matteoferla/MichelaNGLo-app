@@ -78,8 +78,7 @@ def my_view(request):
             reply['pages'] = user.owned.select(request)
             reply['sottotitolo'] = 'Here are links to pages edited by you'
         else:
-            reply['pages'] = []
-            reply['sottotitolo'] = 'Here are links to pages edited by you'
+            return render_to_response("../templates/registration_virtues.mako", reply, request)
         return reply
     elif page == 'admin':
         reply['users'] = request.dbsession.query(User).all()
