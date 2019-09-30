@@ -145,7 +145,10 @@ class Page(Base):
 
     def delete(self):
         if self.exists:
-            os.remove(self.path)
+            if os.path.exists(self.path):
+                os.remove(self.path)
+            else:
+                pass
             self.exists = False
         else:
             print('DEBUG.... DELETION OF A NON EXISTANT PAGE IS IMPOSSIBLE')
