@@ -683,7 +683,7 @@ class PyMolTranspiler:
                 repdata['putty'][ atom['chain'] ][ atom['resi'] ] = {name: True for name in structure[ atom['chain'] ][ atom['resi'] ]}
                 # cartoon off!
                 repdata['cartoon'][atom['chain']][atom['resi']] = {name: False for name in structure[ atom['chain'] ][ atom['resi'] ]}
-        ##convert
+        ##convert and collapse
         for i in (0, 1, 2, 5, 6, 7, 8, 9, 11, 12):
             transdata = []
             rep_name = rep2name[i]
@@ -696,7 +696,7 @@ class PyMolTranspiler:
                     if all(repdata[rep_name][chain][resi].values()):
                         resi_list.append(resi)
                     elif any(repdata[rep_name][chain][resi].values()): # some/all are present
-                        if not all(repdata[rep_name][chain][resi].values()):   # some are present
+                        if not all(repdata[rep_name][chain][resi].values()):   # some, but not all are present
                             transdata.extend([f'{resi}:{chain}.{name}' for name in repdata[rep_name][chain][resi] if repdata[rep_name][chain][resi]])
                             resi_homo_state = False
                     else: # none are.
@@ -704,7 +704,7 @@ class PyMolTranspiler:
                 if resi_homo_state: # no residues differ
                     chain_list.append(f':{chain}')
                 else:
-                    transdata.extend([f'{resi}:{chain}' for resi in resi_list]) # todo... add selection reduction
+                    transdata.extend([f'{resi}:{chain}' for resi in self.collapse_list(resi_list)])
                     chain_homo_state = False
             if chain_homo_state:
                 transdata.append('*')
@@ -738,11 +738,24 @@ class PyMolTranspiler:
     @staticmethod
     def collapse_list(l):
         ## not implemented
-        l=sorted(l)
-        for i in range(1,len(l)):
-            e = l[i]
-            #if l[i-1] == ....
-        return ' or '.join(l)
+        l = sorted(l)
+        if len(l) < 2:
+            return l
+        parts = []
+        start = l[0]
+        print(l)
+        for i in range(1, len(l)):
+            fore = int(l[i - 1])
+            aft = int(l[i])
+            if fore + 1 == aft:
+                # contiguous
+                continue
+            else:
+                # break
+                parts.append(f'{start}-{fore}' if start != fore else str(start))
+                start = aft
+        parts.append(f'{start}-{aft}' if start != aft else str(start))
+        return parts
 
 
     def get_reps(self, inner_tabbed=1, stick='sym_licorice', **settings):  # '^'+atom['chain']
@@ -772,7 +785,7 @@ class PyMolTranspiler:
         if self.surface:
             code.append('var surf = new NGL.Selection( "{0}" );'.format(' or '.join(self.surface)))
             code.append('protein.addRepresentation( "surface", {' + color_str + ' sele: surf.string} );')
-        return self.indent(code, inner_tabbed)
+        return code #self.indent(code, inner_tabbed)
 
     def convert_color(self, uniform_non_carbon=False, inner_tabbed=1, **settings):
         #determine what colors we have.
