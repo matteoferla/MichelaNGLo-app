@@ -13,6 +13,7 @@
     <meta property="og:image" content="${meta_image}">
     <meta property="og:url" content="${meta_url}">
     <link rel="icon" href="/favicon.ico">
+    <meta name="google-site-verification" content="rR92bqgvkgg-_WdvMvGpwrtt-vFHXM8-dfV_t3UoI6g" />
     %if not public:
         <meta name="robots" content="none">
     %endif
