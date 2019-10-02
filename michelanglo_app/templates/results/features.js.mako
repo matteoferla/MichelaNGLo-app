@@ -264,7 +264,7 @@ if (pdbOptions.length) {
                                                                   .map(d => d.uniprot));
                         table.append(`<tr onclick="load_pdb('${v.code}')">
                                             <td>${v.code}</td>
-                                            <td>${res}</td>
+                                            <td  id="res_${v.code}">${res}</td>
                                             <th data-toggle="tooltip" title="${v.x}-${v.y}"><svg height="1em" width="100%" id="span_${v.code}"></svg></th>
                                             <td>${off}</td>
                                             <td>${myChain}</td>
@@ -272,11 +272,17 @@ if (pdbOptions.length) {
                                             <td id="lig_${v.code}"><i class="fas fa-spinner fa-spin"></i></td>
                                           </tr>`);
                         $.getJSON({url: 'https://www.ebi.ac.uk/pdbe/api/pdb/entry/molecules/'+v.code, dataType: 'json', crossOrigin: true})
-                            .then(response => $('#lig_'+v.code).html(  response[v.code.toLowerCase()].filter(e=>e.molecule_type !== 'polypeptide(L)')
+                            .then(response => {$('#lig_'+v.code).html(  response[v.code.toLowerCase()].filter(e=>e.molecule_type !== 'polypeptide(L)')
                                                                                                      .filter(e=> ! ['HOH', 'NA', 'GOL', 'CL', 'MG', 'K', 'BME', 'EDO', 'DMS', 'PGE'].includes(e.chem_comp_ids[0]))
                                                                                                      .map(e => e.molecule_name[0].toLowerCase()+' ('+e.chem_comp_ids[0]+' in chain '+e.in_chains.join('&')+')')
                                                                                                      .join(' + ')
-                                                                    )
+                                                                    );
+                                                let textDump = JSON.stringify(response);
+                                                if (['"MSE"', '"I3C"', '"B3C"'].some(v => textDump.match(v) !== null)) {
+                                                            let res = $('#res_'+v.code);
+                                                            res.html(res.html() + ' <i class="far fa-stroopwafel" data-toggle="tooptip" title="This structure contains compounds added to solve the phase problem. Other structures may be better suited for your needs."></i>');
+                                                        }
+                                               }
                                     );
 
                         let svg=d3.select('#span_'+v.code);
