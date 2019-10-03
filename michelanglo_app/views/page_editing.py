@@ -106,7 +106,7 @@ def edit(request):
         else:  # no change
             pass
         if 'model' in request.params:
-            page.settings['model'] = is_js_true('model')
+            page.settings['model'] = is_js_true(request.params['model'])
         # alter ratio
         if 'columns_viewport' in request.params:
             page.settings['columns_viewport'] = int(request.params['columns_viewport'])
