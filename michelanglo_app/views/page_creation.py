@@ -311,13 +311,12 @@ def with_sdf(request):
         print(request.params['sdf[]'])
     loadfun = 'const ligands = '+json.dumps(sdfdex)+';'
     loadfun += '''
-    
-    
     window.generate_ligands = () => {
-    if (myData === undefined) {setTimout(window.generate_ligands, 100);}
+    if (window.myData === undefined) {setTimout(window.generate_ligands, 100); console.log('wait');}
     else {
         ligands.forEach((v,i) => {
-            window[name] = pdb.replace(/END\\n?/,'TER\\n') + v;
+            window[`ligand${i}`] = pdb.replace(/END\\n?/,'TER\\n') + v;
+            console.log(`ligand${i}`);
         });
     }
     window.generate_ligands();
@@ -328,7 +327,8 @@ def with_sdf(request):
                 'page': pagename, 'editable': True,
                 'backgroundcolor': 'white',
                 'validation': None, 'js': None, 'pdb': [], 'loadfun': loadfun,
-                'proteinJSON': '[{"type": "data", "value": "pdb", "isVariable": true}, ' + ligand_defs + ']'}
+                'proteinJSON': '[{"type": "data", "value": "pdb", "isVariable": true}, ' + ligand_defs + ']',
+                'descriptors': {'text': "<span class='prolink' data-toggle='protein' data-load='ligand0' data-selection='ligand' data-focus='residue'>Ligand zero</span>"}}
     filename = save_file(request, 'pdb', field='pdb')
     trans = PyMolTranspiler.load_pdb(file=filename)
     os.remove(filename)
