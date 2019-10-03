@@ -479,6 +479,14 @@ class PyMolTranspiler:
         os.remove(file)
         return self
 
+    @classmethod
+    @PyMolTranspilerDeco
+    def sdf_to_pdb(cls, infile, outfile):
+        pymol.cmd.load(infile)
+        pymol.cmd.alter('all', 'chain="Z"')
+        pymol.cmd.save(outfile)
+
+
     @staticmethod
     def _mutagen(outfile, mutations, chain):
         """

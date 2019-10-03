@@ -231,7 +231,7 @@ def convert_pdb(request):
     malformed = is_malformed(request, 'viewcode', 'mode', 'pdb')
     if malformed:
         return {'status': malformed}
-    pagename = str(uuid.uuid4())
+    pagename = get_uuid(request)
     viewcode = request.params['viewcode']
     data_other = re.sub(r'<\w+ (.*?)>.*', r'\1', viewcode).replace('data-toggle="protein"','').replace('data-toggle=\'protein\'','').replace('data-toggle=protein','')
     if not request.user or request.user.role not in ('admin', 'friend'):
@@ -290,6 +290,52 @@ def renumber(request):
     return {'pdb': f'REMARK 100 THIS ENTRY IS RENUMBERED FROM {pdb}.\n' +
                    '\n'.join(trans.ss) +
                    '\n'+trans.raw_pdb}
+
+@view_config(route_name='convert_pdb_w_sdf', renderer="json")
+def with_sdf(request):
+    malformed = is_malformed(request, 'pdb', 'sdf')
+    if malformed:
+        return {'status': malformed}
+    pagename = get_uuid(request)
+    ### deal with sdf
+    sdfdex = []
+    def add_pdb(sdffile):
+        out = sdffile.replace('.sdf', '.pdb')
+        PyMolTranspiler.sdf_to_pdb(sdffile, out)
+        with open(out) as fh:
+            sdfdex.append(fh.read())
+    if 'sdf' in request.params:
+        sdffile = save_file(request, 'sdf','sdf')
+        add_pdb(sdffile)
+    else:
+        print(request.params['sdf[]'])
+    loadfun = 'const ligands = '+json.dumps(sdfdex)+';'
+    loadfun += '''
+    
+    
+    window.generate_ligands = () => {
+    if (myData === undefined) {setTimout(window.generate_ligands, 100);}
+    else {
+        ligands.forEach((v,i) => {
+            window[name] = pdb.replace(/END\\n?/,'TER\\n') + v;
+        });
+    }
+    window.generate_ligands();
+    }
+    '''
+    ligand_defs = ','.join([f'{{"type": "data", "value": "ligand{n}", "isVariable": true}}' for n in range(len(sdfdex))])
+    settings = {'data_other': '',
+                'page': pagename, 'editable': True,
+                'backgroundcolor': 'white',
+                'validation': None, 'js': None, 'pdb': [], 'loadfun': loadfun,
+                'proteinJSON': '[{"type": "data", "value": "pdb", "isVariable": true}, ' + ligand_defs + ']'}
+    filename = save_file(request, 'pdb', field='pdb')
+    trans = PyMolTranspiler.load_pdb(file=filename)
+    os.remove(filename)
+    settings['pdb'] = [('pdb', '\n'.join(trans.ss) + '\n' + trans.raw_pdb)]
+    settings['title'] = 'User submitted structure (from uploaded PDB)'
+    commit_submission(request, settings, pagename)
+    return {'page': pagename}
 
 @view_config(route_name='task_check', renderer="json")
 def status_check_view(request):
