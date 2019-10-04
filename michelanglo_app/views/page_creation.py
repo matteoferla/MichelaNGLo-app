@@ -324,7 +324,8 @@ def with_sdf(request):
     '''
     ligand_defs = ','.join([f'{{"type": "data", "value": "{e["name"]}", "isVariable": true}}' for e in sdfdex])
     prolink = '* <span class="prolink" data-toggle="protein" data-load="{i}" data-selection="UNK" data-focus="residue">Ligand: {i}</span>\n'
-    descr = '* <span class="prolink" data-toggle="protein" data-load="apo" data-view="auto">Apo structure</span>\n'+\
+    descr = 'These are the models in this page. To make your own prolinks, do note that the ligand is called "UNK" for selection purposes.\n\n.'+\
+            '* <span class="prolink" data-toggle="protein" data-load="apo" data-view="auto">Apo structure</span>\n'+\
             ''.join([prolink.format(i=e['name']) for e in sdfdex])
     ### viewcode!
     if 'viewcode' in request.params:
@@ -346,7 +347,7 @@ def with_sdf(request):
     trans = PyMolTranspiler.load_pdb(file=pdbfile)
     os.remove(pdbfile)
     settings['pdb'] = [('apo', '\n'.join(trans.ss) + '\n' + trans.raw_pdb.lstrip())]
-    settings['title'] = 'User submitted structure (from uploaded PDB)'
+    settings['title'] = 'User submitted structure (from uploaded PDB+SDF)'
     commit_submission(request, settings, pagename)
     return {'page': pagename}
 
