@@ -295,7 +295,7 @@ NGL.specialOps.load = function (option, noLoadFun) {
         myData.proteins.push({type: 'rcsb', value: option.slice(0,4)}); //no chains please.
         index = myData.proteins.length - 1;
     }
-    else {throw 'No idea what this user submitted option is.'}
+    else {throw `No idea what this "${option}" user-submitted option is for Michelanglo.js.`}
     // check if the one asked for is loaded.
     if ( (index === myData.currentIndex)) {
         var protein = NGL.stageIds[myData.id].getComponentByType('structure');
