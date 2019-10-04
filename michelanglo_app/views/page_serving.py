@@ -1,4 +1,5 @@
 import json, pickle
+import markdown, re
 
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
@@ -134,6 +135,17 @@ def userdata_view(request):
             settings['meta_url'] = 'https://michelanglo.sgc.ox.ac.uk/data/' + page.identifier
             settings['custom_messages'] = json.dumps(custom_messages)
             settings['structure_info'] = json.loads(settings['proteinJSON'])  ## regenerate each time for safety!
+            # backwards compatibility
+            if not settings['descr_mdowned']:
+                #settings['descr_mdowned'] = page.sanitise_HTML(markdown.markdown(settings['description']))
+                settings['descr_mdowned'] = markdown.markdown(settings['description'])
+            rex = re.search('^\<h2\>(.*?)\<\/h2\>', settings['descr_mdowned'])
+            if rex:
+                settings['descr_header'] = '<div class="card-header"><h3 class="card-title">' + rex.group(1) + '</h3></div>'
+                settings['descr_mdowned'] = re.sub('^\<h2\>(.*?)\<\/h2\>', '', settings['descr_mdowned'])
+            else:
+                settings['descr_header'] = ''
+            # return
             return settings   ## renders via the "../templates/user_protein.mako"
 
 @view_config(route_name='monitor', renderer="../templates/monitor.mako")

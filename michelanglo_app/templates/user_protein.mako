@@ -53,17 +53,6 @@
             </div>
         %endif
         <div class="card shadow" role="tooltip">
-            <%
-                import markdown, re
-                descr_mdowned = markdown.markdown(description)
-                rex = re.search('^\<h2\>(.*?)\<\/h2\>',descr_mdowned)
-                if rex:
-                    descr_header = '<div class="card-header"><h3 class="card-title">'+rex.group(1)+'</h3></div>'
-                    descr_mdowned = re.sub('^\<h2\>(.*?)\<\/h2\>', '', descr_mdowned)
-                else:
-                    descr_header = ''
-            %>
-
             ${descr_header|n}
 
             <div class="card-body">

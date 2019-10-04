@@ -5,7 +5,7 @@ from ..models.user import User
 from ..models.trashcan import get_trashcan
 from .user_management import permission
 from ..transplier import PyMolTranspiler
-import os
+import os, markdown
 import json, re
 
 from ._common_methods import is_js_true,  is_malformed
@@ -48,23 +48,26 @@ def edit(request):
             page.settings['authors'].remove('anonymous')
             get_trashcan(request).owned.remove(page.identifier)
         # make a backup
-        if 'revisions' not in page.settings:
-            page.settings['revisions'] = []
         page.settings['revisions'].append({'user': user.name, 'time': str(page.timestamp), 'text': page.settings['description']})
         # only admins and friends can edit html fully
         if user.role in ('admin', 'friend'):
-            for key in ('loadfun', 'title', 'description'):
+            for key in ('loadfun', 'title', ):
                 if key in request.params:
                     page.settings[key] = request.params[key]
+            if 'description' in request.params:
+                page.settings['descr_mdowned'] = markdown.markdown(request.params['description'])
+                page.settings['description'] = request.params['description']
             if 'pdb' in request.params:
                 try:
                     page.settings['pdb'] = json.loads(request.params['pdb'])
                 except:
                     page.settings['pdb'] = request.params['pdb']
         else:  # regular users have to be sanitised
-            for key in ('title', 'description'):
-                if key in request.params:
-                    page.settings[key] = Page.sanitise_HTML(request.params[key])
+            if 'title' in request.params:
+                page.settings['title'] = Page.sanitise_HTML(request.params['title'])
+            if 'description' in request.params:
+                page.settings['descr_mdowned'] = page.sanitise_HTML(markdown.markdown(request.params['description']))
+                page.settings['description'] = request.params['description']
         page.settings['confidential'] = is_js_true(request.params['confidential'])
         if page.privacy == '' or page.privacy is None:
             page.privacy = 'private'

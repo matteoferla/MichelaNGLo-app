@@ -4,6 +4,12 @@ from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
 from Crypto import Random
 
+import bleach
+bleach.sanitizer.ALLOWED_TAGS.extend(['span', 'div', 'img', 'h1', 'h2','h3','h4','h5','p'])
+bleach.sanitizer.ALLOWED_ATTRIBUTES['*'] = ['class','id']
+bleach.sanitizer.ALLOWED_ATTRIBUTES['span'] = lambda tag, name, value: True if name in ('class','id') or 'data-' in name else False
+bleach.sanitizer.ALLOWED_ATTRIBUTES['img'] = lambda tag, name, value: True if name in ('class','id','height', 'width', 'src') and 'javascript' not in value.lower() else False
+
 ##################### Page
 # The reason this is not a full DB is because
 # * the PDB files can get massive
@@ -69,7 +75,7 @@ class Page(Base):
                           'image', 'uniform_non_carbon', 'verbose', 'validation', 'save', 'public', 'confidential',
                           'encryption', 'model')),
                           (str, ('viewport', 'stick', 'backgroundcolor', 'loadfun', 'proteinJSON', 'pdb', 'description',
-                                 'title', 'data_other')),
+                                 'descr_mdowned','title', 'data_other')),
                           (list, ('revisions',))):
             for key in keys:
                 if key not in settings:
@@ -176,6 +182,13 @@ class Page(Base):
 
     @staticmethod
     def sanitise_HTML(code):
+        code=bleach.clean(code)
+        code=bleach.linkify(code)
+        return code
+
+    @staticmethod
+    def alt_sanitise_HTML(code):
+        ### this is more liberal and does not require tags. It is used only by data_other
         def substitute(code, pattern, message):
             code = re.sub(f'<[^>\w]*?\W{pattern}[\s\S]*?>', message, code, re.IGNORECASE | re.MULTILINE | re.DOTALL)
             code = re.sub(f'<{pattern}[\s\S]*?>', message, code, re.IGNORECASE | re.MULTILINE | re.DOTALL)

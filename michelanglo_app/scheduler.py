@@ -29,6 +29,7 @@ def includeme(config):
     #### GO! ####################################################
     scheduler.start()
 
+
 def get_session(): ## not request bound.
     engine = engine_from_config({'sqlalchemy.url': os.environ['SQL_URL'], 'sqlalchemy.echo': 'False'},
                                 prefix='sqlalchemy.')
@@ -42,6 +43,7 @@ def daily_task():
     with transaction.manager:
         for row in sesh.query(User).filter_by(role='new'):
             row.role = 'basic'
+    sesh.commit()
     # PDB?
 
 def spam_task(days_delete_unedited, days_delete_untouched):
@@ -65,10 +67,11 @@ def kill_task(days_delete_unedited, days_delete_untouched):
                 ## file has been deleted manually!?
                 ## this is a pretty major incident.
                 page.exists = False
-                log.warn(f'{page.identifier} does not exist.')
+                log.warning(f'{page.identifier} does not exist.')
                 notify_admin(f'{page.identifier} does not exist.')
             n+=1
         notify_admin(f'Deleted {n} pages in cleanup.')
+    sesh.commit()
 
 def monitor_task():
     sesh = get_session()

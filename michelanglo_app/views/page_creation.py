@@ -90,7 +90,7 @@ def user_submission(request, settings, pagename):
     user = request.user
     user.owned.add(pagename)
     settings[
-        "description"] = 'Editable text. press pen to edit (permissions permitting).\n\nUnedited pages are deleted after a month, while other pages are deleted if unopened within a year.\n\n' + stringify_protein_description(
+        "description"] = '## Description\n\nEditable text. press pen to edit (permissions permitting).\n\nUnedited pages are deleted after a month, while other pages are deleted if unopened within a year.\n\n' + stringify_protein_description(
         settings)
     settings["authors"] = [user.name]
     request.dbsession.add(user)
@@ -235,7 +235,7 @@ def convert_pdb(request):
     viewcode = request.params['viewcode']
     data_other = re.sub(r'<\w+ (.*?)>.*', r'\1', viewcode).replace('data-toggle="protein"','').replace('data-toggle=\'protein\'','').replace('data-toggle=protein','')
     if not request.user or request.user.role not in ('admin', 'friend'):
-        data_other = Page.sanitise_HTML(data_other)
+        data_other = clean_data_other(data_other)
     settings = {'data_other': data_other,
                 'page': pagename, 'editable': True,
                 'backgroundcolor': 'white', 'validation': None, 'js': None, 'pdb': [], 'loadfun': ''}
@@ -275,6 +275,9 @@ def convert_pdb(request):
         settings['title'] = 'User submitted structure (from uploaded PDB)'
     commit_submission(request, settings, pagename)
     return {'page': pagename}
+
+def clean_data_other(data_other):
+    return Page.sanitise_HTML(f'<span {data_other}></span>').replace('<span ','').replace('></span>','')
 
 @view_config(route_name='renumber', renderer="json")
 def renumber(request):
@@ -334,7 +337,7 @@ def with_sdf(request):
                                                               .replace('data-toggle=\'protein\'', '')\
                                                               .replace('data-toggle=protein', '')
         if not request.user or request.user.role not in ('admin', 'friend'):
-            data_other = Page.sanitise_HTML(data_other)
+            data_other = clean_data_other(data_other)
     else:
         data_other = ''
     ### settings

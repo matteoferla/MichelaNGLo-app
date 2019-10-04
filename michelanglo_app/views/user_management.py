@@ -195,7 +195,7 @@ def permission(request, page, mode='edit', key_label='encryption_key'):
                 return {'status': 'OK'}  # valid key
             except ValueError:
                 request.response.status_int = 403
-                log.warn(f'{User.get_username(request)} requested an encrypted page {page.identifier} with wrong key')
+                log.warning(f'{User.get_username(request)} requested an encrypted page {page.identifier} with wrong key')
                 return {'status': 'page requires correct key'}
     else:
         try:
