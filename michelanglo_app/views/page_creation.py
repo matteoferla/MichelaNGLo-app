@@ -293,46 +293,59 @@ def renumber(request):
 
 @view_config(route_name='convert_pdb_w_sdf', renderer="json")
 def with_sdf(request):
-    malformed = is_malformed(request, 'pdb', 'sdf')
+    malformed = is_malformed(request, 'apo')
     if malformed:
         return {'status': malformed}
     pagename = get_uuid(request)
+    pdbfile = save_file(request, 'pdb', field='apo')
     ### deal with sdf
     sdfdex = []
-    def add_pdb(sdffile):
-        out = sdffile.replace('.sdf', '.pdb')
-        PyMolTranspiler.sdf_to_pdb(sdffile, out)
-        with open(out) as fh:
-            sdfdex.append(fh.read())
-    if 'sdf' in request.params:
-        sdffile = save_file(request, 'sdf','sdf')
-        add_pdb(sdffile)
-    else:
-        print(request.params['sdf[]'])
+    for k in request.params.keys():
+        if k in ('apo', 'viewcode'):
+            continue
+        else:
+            print('debug', k)
+            sdffile = save_file(request, 'sdf', k)
+            sdfdex.append({'name': re.sub('[^\w_]','',k.replace(' ','_')),
+                           'block': PyMolTranspiler.sdf_to_pdb(sdffile, pdbfile)})
+    if sdfdex == []:
+        return {'status': 'No SDF files'}
     loadfun = 'const ligands = '+json.dumps(sdfdex)+';'
     loadfun += '''
     window.generate_ligands = () => {
-    if (window.myData === undefined) {setTimout(window.generate_ligands, 100); console.log('wait');}
-    else {
-        ligands.forEach((v,i) => {
-            window[`ligand${i}`] = pdb.replace(/END\\n?/,'TER\\n') + v;
-            console.log(`ligand${i}`);
-        });
+        if (window.myData === undefined) {setTimeout(window.generate_ligands, 100); console.log('wait');}
+        else {
+            ligands.forEach((v,i) => {
+                window[v.name] = apo.replace(/END\\n?/,'TER\\n') + v.block;
+            });
+        }
     }
     window.generate_ligands();
-    }
     '''
-    ligand_defs = ','.join([f'{{"type": "data", "value": "ligand{n}", "isVariable": true}}' for n in range(len(sdfdex))])
-    settings = {'data_other': '',
+    ligand_defs = ','.join([f'{{"type": "data", "value": "{e["name"]}", "isVariable": true}}' for e in sdfdex])
+    prolink = '* <span class="prolink" data-toggle="protein" data-load="{i}" data-selection="UNK" data-focus="residue">Ligand: {i}</span>\n'
+    descr = '* <span class="prolink" data-toggle="protein" data-load="apo" data-view="auto">Apo structure</span>\n'+\
+            ''.join([prolink.format(i=e['name']) for e in sdfdex])
+    ### viewcode!
+    if 'viewcode' in request.params:
+        viewcode = request.params['viewcode']
+        data_other = re.sub(r'<\w+ (.*?)>.*', r'\1', viewcode).replace('data-toggle="protein"', '')\
+                                                              .replace('data-toggle=\'protein\'', '')\
+                                                              .replace('data-toggle=protein', '')
+        if not request.user or request.user.role not in ('admin', 'friend'):
+            data_other = Page.sanitise_HTML(data_other)
+    else:
+        data_other = ''
+    ### settings
+    settings = {'data_other': data_other,
                 'page': pagename, 'editable': True,
                 'backgroundcolor': 'white',
                 'validation': None, 'js': None, 'pdb': [], 'loadfun': loadfun,
-                'proteinJSON': '[{"type": "data", "value": "pdb", "isVariable": true}, ' + ligand_defs + ']',
-                'descriptors': {'text': "<span class='prolink' data-toggle='protein' data-load='ligand0' data-selection='ligand' data-focus='residue'>Ligand zero</span>"}}
-    filename = save_file(request, 'pdb', field='pdb')
-    trans = PyMolTranspiler.load_pdb(file=filename)
-    os.remove(filename)
-    settings['pdb'] = [('pdb', '\n'.join(trans.ss) + '\n' + trans.raw_pdb)]
+                'proteinJSON': '[{"type": "data", "value": "apo", "isVariable": true}, ' + ligand_defs + ']',
+                'descriptors': {'text': descr}}
+    trans = PyMolTranspiler.load_pdb(file=pdbfile)
+    os.remove(pdbfile)
+    settings['pdb'] = [('apo', '\n'.join(trans.ss) + '\n' + trans.raw_pdb.lstrip())]
     settings['title'] = 'User submitted structure (from uploaded PDB)'
     commit_submission(request, settings, pagename)
     return {'page': pagename}

@@ -444,6 +444,7 @@ class PyMolTranspiler:
         """
         self = cls(run_analysis=False) #this is so badly done.
         pymol.cmd.load(file)
+        pymol.cmd.save(file)
         with open(file) as w:
             self.raw_pdb = w.read()
         self.fix_structure()
@@ -481,10 +482,25 @@ class PyMolTranspiler:
 
     @classmethod
     @PyMolTranspilerDeco
-    def sdf_to_pdb(cls, infile, outfile):
-        pymol.cmd.load(infile)
+    def sdf_to_pdb(cls, infile, reffile):
+        combofile = infile.replace('.sdf', '_combo.pdb')
+        minusfile = infile.replace('.sdf', '_ref.pdb')
+        pymol.cmd.load(infile, 'ligand')
         pymol.cmd.alter('all', 'chain="Z"')
-        pymol.cmd.save(outfile)
+        pymol.cmd.load(reffile, 'apo')
+        pymol.cmd.alter('all','segi=""')
+        pymol.cmd.sort()
+        pymol.cmd.create('combo','apo or ligand')
+        pymol.cmd.save(combofile, 'combo')
+        pymol.cmd.save(minusfile, 'apo')
+        with open(minusfile) as fh:
+            ref = fh.readlines()
+        with open(combofile) as fh:
+            combo = fh.readlines()
+        ligand = ''.join([line for line in combo if line not in ref and line.strip() != ''])
+        os.remove(combofile)
+        os.remove(minusfile)
+        return ligand
 
 
     @staticmethod

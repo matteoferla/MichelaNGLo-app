@@ -56,7 +56,7 @@ window.interactive_changer = (event, noRun) =>  {
     }
     let model = $('#markup_model').children(':selected').val();
     if (model !== 'none') {attributes+= ` data-load="${"${model}"}"`}
-    else {code = 'data-focus="'+mode+'"'}
+    code = 'data-focus="'+mode+'"';
     let id = 'viewport';
     let spanCode ='<span class="prolink" data-target="'+id+'" data-toggle="protein" '+code+' '+attributes+'>Try me as a span-element</span>';
     $('#results code').text(spanCode);
