@@ -14,7 +14,7 @@ import json
 
 PyMolTranspiler.tmp = os.path.join('michelanglo_app', 'temp')
 
-from ._common_methods import is_js_true, is_malformed, PDBMeta
+from ._common_methods import is_js_true, is_malformed, PDBMeta, get_uuid
 import logging
 
 log = logging.getLogger(__name__)
@@ -106,15 +106,6 @@ def commit_submission(request, settings, pagename):
     p.edited = False
     settings['is_unseen'] = True
     p.save(settings).commit(request)
-
-
-def get_uuid(request):
-    identifier = str(uuid.uuid4())
-    if identifier in [p.identifier for p in request.dbsession.query(Page)]:
-        log.error('UUID collision!!!')
-        return get_uuid(request)  # one in a ten-quintillion!
-    return identifier
-
 
 ########################################################################################
 ### VIEWS

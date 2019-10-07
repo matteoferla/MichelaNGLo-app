@@ -1,5 +1,5 @@
-import os, requests, logging, re, unicodedata
-from ..models import User
+import os, requests, logging, re, unicodedata, uuid
+from ..models import User, Page
 log = logging.getLogger(__name__)
 
 ## convert booleans and settings
@@ -11,6 +11,13 @@ def is_js_true(value):
         return False
     else:  ## while also return True if its a number or string.
         return True
+
+def get_uuid(request):
+    identifier = str(uuid.uuid4())
+    if identifier in [p.identifier for p in request.dbsession.query(Page)]:
+        log.error('UUID collision!!!')
+        return get_uuid(request)  # one in a ten-quintillion!
+    return identifier
 
 def notify_admin(msg):
     """

@@ -7,8 +7,9 @@ from .user_management import permission
 from ..transplier import PyMolTranspiler
 import os, markdown
 import json, re
+import datetime
 
-from ._common_methods import is_js_true,  is_malformed
+from ._common_methods import is_js_true,  is_malformed, get_uuid
 
 import logging
 log = logging.getLogger(__name__)
@@ -303,3 +304,32 @@ def rename(request):
         new_page = Page(new_name, key=key)
         new_page.save(settings).commit(request)
         return {'status': 'success', 'page': new_name}
+
+@view_config(route_name='copy_user-page', renderer='json')
+def copy(request):
+    """
+    makes a copy. Note that not all permission are the same. encryption and protection are set to false.
+    """
+    log.info(f'Page copy requested by {User.get_username(request)}')
+    malformed = is_malformed(request, 'page')
+    if malformed:
+        return {'status': malformed}
+    # get ready
+    ref = Page.select(request, request.params['page'])
+    if ref.encrypted:
+        return {'status': 'Cannot copy an encrypted page due to strong security concerns, even with editing rights and the key.'}
+    verdict = permission(request, ref, 'view', key_label='encryption_key')
+    if verdict['status'] != 'OK':
+        return verdict
+    else:
+        new = Page(get_uuid(request))
+        new.title = ref.title
+        new.privacy = ref.privacy
+        new.exists = True
+        new.encrypted = False
+        new.timestamp = datetime.datetime.utcnow()
+        new.protected = False
+        new.save(ref.settings)
+        new.commit(request)
+        return {'status': 'success', 'page': new.identifier}
+
