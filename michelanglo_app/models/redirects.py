@@ -21,7 +21,7 @@ class Doi(Base):
     @classmethod
     def reroute(cls, request, short):
         #get the DB version...
-        self = request.dbsession.query(cls).filter(cls.short == short).first()
+        self = request.dbsession.query(cls).filter(cls.short == short.lower()).first()
         if self:
             return self.long
         else:
