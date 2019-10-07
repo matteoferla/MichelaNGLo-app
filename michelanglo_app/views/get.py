@@ -1,6 +1,6 @@
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
-from ..models import Page, User
+from ..models import Page, User, Doi
 import os
 
 import logging
@@ -95,6 +95,17 @@ def get_pages(request):
 
 @view_config(route_name='set', renderer='json')
 def set_ajax(request):
+    """
+    Admin only operations.
+    :param request: must contain 'item' key.
+    * item = msg. set a message based on the value of the keys 'title','descr','bg'
+    * item = clear_msg. clear msg
+    * item = terminate. kills the mother thread. requires the key 'code' containing the same value as the env variable SECRETCODE
+    * item = protection. protects page 'page'
+    * item = deprotection. guess what this does...
+    * item = shorten. 'short' 'long' results in setting up /r/short redirect to /data/long
+    :return: json ('status' as one key)
+    """
     if not request.user or request.user.role != 'admin':
         request.response.status = 403
         log.warn(f'{User.get_username(request)} was refused setting.')
@@ -141,6 +152,19 @@ def set_ajax(request):
                 if file.find(pagename) == 0:
                     os.remove(os.path.join('michelanglo_app/user-data-monitor', file))
             return {'status': 'deprotected successfully'}
+        elif request.params['item'] == 'shorten':
+            malformed = is_malformed(request, 'long', 'short')
+            if malformed:
+                return {'status': malformed}
+            longname = request.params['long']
+            shortname = request.params['short']
+            long = Page.select(request, longname)
+            if request.dbsession.query(Doi).filter(Doi.short == shortname).first() is not None:
+                return {'status': f'{shortname} taken already.'}
+            redirect = Doi(long=longname, short=shortname)
+            request.dbsession.add(redirect)
+            log.info(f'{User.get_username(request)} made shorter page {longname} as {shortname}.')
+            return {'status': 'success', 'long': longname, 'short': shortname}
         else:
             return {'status': 'unknown cmd'}
 

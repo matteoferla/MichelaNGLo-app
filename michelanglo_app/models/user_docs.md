@@ -25,3 +25,9 @@ To manually check or amend the pg DB...
     # \d <tablename>
     # normal SQL statement;
     # \q
+
+
+app_users=# CREATE TABLE redirects (
+app_users(# id serial PRIMARY KEY, 
+app_users(# short TEXT NOT NULL UNIQUE,
+app_users(# long TEXT NOT NULL UNIQUE);

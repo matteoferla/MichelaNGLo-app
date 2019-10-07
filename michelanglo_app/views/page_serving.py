@@ -3,7 +3,7 @@ import markdown, re
 
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
-from ..models import Page, User
+from ..models import Page, User, Doi
 from pyramid.response import FileResponse
 from .user_management import permission
 from pyramid.httpexceptions import HTTPFound
@@ -17,6 +17,19 @@ from ._common_methods import is_malformed, is_js_true
 @view_config(route_name='userdata', renderer="../templates/user_protein.mako")
 def userdata_view(request):
     pagename = request.matchdict['id']
+    return get_userdata(request, pagename)
+
+@view_config(route_name='redirect', renderer="../templates/user_protein.mako")
+def redirect_view(request):
+    """
+    Changed to be a hard redirect.
+    :param request:
+    :return:
+    """
+    pagename = Doi.reroute(request, request.matchdict['id'])
+    return get_userdata(request, pagename)
+
+def get_userdata(request, pagename):
     log.info(f'{User.get_username(request)} is looking at a page {pagename}')
     page = Page.select(request, pagename)
     verdict = permission(request, page, 'view', key_label='key')
@@ -245,4 +258,6 @@ def save_pdb(request):
 @view_config(route_name='save_zip', renderer="string")
 def save_zip(request):
     raise NotImplementedError
+
+
 

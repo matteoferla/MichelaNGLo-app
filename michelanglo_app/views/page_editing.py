@@ -332,4 +332,3 @@ def copy(request):
         new.save(ref.settings)
         new.commit(request)
         return {'status': 'success', 'page': new.identifier}
-

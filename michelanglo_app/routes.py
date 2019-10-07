@@ -44,6 +44,7 @@ def includeme(config):
     config.add_route('extended', '/michelanglo.js')
     config.add_route('extended_menu', '/michelanglo_menu.js')
     config.add_route('userdata', '/data/{id}')
+    config.add_route('redirect', '/r/{id}')
     config.add_route('userthumb', '/thumb/{id}')
     config.add_route('monitor', '/monitor/{id}')
 

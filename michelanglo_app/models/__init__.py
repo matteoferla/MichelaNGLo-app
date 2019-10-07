@@ -8,6 +8,7 @@ import zope.sqlalchemy
 # Base.metadata prior to any initialization routines
 from .pages import Page  # flake8: noqa
 from .user import User  # flake8: noqa
+from .redirects import Doi
 
 # run configure_mappers after defining all of the models to ensure
 # all relationships can be setup
