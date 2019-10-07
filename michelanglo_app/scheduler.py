@@ -1,5 +1,5 @@
 import os, json, imageio, pickle
-from .models import Page, User
+from .models import Page, User, Doi
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql.expression import and_
@@ -60,6 +60,8 @@ def kill_task(days_delete_unedited, days_delete_untouched):
             page.delete()
         untouched_time = datetime.now() - timedelta(days=int(days_delete_untouched))
         for page in sesh.query(Page).filter(and_(Page.exists == True, Page.timestamp < untouched_time)):
+            if page.protected or sesh.query(Doi).filter(Doi.long == page.identifier).first() is not None:
+                continue
             log.info(f'Deleting abbandonned page {page.identifier} ({page.timestamp})')
             try:
                 page.delete()
