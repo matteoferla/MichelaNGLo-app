@@ -6,10 +6,14 @@
             <%include file="../layout_components/vertical_menu_buttons.mako" args='tour=False'/>
 </%block>
 <%block name="title">
-            &mdash; VENUS MOD
+            &mdash; VENUS
 </%block>
 <%block name="subtitle">
-            ???????????
+    Assessing the effect of amino acid variants have on structure
+    <!--
+    This tool gathers information from various sources about a gene and ranks possible effect a SNV may have.
+                <br/>(signal peptide loss, binding site, active site or ddG).
+                -->
 </%block>
 
 <%block name="main">
