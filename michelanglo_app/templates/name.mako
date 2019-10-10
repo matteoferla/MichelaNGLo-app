@@ -13,7 +13,7 @@
 </%block>
 
 <%block name="main">
-    <p>This convinient form simply searches for PDBs that match your protein, while for a more comprehensive search use the <a href="https://www.rcsb.org/" target="_blank">PDB database <i class="far fa-external-link"></i></a>.<br/>
+    <p>This convenient form simply searches for PDBs that match your protein, while for a more comprehensive search use the <a href="https://www.rcsb.org/" target="_blank">PDB database <i class="far fa-external-link"></i></a>.<br/>
         If you already know the PDB code of your protein see <a href="/pdb">PDB conversion page</a>.
         <br/>
         For more information about choosing a model see <a href="/docs/gene">documentation</a>.</p>
