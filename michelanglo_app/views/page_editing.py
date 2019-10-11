@@ -8,6 +8,7 @@ from ..transplier import PyMolTranspiler
 import os, markdown
 import json, re
 import datetime
+import requests
 
 from ._common_methods import is_js_true,  is_malformed, get_uuid
 
@@ -256,9 +257,15 @@ def mutate(request):
         elif protein_data['type'] == 'rcsb':
             PyMolTranspiler.mutate_code(protein_data['value'], filename, mutations, chain)
         else:
-            request.response.status = 406
-            ## this is a super corner case. I am not sure at all how to proceed. Clickbait?
-            return {'status','cannot create mutations from URL for security reasons'}
+            if protein_data['type'] == 'file' and 'https://swissmodel.expasy.org/' in protein_data['value']:
+                seq = requests.get(protein_data['value'])
+                with open(filename, 'w') as fh:
+                    fh.write(seq)
+                PyMolTranspiler.mutate_file(filename, filename, mutations, chain)
+            else:
+                request.response.status = 406
+                ## this is a super corner case. I am not sure at all how to proceed. Clickbait?
+                return {'status': 'Cannot create mutations from URL for security reasons. Please download the PDB file and upload it or ask the site admin to whitelist the URL.'}
         with open(filename, 'r') as fh:
             seq = fh.read()
         new_variable = sanitise_name(request.params['name'], f"mutant_{len(all_protein_data)}", all_protein_data)
