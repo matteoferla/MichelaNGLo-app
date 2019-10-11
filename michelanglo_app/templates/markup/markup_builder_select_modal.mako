@@ -12,7 +12,8 @@
 
           <h4><span class="text-muted">Option A.</span> Selection language</h4>
           <p><i>For more information on the NGL selection language see <a href="https://nglviewer.org/ngl/api/manual/selection-language.html">NGL manual <i class="far fa-external-link"></i></a></i></p>
-        <p>This controls the residues to focus on. The selection uses the NGL selection language. <code>1:A</code> will select residue 1 of chain A, <code>1-20:B</code> the residues 1 to 20 of chain B, <code>*</code> for everything, <code>PLP</code> (or <code>[PLP]123:D</code>) will select the residue named PLP (a ligand).<br/>The logical operators <code>and</code> and <code>or</code> can also be used, e.g. <code>:B or :C</code> will select chains B & C. You can only select residues that exist in the structure, if not it will either show all or erroneously pan off camera.</p>
+        <p>This controls the residues to focus on. The selection uses the NGL selection language. <code>1:A</code> will select residue 1 of chain A, <code>1-20:B</code> the residues 1 to 20 of chain B, <code>*</code> for everything, <code>PLP</code> (or <code>[PLP]123:D</code>) will select the residue named PLP (a ligand).<br/>The logical operators <code>and</code> and <code>or</code> can also be used, e.g. <code>:B or :C</code> will select chains B & C. You can only select residues that exist in the structure, if not it will either show all or erroneously pan off camera when manually written. In this builder you will not be allowed to.<br/>Also to prevent memory issues in mobiles the limit, in the builder only, for residue mode is 500 atoms.</p>
+          <p>To select two different elements use the logical operator <code>or</code>, not <code>and</code>, because you want to select anything that matches X or Y.</p>
           <div class="input-group">
           <div class="input-group-prepend">
             <span class="input-group-text" id="sele_string_addon">Selection line</span>
