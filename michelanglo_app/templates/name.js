@@ -153,7 +153,8 @@ window.load_pdb = pdb => {
     NGL.stageIds = {};
     $('#viewport').html('');
     $('#viewcode').text('<div role="NGL" data-load="'+pdb+'" ></div>');
-    let x = (pdb.length === 4) ? NGL.specialOps.multiLoader('viewport',[{'type': 'rcsb','value': pdb}]) : NGL.specialOps.multiLoader('viewport',[{'type': 'file','value': pdb}]);
+    if (pdb.length === 4) {NGL.specialOps.multiLoader('viewport',[{'type': 'rcsb','value': pdb}]);  $('#model_alert').removeClass('show').hide();}
+    else {NGL.specialOps.multiLoader('viewport',[{'type': 'file','value': pdb}]); $('#model_alert').addClass('show').show();}
     NGL.specialOps.showTitle('viewport', 'Loaded: '+ pdb);
     renumber_alerter(pdb);
     interactive_builder();

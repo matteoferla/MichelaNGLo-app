@@ -1,7 +1,7 @@
 //<%text>
 $('#create').click(function (event) {
     $(event.target).attr('disabled', "disabled");
-    //hard reset to proove all runs fine
+    //hard reset to prove all runs fine
     $('#viewport').detach();
     window.myData = undefined;
     NGL.stageIds = {};
@@ -57,13 +57,13 @@ window.renumber_alerter = (pdb) => {
                                     if (msg.chains.length === 0) return 1;
                                     let chains = msg.chains;
                                     if (chains.map(v => v.offset).some(v => v !== 0)) {
-                                        $('#renumber_alert').addClass('show');
+                                        $('#renumber_alert').addClass('show').show();
                                         $('#renumber_details').html('chains '+chains.map(v => v.offset ? `${v.chain} (<a href="https://www.uniprot.org/uniprot/${v.uniprot}">Uniprot:${v.uniprot} <i class="far fa-external-link"></i></a>; offset of ${v.offset})` : `${v.chain} (${v.uniprot}; aligned)`).join('; '));
                                     }
-                                    else {$('#renumber_alert').removeClass('show');}
+                                    else {$('#renumber_alert').removeClass('show').hide();}
                                 }
                             })
-    else $('#renumber_alert').removeClass('show');
+    else $('#renumber_alert').removeClass('show').hide();
 };
 
 // deal with click of alert.
