@@ -240,6 +240,8 @@ def convert_pdb(request):
             settings['proteinJSON'] = '[{{"type": "file", "value": "{0}"}}]'.format(pdb)  # url
             settings['title'] = 'User submitted structure (from external PDB)'
             settings['descriptors'] = {'text': f'PDB loaded from [{pdb}](source <i class="far fa-external-link"></i>)'}
+            if 'https://swissmodel.expasy.org' in pdb:
+                settings['model'] = True
     elif request.params['mode'] == 'renumbered':
         ### same as file but with mod.
         settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true}]'

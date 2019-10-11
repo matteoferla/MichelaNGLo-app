@@ -13,6 +13,14 @@
     Press here to make the residues in the structure to match Uniprot (irreversible): <button type="button" class="btn btn-success" id="renumber">Renumber</button>
 </div>
 
+<div id="model_alert" class="alert alert-warning alert-dismissable fade" role="alert">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+    <h5 class="alert-heading">Predicted model</h5>
+    This structure is from Swiss-Model. it is threaded against a crystallised structure. It may be incorrect. E.g. missing ligands or broken cysteine bonds.
+</div>
+
 <div class="row">
         <div class="col-6"><div id="viewport" style="width: 100%; height: 0; padding-bottom: 100%;"></div>
         </div>
