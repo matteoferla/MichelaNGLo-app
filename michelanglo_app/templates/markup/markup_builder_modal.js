@@ -30,7 +30,12 @@ window.interactive_changer = (event, noRun) =>  {
     }
     let mode = $('[name="markup_zoom"]:checked').attr('id');
     let sel_el = $('#markup_selection');
-    if ((!! sel_el.val()) && (NGL.getStage().getComponentByType('structure').structure.getView(new NGL.Selection(sel_el.val())).atomCount !== 0)) {
+    let structure = NGL.getStage().getComponentByType('structure').structure;
+    if ((!! sel_el.val()) && (structure.getView(new NGL.Selection(sel_el.val())).atomCount !== 0)) {
+        if ((mode === 'residue' || mode === 'clash') && (structure.getView(new NGL.Selection(sel_el.val())).atomCount > 500)) {
+            sel_el.addClass('is-invalid');
+            return 0;
+        }
         attributes += 'data-selection="'+sel_el.val()+'"';
         $('.is-invalid').removeClass('is-invalid');
     }
@@ -39,6 +44,7 @@ window.interactive_changer = (event, noRun) =>  {
           if (mode === 'residue' || mode === 'clash') {attributes += 'data-selection="hetero"'} else {attributes += 'data-selection="*"'}
           let msele = $('[id^="sele_"]:focus');
           if (msele) {msele.addClass('is-invalid')}
+          return 0;
           }
     let code;
     if (mode === 'default') {
@@ -47,7 +53,7 @@ window.interactive_changer = (event, noRun) =>  {
     else if (mode === 'auto') {
         code = 'data-view="auto"';
     }
-    else if (mode == 'orientation') {
+    else if (mode === 'orientation') {
         let view_el = $('#markup_view');
         if (! view_el.val()) {view_el.addClass('is-invalid'); setInterval(() => view_el.removeClass('is-invalid'),1000); return 0;}
         else {code = 'data-view="'+view_el.val()+'"';
