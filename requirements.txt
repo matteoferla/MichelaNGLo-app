@@ -3,4 +3,8 @@ waitress
 pyramid
 mako
 pyramid_debugtoolbar
+pyramid_retry
 apscheduler
+psycopg2-binary
+sentry-sdk
+bcrypt
