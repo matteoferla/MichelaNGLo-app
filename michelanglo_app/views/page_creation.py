@@ -239,7 +239,7 @@ def convert_pdb(request):
         else:
             settings['proteinJSON'] = '[{{"type": "file", "value": "{0}"}}]'.format(pdb)  # url
             settings['title'] = 'User submitted structure (from external PDB)'
-            settings['descriptors'] = {'text': f'PDB loaded from {pdb}'}
+            settings['descriptors'] = {'text': f'PDB loaded from [{pdb}](source <i class="far fa-external-link"></i>)'}
     elif request.params['mode'] == 'renumbered':
         ### same as file but with mod.
         settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true}]'
