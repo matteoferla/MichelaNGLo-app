@@ -116,7 +116,7 @@ NGL.specialOps.showResidue = function (id, selection, color, radius, view, label
         radius = radius || 4;
         //selection = typeof selection === "string" ? new NGL.Selection(selection) : selection;
         // Remove all bar cartoon-like representation
-        ['ball+stick', 'contact', 'label', 'hyperball', 'licorice','line', 'point','spacefill', 'surface'].map(function (value) {
+        ['ball+stick', 'contact', 'label', 'hyperball', 'licorice','line', 'point','spacefill', 'surface', 'tube'].map(function (value) {
             protein.stage.getRepresentationsByName(value).forEach(function (o) {
                 protein.removeRepresentation(o);
             }); //.forEach representation
