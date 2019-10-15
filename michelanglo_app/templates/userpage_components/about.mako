@@ -9,11 +9,8 @@
       </div>
       <div class="modal-body">
           <p>This protein view was generated using <a href='http://michelanglo.sgc.ox.ac.uk'>Michela<span style="font-variant: small-caps;">ngl</span>o</a>.</p>
-          <p>This web app converts a PyMOL PSE file to an NGL view, allowing it to be shared on the web.
-              In fact, NGL is a powerful javascript library (<a href="https://github.com/arose/ngl" target="_blank"><i class="fab fa-github"></i></a>
-                                                        <a href="http://nglviewer.org/ngl/" target="_blank"><i class="far fa-popcorn"></i></a>
-                                                        <a href="http://nglviewer.org/ngl/api/manual/index.html" target="_blank"><i class="far fa-book"></i></a>)
-          <p><a href='http://michelanglo.sgc.ox.ac.uk/docs'><i class="far fa-books"></i> Read documentation.</a></p>
+          <h4>About</h4>
+          <p>Michelaɴɢʟo is an accessible and open-source web-based application which supports the generation, customisation and sharing of interactive three-dimensional macromolecular visualisations for digital media without requiring programming skills. PyMOL file, PDB file, PDB identifier code or protein/gene name can be provided which form the basis of visualisations using the NGL JavaScript library. Hyperlinks that control the view can be added to text within the page. Protein coding variants can be highlighted to support interpretation their potential functional consequences. The resulting visualisations and text can be customised and shared, as well as embedded within existing web sites by following instructions and using a self-contained download.</p>
       </div>
         <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

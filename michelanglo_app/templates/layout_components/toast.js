@@ -1,4 +1,4 @@
-window.ops={timer: null, i: 0};
+window.ops={timer: null, i: 0, debug: ${'true' if user and user.role == 'admin' else 'false'}};
 
 /// okay. this is a bit weird. but what happens is that during template construction the large toast.mako block gets added to the append. The character exacaping is weird. Not sure if needed.
 ops.addToast = function (id, title, body, bg) {
@@ -10,10 +10,15 @@ ops.addToast = function (id, title, body, bg) {
     };
 
 ops.addErrorToast = (xhr) => {if (!! xhr.responseJSON) {
-                                            ops.addToast('userpageerror','Error '+xhr.status,'An error occured.'+xhr.responseJSON.status, 'bg-danger');
+                                            ops.addToast('userpageerror','Error '+xhr.status,'The request could not be completed because '+xhr.responseJSON.status, 'bg-danger');
                                                 }
                               else if (!! xhr.responseText) {
-                                            ops.addToast('userpageerror', 'Error ' + xhr.status, 'An error occured.' + xhr.responseText, 'bg-danger');
+                                            if (ops.debug) {
+                                                ops.addToast('userpageerror', 'Error ' + xhr.status, 'An unknown error occured serverside and the admin has been notified.' + xhr.responseText, 'bg-danger');
+                                            }
+                                            else {
+                                                ops.addToast('userpageerror', 'Error ' + xhr.status, 'An unknown error occured serverside and the admin has been notified.', 'bg-danger');
+                                            }
                                         }
                               else {
                                             ops.addToast('userpageerror','Error '+xhr.status,'An unknown error occured.', 'bg-danger');
@@ -55,5 +60,3 @@ ops.statusCheck = function (data) {
             return 0;
         });
 };
-
-

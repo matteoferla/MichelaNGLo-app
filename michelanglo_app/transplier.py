@@ -520,8 +520,9 @@ class PyMolTranspiler:
                 f = re.match("\w{3}d+(\w{3})", mutant).group(1).upper()
             else:  # 1 letter R
                 f = p1to3[mutant[-1]].upper()
+            print('f looks like ',f)
+            print('sele ',f"{chain}/{n}/")
             pymol.cmd.get_wizard().set_mode(f)
-            #print('*'*10,f"{chain}/{n}/")
             pymol.cmd.get_wizard().do_select(f"{chain}/{n}/")
             pymol.cmd.get_wizard().apply()
             #m = pymol.cmd.get_model(f"resi {n} and name CA").atom
@@ -529,7 +530,7 @@ class PyMolTranspiler:
             #    pass
             #    # assert f == m[0].resn, f'Something is not right {r} has a {m[0].atom}'
         pymol.cmd.save(outfile)
-        pymol.cmd.delete('(all)')
+        pymol.cmd.delete('all')
 
     @classmethod
     @PyMolTranspilerDeco

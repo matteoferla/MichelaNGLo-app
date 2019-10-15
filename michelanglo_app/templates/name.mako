@@ -51,10 +51,16 @@
     <div class="row">
         <div id="fv_label" class="col-12" style="display: none;">
         <h5>Info</h5>
-        <p>Data loaded for <span id="label_protName"><i class="fas fa-spinner fa-spin"></i></span></p>
+        <p>Data loaded for <b><span id="label_protName"><i class="fas fa-spinner fa-spin"></i></span></b></p>
         <h5>Length</h5>
-    <p>Two pieces of information are presented here to help you choose: the first is the length of the protein and the second is the partners if any in the structure.<br/>
-        Clicking on an entry in the PDB track (if structures are present) will load that protein structure.</p>
+            <p>Two pieces of information are presented here to help you choose: the first is the length of the protein and the second is the partners if any in the structure.</p>
+
+            <div class="alert alert-info" role="alert">
+                <i class="far fa-hand-pointer"></i> Clicking on an entry in the PDB or Swissmodel tracks (if structures are present) will load that protein structure.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+            </div>
         </div>
         <div class="col-12">
             <div id="fv"></div>
@@ -62,6 +68,13 @@
         <div id="matches_label" class="col-12"  style="display: none;">
         <h5>Binding partners</h5>
             <p>Proteins can be crystallised with ligands or binding partners and it is often beneficial to choose a specific one.</p>
+            <div class="alert alert-info" role="alert">
+                <i class="far fa-hand-pointer"></i> Clicking on a row of the table will load that protein structure.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+            </div>
+
             <div id="partner_table"></div>
         </div>
 

@@ -11,6 +11,7 @@ import os
 import io
 import re
 import json
+import requests
 
 PyMolTranspiler.tmp = os.path.join('michelanglo_app', 'temp')
 
@@ -248,13 +249,15 @@ def convert_pdb(request):
         pdb_data = request.params['pdb'].replace("'",'').replace('"','') #XSS treat.
         settings['pdb'] = [('pdb', pdb_data)]
         settings['js'] = 'external'
-        code = re.match('REMARK 100 THIS ENTRY IS RENUMBERED FROM (\w+)\.', pdb_data).group(1)
-        settings['title'] = f'User submitted structure (from renumbered PDB {code})'
-        ### this is mad wasteful. TO DO Fix.
-        definitions = Structure(id=code, description='', x=0, y=0, code=code).lookup_sifts().chain_definitions
-        settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true}]'
-        settings['descriptors'] = {'peptide': [(':'+d['chain'], f"{d['uniprot']} [offset by {d['offset']}]") for d in definitions]}
-        settings['title'] = f'User created page (PDB: {code} renumbered to match protein)'
+        rex = re.match('REMARK 100 THIS ENTRY IS (\w+) FROM (\w+)\.', pdb_data)
+        if rex:
+            code = rex.group(2)
+            ### this is mad wasteful. TO DO Fix.
+            definitions = Structure(id=code, description='', x=0, y=0, code=code).lookup_sifts().chain_definitions
+            settings['descriptors'] = {'peptide': [(':'+d['chain'], f"{d['uniprot']} [offset by {d['offset']}]") for d in definitions]}
+            settings['title'] = f'User created page (PDB: {code} {rex.group(1)})'
+        else:
+            settings['title'] = f'User created page'
     else: #file
         settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true}]'
         filename = save_file(request, 'pdb', field='pdb')
@@ -274,11 +277,12 @@ def clean_data_other(data_other):
 
 @view_config(route_name='renumber', renderer="json")
 def renumber(request):
+    #PDB code only
     malformed = is_malformed(request, 'pdb')
     if malformed:
         return {'status': malformed}
     pdb = request.params['pdb']
-    if len(pdb) != 4 or re.search('\W', pdb) is not None:
+    if len(pdb) != 4 or re.search('\W', pdb) is not None: ## renumber is for PDB structures only. There is no point otherwise.
         request.response.status = 422
         return {'status': f'{pdb} is not PDB code'}
     definitions = Structure(id=pdb, description='', x=0, y=0, code=pdb).lookup_sifts().chain_definitions
@@ -286,6 +290,37 @@ def renumber(request):
     return {'pdb': f'REMARK 100 THIS ENTRY IS RENUMBERED FROM {pdb}.\n' +
                    '\n'.join(trans.ss) +
                    '\n'+trans.raw_pdb}
+
+@view_config(route_name='premutate', renderer="json") #as in mutate a structure before page creation.
+def premutate(request):
+    malformed = is_malformed(request, 'pdb', 'mutations', 'chain')
+    if malformed:
+        return {'status': malformed}
+    ## variant of mutate...
+    pdb = request.params['pdb']
+    chain = request.params['chain']
+    mutations = request.params['mutations'].split()
+    filename = os.path.join('michelanglo_app', 'temp', f'{uuid.uuid4()}.pdb') #get_uuid is not really needed as it does not go to DB.
+    ## type is determined
+    if len(pdb) == 4: ##PDB code.
+        code = pdb
+        PyMolTranspiler.mutate_code(pdb, filename, mutations, chain)
+    elif len(pdb.strip()) == 0:
+        request.response.status = 422
+        return {'status': f'Empty PDB string?!'}
+    else:
+        if re.match('https://swissmodel.expasy.org', pdb): ## swissmodel
+            pdb = requests.get(pdb).text
+        with open(filename, 'w') as fh:
+            fh.write(pdb)
+        PyMolTranspiler.mutate_file(filename, filename, mutations, chain)
+    with open(filename, 'r') as fh:
+        block = fh.read()
+    os.remove(filename)
+    if len(pdb) == 4:
+        return {'pdb': f'REMARK 100 THIS ENTRY IS ALTERED FROM {code}.\n' +block}
+    else:
+        return {'pdb': block}
 
 @view_config(route_name='convert_pdb_w_sdf', renderer="json")
 def with_sdf(request):

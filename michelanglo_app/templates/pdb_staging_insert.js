@@ -27,14 +27,45 @@ $('#create').click(function (event) {
         contentType: false,
         data:  data
     }).done(function (msg) {
-            ops.addToast('jobcompletion','Conversion complete','The data has been converted successfully.','bg-success');
-            console.log(msg);
-            window.location.href = "/data/"+msg.page;
+                ops.addToast('jobcompletion','Conversion complete','The data has been converted successfully.','bg-success');
+                ops.addToast('redirect','Conversion complete','Redirecting you to page '+msg.page,'bg-info');
+                console.log(msg);
+                window.location.href = "/data/"+msg.page;
         })
-        .fail(function () {
-            ops.addToast('jobcompletion','Conversion failed','The data did not convert correctly.','bg-danger');
-        });
+        .fail(ops.addErrorToast);
 });
+
+
+$('#mutate').click(async (event)  => {
+    let mutate_chain = $('#mutate_chain').val() || 'A';
+    let mutations = $('#mutate_mutations').val().replace(/p\./gm, '').trim().split(/[\W,]+/);
+    let pdb = '';
+    if (window.mode === undefined) { pdb = window.pdbCode}
+    else if (window.mode === 'renumbered') { pdb = window.pdbString}
+    else if (window.mode === 'file') {
+        pdb = await $('#upload_pdb')[0].files[0].text();
+    }
+    else {return 0;} //impossible anyway.
+    $.ajax({
+        url: "/premutate",
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            'pdb': pdb,
+            'chain': mutate_chain,
+            'mutations': mutations.join(' ')
+        },
+        success: msg => {
+            window.loadMyMsg(msg);
+            mutations.forEach(v => $('#mutate_collapse').append(`<a href="#viewport"
+                                                                    onclick="$('#markup_selection').val('${parseInt(v.replace(/\D/g,''))}:${mutate_chain}'); $('#markup_view').val(''); $('#clash').click();">
+                                                                    Set viewer to show clashes at ${v}?</a>`));
+                        },
+        error: ops.addErrorToast
+    });
+});
+
+
 
 
 $('#markup_model').detach();
@@ -74,21 +105,24 @@ $('#renumber').click(event => {
                 data: {
                     'pdb': window.pdbCode
                 },
-                success: msg => {
-                    $('#renumber_alert').removeClass('show');
-                    $(event.target).removeAttr('disabled');
-                    window.pdbString = msg.pdb;
-                    $('#staging').show();
-                    window.myData = undefined;
-                    NGL.stageIds = {};
-                    $('#viewport').html('');
-                    $('#viewcode').text('<div role="NGL" data-proteins=\'[{"type": "data", "value": "pdbString", "isVariable": true}]\'></div>');
-                    NGL.specialOps.multiLoader('viewport',[{type: 'data', value: "pdbString", isVariable: true}]);
-                    window.mode = 'renumbered';
-                    interactive_builder();
-                },
+                success: window.loadMyMsg,
                 error: ops.addErrorToast
             })
 
 });
+
+window.loadMyMsg = (msg) => {
+    $('#renumber_alert').removeClass('show');
+    $('#renumber').removeAttr('disabled');
+    window.pdbString = msg.pdb;
+    $('#staging').show();
+    window.myData = undefined;
+    NGL.stageIds = {};
+    $('#viewport').html('');
+    $('#viewcode').text('<div role="NGL" data-proteins=\'[{"type": "data", "value": "pdbString", "isVariable": true}]\'></div>');
+    NGL.specialOps.multiLoader('viewport',[{type: 'data', value: "pdbString", isVariable: true}]);
+    window.mode = 'renumbered';
+    interactive_builder();
+
+};
 //</%text>

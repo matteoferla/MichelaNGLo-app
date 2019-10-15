@@ -32,14 +32,22 @@ window.interactive_changer = (event, noRun) =>  {
     let sel_el = $('#markup_selection');
     let structure = NGL.getStage().getComponentByType('structure').structure;
     if ((!! sel_el.val()) && (structure.getView(new NGL.Selection(sel_el.val())).atomCount !== 0)) {
+        //There is a select that is valid
         if ((mode === 'residue' || mode === 'clash') && (structure.getView(new NGL.Selection(sel_el.val())).atomCount > 500)) {
+            //The selection is too much!
             sel_el.addClass('is-invalid');
+            sel_el.removeClass('is-valid');
             return 0;
+        } else {
+            //The selection is fine.
+            attributes += 'data-selection="'+sel_el.val()+'"';
+            $('.is-invalid').removeClass('is-invalid').addClass('is-valid');;
         }
-        attributes += 'data-selection="'+sel_el.val()+'"';
-        $('.is-invalid').removeClass('is-invalid');
     }
-    else {sel_el.addClass('is-invalid');
+    else if ((! sel_el.val()) && (mode !== 'residue' || mode !== 'clash')) {
+        sel_el.val('*'); attributes += 'data-selection="*"'; $('.is-invalid').removeClass('is-invalid').removeClass('is-valid');
+    }
+    else {sel_el.addClass('is-invalid').removeClass('is-valid');
           // load star if not residue...
           if (mode === 'residue' || mode === 'clash') {attributes += 'data-selection="hetero"'} else {attributes += 'data-selection="*"'}
           let msele = $('[id^="sele_"]:focus');
@@ -174,7 +182,7 @@ window.interactive_builder = () => {
                 for (let j=0; j < entityList[i].chainIndexList.length; j++) {
                     if (entityList[i].entityType === 1) {
                         let I = entityList[i].chainIndexList[j];
-                        let v = chainNames[I];  // let's pray to baby Jesus that order matches.
+                        let v = chainNames[I];  // let's hope that order matches.
                         let n = entityList[i].description;
                         $('#sele_chain,#sele_chain2').append(`<option value=":${'${v}'}">from chain ${'${v}'} (${'${n}'})</option>`);
                     }

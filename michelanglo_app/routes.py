@@ -35,6 +35,7 @@ def includeme(config):
     config.add_route('get', '/get')
     config.add_route('set', '/set')
     config.add_route('mutate', '/mutate')
+    config.add_route('premutate', '/premutate')  #as in mutate a structure before page creation.
     config.add_route('msg', '/msg')
     config.add_route('get_pages', '/get_pages')
     config.add_route('admin', '/admin')
