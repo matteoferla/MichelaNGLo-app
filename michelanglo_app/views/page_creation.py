@@ -4,7 +4,7 @@ import traceback
 from ..models import Page, User
 from ..models.trashcan import get_trashcan
 from protein import Structure
-from ..transplier import PyMolTranspiler
+from ..transplier import PyMolTranspiler, PyMolTranspilerDeco
 import uuid
 import shutil
 import os
@@ -314,11 +314,16 @@ def premutate(request):
     pdb = request.params['pdb']
     chain = request.params['chain']
     mutations = request.params['mutations'].split()
-    return operation(request,
+    try:
+        return operation(request,
                       pdb=pdb,
                       fun_code = PyMolTranspiler.mutate_code,
                       fun_file = PyMolTranspiler.mutate_file,
                       mutations=mutations, chain=chain)
+    except ValueError:
+        request.response.status = 422
+        return {'status': f'Invalid mutations'}
+
 
 def operation(request, pdb, fun_code, fun_file, **kargs):
     filename = os.path.join('michelanglo_app', 'temp', f'{uuid.uuid4()}.pdb') #get_uuid is not really needed as it does not go to DB.

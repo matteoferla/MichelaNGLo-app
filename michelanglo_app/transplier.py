@@ -95,6 +95,7 @@ class PyMolTranspilerDeco:
         except Exception as err:
             if self.lock.locked(): #the code errored before the lock could be released.
                 self.close_up()
+                print('LOCKDOWN!!!!')
             raise err
 
     def clean_up(self):
@@ -116,7 +117,6 @@ class PyMolTranspilerDeco:
             PyMolTranspiler.current_task = f'[{datetime.utcnow()}] working.'
             warn('The thread waited for over a minute!')
         self.clean_up()
-
 
 class PyMolTranspiler:
     """
@@ -518,8 +518,10 @@ class PyMolTranspiler:
             n = re.search("(\d+)", mutant).group(1)
             if re.match("\w{3}d+\w{3}", mutant):  # 3 letter Arg
                 f = re.match("\w{3}d+(\w{3})", mutant).group(1).upper()
-            else:  # 1 letter R
+            elif re.match("\w{1}d+\w{1}", mutant):  # 1 letter R
                 f = p1to3[mutant[-1]].upper()
+            else:
+                raise ValueError(f'{mutant} is not a valid mutation. It should be like A123W')
             print('f looks like ',f)
             print('sele ',f"{chain}/{n}/")
             pymol.cmd.get_wizard().set_mode(f)

@@ -222,7 +222,10 @@ NGL.specialOps.showBlur = function (id,selection, color, radius, view, scale, la
     var protein = NGL.getStage(id).getComponentByType('structure');
     NGL.getStage(id).removeClashes();
     protein.removeAllRepresentations();
-    scale = scale || 0.010;
+    let bfactors = protein.structure.atomStore.bfactor;
+    console.log(scale);
+    console.log(bfactors.length / bfactors.reduce((a,b)=> a+b, 0));
+    scale = scale || bfactors.length / bfactors.reduce((a,b)=> a+b, 0);
   protein.addRepresentation("tube", {
     sele: "polymer",
     radiusType: "bfactor",
@@ -503,7 +506,7 @@ NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
             NGL.specialOps.showSurface(id, selection, view);
         }
         else if ((focus === 'blur') || (focus === 'bfactor')) {
-            NGL.specialOps.showBlur(id,selection, color, radius, view, label);
+            NGL.specialOps.showBlur(id,selection, color, radius, view, undefined, label);
         }
         else if (structure !== undefined) { console.log('Please add view-reset if you are changing structure as its too ambiguous otherwise.');}
         else {throw 'ValueError: odd data-focus tag.'}
