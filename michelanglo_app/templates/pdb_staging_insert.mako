@@ -34,13 +34,15 @@
             <span data-toggle="tooltip" title="Create point mutations in this structure. The mutations are generated via the PyMOL mutagenesis fuction and alter side chain only.">
                 <button type="button" class="btn btn-outline-info mb-3" data-toggle="collapse" data-target="#mutate_collapse" id="mutate_collapse_btn"><i class="far fa-biohazard"></i> Make mutations</button>
            </span>
+            <span data-toggle="tooltip" title="Choose chains to delete">
+                <button type="button" class="btn btn-outline-info mb-3" data-toggle="collapse" data-target="#delete_collapse" id="delete_collapse_btn"><i class="far fa-trash"></i> Remove parts</button>
+           </span>
             </div>
             <div class="collapse bg-light rounded p-3 border" id="mutate_collapse">
                 <h5>Mutagenesis</h5>
                 <p class="mb-3">The mutations will be in the main structure after the page is created. If the mutated residue is shown in the initial view, it is suggested to use <a href="#markup_form" onclick="$('#clash').parent().click();">'clash' focus mode</a>.
                     To show first the wild type structure on page loading but allow the visitor to toggle to a mutation, create a page with no mutations and then add them in the edit menu.</p>
                 ### straight copypaste
-                %if user:
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text" id="mutate_chain_label">Chain</span>
@@ -54,11 +56,18 @@
                   <textarea class="form-control" aria-label="With textarea" id="mutate_mutations"></textarea>
                 </div>
                 <button id="mutate" class="btn btn-success w-100">Mutate</button>
-                %else:
-                    <div class="alert alert-danger">
-                        This feature is not available to unregistered users.
-                    </div>
-                %endif
+                </div>
+            <div class="collapse bg-light rounded p-3 border" id="delete_collapse">
+                <h5>Chain removal</h5>
+                <p class="mb-3">The asymmetric state of crystal structures do not always reflect the oligomerisation of the protein or there may be unneeded chains.</p>
+                ### straight copypaste
+                <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text" id="delete_chain_label">Chain</span>
+                  </div>
+                  <input type="text" class="form-control" aria-describedby="delete_chain_label" id="delete_chains" placeholder="chain ids">
+                </div>
+                <button id="delete" class="btn btn-success w-100">Delete</button>
                 </div>
         </div>
         </div>

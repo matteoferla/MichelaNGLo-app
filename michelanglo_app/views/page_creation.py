@@ -291,6 +291,20 @@ def renumber(request):
                    '\n'.join(trans.ss) +
                    '\n'+trans.raw_pdb}
 
+@view_config(route_name='remove_chains', renderer="json")
+def removal(request):
+    malformed = is_malformed(request, 'pdb', 'chains')
+    if malformed:
+        return {'status': malformed}
+    ## variant of mutate...
+    pdb = request.params['pdb']
+    chains = request.params['chains'].split()
+    return operation(request,
+                      pdb=pdb,
+                      fun_code = PyMolTranspiler.chain_removal_code,
+                      fun_file = PyMolTranspiler.chain_removal_file,
+                      chains=chains)
+
 @view_config(route_name='premutate', renderer="json") #as in mutate a structure before page creation.
 def premutate(request):
     malformed = is_malformed(request, 'pdb', 'mutations', 'chain')
@@ -300,11 +314,18 @@ def premutate(request):
     pdb = request.params['pdb']
     chain = request.params['chain']
     mutations = request.params['mutations'].split()
+    return operation(request,
+                      pdb=pdb,
+                      fun_code = PyMolTranspiler.mutate_code,
+                      fun_file = PyMolTranspiler.mutate_file,
+                      mutations=mutations, chain=chain)
+
+def operation(request, pdb, fun_code, fun_file, **kargs):
     filename = os.path.join('michelanglo_app', 'temp', f'{uuid.uuid4()}.pdb') #get_uuid is not really needed as it does not go to DB.
     ## type is determined
     if len(pdb) == 4: ##PDB code.
         code = pdb
-        PyMolTranspiler.mutate_code(pdb, filename, mutations, chain)
+        fun_code(pdb, filename, **kargs)
     elif len(pdb.strip()) == 0:
         request.response.status = 422
         return {'status': f'Empty PDB string?!'}
@@ -313,12 +334,15 @@ def premutate(request):
             pdb = requests.get(pdb).text
         with open(filename, 'w') as fh:
             fh.write(pdb)
-        PyMolTranspiler.mutate_file(filename, filename, mutations, chain)
+        fun_file(filename,  filename, **kargs)
     with open(filename, 'r') as fh:
         block = fh.read()
     os.remove(filename)
     if len(pdb) == 4:
-        return {'pdb': f'REMARK 100 THIS ENTRY IS ALTERED FROM {code}.\n' +block}
+        return {'pdb': f'REMARK 100 THIS ENTRY IS ALTERED FROM {pdb}.\n' +block}
+    elif 'REMARK 100 THIS ENTRY' in block:
+        code = re.match('REMARK 100 THIS ENTRY IS \w+ FROM (\w+).', pdb).group(1)
+        return {'pdb': f'REMARK 100 THIS ENTRY IS ALTERED FROM {code}.\n' + block}
     else:
         return {'pdb': block}
 

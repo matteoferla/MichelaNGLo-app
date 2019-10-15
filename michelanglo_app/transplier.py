@@ -562,6 +562,51 @@ class PyMolTranspiler:
         cls._mutagen(outfile, mutations, chain)
         return 1
 
+
+
+
+
+    @staticmethod
+    def _chain_removal(outfile, chains):
+        """
+        Create a mutant protein based on a list of mutations on the already loaded protein.
+        :param outfile: str the file to save the mod as.
+        :param chains: list str chain id in the pdb loaded.
+        :return: None
+        """
+        for chain in chains:
+            pymol.cmd.remove(f'chain {chain}')
+        pymol.cmd.save(outfile)
+        pymol.cmd.delete('all')
+
+    @classmethod
+    @PyMolTranspilerDeco
+    def chain_removal_code(cls, code, outfile, chains):
+        """
+        Create a mutant protein based on a list of mutations on a PDB code.
+        :param code: str pdb code.
+        :param outfile: str the file to save the mod as.
+        :param chains: list of str chain id in the pdb loaded.
+        :return:
+        """
+        pymol.cmd.fetch(code)
+        cls._chain_removal(outfile, chains)
+        return 1
+
+    @classmethod
+    @PyMolTranspilerDeco
+    def chain_removal_file(cls, infile, outfile, chains):
+        """
+        Create a mutant protein based on a list of mutations on a PDB file path.
+        :param infile: str
+        :param outfile: str the file to save the mod as.
+        :param chains: lsit of str chain id in the pdb loaded.
+        :return:
+        """
+        pymol.cmd.load(infile)
+        cls._chain_removal(outfile, chains)
+        return 1
+
     def fix_structure(self):
         """
         Fix any issues with structure. see pymol_model_chain_segi.md for more.
