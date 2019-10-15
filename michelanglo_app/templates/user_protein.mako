@@ -46,7 +46,7 @@
     <div class='col-12 col-lg-${columns_text} ${part_order[1]}'>
         %if model:
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
-              <strong>Model warning</strong> One or more structures presented here are computational models and not experimental determination, consequently should be treated with caution.
+              <strong>Model warning</strong> One or more structures presented here are computational models and not experimental determinations, consequently should be treated with caution.
               <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>

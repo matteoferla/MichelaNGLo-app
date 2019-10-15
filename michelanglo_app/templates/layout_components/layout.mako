@@ -284,9 +284,15 @@ pre {
                   <small><a href="https://www.schrodinger.com/" target="_blank">PyMOL <i class="far fa-external-link-square"></i></a> is a trademark of <a href="https://pymol.org/2/" target="_blank">Schr&ouml;dinger , LLC <i class="far fa-external-link-square"></i></a>. The authors are not affiliated or involved with PyMOL or Schr&ouml;dinger.
                       <br/>Data is not kept for commercial, see data <a href="docs/users">policy documentation</a>.</small></div>
               <div class="d-none d-lg-block col-5 offset-lg-1 p-2">
+                  %if not remote:
                   <img src="/static/ox_full.svg" alt="University of Oxford" class="footer-logo" onclick="window.location.href = 'http://www.ox.ac.uk/';">&nbsp;&nbsp;&nbsp;
                   <img src="/static/OxfordBRC-logo-2019.png" alt="BRC"   class="footer-logo" onclick="window.location.href = 'https://oxfordbrc.nihr.ac.uk/';">&nbsp;&nbsp;&nbsp;
                   <img src="/static/SGC_reverse_trans.png" alt="SGC"   class="footer-logo" onclick="window.location.href = 'https://www.sgc.ox.ac.uk/';">
+                  %else:
+                  <img src="https:/michelanglo.sgc.ox.ac.uk/static/ox_full.svg" alt="University of Oxford" class="footer-logo" onclick="window.location.href = 'http://www.ox.ac.uk/';">&nbsp;&nbsp;&nbsp;
+                  <img src="https:/michelanglo.sgc.ox.ac.uk/static/OxfordBRC-logo-2019.png" alt="BRC"   class="footer-logo" onclick="window.location.href = 'https://oxfordbrc.nihr.ac.uk/';">&nbsp;&nbsp;&nbsp;
+                  <img src="https:/michelanglo.sgc.ox.ac.uk/static/SGC_reverse_trans.png" alt="SGC"   class="footer-logo" onclick="window.location.href = 'https://www.sgc.ox.ac.uk/';">
+                  %endif
               </div>
               <div class="d-block d-lg-none col-12">
                   <a href='http://www.ox.ac.uk/'>University of Oxford</a>
