@@ -1,4 +1,4 @@
-
+//<%text>
 
 // this gets called only in modal mode. so it's fine.
 $('#markup_modal').on('shown.bs.modal', function (e) {
@@ -69,7 +69,7 @@ window.interactive_changer = (event, noRun) =>  {
 
     }
     let model = $('#markup_model').children(':selected').val();
-    if (model !== 'none') {attributes+= ` data-load="${"${model}"}"`}
+    if (model !== 'none') {attributes+= ` data-load="${model}"`}
     code = 'data-focus="'+mode+'"';
     let id = 'viewport';
     let spanCode ='<span class="prolink" data-target="'+id+'" data-toggle="protein" '+code+' '+attributes+'>Try me as a span-element</span>';
@@ -140,7 +140,7 @@ window.interactive_builder = () => {
     });
 
     let modelSelector = $('#markup_model');
-    myData.proteins.forEach(  ({value, type}) => modelSelector.append(`<option value="${"${value}"}">${"${value}"}</option>`) );
+    myData.proteins.forEach(  ({value, type}) => modelSelector.append(`<option value="${value}">${value}</option>`) );
     //////////////// Ready ///////////////////////////
     //$('#markup_calculate').click(
     //load domain.
@@ -165,10 +165,9 @@ window.interactive_builder = () => {
     sigs.dragged.add(alertDifference);
 };
 
- $('#selection_modal').on('shown.bs.modal', () => {
-        $('#sele_chain,#sele_chain2').html('<option value=" ">from all chains</option>');
-        //get names if present...
-        let structure = NGL.getStage().getComponentByType('structure').structure;
+
+window.chain_descriptor = () => {
+    let structure = NGL.getStage().getComponentByType('structure').structure;
         // get the chainame:
         let chainNames = structure.chainStore.chainname;
         // chainname is a structure where the first of each three entires is the actual chain letter as a int:
@@ -176,15 +175,20 @@ window.interactive_builder = () => {
         // chainNames is a uint8 array and needs converting to letter:
         chainNames = Array.from(chainNames).map(v => String.fromCharCode(v));
         let entityList =structure.entityList;
+        let values = [];
         if (entityList.length > 0) {
             for (let i=0; i< entityList.length; i++) {
                 //.map(v => structure.chainname[v])
                 for (let j=0; j < entityList[i].chainIndexList.length; j++) {
                     if (entityList[i].entityType === 1) {
                         let I = entityList[i].chainIndexList[j];
-                        let v = chainNames[I];  // let's hope that order matches.
-                        let n = entityList[i].description;
-                        $('#sele_chain,#sele_chain2').append(`<option value=":${'${v}'}">from chain ${'${v}'} (${'${n}'})</option>`);
+                        if (chainNames[I]) {
+                            values.push({'idx': I,
+                                     'value': chainNames[I], // let's hope that order matches.
+                                     'name': entityList[i].description
+                                    });
+                        }
+
                     }
                 }
             }
@@ -192,8 +196,16 @@ window.interactive_builder = () => {
         else {
              // chainNames sometimes has some repeats?! hetero?
             chainNames = chainNames.filter((v, i, a) => a.indexOf(v) === i);
-            chainNames.sort().forEach(v => $('#sele_chain,#sele_chain2').append(`<option value=":${'${v}'}">from chain ${'${v}'}</option>`));
+            values = chainNames.sort().map((v, i) => ({idx: i, value: v, name: v}));
         }
+        return values;
+};
+
+ $('#selection_modal').on('shown.bs.modal', () => {
+        $('#sele_chain,#sele_chain2').html('<option value=" ">from all chains</option>');
+        //get names if present...
+        let names = chain_descriptor();
+        names.forEach(v => $('#sele_chain,#sele_chain2').append(`<option value=":${v.value}">from chain ${v.value} (${v.name})</option>`));
         // add elements
 
         $('#sele_chain option').eq(0).attr('selected', 'selected');
@@ -225,3 +237,4 @@ window.interactive_builder = () => {
 
 
 
+//</%text>
