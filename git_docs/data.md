@@ -5,10 +5,9 @@ The sharable links can be viewed by anyone with the link,
 however, only the registered creator of the page can edit it or promote a registered user who visited the page to edit it.
 
 > app_users=# \d+ users
->
-                                                         Table "public.users"
+
     Column     |       Type        | Collation | Nullable |              Default              | Storage  | Stats target | Description 
----------------+-------------------+-----------+----------+-----------------------------------+----------+--------------+-------------
+---------------|-------------------|-----------|----------|-----------------------------------|----------|--------------|-------------
  id            | integer           |           | not null | nextval('users_id_seq'::regclass) | plain    |              | 
  name          | character varying |           | not null |                                   | extended |              | 
  role          | character varying |           | not null |                                   | extended |              | 
@@ -17,7 +16,7 @@ however, only the registered creator of the page can edit it or promote a regist
  owned_pages   | character varying |           |          |                                   | extended |              | 
  visited_pages | character varying |           |          |                                   | extended |              | 
 
-Indexes:
+    Indexes:
     "users_pkey" PRIMARY KEY, btree (id)
     "users_name_key" UNIQUE CONSTRAINT, btree (name)
 
@@ -86,9 +85,9 @@ This small table contains the names of the redirects `r/nicename` > `data/123456
 
 >app_users-# \d+ redirects
 
-                                                Table "public.redirects"
+
  Column |  Type   | Collation | Nullable |                Default                | Storage  | Stats target | Description 
---------+---------+-----------+----------+---------------------------------------+----------+--------------+-------------
+--------|---------|-----------|----------|---------------------------------------|----------|--------------|-------------
  id     | integer |           | not null | nextval('redirects_id_seq'::regclass) | plain    |              | 
  short  | text    |           | not null |                                       | extended |              | 
  long   | text    |           | not null |                                       | extended |              | 
