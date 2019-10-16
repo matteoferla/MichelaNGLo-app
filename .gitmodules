@@ -4,3 +4,15 @@
 [submodule "michelanglo_app/static/ThirdParty/Font-Awesome-Pro"]
 	path = michelanglo_app/static/ThirdParty/Font-Awesome-Pro
 	url = https://github.com/FortAwesome/Font-Awesome-Pro.git
+[submodule "michelanglo_app/static/ThirdParty/bootstrap"]
+	path = michelanglo_app/static/ThirdParty/bootstrap
+	url = https://github.com/twbs/bootstrap.git
+[submodule "michelanglo_app/static/ThirdParty/jquery"]
+	path = michelanglo_app/static/ThirdParty/jquery
+	url = https://github.com/jquery/jquery.git
+[submodule "michelanglo_app/static/ThirdParty/popper"]
+	path = michelanglo_app/static/ThirdParty/popper
+	url = https://github.com/FezVrasta/popper.js.git
+[submodule "michelanglo_app/static/ThirdParty/ngl"]
+	path = michelanglo_app/static/ThirdParty/ngl
+	url = https://github.com/arose/ngl.git

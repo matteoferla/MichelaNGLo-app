@@ -80,7 +80,15 @@
                 %endif
                 <button type="button" class="btn btn-outline-success w-100 my-1" id="save" data-toggle="tooltip" title="Save a PNG of the current view"><i class="far fa-camera"></i> Save image</button>
                 %if not no_user:
-                    <a href="/data/${page}?no_user=1&remote=1&no_buttons=1&key=${key}" class="btn btn-outline-success w-100 my-1"  download="page.html"  data-toggle="tooltip" title="Download this page. Requires an internet connection to access third party libraries."><i class="far fa-download"></i> Download html file</a>
+                        <div class="dropdown" id="pagedownloadDropdown">
+                          <button class="btn btn-outline-success dropdown-toggle w-100 my-1 " type="button" id="pagedropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="far fa-map"></i> Download HTML file
+                          </button>
+                          <div class="dropdown-menu " aria-labelledby="pagedropdownMenuButton">
+                              <a href="/data/${page}?no_user=1&remote=1&no_buttons=1&key=${key}" class="btn btn-outline-success w-100 my-1"  download="page.html"  data-toggle="tooltip" title="Download this page. Requires an internet connection to access third party libraries."><i class="far fa-download"></i> Download normal html file</a>
+                              <a href="/data/${page}?no_user=1&offline=1&no_buttons=1&key=${key}" class="btn btn-outline-secondary w-100 my-1"  download="page.html"  data-toggle="tooltip" title="Download this page without the need for the internet. Not recommended as some may features do not work."><i class="far fa-download"></i> Download offline html file</a>
+                          </div>
+                        </div>
                     %if len(structure_info) == 1:
                         <a href="/save_pdb?uuid=${page}&key=${key}&index=0" class="btn btn-outline-success w-100 my-1"  download="model.pdb" data-toggle="tooltip" title="Download the structure from this page."><i class="far fa-map"></i> Download PDB file</a>
                     %else:
@@ -99,7 +107,7 @@
                 %endif
                 %endif
                 ###<button type="button" class="btn btn-outline-primary w-100 my-1" data-toggle="modal" data-target="#basics"><i class="far fa-cubes"></i> Protein basics</button>
-                %if remote:
+                %if remote or offline:
                     <button type="button" class="btn btn-outline-primary w-100 my-1" data-toggle="modal" data-target="#about"><i class="far fa-quote-right"></i> Credits</button>
                 %endif
                 </div>

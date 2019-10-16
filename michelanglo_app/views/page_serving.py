@@ -108,7 +108,14 @@ def get_userdata(request, pagename):
         else:
             settings['editable'] = False
         ### extras?
-        if 'remote' in request.params:
+        # default values in layout.mako args.
+        if 'offline' in request.params:
+            settings['offline'] = True
+            settings['remote'] = True
+            settings['no_user'] = True
+            settings['no_analytics'] = True
+            settings['no_buttons'] = True
+        elif 'remote' in request.params:
             settings['remote'] = True
         if 'bootstrap' in request.params:
             settings['bootstrap'] = request.params['bootstrap']
@@ -254,10 +261,6 @@ def save_pdb(request):
             return pdb[0][1] #pdb is
     else:
         return verdict
-
-@view_config(route_name='save_zip', renderer="string")
-def save_zip(request):
-    raise NotImplementedError
 
 
 

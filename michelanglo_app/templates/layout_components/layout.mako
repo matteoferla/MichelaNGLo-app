@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<%page args="bootstrap='4', remote=False, no_user=False, public=True, confidential=False, no_analytics=False, title='Michelaɴɢʟo'"/>
+<%page args="bootstrap='4', remote=False, offline=False, no_user=False, public=True, confidential=False, no_analytics=False, title='Michelaɴɢʟo'"/>
 
 <head>
     <meta charset="utf-8">
@@ -19,19 +19,18 @@
     %endif
 
     <title>${title}</title>
-    % if bootstrap == 'materials':
+    % if offline:
+        <style>
+            ${open('michelanglo_app/static/ThirdParty/bootstrap/dist/css/bootstrap.min.css').read()|n}
+        </style>
+    % elif bootstrap == 'materials':
         <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.7.6/css/mdb.min.css" rel="stylesheet">
     % else:
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     % endif
 
-    <!-- Custom styles for this scaffold -->
-    <!--<link href="/static/theme.css" rel="stylesheet">-->
-    <!--<link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-LRlmVvLKVApDVGuspQFnRQJjkv0P7/YFrw84YYQtmYG4nK8c+M+NlmYDCv0rKWpG" crossorigin="anonymous">-->
-    <link rel="stylesheet" href="/static/ThirdParty/Font-Awesome-Pro/css/all.min.css" crossorigin="anonymous">
-    <link rel="stylesheet" href="/static/ThirdParty/bootstrap-tourist/bootstrap-tourist.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/3.0.0-beta.3/css/bootstrap-colorpicker.css">
+    #### Non-critical stylesheets at bottom of page for speed.
     <style>
 
 .footer {
@@ -285,7 +284,9 @@ pre {
                   <small><a href="https://www.schrodinger.com/" target="_blank">PyMOL <i class="far fa-external-link-square"></i></a> is a trademark of <a href="https://pymol.org/2/" target="_blank">Schr&ouml;dinger , LLC <i class="far fa-external-link-square"></i></a>. The authors are not affiliated or involved with PyMOL or Schr&ouml;dinger.
                       <br/>Data is not kept for commercial, see data <a href="docs/users">policy documentation</a>.</small></div>
               <div class="d-none d-lg-block col-5 offset-lg-1 p-2">
-                  %if not remote:
+                  %if offline:
+                  University of Oxford &mdash; NIHR: BRC &mdash; SGC
+                  %elif not remote:
                   <img src="/static/ox_full.svg" alt="University of Oxford" class="footer-logo" onclick="window.location.href = 'http://www.ox.ac.uk/';">&nbsp;&nbsp;&nbsp;
                   <img src="/static/OxfordBRC-logo-2019.png" alt="BRC"   class="footer-logo" onclick="window.location.href = 'https://oxfordbrc.nihr.ac.uk/';">&nbsp;&nbsp;&nbsp;
                   <img src="/static/SGC_reverse_trans.png" alt="SGC"   class="footer-logo" onclick="window.location.href = 'https://www.sgc.ox.ac.uk/';">
@@ -308,21 +309,32 @@ pre {
     </footer>
 
 
-<!-- Bootstrap core JavaScript
-================================================== -->
-<!-- Placed at the end of the document so the pages load faster -->
-<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-% if bootstrap == 'materials':
+<!-- Bootstrap core JavaScript-->
+%if offline:
+    ### if you get an error here that the file jquery is missing it is because you did not npm built it!
+    <script type="text/javascript">${open('michelanglo_app/static/ThirdParty/jquery/dist/jquery.min.js').read()|n}</script>
+    <script type="text/javascript">${open('michelanglo_app/static/ThirdParty/bootstrap/dist/js/bootstrap.min.js').read()|n}</script>
+    <!-- cannot compile popper -->
+%else:
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+%endif
+%if bootstrap == 'materials':
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.7.6/js/mdb.min.js"></script>
 % endif
-<script src="https://unpkg.com/ngl@2.0.0-dev.34/dist/ngl.js" type="text/javascript"></script>
-% if not remote:
+
+%if offline:
+    <script type="text/javascript">${open('michelanglo_app/static/ThirdParty/ngl/dist/ngl.js').read()|n}</script>
+    <script type="text/javascript">${open('michelanglo_app/static/michelanglo.js').read()|n}</script>
+    <script type="text/javascript">${open('michelanglo_app/static/michelanglo_menu.js').read()|n}</script>
+%elif not remote:
+    <script src="https://unpkg.com/ngl@2.0.0-dev.34/dist/ngl.js" type="text/javascript"></script>
     <script type="text/javascript" src="/static/michelanglo.js"></script>
     <script type="text/javascript" src="/static/michelanglo_menu.js"></script>
     <script src="/static/ThirdParty/bootstrap-tourist/bootstrap-tourist.js"></script>
 % else:
+    <script src="https://unpkg.com/ngl@2.0.0-dev.34/dist/ngl.js" type="text/javascript"></script>
     <script type="text/javascript" src="https://michelanglo.sgc.ox.ac.uk/michelanglo.js"></script>
     <script type="text/javascript" src="https://michelanglo.sgc.ox.ac.uk/michelanglo_menu.js"></script>
     <!-- no turist -->
@@ -399,6 +411,16 @@ $('#chat_send').click((event) => {
   gtag('config', 'UA-66652240-5');
 </script>
 % endif
+<!-- Custom styles for this scaffold that are not time critical-->
+    <!--<link href="/static/theme.css" rel="stylesheet">-->
+    <!--<link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-LRlmVvLKVApDVGuspQFnRQJjkv0P7/YFrw84YYQtmYG4nK8c+M+NlmYDCv0rKWpG" crossorigin="anonymous">-->
+
+<script type="text/javascript">
+    $( document ).ready(()=> $('head').append(`<link rel="stylesheet" href="/static/ThirdParty/Font-Awesome-Pro/css/all.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/ThirdParty/bootstrap-tourist/bootstrap-tourist.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/3.0.0-beta.3/css/bootstrap-colorpicker.css">`));
+</script>
+
 
 
 </body>

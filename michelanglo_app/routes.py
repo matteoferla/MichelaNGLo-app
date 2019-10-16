@@ -24,7 +24,6 @@ def includeme(config):
     config.add_route('choose_pdb', '/choose_pdb')
     config.add_route('task_check','/task_check')
     config.add_route('save_pdb', '/save_pdb')
-    config.add_route('save_zip', '/save_zip')
     config.add_route('edit_user-page', '/edit_user-page')
     config.add_route('combine_user-page', '/combine_user-page')
     config.add_route('delete_user-page', '/delete_user-page')
