@@ -40,7 +40,8 @@ Note that this module uses submodule so clone it recursively.
     python3 setup.py install #or pip install -e .
 
 ## Protein module
-It also uses a protein module to allow gene name querying.
+It also uses a protein module to allow gene name querying. This module has lots of cool stuff. I might be worth your while checking it out.
+
 see [https://github.com/matteoferla/MichelaNGLo-protein-module](https://github.com/matteoferla/MichelaNGLo-protein-module)
 
     git clone https://github.com/matteoferla/MichelaNGLo-protein-module.git
