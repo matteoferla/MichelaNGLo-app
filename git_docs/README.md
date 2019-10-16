@@ -11,3 +11,4 @@ If you want to documentation about the site see [michelanglo.sgc.ox.ac.uk/docs](
 * API (see [michelanglo.sgc.ox.ac.uk/docs/api](https://michelanglo.sgc.ox.ac.uk/docs/api))
 * [database details](./data.md)
 * [the segment and model problem](./PyMOL_model_chains_segi.md)
+* [deploy!](./deploy.md)

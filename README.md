@@ -16,6 +16,9 @@ A future possibility is that in collaboration with specific journals this could 
 
 ![process](git_docs/images/process-02.png)
 
+## Deployment
+
+Want to install this webserver locally? Then check out [deployment notes](git_docs/deploy.md).
 
 ## Transpiler
 The transpiler script does the conversion the PyMol files and a few extras.
@@ -44,6 +47,8 @@ The mouse image can be found [here](git_docs/images/clickmap.jpg).
 
 ## data-toggle='protein'
 Extra functionality can be optionally added, including the ability to create links that control the protein.
+
+![prolink](./git_docs/images/fig%201.jpg)
 
 The full documentation and examples can be found at [michelanglo.sgc.ox.ac.uk/docs/markup](https://michelanglo.sgc.ox.ac.uk/docs/markup).
 
@@ -78,31 +83,6 @@ To debug this yourself, open the console and type `protein.structure.eachAtom(fu
 I am aware of two unfixed bugs, one is the CD2 atom in histidine residues with different colored carbons and the other is the absence of shades of gray (_e.g._ `gray40`) in the color chart.
 
 
-## Python3 compiled Pymol in Ubuntu
-This app requires Python3 compiled Pymol. The best option is using Conda. Otherwise it needs to be compiled ([instructions](https://blog.matteoferla.com/2019/04/pymol-on-linux-without-conda.html)). 
-
-# Webapp installation
-Additionally for the webapp the package needs to be installed and the database started.
-
-    #use whatever venv or system pip/alembic you want.
-    pip3 install -e .
-    alembic -c production.ini revision --autogenerate -m "lets get this party started"
-    alembic -c production.ini upgrade head
-    
-In windows the excecutables will have `.exe` suffixes and are in `Scripts` folder `C:\Users\matteo\AppData\Local\Continuum\anaconda3\Scripts\pip3.exe` say for your regular install, your virtual env will be wherever you put it.
-
-Afterwhich, change the secret in `production.ini` and run the script and made a user called `admin`.
-The users `trashcan` gets generated automatically when a guest makes a view and is blacklisted along with `guest` and `Anonymous`.
-
-# nodejs
-
-In order to get thumbnails of the protein, for Twitter or Facebook, nodejs with puppeteer is required.
-
-    sudo apt install nodejs
-    sudo apt install npm
-    npm i puppeteer
-    
-Also, some of the submodules in `michelanglo_app/static/ThirdParty` need building. But this is only required for static offline downloads.
 
 ## Licence
 * [PyMOL](https://github.com/schrodinger/pymol-open-source/blob/master/LICENSE) is a trademark of Schrodinger, LLC, and can be used freely.
