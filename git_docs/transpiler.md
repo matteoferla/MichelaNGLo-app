@@ -35,7 +35,7 @@ The source of the NGL code can be changed:
    
 
 ## Example
-Here is a rather funny view in PyMOL and the equivalent snapshot transpiled to NGL (link to [example.html](http://www.well.ox.ac.uk/~matteo/junk/example.html)).
+Here is a rather funny view in PyMOL and the equivalent snapshot transpiled to NGL.
 
 <img src="images/example_pymol.png" width="200">
 <img src="images/example_ngl.png" width="200">

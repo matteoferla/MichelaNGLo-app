@@ -40,4 +40,4 @@ Edits are done to the address `edit_user-page`.
             'description': 'HTML escription',
             'loadfun': 'A JS function'}
 
-Note that regular users cannot upload JS (as they could steal credentials of people they share links to ([example](data/7c76d65a-4a98-4768-8166-ad7bd38f148e)). Therefore, only specially approved users can.
+Note that regular users cannot upload JS (as they could steal credentials of people they share links to ([example](https://michelanglo.sgc.ox.ac.uk/data/7c76d65a-4a98-4768-8166-ad7bd38f148e)). Therefore, only specially approved users can.
