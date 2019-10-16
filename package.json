@@ -1,0 +1,23 @@
+{
+  "name": "michelanglo",
+  "version": "1.0.0",
+  "description": "Michelaɴɢʟo is a web app to convert a PyMOL PSE file or PDB file to a easy to implement NGL.js view that can be implemented easily on any site.",
+  "main": "index.js",
+  "dependencies": {
+    "puppeteer": "^1.20.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matteoferla/MichelaNGLo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/matteoferla/MichelaNGLo/issues"
+  },
+  "homepage": "https://github.com/matteoferla/MichelaNGLo#readme"
+}

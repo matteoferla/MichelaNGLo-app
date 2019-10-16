@@ -516,7 +516,7 @@ def file_test():
     return transpiler
 
 def new_template_testing():
-    #transpiler = PyMolTranspiler(file='images/1ubq.pse')
+    #transpiler = PyMolTranspiler(file='git_docs/images/1ubq.pse')
     transpiler = test()
     transpiler.pdb = '1UBQ'
     transpiler.m4_alt = None

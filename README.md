@@ -1,18 +1,10 @@
 # Michelaɴɢʟo
 Michelaɴɢʟo is a web app to convert a PyMOL PSE file or PDB file to a easy to implement NGL.js view that can be implemented easily on any site.
 
-[Click here to visit the web app (temp URL)](https://michelanglo.sgc.ox.ac.uk).
+[Click here to visit the web app](https://michelanglo.sgc.ox.ac.uk).
 
+The documentation present here is purely technical for those who want to steal a part of the site or want to implement it locally.
 For the documentation for the web app see [help page](https://michelanglo.sgc.ox.ac.uk/docs).
-
-For more details about data stored see also [data](data.md).
-
-## Non-Michelaɴɢʟo goodies
-The conversion file, `michelanglo/transpiler.py` and the files in `michelanglo/transpiler_templates` are all that is required to use locally.
-They are in `michelanglo_app` to avoid allowing the app to do a relative import beyond the top-level package (`michelanglo_app`).
-
-The js that allows web content creators to control NGL without using JS is `michelanglo_app/static/michelanglo.js`, while its documentation is at [michelanglo.sgc.ox.ac.uk/docs/markup](michelanglo.sgc.ox.ac.uk/docs/markup).
-
 
 ## Aim of Michelaɴɢʟo
 
@@ -22,16 +14,25 @@ Therefore the intended audience are biochemists that may not have any web knowle
 
 A future possibility is that in collaboration with specific journals this could be rolled out in papers.
 
-![process](images/process-01.jpg)
+![process](git_docs/images/process-02.jpg)
 
-# Script
-The following describes the script. For the documentation for the web app, such as forgotten passwords, cookie usage _etc._, see [help page](https://michelanglo.sgc.ox.ac.uk/docs).
 
 ## Transpiler
+The transpiler script does the conversion the PyMol files and a few extras.
+The conversion file, `michelanglo/transpiler.py` and the files in `michelanglo/transpiler_templates` are all that is required to use locally.
+They are in `michelanglo_app` to avoid allowing the app to do a relative import beyond the top-level package (`michelanglo_app`).
 
-The script, and associated web app, gets a PSE file and converts it to a copy-pastable piece of code.
+For notes about the details about the conversion see [conversion.md](git_docs/conversion.md)
+For notes about the transpiler see [transpiler.md](git_docs/transpiler.md).
 
-If needed, this piece of code can include the PDB data itself, thus removing the need to store the PDB file somewhere.
+## Michelanglo.js
+The js that allows web content creators to control NGL without using JS is `michelanglo_app/static/michelanglo.js`, while its documentation is at [michelanglo.sgc.ox.ac.uk/docs/markup](michelanglo.sgc.ox.ac.uk/docs/markup).
+
+* [This is the michelanglo.js from GitHub](michelanglo_app/static/michelanglo.js)
+* [This is the michelanglo.js from SGC server](michelanglo.sgc.ox.ac.uk/michelanglo.js)
+
+## Data
+For details about how the data stored see also [data](git_docs/data.md).
 
 ## Image
 
@@ -39,59 +40,7 @@ Whereas, the most commonly used protein viewing software is PyMol, most research
 
 Consequently, the code allows users to generate code than when a given static image is clicked it results in a NGL viewer div. Example: [demo](https://michelanglo.sgc.ox.ac.uk/LZTR1.html).
 
-The mouse image can be found [here](images/clickmap.jpg).
-
-## Script functionality
-The script `PyMOL_to_NGL.py` has the class `PyMolTranspiler`. Which accepts different starting values.
-If Pymol is installed on the system and the system is not a Windows machine, the filename of the PSE is passed and processed.
-
-which can be initialised thusly:
-
-    >>> trans = PyMolTranspiler(view=get_view_output_as_string, reps=interate_output_as_string, pdb=file_of_saved_pdb)
-    >>> trans.to_html_line()
-
-        <!-- **inserted code**  -->
-        <script src="https://cdn.rawgit.com/arose/ngl/v0.10.4-1/dist/ngl.js" type="text/javascript"></script>
-        <script type="text/javascript">
-                    var stage = new NGL.Stage( "viewport",{backgroundColor: "white"});
-                    stage.loadFile( "rcsb://1UBQ").then(function (protein) {
-                        window.protein=protein;
-                        var m4 = (new NGL.Matrix4).fromArray([0.7028832919662867, -15.555627368224188, -42.22285806091866, 0.0, 44.899153041969875, 3.027791553007612, -0.36819969318162726, 0.0, 2.968061030936039, -42.12016318698766, 15.567270234463177, 0.0, -26.235111237, -28.054784775, -3.878722429, 1.0]);
-                        stage.viewerControls.orient(m4);
-                        protein.removeAllRepresentations();
-                        var sticks = new NGL.Selection( "1.N or 1.CA or 1.C or 1.O or 1.CB or 1.CG or 1.SD or 1.CE or 30.N or 30.CA or 30.C or 30.O or 30.CB or 30.CG1 or 30.CG2 or 30.CD1" );
-                        protein.addRepresentation( "licorice", { sele: sticks.string} );
-                        var cartoon = new NGL.Selection( "14 or 15 or 19 or 1 or 13 or 16 or 11 or 17 or 12 or 20 or 18 or 10 or 2" );
-                        protein.addRepresentation( "cartoon", { sele: cartoon.string} );
-                        stage.viewerControls.orient(m4);
-                    });
-        </script>
-        <!-- **end of code** -->
-        
-The The class initialises as a blank object with default settings unless the `file` (filename of PSE file) or `view` and/or `reps` is passed.
-For views see `.convert_view(view_string)`, which processes the output of PyMOL command `set_view`
-For representation see `.convert_reps(reps_string)`, which process the output of PyMOL command `iterate 1UBQ, print resi, resn,name,ID,reps`
-    
-The source of the NGL code can be changed:
-
-    >>> trans.to_html_line(ngl='ngl.js')
-   
-
-## Example
-Here is a rather funny view in PyMOL and the equivalent snapshot transpiled to NGL (link to [example.html](http://www.well.ox.ac.uk/~matteo/junk/example.html)).
-
-<img src="images/example_pymol.png" width="200">
-<img src="images/example_ngl.png" width="200">
-
-## Where
-The script output a secret temporary page that can be shared, but also a block of code that can be used by the user on their sites.       
-About the latter usage, to use the output code one needs access to the raw HTML. Not necessarily of the whole page as only a small part is fine. For example:
-
-<img src="images/WYSIWYG_editor.png" width="200">
-<img src="images/raw_editor.png" width="200">
-
-In the first case, the HTML code is hidden as one sees what one gets as an end result. In the second case, the HTML code is visible: words between tags such as &lt;b&gt; are not styled. In most cases JS can be added here.
-</div>
+The mouse image can be found [here](git_docs/images/clickmap.jpg).
 
 ## data-toggle='protein'
 Extra functionality can be optionally added, including the ability to create links that control the protein.
@@ -128,85 +77,6 @@ If the demo image gives you an unsolicited black, that means something went wron
 To debug this yourself, open the console and type `protein.structure.eachAtom(function(atom) {console.log(atom.chainid);});` or `atom.resno` or other property of `atom` until you figure out what is wrong with your structure.
 I am aware of two unfixed bugs, one is the CD2 atom in histidine residues with different colored carbons and the other is the absence of shades of gray (_e.g._ `gray40`) in the color chart.
 
-## Technicalities
-### Parts to convert
-Three parts are needed to convert a `.pse` file into a NGL view.
-* the model
-* orientation
-* representation
-    * lines, sticks, cartoon etc.
-    * colors
-    * surface (handled differently in NGL)
-
-Additionally, there are
-* text/labels which are normally added in photoshop by people...
-* arrows, which are great, but in PyMol are from the add-on script `cgo_arrows` and not part of the native code
-
-### Notes on PSE side
-A Pse is encoded, so there is no way to read it except with Pymol. But Pymol can reveal it's secrets.
-
-### Orientation
-I was driven spare with converting the orientation. It simply was a question of inverting the sign on the $\vec{x}$ and $\vec{z}$ of the rotational matrix, multiplying it by the absolute of the scale and adding the origin of rotation's position with inverted sign.
-For more see [my notes on the conversion of the view](notes_on_view_conversion.md)
-
-### Representation
-The atom information is kept in `reps`. Say `PyMOL>iterate 1UBQ, print resi, resn,name,ID,reps`.
-This is an integer with no information give. However, looking at how it behaves it is clear it is a binary number where each position controls lines, sticks, cartoon and surface.
-
-0. Sticks
-1. Spheres
-2. Surface
-3. Label (needs additional variable)
-4. Non-bounded spheres
-5. Cartoon
-    * putty is a special cartoon rapresentation: `iterate sele, resi,name,reps,cartoon`
-6. Ribbon
-7. Lines
-8. Mesh
-9. Dots
-11. Non-bounded &mdash;Ligand (HETATM) properties are otherwise the same
-12. Cell
-
-### Primitive equivalence table
-
-| PyMol  | PyMol reps bit | NGL |
-| ------------- | --- |------------- |
-| `spheres`  | 000000000010 | `spacefill` |
-| NA | &mdash; | `ball+stick` |
-| NA | &mdash; | `helixorient` |
-| `lines`  | 000010000000 | `line` |
-| `sticks`  | 000000000001 | `licorice`  |
-| NA | &mdash; | `hyperball` |
-| NA | &mdash; | `trace` |
-| `ribbon` | 000001000000 | `backbone` |
-| NA | &mdash; | `ribbon` |
-| `cartoon` | 000000100000 | `cartoon` |
-| `surface` | 000000000100 | `surface` | 
-| `label` | 000000001000 | `label` |
-| `non-bounded spheres` | 000000010000 | &lowast; |
-| NA | &mdash; |`rope`|
-| "putty"* | &mdash; | `tube` |
-| `mesh`   | 000100000000 | &lowast; |
-| `dots`  | 001000000000 | `point` |
-| `non-bounded` | 010000000000 | &lowast; |
-| `cell` | 100000000000 | `cell` |
-
-&lowast;) The two differ in how this is handled.
-
-### The SS problem
-NGL does not assign secondary structure. Therefore, if not specified everything will be a turn/loop, so both the helices and sheet (especially) will look anemic.
-
-<img src="images/sheeted.png" width="200">
-<img src="images/unsheeted.png" width="200">
-
-The script `SS.py` can generate this in PDB file via PyMol. However, the generated `SHEET` definition is not as it ought to be, as it gives out mulitple separate strands as opposed to a single multistrand sheet &mdash;It works though, so who cares? 
-
-### Multiple objects
-[PyMOL_model_chains_segi](PyMOL_model_chains_segi.md)
-
-### Complicated?
-The code seems a bit complex when it comes to selections. The most obvious thing to do is to just have a list of the atoms with a given color and representation. However, this has two problems:
-first, the NGL atom serial does not always map to the same PyMOL atom ID as both try to fix issues in PDB atom id, the second is that having a list of thousands of ids quickly becomes heavy.
 
 ## Python3 compiled Pymol in Ubuntu
 This app requires Python3 compiled Pymol. The best option is using Conda. Otherwise it needs to be compiled ([instructions](https://blog.matteoferla.com/2019/04/pymol-on-linux-without-conda.html)). 
@@ -231,6 +101,8 @@ In order to get thumbnails of the protein, for Twitter or Facebook, nodejs with 
     sudo apt install nodejs
     sudo apt install npm
     npm i puppeteer
+    
+Also, some of the submodules in `michelanglo_app/static/ThirdParty` need building. But this is only required for static offline downloads.
 
 ## Licence
 * [PyMOL](https://github.com/schrodinger/pymol-open-source/blob/master/LICENSE) is a trademark of Schrodinger, LLC, and can be used freely.
