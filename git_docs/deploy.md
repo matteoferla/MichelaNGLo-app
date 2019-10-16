@@ -102,18 +102,26 @@ Slack webhook to keep you in the loop. Note that to get a slack webhook you don'
     
 So a bash variable is declared without spaces `a="hello world"` and then you can call it `echo $a`. These will not be available outside of the current session, unless you `export $a`.
 Alternative you can run the application you want to feed the env variable without leaving a trace(ish) by `a="hello world" python myscript`
-    /home/apps/anaconda3/bin/python app.py > /home/apps/mike.log 2>&1
 
 ## Ghosts in the machine
 Also change the secret in `production.ini` and run the script and make a user called `admin`.
 The users `trashcan` gets generated automatically when a guest makes a view and is blacklisted along with `guest` and `Anonymous`.
 
+## Did you turn it off and on again?
+Set up a system daemon, or a cron job to make sure it comes back upon system failure.
+Also, the app.py serves on port 8088.
+
 # nodejs
 
-In order to get thumbnails of the protein, for Twitter or Facebook, nodejs with puppeteer is required.
+In order to get thumbnails of the protein in the galleries, or for when you share your protein on Twitter or Facebook, nodejs with puppeteer is required.
+![Facebook](./images/fb_thumb.jpg)
+
 
     sudo apt install nodejs
     sudo apt install npm
     npm i puppeteer
+    
+
+    
     
 Also, some of the submodules in `michelanglo_app/static/ThirdParty` need building. But this is only required for static offline downloads.
