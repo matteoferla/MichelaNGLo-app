@@ -4,7 +4,7 @@ window.ops={timer: null, i: 0, debug: ${'true' if user and user.role == 'admin' 
 ops.addToast = function (id, title, body, bg) {
         id = id || 'T'+Date.now();
         $('#'+id).detach(); //duplicate id??!
-        $('#toaster').append(`<%include file="toast.mako" args="toast_id='${id}', toast_title='${title}', toast_body='${body}', toast_bg='${bg}', toast_autohide='true', toast_delay=5000 "/>`);
+        $('#toaster').append(`<%include file="toast.mako" args="toast_id='${id}', toast_title='${title}', toast_body='${body}', toast_bg='${bg}', toast_autohide='true', toast_delay=5000"/>`);
         $('#'+id).toast('show');
 
     };
