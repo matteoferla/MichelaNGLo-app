@@ -269,7 +269,7 @@ pre {
 %if confidential:
     <div class="confidential-ribbon shadow" data-toggle="tooltip" title="This page is confidential. Namely, the URL to this page and its contents have been shared with a specific addressee as a privileged communication that is intended to be read only by the specific addressee. The latter party, unless otherwise specified, is not at liberty to disclose this page and information with a third party."><i class="far fa-user-secret"></i> Confidential</div>
 %endif
-<div class="position-absolute m-0 w-100" style="z-index: 9000;">
+<div id="toasterOuter"  class="position-absolute m-0 w-100" style="z-index: 1;">
 <div id="toaster" class="m-0 w-100 d-flex flex-column p-4" style="position: fixed;"></div>
 </div>
 

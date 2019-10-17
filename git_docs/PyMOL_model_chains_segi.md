@@ -21,7 +21,7 @@ PyMOL has an extra top level boolean toggle for protein objects. They can be `en
 The atoms still have representation regardless.
 
 The chain has to be ASCII for PyMOL to read it or you will get a curious shape.
-![rod of missing byte](images/rod_of_missing_byte.png)
+![rod of missing byte](./images/rod_of_missing_byte.png)
 You cannot use non-ASCII in PyMOL command line or API either. However, A-Z are treated differently than a-z.
 ASCII non-letter symbols are superficially accepted, like `?`, but most cause havoc with selections.
 

@@ -1,7 +1,7 @@
 ## Diagram
 
 Michelanglo has lots of moving parts.
-![diagram](./images/mike layout-01.png)
+![diagram](./images/mike%20-01.png)
 
 ### Backend
 * Python 3.7

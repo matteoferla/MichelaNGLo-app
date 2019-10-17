@@ -161,13 +161,13 @@ It is clear that the discrepancy is a left/right-handed, alibi/alias or similar 
          0.000000000,    0.000000000,  -25.397972107,\
         29.622102737,   19.404640198,   14.739583969,\
        -24.625366211,   70.374717712,  -50.000000000 )
-![Pymol](images/centered-angle zero_pymol.png)
+![Pymol](./images/centered-angle%20zero_pymol.png)
 #### NGL no rotation
     [[ 25.39797211   0.           0.           0.        ]
      [  0.          25.39797211   0.           0.        ]
      [  0.           0.          25.39797211   0.        ]
      [-29.62210274 -19.4046402  -14.73958397   1.        ]]
-![NGL](images/centered-angle zero_NGL.png)
+![NGL](./images/centered-angle%20zero_NGL.png)
 
 Basically NGL is a pi radian off around the y axis.
 
@@ -180,13 +180,13 @@ Likewise looking down from the z axis is \[ 1,0,0 ] \[ 0,-1,0 ] \[ 0,1,0 ] in Py
 Using this, plus the depth and position charge knowlege gets nearly aligned images.             
 The aim is to look down the helix.
 
-![Target](images/target.png)
+![Target](./images/target.png)
 
 Proving that the matrix is correct in PyMOL by adding the arrow of the camera.
 
-![PyMOL offset](images/offset_PyMOL.png)
+![PyMOL offset](./images/offset_PyMOL.png)
 
 Now using this in NGL give a correct view...
 
-![NGL centre](images/offset_NGL.png)
+![NGL centre](./images/offset_NGL.png)
 
