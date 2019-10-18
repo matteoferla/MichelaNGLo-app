@@ -19,6 +19,11 @@ $('#markup_modal').on('hide.bs.modal', function (e) {
 
 // update on change (see interactive_builder)
 window.interactive_changer = (event, noRun) =>  {
+    if (NGL.getStage().getComponentByType('structure') === undefined) {
+        console.log('async issue!');
+        setTimeout(window.interactive_changer, 500, event, noRun);
+        return 0;
+    }
     $('.is-invalid').removeClass('is-invalid');
     let attributes =['title', 'color','radius','tolerance','view'].reduce(function (c,key){
             var value= $('#markup_'+key).val();
