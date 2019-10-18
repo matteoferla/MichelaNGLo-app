@@ -5,7 +5,7 @@ from Crypto.Hash import SHA256
 from Crypto import Random
 
 import bleach
-bleach.sanitizer.ALLOWED_TAGS.extend(['span', 'div', 'img', 'h1', 'h2','h3','h4','h5','p'])
+bleach.sanitizer.ALLOWED_TAGS.extend(['span', 'div', 'img', 'h1', 'h2','h3','h4','h5','p', 'pre', 'code'])
 bleach.sanitizer.ALLOWED_ATTRIBUTES['*'] = ['class','id']
 bleach.sanitizer.ALLOWED_ATTRIBUTES['span'] = lambda tag, name, value: True if name in ('class','id') or 'data-' in name else False
 bleach.sanitizer.ALLOWED_ATTRIBUTES['img'] = lambda tag, name, value: True if name in ('class','id','height', 'width', 'src') and 'javascript' not in value.lower() else False
