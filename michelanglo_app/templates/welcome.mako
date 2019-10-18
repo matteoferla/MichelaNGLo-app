@@ -59,7 +59,7 @@
         },
         {
            "title": '<i class="far fa-books"></i> More',
-            "text": 'See <a href="/docs">documentation</a> for more information or view <a href="/static/demo.mp4">demo video</a>.'
+            "text": 'See <a href="/docs">documentation</a> for more information or view <a href="https://youtu.be/v3B3Ok2X5ck">demo video</a>.'
         }
         ]
         #   "title": '<i class="far fa-bolt"></i> NGL powered', "text": 'NGL (<a href="http://nglviewer.org/ngl/api/" target="_blank">nglviewer.org <i class="far fa-external-link"></i></a>) is a JavaScript library that allows the visualisation of protein on the web.'
