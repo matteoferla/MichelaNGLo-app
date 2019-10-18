@@ -174,7 +174,7 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
     addFeatureTooltip("disulfide bond","Disulfide bond in Uniprot entry. It may or may not be present under all conditions");
 %endif
 
-%if protein.properties:
+%if hasattr(protein, 'protein') and protein.properties:
     ft.addFeature({
         data: ${str([{'x': i+4, 'y': score} for i, score in enumerate(protein.properties["kd"])])|n},
         name: "Hydrophobilicity",
