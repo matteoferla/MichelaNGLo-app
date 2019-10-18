@@ -35,18 +35,19 @@ $('#create').click(function (event) {
         .fail(ops.addErrorToast);
 });
 
-
 $('#mutate').click(async (event)  => {
     $(event.target).attr('disabled','disabled');
     let mutate_chain = $('#mutate_chain').val() || 'A';
     let mutations = $('#mutate_mutations').val().replace(/p\./gm, '').trim().split(/[\W,]+/);
     let pdb = '';
-    if (window.mode === undefined) { pdb = window.pdbCode}
+    if ((window.mode === undefined) || (window.mode === 'code')) { pdb = window.pdbCode}
     else if (window.mode === 'renumbered') { pdb = window.pdbString}
     else if (window.mode === 'file') {
         pdb = await $('#upload_pdb')[0].files[0].text();
     }
-    else {return 0;} //impossible anyway.
+    else {
+        console.log('What?! '+window.mode);
+        return 0;} //impossible anyway.
     $.ajax({
         url: "/premutate",
         type: 'POST',
@@ -71,7 +72,7 @@ $('#delete').click(async (event)  => {
     $(event.target).attr('disabled','disabled');
     let chains = $('#delete_chains').val().replace(/p\./gm, '').trim().split(/[\W,]+/);
     let pdb = '';
-    if (window.mode === undefined) { pdb = window.pdbCode}
+    if ((window.mode === undefined) || (window.mode === 'code')) { pdb = window.pdbCode}
     else if (window.mode === 'renumbered') { pdb = window.pdbString}
     else if (window.mode === 'file') {
         pdb = await $('#upload_pdb')[0].files[0].text();
