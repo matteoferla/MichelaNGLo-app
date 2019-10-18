@@ -23,8 +23,25 @@ window.prolinks = {
         $('#edit_description').html(description);
     },
     expandProlinkOnClick: (number) => {
-        let value = prompt("Edit the string if desired", prolinks.elements[number-1].fore);
-        if (value !== null) {prolinks.elements[number-1].fore = value;}
+        window.currentRange = number;
+        $('#markup_modal').modal('show');
+        setTimeout(() => {  // really ought to override interactive builder, the fx at modal load
+                let pro = $('<span '+prolinks.elements[number-1].fore+' ></span>');
+                ['selection', 'color', 'title', 'radius', 'tolerance', 'load'].map((v) => {
+                    if (pro.data(v) !== undefined) {$('#markup_'+v).val(pro.data(v) )}
+                });
+                if (pro.data('focus') !== undefined) {
+                    $('#'+pro.data('focus')).click();
+                }
+                if (pro.data('hetero') !== undefined) {
+                    if (!! pro.data('hetero')) $('#markup_hetero').prop('checked', 'checked')
+                    else $('#markup_hetero').removeProp('checked')
+                }
+                if (pro.data('view') !== undefined) { //do I need to mod this?
+                    $('#markup_view').val(JSON.stringify(pro.data('view')));
+                }
+                interactive_changer();
+                }, 500);
     },
     expandProlinks: () => {
         //on save
@@ -179,19 +196,29 @@ $('#usespan').click(function () {
     let elems=$($('#results').text());
     // select the appropriate one.
     let wanted = elems[0].outerHTML;
-    let n = prolinks.addProlink(wanted);
-    let addenda;
-    if ($('#collapse_prolinks').prop('checked')) {addenda = prolinks.prolink2md(wanted, n);}
-    else {addenda = wanted.replace(/</mgi,'&lt;').replace(/>/mgi,'&gt;');}
-    if (window.currentRange.toString().length > 0) {
-        addenda = addenda.replace(/Try me as .*?element/,window.currentRange.toString());
-    } else {
-        addenda = addenda.replace(/Try me as .*?element/,'a custom message');
+    if (typeof window.currentRange === "number") {  //its a replacement
+        prolinks.elements[window.currentRange-1] = {
+            fore: wanted.replace(/(<.*?>).*?<\/.*?>/,'$1').replace(/</mgi,'&lt;').replace(/>/mgi,'&gt;'),
+            aft: wanted.replace(/<.*?>.*?(<\/.*?>)/,'$1').replace(/</mgi,'&lt;').replace(/>/mgi,'&gt;'),
+            original: wanted
+        }
     }
+    else {  //it is new.
+        let n = prolinks.addProlink(wanted);
+        let addenda;
+        if ($('#collapse_prolinks').prop('checked')) {addenda = prolinks.prolink2md(wanted, n);}
+        else {addenda = wanted.replace(/</mgi,'&lt;').replace(/>/mgi,'&gt;');}
+        if (window.currentRange.toString().length > 0) {
+            addenda = addenda.replace(/Try me as .*?element/,window.currentRange.toString());
+        } else {
+            addenda = addenda.replace(/Try me as .*?element/,'a custom message');
+        }
 
-    window.currentRange.deleteContents();
-    let span = '<span>'+addenda+'</span>';
-    $('#edit_description')[0].contains(window.currentRange.commonAncestorContainer) ? window.currentRange.insertNode( $(span)[0] ) : $('#edit_description').prepend(span);
+        window.currentRange.deleteContents();
+        let span = '<span>'+addenda+'</span>';
+        $('#edit_description')[0].contains(window.currentRange.commonAncestorContainer) ? window.currentRange.insertNode( $(span)[0] ) : $('#edit_description').prepend(span);
+
+    }
     //let d = $('#edit_description');
     //d.html(d.html()+'\n'+addenda);
     //$('[data-toggle="tooltip"]').tooltip();

@@ -3,7 +3,7 @@
 <div class="row" id="markup_form">
     <div class="col-12 mb-2"
          title="Choose the focusing mode to use. If unsure consult 'prolinks' page in the documetation. <br/>But briefly, <code>domain</code> is best to show a region or domain. <code>residue</code> is to show residues in selection and their environs. <code>clash</code> shows a clash."
-         data-focus="hover" data-toggle="tooltip"
+         data-trigger="hover" data-toggle="tooltip"
          data-html=true
          data-placement="left">
         <div class="input-group">
@@ -20,15 +20,15 @@
     </div>
     </div>
 
-    <div class="col-12 col-md-6 mb-2" data-focus="hover" data-toggle="tooltip" data-placement="bottom" title="NGL selection of residues to focus on. <code>1:A</code> will select residue 1 of chain A, <code>1-20:B</code> the residues 1 to 20 of chain B, <code>*</code> for everything. You can only select residues that exist in the structure, if not it will either show all or erroneously pan off camera." data-html=true data-placement="top" >
+    <div class="col-12 col-md-6 mb-2" data-trigger="hover" data-toggle="tooltip" data-placement="bottom" title="NGL selection of residues to focus on. <code>1:A</code> will select residue 1 of chain A, <code>1-20:B</code> the residues 1 to 20 of chain B, <code>*</code> for everything. You can only select residues that exist in the structure, if not it will either show all or erroneously pan off camera." data-html=true >
         <div class="input-group">
           <div class="input-group-prepend">
             <span class="input-group-text" id="markup_selection_addon">Selection</span>
           </div>
             <input type="text" class="form-control" placeholder="for example 1-10:A" id="markup_selection" aria-describedby="markup_selection_addon">
             <div class="input-group-append">
-                <button class="btn btn-outline-info" type="button" onclick="$('#markup_view').val(''); interactive_changer();"; title="Zoom to residue, discarding current orientation." data-focus="hover" data-toggle="tooltip" data-placement="top"><i class="fas fa-crosshairs"></i></button>
-                <button class="btn btn-outline-info" type="button" id="markup_selection_btn" data-toggle="modal" data-target="#selection_modal"><span data-focus="hover" data-toggle="tooltip" data-placement="top" title="Show simpler selection builder"><i class="far fa-question"></i></span></button>
+                <button class="btn btn-outline-info" type="button" onclick="$('#markup_view').val(''); interactive_changer();"; title="Zoom to residue, discarding current orientation." data-trigger="hover" data-toggle="tooltip" data-placement="top"><i class="fas fa-crosshairs"></i></button>
+                <button class="btn btn-outline-info" type="button" id="markup_selection_btn" data-toggle="modal" data-target="#selection_modal"><span data-trigger="hover" data-toggle="tooltip" data-placement="top" title="Show simpler selection builder"><i class="far fa-question"></i></span></button>
             </div>
         </div>
     </div>
@@ -46,7 +46,7 @@
 
 
     %for n,t,d,h in buttons:
-        <div class="col-12 col-md-6 mb-2" data-focus="hover" data-toggle="tooltip" title="${h}" data-html=true data-placement="top" >
+        <div class="col-12 col-md-6 mb-2" data-trigger="hover" data-toggle="tooltip" title="${h}" data-html=true data-placement="top" >
         <div class="input-group">
           <div class="input-group-prepend">
             <span class="input-group-text" id="markup_${n}_addon">${n.title()}</span>
@@ -55,7 +55,7 @@
         </div>
     </div>
     %endfor
-    <div class="col-12 col-md-6 mb-2" data-focus="hover" data-toggle="tooltip" title="By ligand is intended anything with a HETATM entry, so nucleic acids do not count, while modified residues in older structures are often HETATMs." data-html=true data-placement="top">
+    <div class="col-12 col-md-6 mb-2" data-trigger="hover" data-toggle="tooltip" title="By ligand is intended anything with a HETATM entry, so nucleic acids do not count, while modified residues in older structures are often HETATMs." data-html=true data-placement="top">
         <div class="border rounded bg-light p-2">
             <div     class="custom-control custom-switch">
               <input class="custom-control-input"  id="markup_hetero" type="checkbox" >
@@ -64,7 +64,7 @@
         </div>
     </div>
 
-    <div class="col-12 col-md-6 mb-2" data-focus="hover" data-toggle="tooltip" title="There are multiple structures in this page. This allows you toggle between them. <code>No model specified</code> will use the currently shown model. If there is only one model and you will not add more ignore this." data-html=true data-placement="top">
+    <div class="col-12 col-md-6 mb-2" data-trigger="hover" data-toggle="tooltip" title="There are multiple structures in this page. This allows you toggle between them. <code>No model specified</code> will use the currently shown model. If there is only one model and you will not add more ignore this." data-html=true data-placement="top">
         <select class="custom-select" id="markup_model">
           <option selected value="none" name="markup_model">No model specified</option>
         </select>

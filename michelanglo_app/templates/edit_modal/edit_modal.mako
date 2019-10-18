@@ -11,7 +11,7 @@
             <div class="modal-body">
                 <div id="editor_first_block">
 
-                <div class="input-group mb-3" data-toggle="tooltip" title="This is the title of the page and will appear both as the title of the browser tab and as the header at the top of the page.">
+                <div class="input-group mb-3" data-toggle="tooltip" data-trigger="hover"  title="This is the title of the page and will appear both as the title of the browser tab and as the header at the top of the page.">
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="title-addon1">Title</span>
                     </div>
@@ -46,16 +46,16 @@
                 </div>
 
                    <div class="offset-1 col-11 pb-1">
-                        <span data-toggle="tooltip" title="Create links that control the protein view (prolinks)">
+                        <span data-toggle="tooltip" data-trigger="hover"  title="Create links that control the protein view (prolinks)">
                             <%include file="../markup/markup_builder_btn.mako"/>
                         </span>
-                       <span data-toggle="tooltip" title="Create point mutations in this structure &mdash;mutant structure will appear as a different model (see fa-load in documentation)">
+                       <span data-toggle="tooltip" data-trigger="hover"  title="Create point mutations in this structure &mdash;mutant structure will appear as a different model (see fa-load in documentation)">
                             <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#mutate_modal" id="mutate_modal_btn"><i class="far fa-biohazard"></i> Make mutations</button>
                        </span>
-                       <span data-toggle="tooltip" title="Copy over into this page the structure (or the view only) from another page you have access to &mdash;added structure will appear as a different model (see fa-load in documentation).">
+                       <span data-toggle="tooltip" data-trigger="hover"  title="Copy over into this page the structure (or the view only) from another page you have access to &mdash;added structure will appear as a different model (see fa-load in documentation).">
                            <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#combine_modal"  id="combine_modal_btn"><i class="far fa-paperclip"></i> Add additional model</button>
                        </span>
-                           <button class="btn" data-toggle="tooltip" title="Collapse prolinks. Prolinks are the protein view links that can be created with the builder tool. They can be collapsed into a compact form or written in full as a HTML element. If you plan on moving them around, duplicating them or changing the values expand them. Otherwise keep this checked.">
+                           <button class="btn" data-toggle="tooltip" data-trigger="hover"  title="Collapse prolinks. Prolinks are the protein view links that can be created with the builder tool. They can be collapsed into a compact form or written in full as a HTML element. If you plan on moving them around, duplicating them or changing the values expand them. Otherwise keep this checked.">
                           <div class="input-group-prepend">
                             <div class="input-group-text">
                               <div class="custom-control custom-switch">
