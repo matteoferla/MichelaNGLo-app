@@ -107,6 +107,8 @@ def route_docs(request, reply):
         return render_to_response("../templates/docs/cite.mako", reply, request)
     elif request.matchdict['id'] == 'users' or request.matchdict['id'] == 'pages':
         return render_to_response("../templates/docs/users_n_pages.mako", reply, request)
+    elif request.matchdict['id'] == 'video':
+        return render_to_response("../templates/docs/video.mako", reply, request)
     else:
         return reply
 
