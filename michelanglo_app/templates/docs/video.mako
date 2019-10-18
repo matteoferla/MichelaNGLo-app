@@ -30,16 +30,21 @@
   </li>
   <li class="list-group-item">
       <h4>Proteins 101</h4>
-      <p>Coming soon!</p>
+      <div class="embed-responsive embed-responsive-16by9">
+  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/TgjtPUikjfE" allowfullscreen></iframe>
+</div>
   </li>
   <li class="list-group-item">
       <h4>Advanced editing</h4>
-      <p>Coming soon!</p>
+      <div class="embed-responsive embed-responsive-16by9">
+  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/PjPmXs_wE9Y" allowfullscreen></iframe>
+</div>
   </li>
   <li class="list-group-item">
-      <h4>API</h4>
-      <p>Coming soon!</p>
-  </li>
+      <h4>Page monitoring</h4>
+      <div class="embed-responsive embed-responsive-16by9">
+  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/ospuYm60j58" allowfullscreen></iframe>
+</div>
 </ul>
 
 </%block>
