@@ -168,12 +168,12 @@ END
 		myData.main_view = (new NGL.Matrix4).fromArray([9.439843566302516, 9.66736215650029, 2.3657971118424355, 0, 5.493685278562445, -2.3423400002345534, -12.34902198923213, 0, -8.299052670754863, 9.445689587611566, -5.483624540732769, 0, -29.358034323474335, -3.8331459824791376, 20.095874888318278, 1]);
 		stage.viewerControls.orient(myData.main_view);
 		var sele='9:A';
-		var stericTollerance=1;
+		var stericTolerance=1;
     var refmesh=myData.star;
     sele = typeof sele == "string" ? new NGL.Selection(sele) : sele;
 protein.structure.getView(sele).eachAtom(function (atom) {
     protein.structure.eachAtom(function (neighbour) {
-        if ( (atom.distanceTo(neighbour) < atom.vdw + neighbour.vdw - stericTollerance) &&  (! atom.hasBondTo(neighbour)) &&  (atom.residueIndex != neighbour.residueIndex) ) {
+        if ( (atom.distanceTo(neighbour) < atom.vdw + neighbour.vdw - stericTolerance) &&  (! atom.hasBondTo(neighbour)) &&  (atom.residueIndex != neighbour.residueIndex) ) {
             //console.log(atom.resname+'.'+atom.atomname+' is close to '+neighbour.resname+neighbour.residueIndex+'.'+neighbour.atomname + 'd: '+atom.distanceTo(neighbour).toString()+' vs '+atom.vdw.toString() + '+'+neighbour.vdw.toString());
             var origin=[ atom.x/2+neighbour.x/2, atom.y/2+neighbour.y/2, atom.z/2+neighbour.z/2]
             var m=refmesh.map(function (v,i) {return origin[i % 3] + v/5;});
