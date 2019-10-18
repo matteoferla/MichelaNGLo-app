@@ -95,7 +95,7 @@ class PyMolTranspilerDeco:
         except Exception as err:
             if self.lock.locked(): #the code errored before the lock could be released.
                 self.close_up()
-                print('LOCKDOWN!!!!')
+                print('ERROR: ', err)
             raise err
 
     def clean_up(self):
@@ -515,10 +515,11 @@ class PyMolTranspiler:
         pymol.cmd.wizard("mutagenesis")
         pymol.cmd.do("refresh_wizard")
         for mutant in mutations:
+            mutant = mutant.replace('p.','').strip()
             n = re.search("(\d+)", mutant).group(1)
-            if re.match("\w{3}d+\w{3}", mutant):  # 3 letter Arg
-                f = re.match("\w{3}d+(\w{3})", mutant).group(1).upper()
-            elif re.match("\w{1}d+\w{1}", mutant):  # 1 letter R
+            if re.match("\w{3}\d+\w{3}", mutant):  # 3 letter Arg
+                f = re.match("\w{3}\d+(\w{3})", mutant).group(1).upper()
+            elif re.match("\w{1}\d+\w{1}", mutant):  # 1 letter R
                 f = p1to3[mutant[-1]].upper()
             else:
                 raise ValueError(f'{mutant} is not a valid mutation. It should be like A123W')
