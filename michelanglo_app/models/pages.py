@@ -143,7 +143,7 @@ class Page(Base):
         IV = Random.new().read(AES.block_size)  # generate IV
         encryptor = AES.new(key, AES.MODE_CBC, IV)
         padding = AES.block_size - len(source) % AES.block_size  # calculate needed padding
-        source += bytes([padding]) * padding  # Python 2.x: source += chr(padding) * padding
+        source += bytes([padding]) * padding # pad
         data = IV + encryptor.encrypt(source)  # store the IV at the beginning and encrypt
         return base64.b64encode(data).decode("latin-1") if encode else data
 
