@@ -288,13 +288,13 @@ def mutate(request):
                 settings['pdb'].append((new_variable, seq))
                 new_model = len(all_protein_data) - 1
                 settings['description'] += f'\n\nProtein variants generated for model #{model} ({all_protein_data[model]["value"] if "value" in all_protein_data[model] else "no name given"}) as model #{new_model} ({new_variable}).\n\n'
-                settings['descr_mdowned'] = markdown.markdown(settings['description'])
                 common = '<span class="prolink" data-toggle="protein" data-hetero="true"'
                 for mutant in mutations:
                     n = re.search("(\d+)", mutant).group(1)
                     settings['description'] += f'* __{mutant}__ '+\
                                                f'({common}  data-focus="residue" data-title="{mutant} wild type" data-load="{model} " data-selection="{n}:{chain}">wild type</span>'+\
                                                f'/{common}  data-focus="clash" data-title="{mutant} mutant" data-load="{new_model} " data-selection="{n}:{chain}">mutant</span>)\n'
+                settings['descr_mdowned'] = markdown.markdown(settings['description'])
             page.save(settings)
             return {'status': 'success'}
         except ValueError:
