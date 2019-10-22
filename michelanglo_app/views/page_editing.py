@@ -179,6 +179,7 @@ def combined(request):
     if task == 'method':
         target_page.settings['description'] += f'\nView from <a href="/data/{donor_page.identifier}">{donor_page.title}</a> added as {fun_name}.' + \
                                                f'E.g. <span class="prolink" data-target="#viewport" data-toggle="protein" data-view="{fun_name}">Show to new view</span>'
+        target_page.settings['descr_mdowned'] = markdown.markdown(target_page.settings['description'])
     else: #both
         #proteinJSON
         if addenda[0]['type'] == 'data':
@@ -201,6 +202,7 @@ def combined(request):
         #description
         target_page.settings['description'] += f'\n\nPage structure from <a href="/data/{donor_page.identifier}">{donor_page.title}</a> added as {name} and view as {fun_name}.'+\
                                                f'E.g. <span class="prolink" data-target="#viewport" data-toggle="protein" data-load="{name}" data-view="reset">Show new protein</span>'
+        target_page.settings['descr_mdowned'] = markdown.markdown(target_page.settings['description'])
 
     target_page.edited = True
     target_page.save().commit(request)
@@ -286,6 +288,7 @@ def mutate(request):
                 settings['pdb'].append((new_variable, seq))
                 new_model = len(all_protein_data) - 1
                 settings['description'] += f'\n\nProtein variants generated for model #{model} ({all_protein_data[model]["value"] if "value" in all_protein_data[model] else "no name given"}) as model #{new_model} ({new_variable}).\n\n'
+                settings['descr_mdowned'] = markdown.markdown(settings['description'])
                 common = '<span class="prolink" data-toggle="protein" data-hetero="true"'
                 for mutant in mutations:
                     n = re.search("(\d+)", mutant).group(1)

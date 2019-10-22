@@ -8,7 +8,7 @@
     <div class="collapse">
         <p>Currently, the address to your data contains <a href="https://en.wikipedia.org/w/index.php?title=Universally_unique_identifier" target="_blank">a long id, which cannot be guessed (five undecillion combinations) <i class="far fa-external-link"></i></a>.
         However, if the server is compromised or the administrator turns evil the data can be seen &mdash;note that this does not apply your password, which cannot be seen as it is stored hashed.
-            If your data is <i>extremely</i> sensitive, the data can be encrypted serverside. This requires the encryption key each time the data is requested to be viewed. <b>Note that, if you forget the key, the data is lost, so please proceed with care.</b></p>
+            If your data is <i>extremely</i> sensitive, the data can be encrypted serverside. This requires the encryption password each time the data is requested to be viewed &mdash;as you may share this page and its password please do not use your log-in password. <b>Note that, if you forget the key, the data is lost, so please proceed with care.</b></p>
         <div class="input-group">
       <div class="input-group-prepend">
           <div class="input-group-text px-2">

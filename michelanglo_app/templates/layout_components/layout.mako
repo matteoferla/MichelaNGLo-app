@@ -270,7 +270,7 @@ pre {
     <div class="confidential-ribbon shadow" data-toggle="tooltip" title="This page is confidential. Namely, the URL to this page and its contents have been shared with a specific addressee as a privileged communication that is intended to be read only by the specific addressee. The latter party, unless otherwise specified, is not at liberty to disclose this page and information with a third party."><i class="far fa-user-secret"></i> Confidential</div>
 %endif
 <div id="toasterOuter"  class="position-absolute m-0 w-100" style="z-index: 9999;">
-<div id="toaster" class="m-0 w-100 d-flex flex-column" style="position: fixed;"></div>
+<div id="toaster" class="m-0 w-100 d-flex flex-column  pt-3 pl-3" style="position: fixed;"></div>
 </div>
 
 <main role='main' class="container-fluid p-0 w-100 mx-0">
