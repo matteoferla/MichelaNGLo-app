@@ -81,9 +81,7 @@ def analyse_view(request):
         return {'protein': protein, 'home': '/'}
 
 
-
 """
-        
         return render_to_response('json', {'error': msg}, request)
         error_response(protein.mutation_discrepancy(mutation))
     ### wait for all to finish
