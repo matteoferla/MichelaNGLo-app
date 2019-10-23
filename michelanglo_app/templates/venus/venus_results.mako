@@ -106,6 +106,12 @@
                         ${line_fore('Mutation')}
                             <span ${prolink|n} data-focus="residue" data-selection="${protein.mutation.residue_index}:CURRENTCHAIN">
                                 ${protein.mutation.long_name(protein.mutation.from_residue)} at position ${protein.mutation.residue_index}</span> is mutated to ${protein.mutation.long_name(protein.mutation.to_residue)}
+                          <div class="row">
+                                <div class="col-6"><img src="/static/aa/${protein.mutation.from_residue}${protein.mutation.to_residue}.svg" width="100%">
+                                <p>Differing atoms in ${protein.mutation.long_name(protein.mutation.from_residue)} highlighted in red</p></div>
+                                <div class="col-6"><img src="/static/aa/${protein.mutation.to_residue}${protein.mutation.from_residue}.svg" width="100%">
+                                <p>Differing atoms in ${protein.mutation.long_name(protein.mutation.to_residue)} highlighted in red</p></div>
+                            </div>
                       ${line_aft()}
 
                           ###################### apriori ###################################
@@ -122,7 +128,13 @@
                           ###################### structural ###################################
 
                         ${line_fore('Effect based on structure')}
-                            <p>section silenced while being rebuilt.</p>
+                          <p>Nearby residues structurally are:</p>
+                          <ul>
+                              %for r in protein.structure.get_structure_neighbours():
+                              <li>${r}</li>
+                              %endfor
+                          </ul>
+                          <p>${protein.structure.get_superficiality()}</p>
                           ${line_aft()}
 
                           ###################### location ###################################

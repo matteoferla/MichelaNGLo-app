@@ -4,7 +4,7 @@ __description___ = """
 
 from .uniprot_data import *
 #ProteinCore organism human uniprot2pdb
-from protein import ProteinAnalyser, Mutation
+from protein import ProteinAnalyser, Mutation, ProteinCore
 
 from ..models import User ##needed solely for log.
 from ._common_methods import is_malformed
@@ -70,13 +70,14 @@ def analyse_view(request):
         protein.load()
     except:
         log.error(f'There was no pickle for uniprot {uniprot} taxid {taxid}. TREMBL code via API?')
-        protein = ProteinGatherer(uniprot=uniprot, taxid=taxid).get_uniprot()
+        protein.__dict__ = ProteinGatherer(uniprot=uniprot, taxid=taxid).get_uniprot().__dict__
     protein.mutation = mutation
     if not protein.check_mutation():
         log.info('protein mutation discrepancy error')
         return render_to_response("json", {'error': 'mutation', 'msg': protein.mutation_discrepancy()}, request)
     else:
         protein.predict_effect()
+        protein.analyse_structure()
         return {'protein': protein, 'home': '/'}
 
 
