@@ -77,7 +77,11 @@ def analyse_view(request):
         return render_to_response("json", {'error': 'mutation', 'msg': protein.mutation_discrepancy()}, request)
     else:
         protein.predict_effect()
-        protein.analyse_structure()
+        try:
+            protein.analyse_structure()
+        except Exception as err:
+            log.warning(f'Structural analysis failed {err}.')
+            pass
         return {'protein': protein, 'home': '/'}
 
 
