@@ -35,6 +35,8 @@
         </div>
     </div>
 
+<%block name="after_main"/>
+
 
 
 <%block name="modals"/>

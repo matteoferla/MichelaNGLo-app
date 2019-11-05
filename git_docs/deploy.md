@@ -121,7 +121,10 @@ In order to get thumbnails of the protein in the galleries, or for when you shar
     sudo apt install npm
     npm i puppeteer
     
-
-    
-    
 Also, some of the submodules in `michelanglo_app/static/ThirdParty` need building. But this is only required for static offline downloads.
+
+# Rosetta
+
+For Venus, upcoming, Rosetta will be optionally required
+
+curl -o a.tar.gz  -u Academic_User:**** https://www.rosettacommons.org/downloads/academic/3.11/rosetta_bin_linux_3.11_bundle.tgz

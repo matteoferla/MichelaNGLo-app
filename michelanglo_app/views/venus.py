@@ -20,6 +20,9 @@ log = logging.getLogger(__name__)
 from pprint import PrettyPrinter
 pprint = PrettyPrinter().pprint
 
+### This is a weird way to solve the status 206 issue.
+system_storage = {}
+
 @view_config(route_name='venus', renderer="../templates/venus/venus_main.mako")
 def venus_view(request):
     return {'project': 'VENUS',
@@ -56,6 +59,7 @@ def random_view(request):
             continue
 
 ############################### Analyse the mutation
+"""
 @view_config(route_name='venus_analyse', renderer="../templates/venus/venus_results.mako")
 def analyse_view(request):
     log.info(f'Analysis requested by {User.get_username(request)}')
@@ -83,6 +87,46 @@ def analyse_view(request):
             log.warning(f'Structural analysis failed {err}.')
             pass
         return {'protein': protein, 'home': '/'}
+"""
+
+@view_config(route_name='venus_analyse', renderer="../templates/venus/venus_results.mako")
+def analyse_view(request):
+    """
+    View that does the analysis. Formerly returned html now returns json.
+    :param request:
+    :return:
+    """
+    log.info(f'Analysis requested by {User.get_username(request)}')
+    malformed = is_malformed(request, 'step', 'uniprot', 'species', 'mutation')
+    if malformed:
+        return {'status': malformed}
+    if request.params['step'] == 'start':
+        uniprot = request.params['uniprot']
+        taxid = request.params['species']
+        mutation = Mutation(request.params['mutation'])
+        protein = ProteinAnalyser(uniprot=uniprot, taxid=taxid)
+        try:
+            protein.load()
+        except:
+            log.error(f'There was no pickle for uniprot {uniprot} taxid {taxid}. TREMBL code via API?')
+            protein.__dict__ = ProteinGatherer(uniprot=uniprot, taxid=taxid).get_uniprot().__dict__
+        protein.mutation = mutation
+        if not protein.check_mutation():
+            log.info('protein mutation discrepancy error')
+            return {'error': 'mutation', 'msg': protein.mutation_discrepancy()}
+        else:
+            handle = request.params['uniprot'] + request.params['mutation']
+            system_storage[handle] = protein
+            return {'protein': protein, 'home': '/'}
+
+
+            protein.predict_effect()
+            try:
+                protein.analyse_structure()
+            except Exception as err:
+                log.warning(f'Structural analysis failed {err}.')
+                pass
+
 
 
 """
