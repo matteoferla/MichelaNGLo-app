@@ -41,7 +41,7 @@ def venus_view(request):
 @view_config(route_name='venus_random', renderer="json")
 def random_view(request):
     while True:
-        name = random.choice(human.keys())
+        name = random.choice(list(human.keys()))
         uniprot = human[name]
         protein = ProteinCore(taxid=9606, uniprot=uniprot).load()
         if protein.pdbs:
@@ -58,7 +58,90 @@ def random_view(request):
             log.error(f'Impossible... pdb.x out of bounds in unicode for gene {uniprot}')
             continue
 
+def jsonable(self):
+    def deobjectify(x):
+        if isinstance(x, dict):
+            return {k: deobjectify(x[k]) for k in x}
+        elif isinstance(x, list):
+            return [deobjectify(v) for v in x]
+        elif isinstance(x, int) or isinstance(x, float):
+            return x
+        else:
+            return str(x) # really ought to deal with falseys.
+    return {a: deobjectify(getattr(self, a, '')) for a in self.__dict__}
+
 ############################### Analyse the mutation
+@view_config(route_name='venus_analyse', renderer="json")
+def analyse_view(request):
+    """
+    View that does the analysis. Formerly returned html now returns json.
+    The request has to contain each of following 'step', 'uniprot', 'species', 'mutation' fields.
+    /venus_analyse?species=9606&uniprot=Q96C12&mutation=p.V123F&step=protein
+    step can be protein
+    Species is taxid. Human is 9606.
+    :param request:
+    :return:
+    """
+    ### STEP 1
+    def protein_step():
+        uniprot = request.params['uniprot']
+        taxid = request.params['species']
+        mutation = Mutation(request.params['mutation'])
+        protein = ProteinAnalyser(uniprot=uniprot, taxid=taxid)
+        try:
+            protein.load()
+        except:
+            log.error(f'There was no pickle for uniprot {uniprot} taxid {taxid}. TREMBL code via API?')
+            protein.__dict__ = ProteinGatherer(uniprot=uniprot, taxid=taxid).get_uniprot().__dict__
+        protein.mutation = mutation
+        if not protein.check_mutation():
+            log.info('protein mutation discrepancy error')
+            return {'error': 'mutation', 'msg': protein.mutation_discrepancy(), 'status': 'error'}
+        else:
+            handle = request.params['uniprot'] + request.params['mutation']
+            system_storage[handle] = protein
+            return {'protein': jsonable(protein), 'status': 'success'}
+    ### STEP 2
+    def mutation_step():
+        handle = request.params['uniprot'] + request.params['mutation']
+        if handle not in system_storage:
+            protein_step()
+        protein = system_storage[handle]
+        protein.predict_effect()
+        return {'mutation': jsonable(protein.mutation), 'status': 'success'}
+    ### STEP 3
+    def structural_step():
+        handle = request.params['uniprot'] + request.params['mutation']
+        protein = system_storage[handle]
+        try:
+            protein.analyse_structure()
+            return {'structural': jsonable(protein.structure), 'status': 'success'}
+        except Exception as err:
+            log.warning(f'Structural analysis failed {err}.')
+            return {'status': 'error'}
+
+    ### check valid
+    log.info(f'Analysis requested by {User.get_username(request)}')
+    malformed = is_malformed(request, 'uniprot', 'species', 'mutation')
+    if malformed:
+        return {'status': malformed}
+    if 'step' not in request.params:
+        return {**protein_step(), **mutation_step(), **structural_step()}
+    if request.params['step'] == 'protein':
+        return protein_step()
+    elif request.params['step'] == 'mutation':
+        return mutation_step()
+    elif request.params['step'] == 'structural':
+        return structural_step()
+    elif request.params['step'] == 'fv': ## this is the same as get_uniprot but does not redundantly redownload the data.
+        handle = request.params['uniprot'] + request.params['mutation']
+        if handle not in system_storage:
+            protein_step()
+        protein = system_storage[handle]
+        return render_to_response("../templates/results/features.js.mako", {'protein': protein}, request)
+    else:
+        return {'status': 'error', 'error': 'Unknown step'}
+
 """
 @view_config(route_name='venus_analyse', renderer="../templates/venus/venus_results.mako")
 def analyse_view(request):
@@ -89,43 +172,7 @@ def analyse_view(request):
         return {'protein': protein, 'home': '/'}
 """
 
-@view_config(route_name='venus_analyse', renderer="../templates/venus/venus_results.mako")
-def analyse_view(request):
-    """
-    View that does the analysis. Formerly returned html now returns json.
-    :param request:
-    :return:
-    """
-    log.info(f'Analysis requested by {User.get_username(request)}')
-    malformed = is_malformed(request, 'step', 'uniprot', 'species', 'mutation')
-    if malformed:
-        return {'status': malformed}
-    if request.params['step'] == 'start':
-        uniprot = request.params['uniprot']
-        taxid = request.params['species']
-        mutation = Mutation(request.params['mutation'])
-        protein = ProteinAnalyser(uniprot=uniprot, taxid=taxid)
-        try:
-            protein.load()
-        except:
-            log.error(f'There was no pickle for uniprot {uniprot} taxid {taxid}. TREMBL code via API?')
-            protein.__dict__ = ProteinGatherer(uniprot=uniprot, taxid=taxid).get_uniprot().__dict__
-        protein.mutation = mutation
-        if not protein.check_mutation():
-            log.info('protein mutation discrepancy error')
-            return {'error': 'mutation', 'msg': protein.mutation_discrepancy()}
-        else:
-            handle = request.params['uniprot'] + request.params['mutation']
-            system_storage[handle] = protein
-            return {'protein': protein, 'home': '/'}
 
-
-            protein.predict_effect()
-            try:
-                protein.analyse_structure()
-            except Exception as err:
-                log.warning(f'Structural analysis failed {err}.')
-                pass
 
 
 

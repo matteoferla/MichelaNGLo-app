@@ -27,7 +27,16 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
 
 
 ################### Own SNV #######################
-## DISABLED.
+%if hasattr(protein, 'mutation'):
+    ft.addFeature({
+            data: [{'x':${protein.mutation.residue_index},'y': ${protein.mutation.residue_index}, 'id': 'our_${protein.mutation.residue_index}', 'description': 'p.${str(protein.mutation)}'}],
+            name: "Candidate SNP",
+            className: "our_SNP",
+            color: "indianred",
+            type: "unique",
+            filter: "Variant"
+        });
+%endif
 
 ################### Domains #######################
 %if 'domain' in protein.features:

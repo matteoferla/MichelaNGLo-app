@@ -64,98 +64,7 @@
 </%block>
 
 <%block name='after_main'>
-
-<div class="container-fluid" id="results">
-    <div style="width:47vw; position:fixed; top:7rem; bottom: 24px; right: 24px;">
-                    <div class="card shadow-sm">
-                        <div class="card-header"><h5 class="card-title">
-                            <i class="far fa-cubes"></i> Structure
-                        </h5></div>
-                      <div class="card-body">
-                        <div id="viewport" style="width:100%; height: 0; padding-bottom: 100%;">
-                        </div>
-                      </div>
-                    </div>
-                </div>
-    <div class="row">
-                <!-- Main text -->
-                <div class="offset-3 col-6 mb-4 py-4">
-                    <div class="card shadow-sm bg-light">
-                        <div class="card-body  text-center">
-                            <div class="btn-group" role="group" aria-label="Basic example">
-                              <button type="button" class="btn btn-outline-warning" id="new_analysis">
-                                  <i class="far fa-undo  fa-lg"></i> Analyse another
-                              </button>
-                                <button class="btn btn-outline-secondary" type="button" id="feedback-btn" data-toggle="modal" data-target="#modal_feedback">
-                                    <i class="far fa-star"></i> Feedback
-                                </button>
-                                <button class="btn btn-outline-primary" type="button" id="report-btn" data-toggle="modal" data-target="#report">
-                                    <i class="far fa-clipboard-list fa-lg"></i> Create a sharable page (Michelaɴɢʟo)
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-    </div>
-
-
-    <div class="row">
-                <!-- Feature -->
-                <div class="col-6 mb-4 pl-4">
-                    <div class="card shadow-sm">
-                        <div class="card-header"><h5 class="card-title">
-                            <i class="far fa-dna"></i> Features
-                        </h5><h6 class="card-subtitle mb-2 text-muted">
-                            (Click on a feature to visualise it on the structure)
-                        </h6></div>
-
-                        ###################### arrow ###################################
-
-
-                      <div class="card-body">
-                        <div class="arrow-right"></div><div class="arrow-right2"></div>
-
-                          ###################### end of arrow ###################################
-
-                        <div id="fv"></div>
-
-                          <div>
-                              <button class="btn btn-outline-secondary bindersCollapse collapse show" data-toggle="collapse" data-target=".bindersCollapse"><i class="far fa-eye"></i> Show PDB structure details</button>
-                              <button class="btn btn-outline-secondary bindersCollapse collapse" data-toggle="collapse" data-target=".bindersCollapse"><i class="far fa-eye-slash"></i> Hide PDB structure details</button>
-                          </div>
-                          <div id="matches_collapse" class="col-12 collapse bindersCollapse">
-                            <p>Proteins can be crystallised with ligands or binding partners and it is often beneficial to choose a specific one.</p>
-                            <div id="partner_table"></div>
-                        </div>
-                      </div>
-                    </div>
-                </div>
-            </div>
-
-    <div class="row">
-                <div class="col-6 mb-4 pl-4">
-                    <div class="card shadow-sm">
-                        <div class="card-header">
-                            <h3 class="card-title" id="result_title">
-                                <i class="far fa-dna fa-spin"></i> Loading
-                            </h3>
-                            <h6 class="card-subtitle mb-2 text-muted">
-                                Predicted effects
-                            </h6>
-                        </div>
-
-                        ###################### lines ###################################
-
-                      <div class="card-body">
-                          <div class="arrow-right"></div><div class="arrow-right2">
-                          </div>
-                      <ul class="list-group list-group-flush" id="results_list">
-                      </ul>
-                      </div>
-                      </div>
-                    </div>
-    </div>
-</div>
+    <%include file="venus_result_section.mako"/>
 </%block>
 
 <%block name='modals'>
@@ -165,41 +74,7 @@
 <script type="text/javascript">
     $(document).ready(function () {
         <%include file="../name.js"/>
-        const vbtn = $('#venus_calc');
-        $('#mutation').keyup(e => {if ($(e.target).val().search(/\d+/) !== -1 && uniprotValue !== 'ERROR') {
-                                                vbtn.show();
-                                                $('#error_mutation').hide();
-                                                $(e.target).removeClass('is-invalid');
-                                                if (event.keyCode === 13) vbtn.click();
-                                        } else {vbtn.hide();}
-                                    });
-        vbtn.click(e => {
-            if (taxidValue === 'ERROR') {$('#error_species').show(); return 0;}
-            if (uniprotValue === 'ERROR') {$('#error_gene').show(); return 0;}
-            if ($('#mutation').val().search(/\d+/) === -1) {$('#error_mutation').show(); return 0;}
-
-                $.ajax({
-        type: "POST",
-        url: "venus_analyse",
-        data:  {uniprot: uniprotValue,
-                species: taxidValue,
-                mutation: $('#mutation').val()}
-    })
-        .done(function (msg) {
-            if (msg.error) {
-                $('#error_'+msg.error).show();
-                $('#'+msg.error).addClass('is-invalid');
-                ops.addToast('error','Error - '+msg.error,'<i class="far fa-bug"></i> An issue arose analysing the results.<br/>'+msg.msg,'bg-warning');}
-            else {
-                $('#retrieval_card').hide(1000);
-            $('#input_card').hide(1000);
-            $('main').append(msg);
-            $('#new_analysis').show();
-            $('#report-btn').show();
-            }
-        })
-        .fail(ops.addErrorToast);
-        });
+        <%include file="venus.js"/>
     });
     ####include file="../markup/markup_builder_modal.js"/>
     window.interactive_builder = () => undefined; //burn the call.
