@@ -14,7 +14,7 @@ Therefore the intended audience are biochemists that may not have any web knowle
 
 A future possibility is that in collaboration with specific journals this could be rolled out in papers.
 
-![process](git_docs/images/process-02.png)
+![process](git_docs/images/Fig1_v3.jpg)
 
 ## Deployment
 
