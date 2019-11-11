@@ -49,11 +49,8 @@
                         </h6></div>
 
                         ###################### arrow ###################################
-
-
                       <div class="card-body">
                         <div class="arrow-right"></div><div class="arrow-right2"></div>
-
                           ###################### end of arrow ###################################
 
                         <div id="fv"></div>

@@ -113,7 +113,7 @@ def choose_pdb(request):
         except:
             log.error(f'There was no pickle for uniprot {uniprot} taxid {taxid}. TREMBL code via API??')
             try:
-                protein = ProteinGatherer(uniprot=uniprot, taxid=taxid).get_uniprot()
+                protein = ProteinGatherer(uniprot=uniprot, taxid=taxid).parse_uniprot()
             except:
                 request.response.status = 410 #malformed
                 return {'status': 'Unknown Uniprot code.'}

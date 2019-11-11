@@ -53,7 +53,7 @@
                         </div>
                       </div>
                     </div>
-                    ##### secodn block: results
+                    ##### secodn block: Mutation results
                     <div class="card shadow-sm">
                         <div class="card-header">
                             <h5 class="card-title">
@@ -69,7 +69,7 @@
                       <div class="card-body">
                           <div class="arrow-right"></div><div class="arrow-right2">
                           </div>
-                      <ul class="list-group list-group-flush" id="results_list">
+                      <ul class="list-group list-group-flush" id="results_mutalist">
                       </ul>
                       </div>
                       </div>

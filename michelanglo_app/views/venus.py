@@ -90,9 +90,9 @@ def analyse_view(request):
         protein = ProteinAnalyser(uniprot=uniprot, taxid=taxid)
         try:
             protein.load()
-        except:
+        except FutureWarning:
             log.error(f'There was no pickle for uniprot {uniprot} taxid {taxid}. TREMBL code via API?')
-            protein.__dict__ = ProteinGatherer(uniprot=uniprot, taxid=taxid).get_uniprot().__dict__
+            #protein.__dict__ = ProteinGatherer(uniprot=uniprot, taxid=taxid).get_uniprot().__dict__
         protein.mutation = mutation
         if not protein.check_mutation():
             log.info('protein mutation discrepancy error')
@@ -108,7 +108,8 @@ def analyse_view(request):
             protein_step()
         protein = system_storage[handle]
         protein.predict_effect()
-        return {'mutation': jsonable(protein.mutation), 'status': 'success'}
+        return {'mutation': {**jsonable(protein.mutation), 'features_near_residue_index': protein.get_features_near_position(protein.mutation.residue_index)},
+                'status': 'success'}
     ### STEP 3
     def structural_step():
         handle = request.params['uniprot'] + request.params['mutation']
