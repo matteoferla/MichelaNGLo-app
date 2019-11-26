@@ -76,6 +76,9 @@ class PyMolTranspilerDeco:
     """
     Decorator for the bound methods of PyMolTranspiler that use Pymol.
     The session is shared... so only one thread at the time ought to use PyMOL.
+    If a session raises an error, it should be caught so everyhting is cleaned closed and the error raised for the logger.
+    Conor has rightfully suggested that the lock should be handled by the scheduler. I.e. a request is made and the a job is added to a queue.
+    Currently, each extra concurrent thread simply waits or dies if it waits too long.
     """
     lock = threading.Lock()
 
