@@ -4,7 +4,7 @@ import traceback
 from ..models import Page, User
 from ..models.trashcan import get_trashcan
 from protein import Structure
-from ..transplier import PyMolTranspiler, PyMolTranspilerDeco
+from ..transplier import PyMolTranspiler
 import uuid
 import shutil
 import os

@@ -6,7 +6,7 @@ import os, json
 from protein import ProteinCore, global_settings, Structure
 from protein.generate import ProteinGatherer
 
-global_settings.init(os.environ['PROTEIN_DATA'])
+global_settings.startup(os.environ['PROTEIN_DATA'])
 
 ## the folder dictionary has the cross ref files.
 organism = json.load(open(os.path.join(global_settings.dictionary_folder,'organism.json')))

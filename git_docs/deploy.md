@@ -55,7 +55,7 @@ Also, if you plan to mod Michelanglo do not clone the protein module in Michelan
     >>>from protein.generate import ProteomeGatherer
     >settings = ProteomeGatherer.settings
     >>>settings.verbose = False #or True
-    >>>settings.init(data_folder='../protein-data') #or wherever
+    >>>settings.startup(data_folder='../protein-data') #or wherever
 
 This will save all the data it will download and parse to this folder.
 It will download the Uniprot and few other large datasets with the following:

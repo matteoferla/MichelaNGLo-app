@@ -4,7 +4,7 @@ from ..models.pages import Page
 from ..models.user import User
 from ..models.trashcan import get_trashcan
 from .user_management import permission
-from ..transplier import PyMolTranspiler
+from michelanglo_transpiler import PyMolTranspiler
 import os, markdown
 import json, re
 import datetime

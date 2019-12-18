@@ -148,16 +148,16 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
     addFeatureTooltip("Splice variant","Regions that differ/absent in splice variants (according to Uniprot)");
 %endif
 
-%if protein.gNOMAD:
+%if protein.gnomAD:
     ft.addFeature({
-        data: ${str([dict(snp._asdict()) for snp in protein.gNOMAD])|n},
-        name: "gNOMAD",
+        data: ${str([dict(snp._asdict()) for snp in protein.gnomAD])|n},
+        name: "gnomAD",
         className: "modified",
         color: "skyblue",
         type: "unique",
         filter: "Modified"
     });
-    addFeatureTooltip("gNOMAD","gNOMAD variant (i.e. variant in the healthy human population)");
+    addFeatureTooltip("gnomAD","gnomAD variant (i.e. variant in the healthy human population)");
 %endif
 
 %if 'disulfide bond' in protein.features:
@@ -169,7 +169,7 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
         type: "path",
         filter: "Modified Residue"
     });
-    addFeatureTooltip("gNOMAD","gNOMAD variant (i.e. variant in the healthy human population)");
+    addFeatureTooltip("gnomAD","gnomAD variant (i.e. variant in the healthy human population)");
 %endif
 
 %if 'cross-link' in protein.features:
