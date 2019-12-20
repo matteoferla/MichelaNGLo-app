@@ -41,7 +41,7 @@
         },
         {
            "title": '<i class="far fa-globe-europe"></i> Share',
-            "text": "Edit and share the pages you create. (<a href='/data/LZTR1'>Example</a>)"
+            "text": "Edit and share the pages you create. (<a href='/gallery'>Examples</a>)"
         },
         {
            "title": '<i class="far fa-map-marked-alt"></i> Control',
@@ -50,7 +50,7 @@
         },
         {
            "title": '<i class="far fa-code"></i> Implement',
-            "text": 'Alternatively, follow the instructions to implement the view on your website',
+            "text": 'Alternatively, follow the instructions on the generated page to implement the view on your website.',
 
         },
         {
