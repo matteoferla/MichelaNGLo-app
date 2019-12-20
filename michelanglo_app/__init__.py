@@ -4,7 +4,8 @@
 import sentry_sdk, os
 from sentry_sdk.integrations.pyramid import PyramidIntegration
 
-if 'SENTRY_DNS_MICHELANGLO' in os.environ: #this is not in the config file due to security as this github repo is public.
+if 'SENTRY_DNS_MICHELANGLO' in os.environ:
+    #this is not in the config file due to security as this github repo is public.
     sentry_sdk.init(
      dsn=os.environ['SENTRY_DNS_MICHELANGLO'],
      integrations=[PyramidIntegration()]
