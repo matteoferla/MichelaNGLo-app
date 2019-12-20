@@ -49,6 +49,8 @@ see [https://github.com/matteoferla/MichelaNGLo-protein-module](https://github.c
     python3 setup.py install
 
 This module uses a lot of data. That unfortunately I cannot keep as a repo for you to download.
+However. This step is optional: if not done, gene retrieval will not work.
+
 Also, if you plan to mod Michelanglo do not clone the protein module in Michelanglo or your IDE will go _extremely_ slow.
 
     Python3
@@ -66,7 +68,17 @@ These will be parse with:
 
     >>>ProteomeGatherer(skip=True, remake_pickles=True)
 
-This will take overnight.
+This will take overnight. 
+
+## Transpiler
+
+Both the protein module and Michelanglo require a PyMOL manipulation script, whcih is separate as the data parsing module works without Michelanglo
+
+See [https://github.com/matteoferla/MichelaNGLo-transpiler](https://github.com/matteoferla/MichelaNGLo-transpiler) for more.
+
+    git clone https://github.com/matteoferla/MichelaNGLo-transpiler
+    cd MichelaNGLo-transpiler
+    python3 setup.py install
 
 ## Create the database
 The config file needs altering for alembic to work: make a copy and hard code the environment variables.
