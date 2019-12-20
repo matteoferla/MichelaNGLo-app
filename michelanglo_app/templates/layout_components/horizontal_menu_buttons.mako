@@ -9,7 +9,7 @@
             data-container="body"
             data-toggle="popover"
             data-placement="left"
-            data-trigger="focus"
+            data-trigger="click focus"
             data-html="true"
             data-content='<a role="button" class="btn btn-outline-secondary mx-1" href="/" title="Home">                                                                <i class="far fa-home"></i></a>
                           <a role="button" class="btn btn-outline-secondary mx-1"  href="/pymol" title="Convert PyMol file">                                            <i class="far fa-hammer"></i></a>
