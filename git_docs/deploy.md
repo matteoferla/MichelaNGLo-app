@@ -1,5 +1,55 @@
 ## Diagram
 
+### TL;DR 
+    
+    # Linux packages
+    sudo apt install nodejs
+    sudo apt install npm
+    # either...
+    sudo apt install sqlite
+    # or...
+    sudo apt install postgres
+
+    # Mac packages
+    brew install nodejs
+    brew install npm
+    brew install wget
+    # either...
+    brew install sqlite
+    # or...
+    brew install postgres
+    
+        
+    # Conda...
+    wget https://repo.anaconda.com/archive/Anaconda3-2019.10-MacOSX-x86_64.sh
+    bash Anaconda3-2019.10-MacOSX-x86_64.sh -b
+    conda init
+    conda config --set auto_activate_base true
+
+    # Install pymol
+    conda install -c schrodinger -y pymol
+    conda install -c conda-forge -y biopython
+    #conda install -c conda-forge -y rdkit
+    
+    #install modules
+    mkdir michelanglo
+    cd michelanglo/
+    git clone --recursive https://github.com/matteoferla/MichelaNGLo.git app
+    git clone https://github.com/matteoferla/MichelaNGLo-protein-module.git protein-module
+    git clone https://github.com/matteoferla/MichelaNGLo-transpiler transpiler
+    cd protein-module
+    python3 setup.py install
+    cd ../transpiler
+    python3 setup.py install
+    cd ../app
+    python3 setup.py install
+    npm i puppeteer
+    # sqlite?
+    touch mike.db
+
+
+### Diagram
+
 Michelanglo has lots of moving parts.
 ![diagram](./images/mike%20layout-03.png)
 
@@ -11,7 +61,9 @@ Michelanglo has lots of moving parts.
     * Biopython
     * APScheduler
     * Postgres
-    * external purpose written module: [github.com/matteoferla/MichelaNGLo-protein-module](https://github.com/matteoferla/MichelaNGLo-protein-module)
+    * external purpose written modules:
+        * [github.com/matteoferla/MichelaNGLo-protein-module](https://github.com/matteoferla/MichelaNGLo-protein-module)
+        * [github.com/matteoferla/MichelaNGLo-transpiler](https://github.com/matteoferla/MichelaNGLo-transpiler)
 * NodeJS
     * Puppeeter
    
@@ -29,9 +81,10 @@ This repo uses f-strings.
 ### Python3 compiled Pymol in Ubuntu
 This app requires Python3 compiled Pymol. The best option is using Conda. Otherwise it needs to be compiled ([instructions](https://blog.matteoferla.com/2019/04/pymol-on-linux-without-conda.html)).
 So the best bet is to install anaconda3. See the web.
-Then make a venv etc.
+Then optinally make a venv etc.
 
     conda install -c schrodinger pymol
+    conda install -c conda-forge -y biopython
 
 ## clone michelanglo   
 Note that this module uses submodule so clone it recursively.
