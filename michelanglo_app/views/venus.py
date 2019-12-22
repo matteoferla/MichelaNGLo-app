@@ -4,7 +4,7 @@ __description___ = """
 
 from .uniprot_data import *
 #ProteinCore organism human uniprot2pdb
-from protein import ProteinAnalyser, Mutation, ProteinCore
+from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore
 
 from ..models import User ##needed solely for log.
 from ._common_methods import is_malformed

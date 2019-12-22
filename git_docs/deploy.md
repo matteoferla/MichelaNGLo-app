@@ -54,7 +54,7 @@ However. This step is optional: if not done, gene retrieval will not work.
 Also, if you plan to mod Michelanglo do not clone the protein module in Michelanglo or your IDE will go _extremely_ slow.
 
     Python3
-    >>>from protein.generate import ProteomeGatherer
+    >>>from michelanglo_protein.generate import ProteomeGatherer
     >settings = ProteomeGatherer.settings
     >>>settings.verbose = False #or True
     >>>settings.startup(data_folder='../protein-data') #or wherever

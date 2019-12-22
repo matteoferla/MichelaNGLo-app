@@ -3,7 +3,7 @@ from pyramid.renderers import render_to_response
 import traceback
 from ..models import Page, User
 from ..models.trashcan import get_trashcan
-from protein import Structure
+from michelanglo_protein import Structure
 from ..transplier import PyMolTranspiler
 import uuid
 import shutil

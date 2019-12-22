@@ -3,8 +3,8 @@ This page loads the data from the protein-data module as is used by both name.py
 """
 
 import os, json
-from protein import ProteinCore, global_settings, Structure
-from protein.generate import ProteinGatherer
+from michelanglo_protein import ProteinCore, global_settings, Structure
+from michelanglo_protein.generate import ProteinGatherer
 import logging
 log = logging.getLogger(__name__)
 
