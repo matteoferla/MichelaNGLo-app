@@ -12,7 +12,7 @@
 	url = https://github.com/jquery/jquery.git
 [submodule "michelanglo_app/static/ThirdParty/popper"]
 	path = michelanglo_app/static/ThirdParty/popper
-	url = https://github.com/FezVrasta/popper.js.git
+	url = https://github.com/popperjs/popper.js.git
 [submodule "michelanglo_app/static/ThirdParty/ngl"]
 	path = michelanglo_app/static/ThirdParty/ngl
 	url = https://github.com/arose/ngl.git
