@@ -29,3 +29,40 @@ michelanglo_app.egg-info/*
 michelanglo_app/demo/*.pdb
 michelanglo_app/user-data/*.p
 michelanglo_app/user-data/*.ep
+michelanglo_app/user-data-monitor/*
+michelanglo_app/user-data-thumb/*
+.ipynb_checkpoints
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+__pypackages__/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
