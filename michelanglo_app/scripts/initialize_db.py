@@ -8,8 +8,8 @@ from .. import models
 
 
 def setup_models(dbsession):
-    editor = models.User(name='editor', role='editor')
-    editor.set_password('editor')
+    editor = models.User(name='admin', role='admin')
+    editor.set_password('admin')
     dbsession.add(editor)
 
     basic = models.User(name='basic', role='spirit')

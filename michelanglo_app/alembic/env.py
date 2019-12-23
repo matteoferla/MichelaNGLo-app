@@ -17,7 +17,7 @@ config = context.config
 
 setup_logging(config.config_file_name)
 
-settings = get_appsettings(config.config_file_name)
+settings = get_appsettings(config.config_file_name, options={'SQL_URL': os.environ['SQL_URL']})
 if 'SQL_URL' in os.environ:  # postgres in production!
     settings['sqlalchemy.url']=os.environ['SQL_URL']
 target_metadata = Base.metadata
