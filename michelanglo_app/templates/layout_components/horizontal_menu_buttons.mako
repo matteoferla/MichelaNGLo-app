@@ -1,4 +1,5 @@
 <%page args="tour=False"/>
+### This is no longer used. it is now vertical.
 <div class="float-right d-flex flex-row">
     #### filled by JS in layout.mako
     <span id="user" class="my-2 mr-3"></span>
