@@ -1,53 +1,12 @@
 __docs__ = """
-To install...
-# conda way
-install anaconda...
-
-cd ~/Downloads
-curl -O https://repo.anaconda.com/Anaconda2-2019.03-Linux-x86_64.sh
-sudo sh Anaconda2-2019.03-Linux-x86_64.sh
-conda update conda
-conda create -n env python=3.7 anaconda
-conda activate env
-conda install  -n env -c schrodinger pymol
-conda install -c conda-forge biopython
-
-
-
-# older way.
-# get python
-sudo apt-get install python3
-# make venv
-sudo apt-get install python3-venv
-python3 -m venv env
-./env/bin/pip install -e .
-# make pymol
-sudo apt-get install python3-dev libglm-dev freeglut3-dev libglew-dev libpng12-dev libfreetype6-dev build-essential libxml++2.6-dev
-sudo apt-get install libpng-dev # if libpng12-dev fails.
-./env/bin/pip install pmw numpy
-prefix=env/pymol
-modules=$prefix/modules
-mkdir -p $prefix
-mkdir -p $modules
-git clone https://github.com/schrodinger/pymol-open-source.git env/pymol
-cd env/pymol
-sudo ./env/bin/python3 setup.py build install --home=${prefix}/ --install-lib=$modules --install-scripts=$prefix/
-#add the module to python
-#sudo echo $modules > env/lib/python3.6/dist-packages/pymol.pth  #mac
-sudo echo $modules > env/lib/python3.6/site-packages/pymol.pth  #linux
-./env/bin/alembic -c production.ini revision --autogenerate -m "lets get this party started"
-
-command for shitedows 7 when venv fails. without the \\ as \ is a special character. God I hate windows.
-C:\\Users\\matteo\\AppData\\Local\\Continuum\\anaconda3\\Scripts\\pip3.exe install -e .
-C:\\Users\\matteo\\AppData\Local\\Continuum\\anaconda3\Scripts\\alembic.exe -c production.ini revision --autogenerate -m "use Users"
-C:\\Users\\matteo\\AppData\Local\\Continuum\\anaconda3\\Scripts\\alembic.exe -c development.ini upgrade head
-also requires to be installed by mouse:
-https://www.enterprisedb.com/downloads/postgres-postgresql-downloads
+To install fully please see git_docs/deploy.md
 """
 
-import os
+import os, warnings
 
 from setuptools import setup, find_packages
+
+warnings.warn('PLEASE READ THE FILE `git_docs/deploy.md`')
 
 here = os.path.abspath(os.path.dirname(__file__))
 

@@ -1,35 +1,4 @@
-## Diagram
 
-### TL;DR 
-    
-    # Linux packages
-    sudo apt install nodejs
-    sudo apt install npm
-    # either...
-    sudo apt install sqlite
-    # or...
-    sudo apt install postgres
-
-    # Mac packages
-    brew install nodejs
-    brew install npm
-    brew install wget
-    # either...
-    brew install sqlite
-    # or...
-    brew install postgres
-    
-        
-    # Conda...
-    wget https://repo.anaconda.com/archive/Anaconda3-2019.10-MacOSX-x86_64.sh
-    bash Anaconda3-2019.10-MacOSX-x86_64.sh -b
-    conda init
-    conda config --set auto_activate_base true
-
-    # Install pymol
-    conda install -c schrodinger -y pymol
-    conda install -c conda-forge -y biopython
-    #conda install -c conda-forge -y rdkit
     
     #install modules
     mkdir michelanglo
@@ -46,11 +15,20 @@
     npm i puppeteer
     # sqlite?
     touch mike.db
+    SQL_URL=sqlite:///mike.db alembic -c development.ini revision --autogenerate -m "init"
+    # postgres?
+    postgresql://apps:ornithine@localhost:5432/app_users;
+    
+    sqlite:///mike.db
 
+## Preface
+This is why there are many commands to copy. Skip if impatient.
+
+** Do not jump the gun and git clone recursively** this repository without altering FontAwesome Pro requirement if needed (see below).
 
 ### Diagram
 
-Michelanglo has lots of moving parts.
+Michelanglo has lots of moving parts...
 ![diagram](./images/mike%20layout-03.png)
 
 ### Backend
@@ -67,6 +45,10 @@ Michelanglo has lots of moving parts.
 * NodeJS
     * Puppeeter
    
+
+**Python 3.7**: This repo uses f-strings and the author is unwilling to make it backwards compatible.
+**DB**: Postgres is more robust and secure than SQLite. But if you are just running this for yourself, be lazy & go SQLite.
+
 ### Frontend
 * Mako-templated HTML
 * NGL
@@ -75,76 +57,142 @@ Michelanglo has lots of moving parts.
 * FontAwesome Pro
 * Bootstrap Tour (mod)
 
-## Python 3.7
-This repo uses f-strings.
+**FontAwesome**: I have a pro licence, but a free version is available. So a wee change is required to `.gitmodules`.
+Note that all instances of the class `far` with `fas` in the templates.
+If this is too much faff just drop matteo dot ferla at gmail an email.
 
-### Python3 compiled Pymol in Ubuntu
-This app requires Python3 compiled Pymol. The best option is using Conda. Otherwise it needs to be compiled ([instructions](https://blog.matteoferla.com/2019/04/pymol-on-linux-without-conda.html)).
-So the best bet is to install anaconda3. See the web.
-Then optinally make a venv etc.
+## Step 1. Prerequisites
+
+Linux packages
+
+    sudo apt install nodejs
+    sudo apt install npm
+
+And either...
+
+    sudo apt install sqlite
+
+or...
+
+    sudo apt install postgres
+
+Mac packages
+
+    brew install nodejs
+    brew install npm
+    brew install wget
+
+either...
+
+    brew install sqlite
+or...
+
+    brew install postgres
+    
+Installing postgres on a networked windows machine is a satanic endevour.
+Consider a Docker container with Alpine, a VM with Ubuntu, Rasperry pi with Raspian (use Berryconda) or an old smartphone with AfterMarketOS.
+All the documentation here works on Ubuntu, CentOS and MacOS and everything in Windows it is a bit trickier. But the excecutables will have `.exe` suffixes and are in `Scripts` folder `C:\Users\yournamehere\AppData\Local\Continuum\anaconda3\Scripts\pip3.exe` say for your regular install, your virtual env will be wherever you put it.
+
+
+## Step 2. Python
+This app requires Python3 compiled PyMOL. The best option is using Conda. Otherwise it needs to be compiled ([instructions](https://blog.matteoferla.com/2019/04/pymol-on-linux-without-conda.html)).
+So the best bet is to install anaconda3:
+
+    wget https://repo.anaconda.com/archive/Anaconda3-2019.10-MacOSX-x86_64.sh
+    bash Anaconda3-2019.10-MacOSX-x86_64.sh -b
+    conda init
+    conda config --set auto_activate_base true
+    conda update conda
+    
+If you want to make env —your call
+
+    conda create -n env python=3.7 anaconda
+    conda activate env
+    
+Install what you need:
 
     conda install -c schrodinger pymol
     conda install -c conda-forge -y biopython
+    #conda install -c conda-forge -y rdkit
 
-## clone michelanglo   
-Note that this module uses submodule so clone it recursively.
+## Step 3. Clone the required repos  
+For fetching proteins, michelanglo_app requires [https://github.com/matteoferla/MichelaNGLo-protein-module](https://github.com/matteoferla/MichelaNGLo-protein-module).
 
-    git clone --recursive https://github.com/matteoferla/MichelaNGLo.git
-    python3 setup.py install #or pip install -e .
+Both the protein module and Michelanglo require a PyMOL manipulation script, whcih is separate as the protein parsing module works without Michelanglo.
+[https://github.com/matteoferla/MichelaNGLo-transpiler](https://github.com/matteoferla/MichelaNGLo-transpiler) for more.
 
-## Protein module
-It also uses a protein module to allow gene name querying. This module has lots of cool stuff. I might be worth your while checking it out.
 
-see [https://github.com/matteoferla/MichelaNGLo-protein-module](https://github.com/matteoferla/MichelaNGLo-protein-module)
-
-    git clone https://github.com/matteoferla/MichelaNGLo-protein-module.git
-    cd MichelaNGLo-protein-module
+    mkdir michelanglo
+    cd michelanglo/
+    git clone https://github.com/matteoferla/MichelaNGLo-protein-module.git protein-module
+    cd protein-module
     python3 setup.py install
+    git clone https://github.com/matteoferla/MichelaNGLo-transpiler transpiler
+    cd ../transpiler
+    python3 setup.py install
+
+Do you have FontAwesome Pro?
+    
+    git clone --recursive https://github.com/matteoferla/MichelaNGLo.git app
+    cd ../app
+    python3 setup.py install
+    
+Installing it isn't needed for normal operations, but you might need a bit for a Jupyter notebook.
+
+Else:
+
+    git clone https://github.com/matteoferla/MichelaNGLo.git app
+    https://github.com/FortAwesome/Font-Awesome
+    sed -i 's/Font-Awesome-Pro\.git/Font-Awesome\.git/g' .gitmodules
+    git submodule update --init --recursive
+    cd ../app
+    python3 setup.py install
+
+## Step 4. Generate the data
+It also uses a protein module to allow gene name querying.
 
 This module uses a lot of data. That unfortunately I cannot keep as a repo for you to download.
 However. This step is optional: if not done, gene retrieval will not work.
 
+This module has lots of cool stuff. I might be worth your while checking it out.
+
+see [https://github.com/matteoferla/MichelaNGLo-protein-module](https://github.com/matteoferla/MichelaNGLo-protein-module)
+
 Also, if you plan to mod Michelanglo do not clone the protein module in Michelanglo or your IDE will go _extremely_ slow.
 
-    Python3
-    >>>from michelanglo_protein.generate import ProteomeGatherer
-    >settings = ProteomeGatherer.settings
-    >>>settings.verbose = False #or True
-    >>>settings.startup(data_folder='../protein-data') #or wherever
+To get everything...
 
+    cd ../protein-module
+    python3 create.py
+    
 This will save all the data it will download and parse to this folder.
-It will download the Uniprot and few other large datasets with the following:
+This will take a whole day.
+For licencing issues, Phosphosite plus data needs to be downloaded manually.
 
-    >>>settings.retrieve_references(ask=False, refresh=False)
+However, if there is a species you are interested in, email me and I can save you the bother.
 
-These will be parse with:
+## Step 5. Create the database
 
-    >>>ProteomeGatherer(skip=True, remake_pickles=True)
+The database needs starting...
 
-This will take overnight. 
+    SQL_URL=sqlite:///mike.db alembic -c development.ini revision --autogenerate -m "init"
+    
+If using postgres the environment variable needs to be `SQL_URL=postgresql://name_of_owner_user_you_made_for_the_db_that_is_not_postgres:its_password@localhost:5432/name_of_db`
 
-## Transpiler
+## Step 6. NPM
 
-Both the protein module and Michelanglo require a PyMOL manipulation script, whcih is separate as the data parsing module works without Michelanglo
+In order to get thumbnails of the protein in the galleries, or for when you share your protein on Twitter or Facebook, nodejs with puppeteer is required.
+![Facebook](./images/fb_thumb.jpg)
 
-See [https://github.com/matteoferla/MichelaNGLo-transpiler](https://github.com/matteoferla/MichelaNGLo-transpiler) for more.
+    npm i puppeteer
+    
+Also, some of the submodules in `michelanglo_app/static/ThirdParty` need building. But this is only required for static offline downloads.
 
-    git clone https://github.com/matteoferla/MichelaNGLo-transpiler
-    cd MichelaNGLo-transpiler
-    python3 setup.py install
+## Step 7. Run
 
-## Create the database
-The config file needs altering for alembic to work: make a copy and hard code the environment variables.
-Alternatively, I might have altered the initialise_db script to run off enviroment variables.
+### Environment variables
 
-    alembic -c production.ini revision --autogenerate -m "lets get this party started"
-    alembic -c production.ini upgrade head
-
-All the documentation here works on Ubuntu, CentOS and MacOS.
-In Windows it is a bit trickier. But the excecutables will have `.exe` suffixes and are in `Scripts` folder `C:\Users\yournamehere\AppData\Local\Continuum\anaconda3\Scripts\pip3.exe` say for your regular install, your virtual env will be wherever you put it.
-
-## Environment variables
-
+Having an config file with sensitive data on GitHub is a no-no, so there are lots of env variables used here.
 Where did you put the protein?
 
     PROTEIN_DATA='/home/apps/protein-data'
@@ -168,28 +216,19 @@ Slack webhook to keep you in the loop. Note that to get a slack webhook you don'
 So a bash variable is declared without spaces `a="hello world"` and then you can call it `echo $a`. These will not be available outside of the current session, unless you `export $a`.
 Alternative you can run the application you want to feed the env variable without leaving a trace(ish) by `a="hello world" python myscript`
 
+    SQL_URL=xxx;SECRETCODE=xxx;SLACK_WEBHOOK=xxx;PROTEIN_DATA=xxx python3 app.py --d
+
 ## Ghosts in the machine
-Also change the secret in `production.ini` and run the script and make a user called `admin`.
+Run the script and make a user called `admin`.
 The users `trashcan` gets generated automatically when a guest makes a view and is blacklisted along with `guest` and `Anonymous`.
 
 ## Did you turn it off and on again?
 Set up a system daemon, or a cron job to make sure it comes back upon system failure.
 Also, the app.py serves on port 8088.
 
-# nodejs
+# Future
+## Rosetta
 
-In order to get thumbnails of the protein in the galleries, or for when you share your protein on Twitter or Facebook, nodejs with puppeteer is required.
-![Facebook](./images/fb_thumb.jpg)
+For Venus, upcoming, Rosetta will be optionally required (maybe)
 
-
-    sudo apt install nodejs
-    sudo apt install npm
-    npm i puppeteer
-    
-Also, some of the submodules in `michelanglo_app/static/ThirdParty` need building. But this is only required for static offline downloads.
-
-# Rosetta
-
-For Venus, upcoming, Rosetta will be optionally required
-
-curl -o a.tar.gz  -u Academic_User:**** https://www.rosettacommons.org/downloads/academic/3.11/rosetta_bin_linux_3.11_bundle.tgz
+    curl -o a.tar.gz  -u Academic_User:**** https://www.rosettacommons.org/downloads/academic/3.11/rosetta_bin_linux_3.11_bundle.tgz
