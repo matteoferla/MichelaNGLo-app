@@ -54,12 +54,12 @@ def kill_task(days_delete_unedited, days_delete_untouched):
     with transaction.manager:
         unedited_time = datetime.now() - timedelta(days=int(days_delete_unedited))
         n = 0
-        for page in sesh.query(Page).filter(and_(Page.exists == True, Page.edited == False, Page.timestamp < unedited_time)):
+        for page in sesh.query(Page).filter(and_(Page.existant == True, Page.edited == False, Page.timestamp < unedited_time)):
             log.info(f'Deleting unedited page {page.identifier} by {page}')
             n+=1
             page.delete()
         untouched_time = datetime.now() - timedelta(days=int(days_delete_untouched))
-        for page in sesh.query(Page).filter(and_(Page.exists == True, Page.timestamp < untouched_time)):
+        for page in sesh.query(Page).filter(and_(Page.existant == True, Page.timestamp < untouched_time)):
             if page.protected or sesh.query(Doi).filter(Doi.long == page.identifier).first() is not None:
                 continue
             log.info(f'Deleting abbandonned page {page.identifier} ({page.timestamp})')
@@ -68,7 +68,7 @@ def kill_task(days_delete_unedited, days_delete_untouched):
             except FileNotFoundError:
                 ## file has been deleted manually!?
                 ## this is a pretty major incident.
-                page.exists = False
+                page.existant = False
                 log.warning(f'{page.identifier} does not exist.')
                 notify_admin(f'{page.identifier} does not exist.')
             n+=1
@@ -78,7 +78,7 @@ def kill_task(days_delete_unedited, days_delete_untouched):
 def monitor_task():
     sesh = get_session()
     with transaction.manager:
-        for page in sesh.query(Page).filter(and_(Page.exists == True, Page.protected == True)):
+        for page in sesh.query(Page).filter(and_(Page.existant == True, Page.protected == True)):
             log.info(f'Monitoring {page}.')
             state = []
             try:
@@ -88,8 +88,8 @@ def monitor_task():
                 for i in range(len(details)):
                     ref = os.path.join('michelanglo_app','user-data-monitor', f'{page.identifier}-{i}.png')
                     new = os.path.join('michelanglo_app','user-data-monitor', f'tmp_{page.identifier}-{i}.png')
-                    assert os.path.exists(ref), 'Reference image does not exist'
-                    assert os.path.exists(new), 'Generated image does not exist'
+                    assert os.path.existant(ref), 'Reference image does not exist'
+                    assert os.path.existant(new), 'Generated image does not exist'
                     ref_img = imageio.imread(ref).flatten()
                     new_img = imageio.imread(new).flatten()
                     if ref_img.shape != new_img.shape:

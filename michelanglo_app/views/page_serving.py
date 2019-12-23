@@ -215,7 +215,7 @@ def thumbnail(request):
     pagename = request.matchdict['id']
     page = Page.select(request, pagename)
     verdict = permission(request, page, 'view', key_label='key')
-    if verdict['status'] != 'OK' or not page.exists:
+    if verdict['status'] != 'OK' or not page.existant:
         request.response.status = 200 # we would block facebook and twitter otherwise as they redirect.
         response = FileResponse(os.path.join('michelanglo_app', 'static', 'tim_barrel.png'))
     elif os.path.exists(page.thumb_path):

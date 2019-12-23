@@ -176,8 +176,14 @@ However, if there is a species you are interested in, email me and I can save yo
 The database needs starting...
 
     SQL_URL=sqlite:///mike.db alembic -c development.ini revision --autogenerate -m "init"
+    SQL_URL=sqlite:///mike.db alembic -c development.ini upgrade head
     
 If using postgres the environment variable needs to be `SQL_URL=postgresql://name_of_owner_user_you_made_for_the_db_that_is_not_postgres:its_password@localhost:5432/name_of_db`
+
+Obviously, nothing ever goes smoothly. If you get an error with the second line (the upgrade) edit the file `michelanglo_app/alembic/versions/xxxx.py` if you get:
+
+* an error about explicit contraint names: change all `sa.Boolean()` to `sa.Boolean(create_constraint=False)`. SQLite does not know about Booleans.
+* an error about exits: `existant` is a SQL keyword so change `sa.Column('existant',` to `sa.Column('[existant]',`. 
 
 ## Step 6. NPM
 

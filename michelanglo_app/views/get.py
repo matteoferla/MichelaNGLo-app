@@ -49,7 +49,7 @@ def get_ajax(request):
         page = Page.select(request, request.params['page'])
         if not page:
             return render_to_response("../templates/part_error.mako", {'error': '404'}, request)
-        elif not page.exists:
+        elif not page.existant:
             return render_to_response("../templates/part_error.mako", {'error': '410'}, request)
         elif page.encrypted and 'encryption_key' not in request.params:
             return render_to_response("../templates/part_error.mako", {'error': '403'}, request)
@@ -82,9 +82,9 @@ def get_pages(request):
         if user.role == 'admin':   ### ULTRABACK DOOR.
             data['all'] = {'unencrypted_files': [p.replace('.p','') for p in os.listdir(os.path.join('michelanglo_app', 'user-data')) if os.path.splitext(p)[1] == '.p'],
                            'encrypted_files': [p.replace('.ep','') for p in os.listdir(os.path.join('michelanglo_app', 'user-data')) if os.path.splitext(p)[1] == '.ep'],
-                           'unencrypted_entries': [p.identifier for p in request.dbsession.query(Page) if p.exists and not p.encrypted],
-                           'encrypted_entries': [p.identifier for p in request.dbsession.query(Page) if p.exists and p.encrypted],
-                           'deleted_entries': [p.identifier for p in request.dbsession.query(Page) if not p.exists]}
+                           'unencrypted_entries': [p.identifier for p in request.dbsession.query(Page) if p.existant and not p.encrypted],
+                           'encrypted_entries': [p.identifier for p in request.dbsession.query(Page) if p.existant and p.encrypted],
+                           'deleted_entries': [p.identifier for p in request.dbsession.query(Page) if not p.existant]}
         else:
             data['all'] = 'RESTRICTED'
         to_list = lambda x: [p.identifier for p in x]  ## crap name. converts the objects to names only.

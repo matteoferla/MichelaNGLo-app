@@ -7,7 +7,7 @@ class UserPages:
 
     def _filter_pages(self, pages):
         query = self.dbsession.query(Page).filter(Page.identifier in pages)
-        return [page for page in query if page.exists]
+        return [page for page in query if page.existant]
 
 
 

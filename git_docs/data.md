@@ -68,7 +68,7 @@ The table at present looks like:
  id         | integer                     |           | not null | nextval('pages_index_seq'::regclass) | plain    |              | 
  identifier | text                        |           | not null |                                      | extended |              | 
  title      | text                        |           |          |                                      | extended |              | 
- exists     | boolean                     |           |          | true                                 | plain    |              | 
+ existant     | boolean                     |           |          | true                                 | plain    |              | 
  edited     | boolean                     |           |          | false                                | plain    |              | 
  encrypted  | boolean                     |           |          | false                                | plain    |              | 
  timestamp  | timestamp without time zone |           | not null |                                      | plain    |              | 

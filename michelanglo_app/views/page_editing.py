@@ -223,7 +223,7 @@ def delete(request):
         return {'status': 'cannot delete protected page.'}
     else:
         page.delete().commit(request)
-        if not page.exists:
+        if not page.existant:
             return {'status': 'success'}
         else:
             return {'status': 'file missing'}
@@ -348,7 +348,7 @@ def copy(request):
         new = Page(get_uuid(request))
         new.title = ref.title
         new.privacy = ref.privacy
-        new.exists = True
+        new.existant = True
         new.encrypted = False
         new.timestamp = datetime.datetime.utcnow()
         new.protected = False

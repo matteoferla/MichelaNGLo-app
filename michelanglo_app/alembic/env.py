@@ -47,7 +47,7 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
-    engine = engine_from_config(settings, prefix='sqlalchemy.')
+    engine = engine_from_config(settings, prefix='sqlalchemy.', url=settings['sqlalchemy.url'])
 
     connection = engine.connect()
     context.configure(

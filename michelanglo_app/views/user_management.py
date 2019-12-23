@@ -201,7 +201,7 @@ def permission(request, page, mode='edit', key_label='encryption_key'):
         try:
             page.load()
         except FileNotFoundError:
-            page.exists = False
+            page.existant = False
             request.response.status_int = 404
             log.error(f'Page not found {page.identifier}')
             return {'status': 'Page not found!'}

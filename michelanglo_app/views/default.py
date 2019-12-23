@@ -69,7 +69,7 @@ def my_view(request):
     elif page == 'gallery':
         reply['pages'] = request.dbsession.query(Page)\
                                                     .filter(Page.privacy != 'private')\
-                                                    .filter(Page.exists == True)\
+                                                    .filter(Page.existant == True)\
                                                     .all()
         reply['sottotitolo'] = 'Here are links to created pages flagged as public'
         return reply
