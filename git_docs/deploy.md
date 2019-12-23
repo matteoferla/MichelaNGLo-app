@@ -183,7 +183,7 @@ If using postgres the environment variable needs to be `SQL_URL=postgresql://nam
 Obviously, nothing ever goes smoothly. If you get an error with the second line (the upgrade) edit the file `michelanglo_app/alembic/versions/xxxx.py` if you get:
 
 * an error about explicit contraint names: change all `sa.Boolean()` to `sa.Boolean(create_constraint=False)`. SQLite does not know about Booleans.
-* an error about exits: `existant` is a SQL keyword so change `sa.Column('existant',` to `sa.Column('[existant]',`. 
+* ... ?
 
 ## Step 6. NPM
 
