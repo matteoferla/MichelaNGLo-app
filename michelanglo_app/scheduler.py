@@ -88,8 +88,8 @@ def monitor_task():
                 for i in range(len(details)):
                     ref = os.path.join('michelanglo_app','user-data-monitor', f'{page.identifier}-{i}.png')
                     new = os.path.join('michelanglo_app','user-data-monitor', f'tmp_{page.identifier}-{i}.png')
-                    assert os.path.existant(ref), 'Reference image does not exist'
-                    assert os.path.existant(new), 'Generated image does not exist'
+                    assert os.path.exists(ref), 'Reference image does not exist'
+                    assert os.path.exists(new), 'Generated image does not exist'
                     ref_img = imageio.imread(ref).flatten()
                     new_img = imageio.imread(new).flatten()
                     if ref_img.shape != new_img.shape:

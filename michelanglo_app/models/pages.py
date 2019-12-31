@@ -95,7 +95,7 @@ class Page(Base):
             else:
                 with open(self.path, 'rb') as fh:
                     self.settings = pickle.load(fh)
-        elif os.path.existant(self.path):
+        elif os.path.exists(self.path):
             raise FileExistsError(f'File {self.identifier} exists but is not in the DB!')
         else:
             raise FileNotFoundError(f'File {self.identifier} ought to exist?')
