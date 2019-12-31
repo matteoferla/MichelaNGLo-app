@@ -43,7 +43,7 @@ if __name__ == '__main__':
                     sesh.update(p)
                 elif ext == '.p':
                     p = Page(uuid)
-                    p.exists = True
+                    p.existant = True
                     print(f'Page {uuid} to be loaded...')
                     p.load()
                     print(f'Page {uuid} to be registered...')
@@ -59,7 +59,7 @@ if __name__ == '__main__':
                     sesh.commit()
                 elif ext == '.ep':
                     p = Page(uuid)
-                    p.exists = True
+                    p.existant = True
                     print(f'Page {uuid} is encrypted.')
                     print(f'Page {uuid} to be registered...')
                     print(p.settings.keys())
