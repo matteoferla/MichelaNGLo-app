@@ -1,3 +1,11 @@
+## TL;DR
+This assumes:
+
+* have conda already, if not read Step 1 and 2.
+* have a licence to FontAwesome-Pro, if not read Step 3
+* dont care about VENUS or gene name route, if not read Step 4
+* you want to use sqlite, not postgres. if not read Step 5
+* dont care about static downloads, if not read step 6
 
     
     #install modules
@@ -9,20 +17,21 @@
     cd protein-module
     python3 setup.py install
     cd ../transpiler
+    #python3 create.py #do this to get protein data.
     python3 setup.py install
     cd ../app
     python3 setup.py install
     npm i puppeteer
-    # sqlite?
+    # not sqlite? change the env variable accordingly and read below
     touch mike.db
     SQL_URL=sqlite:///mike.db alembic -c development.ini revision --autogenerate -m "init"
-    # postgres?
-    postgresql://apps:ornithine@localhost:5432/app_users;
+    SQL_URL=sqlite:///mike.db alembic -c development.ini alembic upgrade head
+    PROTEIN_DATA='../protein-data' SECRETCODE='needed-for-remote-reset' SQL_URL='qlite:///mike.db' SLACK_WEBHOOK='https://hooks.slack.com/services/xxx/xxx/xxx' python3 app.py > ../mike.log 2>&1
+    #SENTRY_DNS_MICHELANGLO='https://xxxx@sentry.io/xxx' is optional.
     
-    sqlite:///mike.db
 
 ## Preface
-This is why there are many commands to copy. Skip if impatient.
+This is why there are many commands to copy.
 
 ** Do not jump the gun and git clone recursively** this repository without altering FontAwesome Pro requirement if needed (see below).
 
@@ -137,7 +146,7 @@ Do you have FontAwesome Pro?
     cd ../app
     python3 setup.py install
     
-Installing it isn't needed for normal operations, but you might need a bit for a Jupyter notebook.
+Installing it isn't needed for normal operations, just esthetics.
 
 Else:
 
@@ -145,7 +154,6 @@ Else:
     https://github.com/FortAwesome/Font-Awesome
     sed -i 's/Font-Awesome-Pro\.git/Font-Awesome\.git/g' .gitmodules
     git submodule update --init --recursive
-    cd ../app
     python3 setup.py install
 
 ## Step 4. Generate the data
