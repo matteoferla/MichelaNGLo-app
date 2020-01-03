@@ -27,7 +27,7 @@ This assumes:
     touch mike.db
     SQL_URL=sqlite:///mike.db alembic -c development.ini revision --autogenerate -m "init"
     SQL_URL=sqlite:///mike.db alembic -c development.ini alembic upgrade head
-    PROTEIN_DATA='../protein-data' SECRETCODE='needed-for-remote-reset' SQL_URL='qlite:///mike.db' SLACK_WEBHOOK='https://hooks.slack.com/services/xxx/xxx/xxx' python3 app.py > ../mike.log 2>&1
+    PROTEIN_DATA='../protein-data' SECRETCODE='needed-for-remote-reset' SQL_URL='sqlite:///mike.db' SLACK_WEBHOOK='https://hooks.slack.com/services/xxx/xxx/xxx' python3 app.py > ../mike.log 2>&1
     #SENTRY_DNS_MICHELANGLO='https://xxxx@sentry.io/xxx' is optional.
 
 
