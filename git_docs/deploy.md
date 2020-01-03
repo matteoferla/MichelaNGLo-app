@@ -7,7 +7,8 @@ This assumes:
 * you want to use sqlite, not postgres. if not read Step 5
 * dont care about static downloads, if not read step 6
 
-    
+
+
     #install modules
     mkdir michelanglo
     cd michelanglo/
@@ -28,7 +29,7 @@ This assumes:
     SQL_URL=sqlite:///mike.db alembic -c development.ini alembic upgrade head
     PROTEIN_DATA='../protein-data' SECRETCODE='needed-for-remote-reset' SQL_URL='qlite:///mike.db' SLACK_WEBHOOK='https://hooks.slack.com/services/xxx/xxx/xxx' python3 app.py > ../mike.log 2>&1
     #SENTRY_DNS_MICHELANGLO='https://xxxx@sentry.io/xxx' is optional.
-    
+
 
 ## Preface
 This is why there are many commands to copy.
