@@ -7,7 +7,7 @@
             &mdash; PDB
 </%block>
 <%block name="subtitle">
-            Convert a PDB file or code to an interactive NGL viewport
+            Convert a PDB code or file (PDB/mmCIF) to an interactive NGL viewport
 </%block>
 
 
@@ -38,16 +38,16 @@
                     </div>
                     <div class="col-12 col-md-5 ">
 
-                            <div class="input-group" data-toggle="tooltip" title="Upload your PDB file">
+                            <div class="input-group" data-toggle="tooltip" title="Upload your PDB file in PDB format or mmCIF format.">
                               <div class="input-group-prepend">
-                                <span class="input-group-text" id="upload_addon_pdb">Upload PDB</span>
+                                <span class="input-group-text" id="upload_addon_pdb">Upload file</span>
                               </div>
                               <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="upload_pdb" aria-describedby="upload_addon_pdb" accept=".pdb">
+                                <input type="file" class="custom-file-input" id="upload_pdb" aria-describedby="upload_addon_pdb" accept=".pdb, .cif, .mmtf">
                                 <label class="custom-file-label" for="upload_pdb">Choose file</label>
                               </div>
                             </div>
-                            <div class="invalid-feedback" id="error_upload_pdb">Please upload a valid pdb file.</div>
+                            <div class="invalid-feedback" id="error_upload_pdb">Please upload a valid pdb/mmCIF file.</div>
                     </div>
                 </div>
             </li>
@@ -96,10 +96,11 @@
     $('#upload_pdb').change(function () {
         window.mode = 'file'; //file | code
         // check if good.
-        var extension = '.pdb';
-        var filename=$(this).val().split('\\').slice(-1)[0];
+        let validExtensions = ['pdb', 'cif', 'mmtf'];
+        let filename=$(this).val().split('\\').slice(-1)[0];
+        let extension = filename.split('\.').pop().toLowerCase();
         if (!! $(this).val()) { //valid upload
-            if ($(this).val().toLowerCase().search(extension) != -1) {
+            if (validExtensions.some(e => e == extension)) {
             $(this).addClass('is-valid');
             $(this).removeClass('is-invalid');
             $('#error_upload_pdb').hide();
@@ -108,13 +109,15 @@
             $(id).removeClass('is-valid');
             $(id).addClass('is-invalid');
             $('#error_upload_pdb').show();
+            return 0;
         }
         $('#upload_pdb+.custom-file-label').html(filename);
-        } // else? nothing added. user chickened out.
+        } // else? nothing added. user chickened out. Dont yell at him/her
         start_stage_two();
         let pdb = $('#pdb').val();
-        $('#viewcode').text('<div role="NGL" data-proteins=\'[{"type": "data", "value": "pdbString", "isVariable": true}]\'></div>');
-        NGL.specialOps.multiLoader('viewport',[{'type': 'file','value': $('#upload_pdb')[0].files[0]}]);
+
+        $('#viewcode').text('<div role="NGL" data-proteins=\'[{"type": "data", "value": "pdbString", "isVariable": true, "ext": "'+extension+'"}]\'></div>');
+        NGL.specialOps.multiLoader('viewport',[{'type': 'file','value': $('#upload_pdb')[0].files[0],'ext': extension}]);
         NGL.specialOps.showTitle('viewport', 'Loaded: '+ pdb );
         interactive_builder();
     });
