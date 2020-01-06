@@ -1,6 +1,7 @@
 ## mmCIF problem
 
-PyMOL saved mmCIF and mmTF files do not load in NGL.
+PyMOL saved mmCIF and mmTF files do not load in NGL. So this error needs to be fixed.
+As expected from PDB format the secondary structure is lost &mdash;hence why I add it with `PyMolTranspiler.parse_ss` in Michelanglo_transpiler.
 
 In [specs for NGL](http://nglviewer.org/ngl/api/manual/file-formats.html#mmcif), the mmCIF ought to contain 'auth_seq_id' and 'auth_asym_id'.
 
