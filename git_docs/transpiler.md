@@ -1,4 +1,8 @@
 ## Script functionality
+
+**THE TRANSPILER FUNCTIONALITY NOW RESIDES IN [https://github.com/matteoferla/MichelaNGLo-transpiler](MichelaNGLo-transpiler).**
+
+
 The script `PyMOL_to_NGL.py` has the class `PyMolTranspiler`. Which accepts different starting values.
 If Pymol is installed on the system and the system is not a Windows machine, the filename of the PSE is passed and processed.
 
