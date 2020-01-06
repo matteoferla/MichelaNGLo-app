@@ -7,6 +7,9 @@ log = logging.getLogger(__name__)
 
 @view_config(route_name='msg', renderer='json')
 def send_msg(request):
+    """
+    This is a route, the actual messaging functionality resides in ``_common_methods.notify_admin``
+    """
     if 'page' in request.params and 'text' in request.params:
         if 'event' == 'report':
             log.warning(f'{User.get_username(request)} reported {request.params["page"]}')
