@@ -55,4 +55,34 @@ So why did changing `label_seq_id` and `label_asym_id` kill it?
 
 mmTF has issues too.
 
-TypeError: `p.atomIdList` is undefined.
+    pymol.cmd.delete('all')
+    pymol.cmd.fetch('6ucs')
+    pymol.cmd.save('test.mmtf')
+    pymol.cmd.delete('all')
+
+TypeError: `p.atomIdList` is undefined. Nominally this is [optional](https://github.com/rcsb/mmtf/blob/master/spec.md#atomidlist).
+
+The roundtrip via Anthony Bradley's `mmtf` package does not work as it is considered malformed.
+
+    import mmtf
+    tf = mmtf.api.parse('test.mmtf') # works
+    mmtf.api.write_mmtf('round.mmtf',tf, mmtf.api.MMTFDecoder.pass_data_on) # fails.
+    
+Here is a control writing of a read file, which works:
+
+    tf = mmtf.api.fetch('6ucs')
+    mmtf.api.write_mmtf('round.mmtf',tf, mmtf.api.MMTFDecoder.pass_data_on)
+    tf = mmtf.api.parse('round.mmtf')
+    mmtf.api.write_mmtf('round2.mmtf',tf, mmtf.api.MMTFDecoder.pass_data_on)
+
+The error in the roundtrip is an idex out of range at `data_api.sequence_index_list[group_index],`.
+
+PyMOL does a normal round trip:
+
+    pymol.cmd.load('test.mmtf')
+    pymol.cmd.save('test.pse')
+    
+The `sequence_index_list` (aka. `sequenceIndexList`) is nominally an [optional field](https://github.com/rcsb/mmtf/blob/master/spec.md#sequenceindexlist).
+
+Both the troublesome entries ought to be (when decoded) a simple range. So it may be fixable.
+However, for now, mmCIF seems like a better target.
