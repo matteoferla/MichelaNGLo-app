@@ -8,7 +8,8 @@ This assumes:
 * dont care about static downloads, if not read step 6
 
 
-    #install modules
+Install modules in a folder called michelanglo:
+
     mkdir michelanglo
     cd michelanglo/
     git clone --recursive https://github.com/matteoferla/MichelaNGLo.git app
@@ -16,8 +17,8 @@ This assumes:
     git clone https://github.com/matteoferla/MichelaNGLo-transpiler transpiler
     cd protein-module
     python3 setup.py install
+    #python3 create.py & #do this to get protein data.
     cd ../transpiler
-    #python3 create.py #do this to get protein data.
     python3 setup.py install
     cd ../app
     python3 setup.py install
@@ -27,7 +28,9 @@ This assumes:
     SQL_URL=sqlite:///mike.db alembic -c development.ini revision --autogenerate -m "init"
     SQL_URL=sqlite:///mike.db alembic -c development.ini alembic upgrade head
     PROTEIN_DATA='../protein-data' SECRETCODE='needed-for-remote-reset' SQL_URL='sqlite:///mike.db' SLACK_WEBHOOK='https://hooks.slack.com/services/xxx/xxx/xxx' python3 app.py > ../mike.log 2>&1
-    #SENTRY_DNS_MICHELANGLO='https://xxxx@sentry.io/xxx' is optional.
+
+Additional adding the env var `SENTRY_DNS_MICHELANGLO='https://xxxx@sentry.io/xxx'` will send errors.
+The Slack webhook isn't optional, but giving a dummy value will just make errors.
 
 
 ## Preface
