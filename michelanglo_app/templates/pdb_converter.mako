@@ -27,7 +27,7 @@
                                     <input type="text" class="form-control" id="pdb" autocomplete="new-password">
                                     <div class="invalid-feedback" id="error_pdb">Weird PDB code</div>
                                     <div class="input-group-append">
-                                        <button class="btn btn-success" type="button" id="code_load">Load</button>
+                                        <button class="btn btn-success" type="button" id="code_load">Fetch</button>
                                     </div>
 
                                 </div>
@@ -43,7 +43,7 @@
                                 <span class="input-group-text" id="upload_addon_pdb">Upload file</span>
                               </div>
                               <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="upload_pdb" aria-describedby="upload_addon_pdb" accept=".pdb, .cif, .mmtf">
+                                <input type="file" class="custom-file-input" id="upload_pdb" aria-describedby="upload_addon_pdb" accept=".pdb, .cif, .mmtf, .pqr, .sdf, .mol2">
                                 <label class="custom-file-label" for="upload_pdb">Choose file</label>
                               </div>
                             </div>
@@ -96,7 +96,7 @@
     $('#upload_pdb').change(function () {
         window.mode = 'file'; //file | code
         // check if good.
-        let validExtensions = ['pdb', 'cif', 'mmtf'];
+        let validExtensions = ['pdb', 'cif', 'mmtf', 'pqr', 'sdf', 'mol', 'mol2'];
         let filename=$(this).val().split('\\').slice(-1)[0];
         let extension = filename.split('\.').pop().toLowerCase();
         if (!! $(this).val()) { //valid upload
