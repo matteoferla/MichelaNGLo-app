@@ -8,7 +8,6 @@ This assumes:
 * dont care about static downloads, if not read step 6
 
 
-
     #install modules
     mkdir michelanglo
     cd michelanglo/

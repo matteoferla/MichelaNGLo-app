@@ -20,13 +20,16 @@ A future possibility is that in collaboration with specific journals this could 
 
 Want to install this webserver locally? Then check out [deployment notes](git_docs/deploy.md).
 
-## Transpiler
-The transpiler script does the conversion the PyMol files and a few extras.
-The conversion file, `michelanglo/transpiler.py` and the files in `michelanglo/transpiler_templates` are all that is required to use locally.
-They are in `michelanglo_app` to avoid allowing the app to do a relative import beyond the top-level package (`michelanglo_app`).
+The site [michelanglo.sgc.ox.ac.uk](https://michelanglo.sgc.ox.ac.uk) depends on three repos:
+* **MichelaNGLo-app**
+* [MichelaNGLo-transpiler](https://github.com/matteoferla/MichelaNGLo-transpiler)
+* [MichelaNGLo-protein-module](https://github.com/matteoferla/MichelaNGLo-protein-module)
 
-For notes about the details about the conversion see [conversion.md](git_docs/conversion.md)
-For notes about the transpiler see [transpiler.md](git_docs/transpiler.md).
+## Transpiler
+
+> See [MichelaNGLo-transpiler repo](https://github.com/matteoferla/MichelaNGLo-transpiler) for details
+
+The transpiler script does the conversion the PyMol files and a few extras. It is now located within its own repo: [MichelaNGLo-transpiler](https://github.com/matteoferla/MichelaNGLo-transpiler).
 
 ## Michelanglo.js
 The js that allows web content creators to control NGL without using JS is `michelanglo_app/static/michelanglo.js`, while its documentation is at [michelanglo.sgc.ox.ac.uk/docs/markup](michelanglo.sgc.ox.ac.uk/docs/markup).
