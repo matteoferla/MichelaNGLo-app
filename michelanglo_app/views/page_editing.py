@@ -73,10 +73,10 @@ def edit(request):
         page.settings['confidential'] = is_js_true(request.params['confidential'])
         if page.privacy == '' or page.privacy is None:
             page.privacy = 'private'
-            log.warn('A page had no privacy setting. How?')
+            log.warning('A page had no privacy setting. How?')
         if user.role == 'admin' and request.params['public'] not in (None, False, True, 'false','true'):
             ## only admin can set to anything that is not private | public
-            page.privacy = request.params['public'].lower()
+            page.privacy = request.params['public'].lower() # private | public | published | sgc | pinned
         elif is_js_true(request.params['public']):
             if page.privacy not in ('public', 'private'):
                 pass # keep page privacy. admin set it to published or sgc.

@@ -44,7 +44,16 @@
         </div>
         <br/>
     <p>Lastly, you can make the page publicly listed. Search engines do not and cannot know about your page and cannot parse them otherwise. Enabling this will disable encryption.</p>
-        <div class="custom-control custom-switch">
+        %if user and user.role in ('admin', 'friend'):
+            <select class="custom-select" id="public">
+                <option selected value="private">Private</option>
+                <option value="public">Public</option>
+                <option value="sgc">SGC TEP</option>
+                <option value="pinned">Pinned</option>
+                <option value="published">Published</option>
+              </select>
+        %else:
+            <div class="custom-control custom-switch">
           <input type="checkbox" class="custom-control-input user-editable-state" id="public"
                  %if public:
                     checked
@@ -52,6 +61,8 @@
                     >
           <label class="custom-control-label" for="public">Public</label>
         </div>
+        %endif
+
 
     </div>
 </div>

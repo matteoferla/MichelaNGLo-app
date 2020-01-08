@@ -39,6 +39,9 @@ class Page(Base):
         encrypted BOOL,
         timestamp TIMESTAMP NOT NULL);
 
+        privacy ought to be an enum... private | public | published | sgc | pinned
+        any change to it need to be changed in gallery.mako
+
         """
     __tablename__ = 'pages'
     id = Column(Integer, primary_key=True)

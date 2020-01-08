@@ -20,6 +20,8 @@
                     <p class="card-text text-muted">This page was created by a user.</p>
                   %elif page.privacy == 'published':
                     <p class="card-text text-muted">This user-created page appears in a publication.</p>
+                  %elif page.privacy == 'pinned':
+                    <p class="card-text text-muted">This page is of importance so is pinned.</p>
                   %elif page.privacy == 'sgc':
                     <p class="card-text text-muted">This page features an Target Enabling Package from the SGC.</p>
                   %endif
@@ -47,6 +49,7 @@
 
         <%
             cats = {'published': 'Pages appearing in publications',
+                    'pinned': 'Pinned pages',
                     'sgc': 'Target Enabling Packages (SGC)',
                     'public': 'Public Pages',
                     'private': 'Private Pages',

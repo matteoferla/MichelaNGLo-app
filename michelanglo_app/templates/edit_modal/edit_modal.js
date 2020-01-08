@@ -124,7 +124,7 @@ $('#edit_submit').click(function () {
             'new_editors': JSON.stringify(new_editors),
             'encryption': $('#encryption').prop('checked'),
             'encryption_key': $('#encryption_key').val(),
-            'public': $('#public').prop('checked'),
+            'public': (public.nodeName == "SELECT") ? public.value : public.checked,
             'confidential': $('#confidential').prop('checked'),
             'model': $('#model').prop('checked')
         }
