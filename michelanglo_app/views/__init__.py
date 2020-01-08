@@ -5,3 +5,5 @@
 # to set go to admin console.
 
 custom_messages = []
+
+valid_extensions = ['pdb', 'cif', 'mmtf', 'pqr', 'sdf', 'mol', 'mol2']

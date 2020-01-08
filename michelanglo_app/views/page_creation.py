@@ -12,6 +12,7 @@ import io
 import re
 import json
 import requests
+from . import valid_extensions
 
 PyMolTranspiler.tmp = os.path.join('michelanglo_app', 'temp')
 
@@ -42,6 +43,21 @@ def save_file(request, extension, field='file'):
             request.params[field].file.seek(0)
             shutil.copyfileobj(request.params[field].file, output_file)
     return filename
+
+def save_coordinates(request, mod_fx=None):
+    """
+    Saves the request['pdb'] file. Does not accept str.
+    """
+    extension = request.params['pdb'].filename.split('.')[-1]
+    if extension not in valid_extensions:
+        log.warning(f'Odd format in pdb upload: {extension} {valid_extensions}')
+        extension = 'pdb'
+    filename = save_file(request, extension, field='pdb')
+    trans = PyMolTranspiler.load_pdb(file=filename, mod_fx=mod_fx)
+    os.remove(filename)
+    if extension != 'pdb':
+        os.remove(filename.replace(extension, 'pdb'))
+    return trans
 
 
 ########################################################################################
@@ -121,7 +137,7 @@ def convert_pse(request):
             return {'status': malformed}
         if 'demo_filename' not in request.params and 'file' not in request.params:
             request.response.status = 422
-            log.warn(f'{User.get_username(request)} malformed request due to missing demo_filename or file')
+            log.warning(f'{User.get_username(request)} malformed request due to missing demo_filename or file')
             return f'Missing field (either demo_filename or file are compulsory)'
         ## set settings
         settings = {'viewport': 'viewport',  # 'tabbed': int(request.params['indent']),
@@ -152,8 +168,8 @@ def convert_pse(request):
                 return {'status': malformed}
             filename = save_file(request, 'pse')
         trans = PyMolTranspiler(file=filename, job=User.get_username(request), **settings)
-        if mode == 'demo' or not is_js_true(request.params[
-                                                'pdb']):  ## pdb_string checkbox is true means that it adds the coordinates in the JS and not pdb code is given
+        if mode == 'demo' or not is_js_true(request.params['pdb']):
+            ## pdb_string checkbox is true means that it adds the coordinates in the JS and not pdb code is given
             with open(os.path.join(trans.tmp, os.path.split(filename)[1].replace('.pse', '.pdb'))) as fh:
                 trans.raw_pdb = fh.read()
         else:
@@ -231,8 +247,9 @@ def convert_pdb(request):
     settings = {'data_other': data_other,
                 'page': pagename, 'editable': True,
                 'backgroundcolor': 'white', 'validation': None, 'js': None, 'pdb': [], 'loadfun': ''}
+    extension = 'pdb'
+    pdb = request.params['pdb']
     if request.params['mode'] == 'code':
-        pdb = request.params['pdb']
         if len(pdb) == 4:
             settings['proteinJSON'] = '[{{"type": "rcsb", "value": "{0}"}}]'.format(pdb)  # PDB code.
             settings['descriptors'] = PDBMeta(pdb).describe()
@@ -258,17 +275,14 @@ def convert_pdb(request):
             settings['title'] = f'User created page (PDB: {code} {rex.group(1)})'
         else:
             settings['title'] = f'User created page'
-    else: #file
+    elif hasattr(request.params['pdb'], 'filename'):
         settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true}]'
-        filename = save_file(request, 'pdb', field='pdb')
-        trans = PyMolTranspiler.load_pdb(file=filename)
-        os.remove(filename)
-        if 'HELIX' in trans.raw_pdb or 'SHEET' in trans.raw_pdb:
-            settings['pdb'] = [('pdb', trans.raw_pdb)]
-        else:
-            settings['pdb'] = [('pdb', '\n'.join(trans.ss)+'\n'+trans.raw_pdb)]
+        trans = save_coordinates(request)
+        settings['pdb'] = [('pdb', trans.raw_pdb)]
         settings['js'] = 'external'
         settings['title'] = 'User submitted structure (from uploaded PDB)'
+    else:
+        log.exception(f'I have no idea what is uploaded as `pdb`. type: {type(pdb)} {pdb}')
     commit_submission(request, settings, pagename)
     return {'page': pagename}
 
@@ -281,7 +295,7 @@ def renumber(request):
     malformed = is_malformed(request, 'pdb')
     if malformed:
         return {'status': malformed}
-    pdb = request.params['pdb']
+    pdb = get_pdb_block(request)
     if len(pdb) != 4 or re.search('\W', pdb) is not None: ## renumber is for PDB structures only. There is no point otherwise.
         request.response.status = 422
         return {'status': f'{pdb} is not PDB code'}
@@ -297,7 +311,7 @@ def removal(request):
     if malformed:
         return {'status': malformed}
     ## variant of mutate...
-    pdb = request.params['pdb']
+    pdb = get_pdb_block(request)
     chains = request.params['chains'].split()
     return operation(request,
                       pdb=pdb,
@@ -305,13 +319,53 @@ def removal(request):
                       fun_file = PyMolTranspiler.chain_removal_file,
                       chains=chains)
 
+@view_config(route_name='dehydrate', renderer="json") #as in dehydrate a structure before page creation.
+def dehydrate(request):
+    malformed = is_malformed(request, 'pdb', 'water', 'ligand', 'format')
+    if malformed:
+        return {'status': malformed}
+    pdb = get_pdb_block(request)
+    try:
+        water = is_js_true(request.params['water'])
+        ligand = is_js_true(request.params['ligand'])
+        if not (water or ligand):
+            raise ValueError
+        return operation(request,
+                      pdb=pdb,
+                      fun_code = PyMolTranspiler.dehydrate_code,
+                      fun_file = PyMolTranspiler.dehydrate_file,
+                      water=water,
+                      ligand=ligand
+                         )
+    except ValueError:
+        request.response.status = 422
+        return {'status': f'Nothing to delete'}
+
+def get_pdb_block(request):
+    """
+    This does an unneccassry round trip.
+    """
+    if isinstance(request.params['pdb'], str): #string
+        if 'format' not in request.params:
+            return request.params['pdb']
+        elif request.params['format'].lower() == 'pdb':
+            return request.params['pdb']
+        elif request.params['format'].lower() not in valid_extensions:
+                log.warning(f'Odd format in pdb upload: {request.params["format"]} {valid_extensions}')
+                return request.params['pdb']
+        else:
+            filename = save_file(request, request.params['format'].lower(), field='pdb')  # save_file is abivalent to file or str
+            return PyMolTranspiler.load_pdb(file=filename).raw_pdb
+    elif hasattr(request.params['pdb'], "filename"): #file
+        return save_coordinates(request).raw_pdb
+
 @view_config(route_name='premutate', renderer="json") #as in mutate a structure before page creation.
 def premutate(request):
-    malformed = is_malformed(request, 'pdb', 'mutations', 'chain')
+    malformed = is_malformed(request, 'pdb', 'mutations', 'chain', 'format')
     if malformed:
         return {'status': malformed}
     ## variant of mutate...
-    pdb = request.params['pdb']
+    pdb = get_pdb_block(request)
     chain = request.params['chain']
     mutations = request.params['mutations'].split()
     try:
@@ -326,23 +380,36 @@ def premutate(request):
 
 
 def operation(request, pdb, fun_code, fun_file, **kargs):
-    filename = os.path.join('michelanglo_app', 'temp', f'{uuid.uuid4()}.pdb') #get_uuid is not really needed as it does not go to DB.
+    """
+    This method is called by premutate and removal, neither changes anything serverside.
+    """
+    # get_uuid is not really needed as it does not go to DB.
+    filename = os.path.join('michelanglo_app', 'temp', f'{uuid.uuid4()}.pdb')
     ## type is determined
-    if len(pdb) == 4: ##PDB code.
-        code = pdb
-        fun_code(pdb, filename, **kargs)
-    elif len(pdb.strip()) == 0:
-        request.response.status = 422
-        return {'status': f'Empty PDB string?!'}
+    if hasattr(pdb, 'filename'):
+        #this is a special case wherein the uses has sent a file upload.
+        #for now it is simply saved and annotated and reopened.
+        #totally wasteful but for now none of the methods upload a file.
+        trans = save_coordinates(request, mod_fx=None)
+        block = trans.raw_pdb()  ### xxxxxxxx
+        print(block)
+        raise NotImplementedError
     else:
-        if re.match('https://swissmodel.expasy.org', pdb): ## swissmodel
-            pdb = requests.get(pdb).text
-        with open(filename, 'w') as fh:
-            fh.write(pdb)
-        fun_file(filename,  filename, **kargs)
-    with open(filename, 'r') as fh:
-        block = fh.read()
-    os.remove(filename)
+        if len(pdb) == 4: ##PDB code.
+            code = pdb
+            fun_code(pdb, filename, **kargs)
+        elif len(pdb.strip()) == 0:
+            request.response.status = 422
+            return {'status': f'Empty PDB string?!'}
+        else: #string
+            if re.match('https://swissmodel.expasy.org', pdb): ## swissmodel
+                pdb = requests.get(pdb).text
+            with open(filename, 'w') as fh:
+                fh.write(pdb)
+            fun_file(filename,  filename, **kargs)
+        with open(filename, 'r') as fh:
+            block = fh.read()
+        os.remove(filename)
     if len(pdb) == 4:
         return {'pdb': f'REMARK 100 THIS ENTRY IS ALTERED FROM {pdb}.\n' +block}
     elif 'REMARK 100 THIS ENTRY' in block:

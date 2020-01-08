@@ -10,7 +10,6 @@
             Convert a PDB code or file (PDB/mmCIF) to an interactive NGL viewport
 </%block>
 
-
 <%block name="body">
 <ul class="list-group list-group-flush">
             <li class="list-group-item">
@@ -38,12 +37,12 @@
                     </div>
                     <div class="col-12 col-md-5 ">
 
-                            <div class="input-group" data-toggle="tooltip" title="Upload your PDB file in PDB format or mmCIF format.">
+                            <div class="input-group" data-toggle="tooltip" title="Upload your coordinate file in in ${', '.join(valid_extensions)} format (will be converted to pdb).">
                               <div class="input-group-prepend">
                                 <span class="input-group-text" id="upload_addon_pdb">Upload file</span>
                               </div>
                               <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="upload_pdb" aria-describedby="upload_addon_pdb" accept=".pdb, .cif, .mmtf, .pqr, .sdf, .mol2">
+                                <input type="file" class="custom-file-input" id="upload_pdb" aria-describedby="upload_addon_pdb" accept="${', '.join(['.'+str(e) for e in valid_extensions])}">
                                 <label class="custom-file-label" for="upload_pdb">Choose file</label>
                               </div>
                             </div>
@@ -96,7 +95,7 @@
     $('#upload_pdb').change(function () {
         window.mode = 'file'; //file | code
         // check if good.
-        let validExtensions = ['pdb', 'cif', 'mmtf', 'pqr', 'sdf', 'mol', 'mol2'];
+        let validExtensions = ${str(valid_extensions)|n};
         let filename=$(this).val().split('\\').slice(-1)[0];
         let extension = filename.split('\.').pop().toLowerCase();
         if (!! $(this).val()) { //valid upload

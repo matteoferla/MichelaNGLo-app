@@ -35,19 +35,28 @@ $('#create').click(function (event) {
         .fail(ops.addErrorToast);
 });
 
+window.getCoordinates = async () => {
+    let pdb = '';
+    let extension = 'pdb';
+    if ((window.mode === undefined) || (window.mode === 'code')) { pdb = window.pdbCode}
+    else if (window.mode === 'renumbered') { pdb = window.pdbString}
+    else if (window.mode === 'file') {
+        let f = $('#upload_pdb')[0].files[0];
+        pdb = await f.text();
+        extension = f.name.split('\.').pop().toLowerCase()
+    }
+    else {
+        console.log('What?! '+window.mode);
+        return [null, null];} //impossible anyway.
+    return [pdb, extension];
+};
+
 $('#mutate').click(async (event)  => {
     $(event.target).attr('disabled','disabled');
     let mutate_chain = $('#mutate_chain').val() || 'A';
     let mutations = $('#mutate_mutations').val().replace(/p\./gm, '').trim().split(/[\W,]+/);
-    let pdb = '';
-    if ((window.mode === undefined) || (window.mode === 'code')) { pdb = window.pdbCode}
-    else if (window.mode === 'renumbered') { pdb = window.pdbString}
-    else if (window.mode === 'file') {
-        pdb = await $('#upload_pdb')[0].files[0].text();
-    }
-    else {
-        console.log('What?! '+window.mode);
-        return 0;} //impossible anyway.
+    let [pdb, extension] = await getCoordinates();
+    if (pdb === null) return 0;
     $.ajax({
         url: "/premutate",
         type: 'POST',
@@ -55,7 +64,8 @@ $('#mutate').click(async (event)  => {
         data: {
             'pdb': pdb,
             'chain': mutate_chain,
-            'mutations': mutations.join(' ')
+            'mutations': mutations.join(' '),
+            'format': extension
         },
         success: msg => {
             window.loadMyMsg(msg);
@@ -71,20 +81,37 @@ $('#mutate').click(async (event)  => {
 $('#delete').click(async (event)  => {
     $(event.target).attr('disabled','disabled');
     let chains = $('#delete_chains').val().replace(/p\./gm, '').trim().split(/[\W,]+/);
-    let pdb = '';
-    if ((window.mode === undefined) || (window.mode === 'code')) { pdb = window.pdbCode}
-    else if (window.mode === 'renumbered') { pdb = window.pdbString}
-    else if (window.mode === 'file') {
-        pdb = await $('#upload_pdb')[0].files[0].text();
-    }
-    else {return 0;} //impossible anyway.
+    let [pdb, extension] = await getCoordinates();
+    if (pdb === null) return 0;
     $.ajax({
         url: "/remove_chains",
         type: 'POST',
         dataType: 'json',
         data: {
-            'pdb': pdb,
-            'chains': chains.join(' ')
+            pdb: pdb,
+            chains: chains.join(' '),
+            format: extension
+        },
+        success: window.loadMyMsg,
+        error: ops.addErrorToast
+    });
+
+});
+
+$('#dehydrate').click(async (event)  => {
+    $(event.target).attr('disabled','disabled');
+    let chains = $('#delete_chains').val().replace(/p\./gm, '').trim().split(/[\W,]+/);
+    let [pdb, extension] = await getCoordinates();
+    if (pdb === null) return 0;
+    $.ajax({
+        url: "/dehydrate",
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            pdb: pdb,
+            format: extension,
+            water: $('#water_toggle').prop('checked'),
+            ligand: $('#artefact_toggle').prop('checked')
         },
         success: window.loadMyMsg,
         error: ops.addErrorToast
@@ -98,6 +125,20 @@ $('#markup_model').detach();
 $('#selection_modal .modal-dialog').removeClass('float-left').addClass('float-right').css('padding-right', '32px !important;');
 $('#selection_modal .fa-arrow-right').removeClass('fa-arrow-right').addClass('fa-check');
 
+$('#dehydrate_collapse').on('shown.bs.collapse',event => {
+    const protein = NGL.getStage().compList[0];
+    const water = $('#water_toggle').closest('.col-12');
+    const artefact = $('#artefact_toggle').closest('.col-12');
+    const hider = el => {el.hide(); el.find('.custom-control-input').prop('checked',false);};
+    const shower = el => {el.show(); el.find('.custom-control-input').prop('checked',true);};
+    (protein.structure.getView(new NGL.Selection('water')).atomCount !== 0) ? shower(water) : hider(water);
+    (protein.structure.getView(new NGL.Selection('ligand')).atomCount !== 0) ? shower(artefact) : hider(artefact);
+    if (protein.structure.getView(new NGL.Selection('ligand or water')).atomCount === 0) {
+        $('#ligandlist').append('<b>No waters or ligands present</b>');
+    } else {
+        $('#ligandlist p').detach();
+    }
+});
 
 // fun for the loading of a pdb.
 window.renumber_alerter = (pdb) => {
@@ -122,12 +163,15 @@ window.renumber_alerter = (pdb) => {
 };
 
 // deal with click of alert.
-$('#renumber').click(event => {
+$('#renumber').click(async event => {
     $(event.target).attr('disabled','disabled');
+    let [pdb, extension] = await getCoordinates();
+    if (pdb === null) return 0;
     $.post({
                 url: "/renumber",
                 data: {
-                    'pdb': window.pdbCode
+                    pdb: pdb,
+                    format: extension
                 },
                 success: window.loadMyMsg,
                 error: ops.addErrorToast

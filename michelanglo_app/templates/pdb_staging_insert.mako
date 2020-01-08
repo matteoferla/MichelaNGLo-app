@@ -37,6 +37,9 @@
             <span data-toggle="tooltip" title="Choose chains to delete">
                 <button type="button" class="btn btn-outline-info mb-3" data-toggle="collapse" data-target="#delete_collapse" id="delete_collapse_btn"><i class="far fa-trash"></i> Remove parts</button>
            </span>
+           <span data-toggle="tooltip" title="Remove water and selected ligands">
+                <button type="button" class="btn btn-outline-info mb-3" data-toggle="collapse" data-target="#dehydrate_collapse" id="dehydrate_collapse_btn"><i class="far fa-tint"></i> Remove waters</button>
+           </span>
             </div>
             <div class="collapse bg-light rounded p-3 border" id="mutate_collapse">
                 <h5>Mutagenesis</h5>
@@ -68,6 +71,29 @@
                   <input type="text" class="form-control" aria-describedby="delete_chain_label" id="delete_chains" placeholder="chain ids">
                 </div>
                 <button id="delete" class="btn btn-success w-100">Delete</button>
+                </div>
+            <div class="collapse bg-light rounded p-3 border" id="dehydrate_collapse">
+                <h5>Remove waters and ligands</h5>
+                <p class="mb-3">Crystallographic waters are that kept in an ordered position by the protein. Often chemicals that aid in crystallisation are similarly found. Natural ligands will not be removed (<i>cf.</i> <a href="https://blog.matteoferla.com/2019/11/go-away-glycerol.html" target="_blank">blacklist</a>).</p>
+                <div clss="row" id="ligandlist">
+                    <div class="col-12 mb-2">
+                    <div class="border rounded bg-light p-2">
+                        <div class="custom-control custom-switch">
+                          <input class="custom-control-input"  id="water_toggle" type="checkbox" >
+                            <label class="custom-control-label" for="water_toggle">Remove <span class="prolink" data-target="viewport" data-radius="-1" data-toggle="protein" data-focus="residue" data-selection="water">waters</span></label>
+                        </div>
+                    </div>
+                </div>
+                    <div class="col-12 mb-2">
+                        <div class="border rounded bg-light p-2">
+                        <div     class="custom-control custom-switch">
+                          <input class="custom-control-input"  id="artefact_toggle" type="checkbox" >
+                          <label class="custom-control-label" for="artefact_toggle">Remove <span class="prolink" data-target="viewport" data-radius="-1" data-toggle="protein" data-focus="residue" data-selection="ligand">crystallisation compounds</span></label>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                 <button id="dehydrate" class="btn btn-success w-100">Remove selected</button>
                 </div>
         </div>
         </div>

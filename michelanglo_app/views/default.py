@@ -3,7 +3,7 @@ from pyramid.renderers import render_to_response
 from pyramid.response import FileResponse
 import os, json
 from ..models import User, Page
-from . import custom_messages
+from . import custom_messages, valid_extensions
 
 import logging
 log = logging.getLogger(__name__)
@@ -62,7 +62,8 @@ def my_view(request):
                 'meta_description': 'Convert PyMOL files, upload PDB files or submit PDB codes and '+\
                                     'create a webpage to edit, share or implement standalone on your site',
                 'meta_image': '/static/tim_barrel.png',
-                'meta_url': 'https://michelanglo.sgc.ox.ac.uk/'
+                'meta_url': 'https://michelanglo.sgc.ox.ac.uk/',
+                'valid_extensions': valid_extensions
             }
     if page == 'docs':
         return route_docs(request, reply)
