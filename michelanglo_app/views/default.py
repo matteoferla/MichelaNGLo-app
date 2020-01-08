@@ -124,3 +124,7 @@ def status_view(request):
 def favicon_view(request):
     icon = os.path.join("michelanglo_app", "static", "favicon.ico")
     return FileResponse(icon, request=request)
+
+@view_config(route_name="robots", renderer='string')
+def robots(request):
+    return 'User-Agent: *\nDisallow:\nAllow: /'

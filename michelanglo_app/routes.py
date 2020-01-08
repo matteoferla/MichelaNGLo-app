@@ -49,6 +49,7 @@ def includeme(config):
     config.add_route('redirect', '/r/{id}')
     config.add_route('userthumb', '/thumb/{id}')
     config.add_route('monitor', '/monitor/{id}')
+    config.add_route('robots','/robots.txt')
 
     #previously existent routes... deadlink possible:
     #config.add_route('sandbox', '/sandbox')
