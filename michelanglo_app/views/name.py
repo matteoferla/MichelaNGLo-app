@@ -18,14 +18,14 @@ def choose_pdb(request):
         malformed = is_malformed(request, 'name')
         if malformed:
             return {'status': malformed}
-        name = request.params['name']
-        if not name:
+        name = request.params['name'].strip()
+        if not name: #empty name
             return {'options': 'many'}
-        elif name in organism:
+        elif name in organism: #name exists!
             return {'taxid': organism[name]}
-        elif name.title() in organism:
+        elif name.title() in organism: #name exists and is formatted differently
             return {'taxid': organism[name.title()]}
-        elif len(name) < 4:
+        elif len(name) < 4: #too short.
             return {'options': 'many'}
         else:
             lowname = name.lower()
@@ -66,7 +66,15 @@ def choose_pdb(request):
         elif len(gene) > 2:
             lowname = gene.lower()
             options = [k for k in genedex if lowname in k.lower()]
-            return {'options': options}
+            if len(options):
+                return {'options': options}
+            elif gene[1:].isdigit():  # likely Uniprot id. What the hell, user.
+                uni = json.load(open(os.path.join(ProteinCore.settings.dictionary_folder, 'uniprot2species.json')))
+                if gene.upper() in uni:
+                    tax = uni[gene.upper()]
+                    return {'species_correction': [o for o,i in organism.items() if i == tax]}
+            else:
+                return {'options': []}
         else:
             return {'invalid': True}
     elif request.params['item'] == 'get_pdbs':
