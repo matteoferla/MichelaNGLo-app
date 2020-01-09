@@ -67,7 +67,7 @@ $('#gene').on('keyup', event => {
                                                                 species.val(msg.species_correction[0]);
                                                                 window.taxidValue = msg.species_correction[3];
                                                                 species.trigger('keyup');
-                                                                setTimeout(() => gene.trigger('keyup'), 300);
+                                                                setTimeout(() => gene.trigger('keyup'), 500);
                                                                 }
                               else if (msg.options) {
                                    const buttonise = el => `<a href='#' class="list-group-item list-group-item-action" name="genes">${el}</a>`;
