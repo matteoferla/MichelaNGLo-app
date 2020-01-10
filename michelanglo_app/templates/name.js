@@ -65,7 +65,7 @@ $('#gene').on('keyup', event => {
                               if (msg.invalid) {error_gene.show(); gene.addClass('is-invalid')}
                               else if (msg.species_correction) {ops.addToast('wrongSpecies','Species mismatch', 'The Uniprot ID you entered belongs to a  '+msg.species_correction[0]+' ('+msg.species_correction[1]+'; taxid'+msg.species_correction[2]+'). It has been changed accordingly', 'bg-info');
                                                                 species.val(msg.species_correction[0]);
-                                                                window.taxidValue = msg.species_correction[3];
+                                                                window.taxidValue = msg.species_correction.pop();
                                                                 species.trigger('keyup');
                                                                 setTimeout(() => gene.trigger('keyup'), 500);
                                                                 }
