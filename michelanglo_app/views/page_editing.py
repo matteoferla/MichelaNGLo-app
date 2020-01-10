@@ -258,15 +258,15 @@ def mutate(request):
                     seq = protein_data['value']
                 with open(filename, 'w') as fh:
                     fh.write(seq)
-                PyMolTranspiler.mutate_file(filename, filename, mutations, chain)
+                PyMolTranspiler().mutate_file(filename, filename, mutations, chain)
             elif protein_data['type'] == 'rcsb':
-                PyMolTranspiler.mutate_code(protein_data['value'], filename, mutations, chain)
+                PyMolTranspiler().mutate_code(protein_data['value'], filename, mutations, chain)
             else:
                 if protein_data['type'] == 'file' and 'https://swissmodel.expasy.org/' in protein_data['value']:
                     seq = requests.get(protein_data['value']).text
                     with open(filename, 'w') as fh:
                         fh.write(seq)
-                    PyMolTranspiler.mutate_file(filename, filename, mutations, chain)
+                    PyMolTranspiler().mutate_file(filename, filename, mutations, chain)
                 else:
                     request.response.status = 406
                     ## this is a super corner case. I am not sure at all how to proceed. Clickbait?

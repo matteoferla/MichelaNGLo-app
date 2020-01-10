@@ -53,7 +53,7 @@ def save_coordinates(request, mod_fx=None):
         log.warning(f'Odd format in pdb upload: {extension} {valid_extensions}')
         extension = 'pdb'
     filename = save_file(request, extension, field='pdb')
-    trans = PyMolTranspiler.load_pdb(file=filename, mod_fx=mod_fx)
+    trans = PyMolTranspiler().load_pdb(file=filename, mod_fx=mod_fx)
     os.remove(filename)
     if extension != 'pdb':
         os.remove(filename.replace(extension, 'pdb'))
@@ -167,7 +167,11 @@ def convert_pse(request):
             if malformed:
                 return {'status': malformed}
             filename = save_file(request, 'pse')
-        trans = PyMolTranspiler(file=filename, job=User.get_username(request), **settings)
+        ### GO!
+        log.debug('About to call the transpiler!')
+        log.debug(filename)
+        trans = PyMolTranspiler(job=User.get_username(request)).transpile(file=filename, **settings)
+        ### finish up
         if mode == 'demo' or not is_js_true(request.params['pdb']):
             ## pdb_string checkbox is true means that it adds the coordinates in the JS and not pdb code is given
             with open(os.path.join(trans.tmp, os.path.split(filename)[1].replace('.pse', '.pdb'))) as fh:
@@ -300,7 +304,7 @@ def renumber(request):
         request.response.status = 422
         return {'status': f'{pdb} is not PDB code'}
     definitions = Structure(id=pdb, description='', x=0, y=0, code=pdb).lookup_sifts().chain_definitions
-    trans = PyMolTranspiler.renumber(pdb, definitions)
+    trans = PyMolTranspiler().renumber(pdb, definitions)
     return {'pdb': f'REMARK 100 THIS ENTRY IS RENUMBERED FROM {pdb}.\n' +
                    '\n'.join(trans.ss) +
                    '\n'+trans.raw_pdb}
@@ -315,8 +319,8 @@ def removal(request):
     chains = request.params['chains'].split()
     return operation(request,
                       pdb=pdb,
-                      fun_code = PyMolTranspiler.chain_removal_code,
-                      fun_file = PyMolTranspiler.chain_removal_file,
+                      fun_code = PyMolTranspiler().chain_removal_code,
+                      fun_file = PyMolTranspiler().chain_removal_file,
                       chains=chains)
 
 @view_config(route_name='dehydrate', renderer="json") #as in dehydrate a structure before page creation.
@@ -332,8 +336,8 @@ def dehydrate(request):
             raise ValueError
         return operation(request,
                       pdb=pdb,
-                      fun_code = PyMolTranspiler.dehydrate_code,
-                      fun_file = PyMolTranspiler.dehydrate_file,
+                      fun_code = PyMolTranspiler().dehydrate_code,
+                      fun_file = PyMolTranspiler().dehydrate_file,
                       water=water,
                       ligand=ligand
                          )
@@ -355,7 +359,7 @@ def get_pdb_block(request):
                 return request.params['pdb']
         else:
             filename = save_file(request, request.params['format'].lower(), field='pdb')  # save_file is abivalent to file or str
-            return PyMolTranspiler.load_pdb(file=filename).raw_pdb
+            return PyMolTranspiler().load_pdb(file=filename).raw_pdb
     elif hasattr(request.params['pdb'], "filename"): #file
         return save_coordinates(request).raw_pdb
 
@@ -371,8 +375,8 @@ def premutate(request):
     try:
         return operation(request,
                       pdb=pdb,
-                      fun_code = PyMolTranspiler.mutate_code,
-                      fun_file = PyMolTranspiler.mutate_file,
+                      fun_code = PyMolTranspiler().mutate_code,
+                      fun_file = PyMolTranspiler().mutate_file,
                       mutations=mutations, chain=chain)
     except ValueError:
         request.response.status = 422
@@ -434,7 +438,7 @@ def with_sdf(request):
             print('debug', k)
             sdffile = save_file(request, 'sdf', k)
             sdfdex.append({'name': re.sub('[^\w_]','',k.replace(' ','_')),
-                           'block': PyMolTranspiler.sdf_to_pdb(sdffile, pdbfile)})
+                           'block': PyMolTranspiler().sdf_to_pdb(sdffile, pdbfile)})
     if sdfdex == []:
         return {'status': 'No SDF files'}
     loadfun = 'const ligands = '+json.dumps(sdfdex)+';'
@@ -471,7 +475,7 @@ def with_sdf(request):
                 'validation': None, 'js': None, 'pdb': [], 'loadfun': loadfun,
                 'proteinJSON': '[{"type": "data", "value": "apo", "isVariable": true}, ' + ligand_defs + ']',
                 'descriptors': {'text': descr}}
-    trans = PyMolTranspiler.load_pdb(file=pdbfile)
+    trans = PyMolTranspiler().load_pdb(file=pdbfile)
     os.remove(pdbfile)
     settings['pdb'] = [('apo', '\n'.join(trans.ss) + '\n' + trans.raw_pdb.lstrip())]
     settings['title'] = 'User submitted structure (from uploaded PDB+SDF)'
