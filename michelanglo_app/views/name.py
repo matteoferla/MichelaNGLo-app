@@ -98,6 +98,7 @@ def choose_pdb(request):
         if malformed:
             return {'status': malformed}
         pdb = request.params['pdb']
+        chain = request.params['chain'] if 'chain' in request.params else 'A'
         log.info(f'{User.get_username(request)} wants pdb info')
         if 1 == 0: #via PDBe. PDBMeta is in common methods
             try:

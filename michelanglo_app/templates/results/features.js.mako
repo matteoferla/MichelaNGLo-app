@@ -282,14 +282,21 @@ if (pdbOptions.length) {
                                             <td id="lig_${v.code}"><i class="fas fa-spinner fa-spin"></i></td>
                                           </tr>`);
                         $.getJSON({url: 'https://www.ebi.ac.uk/pdbe/api/pdb/entry/molecules/'+v.code, dataType: 'json', crossOrigin: true})
-                            .then(response => {$('#lig_'+v.code).html(  response[v.code.toLowerCase()].filter(e=>e.molecule_type !== 'polypeptide(L)')
-                                                                                                     .filter(e=> ! ['HOH', 'NA', 'GOL', 'CL', 'MG', 'K', 'BME', 'EDO', 'DMS', 'PGE'].includes(e.chem_comp_ids[0]))
-                                                                                                     .map(e => e.molecule_name[0].toLowerCase()+' ('+e.chem_comp_ids[0]+' in chain '+e.in_chains.join('&')+')')
-                                                                                                     .join(' + ')
-                                                                    );
+                            .then(response => { const components = response[v.code.toLowerCase()];
+                                                $('#lig_'+v.code).html(  components.filter(e=>e.molecule_type !== 'polypeptide(L)')
+                                                                                   .filter(e=> ! ['HOH', 'NA', 'GOL', 'CL', 'MG', 'K', 'BME', 'EDO', 'DMS', 'PGE'].includes(e.chem_comp_ids[0]))
+                                                                                   .map(e => e.molecule_name[0].toLowerCase()+' ('+e.chem_comp_ids[0]+' in chain '+e.in_chains.join('&')+')')
+                                                                                   .join(' + ')
+                                                                     );
+
+                                                let c = myChain.match(/Chain \w/g).map(t => t.replace('Chain ',''))[0];
+                                                let mutants = components.filter(e=>e.molecule_type === 'polypeptide(L)').find(e => e.in_chains.includes(c)).mutation_flag;
+                                                let res = $('#res_'+v.code);
+                                                if (mutants !== null) {
+                                                    res.html(res.html() + ` <i class="far fa-tools" data-toggle="tooptip" title="This structure contains mutated residues: ${mutants}"></i>`);
+                                                }
                                                 let textDump = JSON.stringify(response);
-                                                if (['"MSE"', '"I3C"', '"B3C"'].some(v => textDump.match(v) !== null)) {
-                                                            let res = $('#res_'+v.code);
+                                                if (['"MSE"', '"I3C"', '"B3C"'].some(e => textDump.match(e) !== null)) {
                                                             res.html(res.html() + ' <i class="far fa-stroopwafel" data-toggle="tooptip" title="This structure contains compounds added to solve the phase problem. Other structures may be better suited for your needs."></i>');
                                                         }
                                                }
