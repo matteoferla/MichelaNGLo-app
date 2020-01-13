@@ -66,7 +66,15 @@ Below these add the following to all the custom representation and view of the p
 %>
 <h4>Description</h4>
 Lastly, if you want to use the text you created with all the prolinks add the following:
-<pre style="overflow: scroll; height: 5.5rem;">${copy_btn('desc_code')}<code id="desc_code">${descr_mdowned|n}</code></pre>
+#### The descr_mdowned _has_ to be converted. Do not add the n flag.
+<pre style="overflow: scroll; height: 5.5rem;">
+    ${copy_btn('desc_code')}
+    <code id="desc_code">${descr_mdowned|h}</code></pre>
+<script>
+    new ClipboardJS('#descr_btn', {
+        text: () => $('#desc_code').html()
+    });
+</script>
 <p>Do note that you will need to add style to the <code>class="prolinks"</code>. Within Michelanglo, the style is simply:</p>
 <pre>${copy_btn('green_code')}<code id="green_code">&lt;style>
     .prolink {
