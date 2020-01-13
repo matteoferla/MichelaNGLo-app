@@ -80,7 +80,7 @@ Lastly, if you want to use the text you created with all the prolinks add the fo
     }
 &lt;/style>
 </code></pre>
-<p>But you can do what ever you fancy from a very in teal, mustard or coral to a very 90s web neon green, yellow and pink...</p>
+<p>But you can do what ever you fancy from a very trendy teal, mustard (<code>#ffdb58</code>) or coral to a very 90s-web neon green, yellow and pink &mdash;I hear apricot (<code>#fbceb1</code>) is in this year.</p>
 <!--
 <h3 data-toggle="collapse" data-target=".docs_raw" style="cursor: pointer;">
    <span class="collapse show docs_raw">Show</span>
