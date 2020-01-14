@@ -118,7 +118,7 @@ class PDBMeta:
         elif len(entity['chem_comp_ids']) == 0:
             return True #this entity isnt even a thing
         else:
-            return entity['chem_comp_ids'][0] in PyMolTranspiler.boring_ligand
+            return entity['chem_comp_ids'][0] in PyMolTranspiler.boring_ligand or entity['chem_comp_ids'][0] in ('WAT', 'HOH', 'TP3')
 
     def wordy_describe(self, delimiter=' + '):
         descr = delimiter.join([self.wordy_describe_entity(entity) for entity in self.get_proteins()])

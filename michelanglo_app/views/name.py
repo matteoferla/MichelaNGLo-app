@@ -14,7 +14,7 @@ def choose_pdb(request):
     malformed = is_malformed(request, 'item')
     if malformed:
         return {'status': malformed}
-    if request.params['item'] == 'match species':
+    if request.params['item'] == 'match species': ######################################
         malformed = is_malformed(request, 'name')
         if malformed:
             return {'status': malformed}
@@ -31,7 +31,7 @@ def choose_pdb(request):
             lowname = name.lower()
             options = [k for k in organism if lowname in k.lower()]
             return {'options': options}
-    elif request.params['item'] == 'match gene':
+    elif request.params['item'] == 'match gene': ######################################
         malformed = is_malformed(request, 'species', 'gene')
         if malformed:
             return {'status': malformed}
@@ -77,7 +77,7 @@ def choose_pdb(request):
                 return {'options': []}
         else:
             return {'invalid': True}
-    elif request.params['item'] == 'get_pdbs':
+    elif request.params['item'] == 'get_pdbs': ######################################
         ### gets the metadata for a given PDB list
         malformed = is_malformed(request, 'entries', 'uniprot')
         if malformed:
@@ -92,13 +92,13 @@ def choose_pdb(request):
             except KeyError:
                 pass # this protein was removed. We shalt speak of it.
         return {'descriptions': ' <br/> '.join(details)}
-    elif request.params['item'] == 'get_pdb':
+    elif request.params['item'] == 'get_pdb': ######################################
         ### gets the metadata for a given PDB code
         malformed = is_malformed(request, 'pdb')
         if malformed:
             return {'status': malformed}
         pdb = request.params['pdb']
-        chain = request.params['chain'] if 'chain' in request.params else 'A'
+        #chain = request.params['chain'] if 'chain' in request.params else 'A'
         log.info(f'{User.get_username(request)} wants pdb info')
         if 1 == 0: #via PDBe. PDBMeta is in common methods
             try:
