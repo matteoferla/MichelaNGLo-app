@@ -53,25 +53,40 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
 %endif
 
 <%
+
+    def feature_viewer_standardise(dex):
+        for entry in dex:
+            if 'x' not in entry and 'residue_index':
+                entry['x'] = entry['residue_index']
+                if 'y' not in entry:
+                    entry['y'] = entry['residue_index']
+            if 'description' not in entry:
+                if 'ptm' in entry:
+                    entry['description'] = entry['from_residue']+str(entry['residue_index'])+entry['ptm']
+            if 'id' not in entry and 'description' in entry:
+                    entry['id'] = entry['description'].replace(' ','_')
+        return dex
+
+
     combo_roi=[]
     for key in ('transmembrane region','intramembrane region','region of interest','peptide','site','active site','binding site','calcium-binding region','zinc finger region','metal ion-binding site','DNA-binding region','lipid moiety-binding region', 'nucleotide phosphate-binding region'):
         if key in protein.features:
-            combo_roi.extend(protein.features[key])
+            combo_roi.extend(feature_viewer_standardise(protein.features[key]))
 
     combo_other=[]
     for key in ('propeptide','signal peptide','repeat','coiled-coil region','compositionally biased region','short sequence motif','topological domain','transit peptide'):
         if key in protein.features:
-            combo_other.extend(protein.features[key])
+            combo_other.extend(feature_viewer_standardise(protein.features[key]))
 
     combo_ptm=[]
     for key in ('initiator methionine','modified residue','glycosylation site','non-standard amino acid'):
         if key in protein.features:
-            combo_ptm.extend(protein.features[key])
+            combo_ptm.extend(feature_viewer_standardise(protein.features[key]))
 
     combo_ss=[]
     for key in ('helix', 'turn', 'strand'):
         if key in protein.features:
-            combo_ss.extend(protein.features[key])
+            combo_ss.extend(feature_viewer_standardise(protein.features[key]))
 %>
 %if combo_roi:
     ft.addFeature({
@@ -109,6 +124,20 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
     });
     addFeatureTooltip("Modified residues", "A collection of various Uniprot annotations: 'initiator methionine','modified residue','glycosylation site','non-standard amino acid'");
 %endif
+
+%if protein.features['PSP_modified_residues']:
+    ft.addFeature({
+        data: ${str(feature_viewer_standardise(protein.features['PSP_modified_residues']))|n},
+        name: "Mod. residues (HT)",
+        className: "modified",
+        color: "slateblue",
+        type: "unique",
+        filter: "Modified"
+    });
+    addFeatureTooltip("Mod. residues (HT)", "Post translational modifications from Phosphosite-plus");
+%endif
+
+
 
 %if combo_ss:
     ft.addFeature({
@@ -184,7 +213,7 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
     addFeatureTooltip("disulfide bond","Disulfide bond in Uniprot entry. It may or may not be present under all conditions");
 %endif
 
-%if hasattr(protein, 'protein') and protein.properties:
+%if hasattr(protein, 'properties') and protein.properties:
     ft.addFeature({
         data: ${str([{'x': i+4, 'y': score} for i, score in enumerate(protein.properties["kd"])])|n},
         name: "Hydrophobilicity",
