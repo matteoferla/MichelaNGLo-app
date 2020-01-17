@@ -121,11 +121,9 @@ def analyse_view(request):
         protein = system_storage[handle]
         try:
             protein.analyse_structure()
-            return {'structural': {**jsonable(protein.structural),
-                                    'superficiality': protein.structural.get_superficiality(),
-                                    'structural_neighbours': list(protein.structural.get_structure_neighbours())},
+            return {'structural': jsonable(protein.structural),
                     'status': 'success'}
-        except Exception as err:
+        except DeprecationWarning as err:  #Exception
             log.warning(f'Structural analysis failed {err} {type(err).__name__}.')
             return {'status': 'error'}
 
