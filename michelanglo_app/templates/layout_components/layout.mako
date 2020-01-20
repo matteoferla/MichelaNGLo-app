@@ -419,6 +419,11 @@ $('#chat_send').click((event) => {
     $( document ).ready(()=> $('head').append(`<link rel="stylesheet" href="/static/ThirdParty/Font-Awesome-Pro/css/all.min.css" crossorigin="anonymous">
     <link rel="stylesheet" href="/static/ThirdParty/bootstrap-tourist/bootstrap-tourist.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/3.0.0-beta.3/css/bootstrap-colorpicker.css">`));
+
+    //Don't have FA-pro in your local deployment?
+    //Then uncomment here:
+    //$('.far').addClass('fas').removeClass('far');
+
 </script>
 
 

@@ -69,9 +69,7 @@ Michelanglo has lots of moving parts...
 * FontAwesome Pro
 * Bootstrap Tour (mod)
 
-**FontAwesome**: I have a pro licence, but a free version is available. So a wee change is required to `.gitmodules`.
-Note that all instances of the class `far` with `fas` in the templates.
-If this is too much faff just drop matteo dot ferla at gmail an email.
+**FontAwesome**: I have a pro licence, but a free version is available. So a wee change is required to `.gitmodules` (see below).
 
 ## Step 1. Prerequisites
 
@@ -127,7 +125,10 @@ Install what you need:
     conda install -c conda-forge -y biopython
     #conda install -c conda-forge -y rdkit
 
-## Step 3. Clone the required repos  
+## Step 3. Clone the required repos 
+
+### Step 3.1 MichelaNGLo specific 
+
 For fetching proteins, michelanglo_app requires [https://github.com/matteoferla/MichelaNGLo-protein-module](https://github.com/matteoferla/MichelaNGLo-protein-module).
 
 Both the protein module and Michelanglo require a PyMOL manipulation script, whcih is separate as the protein parsing module works without Michelanglo.
@@ -142,6 +143,8 @@ Both the protein module and Michelanglo require a PyMOL manipulation script, whc
     git clone https://github.com/matteoferla/MichelaNGLo-transpiler transpiler
     cd ../transpiler
     python3 setup.py install
+
+### Step 3.2 FontAwesome
 
 Do you have FontAwesome Pro?
     
@@ -158,6 +161,11 @@ Else:
     sed -i 's/Font-Awesome-Pro\.git/Font-Awesome\.git/g' .gitmodules
     git submodule update --init --recursive
     python3 setup.py install
+    
+Note that you'll also need to change all instances of the class `far` with `fas` in the templates
+by adding `<script>$('.far').addClass('fas').removeClass('far')</script>` near the bottom of `templates/layout_components/layout.mako` 
+(There is a common giving more info within there).
+If this is too much faff just drop matteo dot ferla at gmail an email.
 
 ## Step 4. Generate the data
 It also uses a protein module to allow gene name querying.
