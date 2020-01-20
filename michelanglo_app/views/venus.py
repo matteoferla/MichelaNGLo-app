@@ -118,6 +118,13 @@ def analyse_view(request):
     ### STEP 3
     def structural_step():
         handle = request.params['uniprot'] + request.params['mutation']
+        if handle not in system_storage:
+            status = protein_step()
+            if 'error' in status:
+                return status
+            status = mutation_step()
+            if 'error' in status:
+                return status
         protein = system_storage[handle]
         try:
             protein.analyse_structure()
