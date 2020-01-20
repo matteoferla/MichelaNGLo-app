@@ -156,14 +156,21 @@ class Venus {
                 ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
             } else {
                 window.structural = msg.structural;
-
-                let strloctext = `<p>${structural.superficiality}</p>`;
-                strloctext += '<p>NEW PROTPARAM DATA: DISORDER</p>';
+                if (!!structural.coordinates.length) {
+                    NGL.specialOps.multiLoader('viewport', [{ type: "data", value: structural.coordinates, ext: 'pdb', chain: 'A'}]);
+                    //NGL.getStage().loadFile(new Blob([structural.coordinates, {type: 'text/plain'}]), {, firstModelOnly: true})
+                }
+                let strloctext = `<p>Chosen model: ${structural.code}</p>`;
+                strloctext += `<p>${(structural.buried) ? 'buried' : 'surface'} ${structural.SS} (RSA: ${structural.RSA})</p>`;
+                strloctext += `<p>${(structural.has_all_heavy_atoms) ? 'Resolved in crystal' : 'Some heavy atoms unresolved (too dynamic)'}</p>`;
+                if (!! structural.ligand_list.length) {
+                    strloctext += `<p>Closest ligand atom: ${structural.closest_ligand.match(/\[.*\]/)[0].slice(1,-1)} ${structural.distance_to_closest_ligand}</p>`;
+                }
                 mutalist.append(this.card('Structural character', strloctext));
 
 
-                let strtext = '<p>Structural neighbourhood. NB. CODE TO OVERRIDE gnomAD</p>';
-                strtext += '<ul>'+structural.structural_neighbours.map(v => `<li>${v}</li>`).join()+'</ul>';
+                let strtext = '<p>Structural neighbourhood.</p>';
+                strtext += '<ul>'+structural.neighbours.map(v => `<li>${v}</li>`).join()+'</ul>';
                 mutalist.append(this.card('Structural neighbourhood', strtext));
             }
         })
