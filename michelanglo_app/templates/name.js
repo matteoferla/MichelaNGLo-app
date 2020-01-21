@@ -163,6 +163,7 @@ window.load_pdb = pdb => {
     else {NGL.specialOps.multiLoader('viewport',[{'type': 'file','value': pdb}]); $('#model_alert').addClass('show').show();}
     NGL.specialOps.showTitle('viewport', 'Loaded: '+ pdb);
     renumber_alerter(pdb);
+    naturalise_alerter(pdb);
     interactive_builder();
     if ($('#staging').length) $('html, body').animate({scrollTop: $('#staging').offset().top}, 2000);
 };

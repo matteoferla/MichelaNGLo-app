@@ -162,6 +162,36 @@ window.renumber_alerter = (pdb) => {
     else $('#renumber_alert').removeClass('show').hide();
 };
 
+
+///
+window.engineered = [];
+window.naturalise_alerter = (pdb) => {
+    $('#naturalise_alert').removeClass('show').hide();
+    $('#naturalise_details').html('');
+    if (pdb.length === 4) $.getJSON({url: 'https://www.ebi.ac.uk/pdbe/api/pdb/entry/molecules/'+pdb, dataType: 'json', crossOrigin: true})
+                            .then(response => { const components = response[pdb.toLowerCase()];
+                                               window.engineered = [];
+                                               for (let chain of components.filter(e=>e.molecule_type === 'polypeptide(L)')) {
+                                                   console.log(chain);
+                                                   let chEng = [];
+                                                   //mse
+                                                   let m = Object.entries(chain.pdb_sequence_indices_with_multiple_residues).filter(([r, v]) => v.three_letter_code === "MSE").map(([r, v]) => r);
+
+                                                   if (m.length > 0) chEng = chEng.concat(m.map(v => 'X'+v+'M'));
+                                                   console.log(chEng);
+                                                   //engineered
+                                                   if (chain.mutation_flag !== null) chEng = chEng.concat(chain.mutation_flag.split('/'));
+                                                   if (chEng.length > 0) {
+                                                       console.log(chEng);
+                                                       engineered.push({chains: chain.in_chains, resi: chEng});
+                                                       $('#naturalise_alert').addClass('show').show();
+                                                       $('#naturalise_details').text($('#naturalise_details').text()+chEng.join(' ')+' in chain '+chain.in_chains.join('+'));
+                                                   }
+                                               }
+                                           }
+                                    )
+};
+
 // deal with click of alert.
 $('#renumber').click(async event => {
     $(event.target).attr('disabled','disabled');
@@ -173,15 +203,46 @@ $('#renumber').click(async event => {
                     pdb: pdb,
                     format: extension
                 },
-                success: window.loadMyMsg,
+                success: msg => {window.loadMyMsg(msg);
+                                $('#renumber_alert').removeClass('show');
+                                $('#renumber').removeAttr('disabled');
+                                if (msg.offsets !== undefined && window.engineered.length > 0) {
+                                    // convert [{chain: X1, offset: n1},{chain: X2, offset: n2}] to {X1: n1, X2: n2}
+                                    let o = msg.offsets.reduce((o, d) => ({ ...o, [d.chain]: d.offset}), {});
+                                    window.engineered = window.engineered.map(c => ({chains: c.chains,
+                                                                                     resi: c.resi.map(m => m[0]+
+                                                                                                         (parseInt(m.slice(1,-1))+ o[c.chains[0]])+
+                                                                                                         m.charAt(m.length-1))}));
+                                    $('#naturalise_details').text(window.engineered.map(c => c.resi.join(' ')+' in chain '+c.chains.join('+')).join(', and '));
+                                }},
                 error: ops.addErrorToast
-            })
+            });
+});
 
+$('#naturalise').click(async event => {
+    $(event.target).attr('disabled','disabled');
+    let [pdb, extension] = await getCoordinates();
+    if (pdb === null) return 0;
+    const reverseMutation = m => m.charAt(-1)+m.slice(1,-1)+m[0];
+    $.ajax({
+        url: "/premutate",
+        type: 'POST',
+        dataType: 'json',
+        data: {
+            'pdb': pdb,
+            'chain': window.engineered.reduce((acc, {chains, resi}) => acc.concat(chains.reduce((a2, c) => a2.concat(resi.map(x => c)), [])), []),
+            'mutations': window.engineered.reduce((acc, {chains, resi}) => acc.concat(chains.reduce((a2, c) => a2.concat(resi.map(reverseMutation)), [])), []),
+            'format': extension
+        },
+        success: msg => {window.loadMyMsg(msg);
+                        $('#naturalise_alert').removeClass('show');
+                        $('#naturalise').removeAttr('disabled');
+                        },
+        error: ops.addErrorToast
+    });
 });
 
 window.loadMyMsg = (msg) => {
-    $('#renumber_alert').removeClass('show');
-    $('#renumber').removeAttr('disabled');
     window.pdbString = msg.pdb;
     $('#staging').show();
     window.myData = undefined;
@@ -192,6 +253,5 @@ window.loadMyMsg = (msg) => {
     window.mode = 'renumbered';
     interactive_builder();
     $('[disabled="disabled"]').removeAttr('disabled');
-
 };
 //</%text>

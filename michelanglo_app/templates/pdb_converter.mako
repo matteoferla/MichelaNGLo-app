@@ -89,6 +89,7 @@
         NGL.specialOps.multiLoader('viewport',[{'type': 'rcsb','value': pdbCode}]);
         NGL.specialOps.showTitle('viewport', 'Loaded: '+ pdbCode );
         renumber_alerter(pdbCode);
+        naturalise_alerter(pdbCode);
         interactive_builder();
     });
 

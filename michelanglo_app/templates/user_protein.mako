@@ -208,7 +208,19 @@ $(document).ready(function () {
         if (urlParams.has('prolink')) setTimeout(n => $('.prolink').eq(n).click(), 500, parseInt(urlParams.get('prolink')));
 
     }
-
+%if firsttime:
+    const voter = (target, direction) => {
+        let row = $(target).parents('.row');
+        $('#wrong_modal ul button').attr('disabled','disabled');
+        $.post('/vote',{direction: direction, topic: row.find('h3').text()});
+    };
+    const uppers = $('#wrong_modal .fa-thumbs-up').parent();
+    uppers.click(event => voter(event.target, 'up'));
+    uppers.tooltip({title: 'This explains the issue!'});
+    const downers = $('#wrong_modal .fa-thumbs-down').parent();
+    downers.click(event => voter(event.target, 'down'));
+    downers.tooltip({title: 'This is your problem and you want this fixed!!'});
+% endif
 
 }); //ready
 <%include file="edit_modal/tour.js"/>

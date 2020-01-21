@@ -7,7 +7,7 @@ import logging
 log = logging.getLogger(__name__)
 from ._common_methods import is_malformed, notify_admin
 
-from . import custom_messages
+from . import custom_messages, votes
 
 #### note that a few non-setting get json funs are actually hiding in name.py.
 @view_config(route_name='get')
@@ -167,6 +167,20 @@ def set_ajax(request):
             return {'status': 'success', 'long': longname, 'short': shortname}
         else:
             return {'status': 'unknown cmd'}
+
+
+
+@view_config(route_name='vote', renderer='json')
+def set_ajax(request):
+    malformed = is_malformed(request, 'topic','direction')
+    if malformed:
+        return {'status': malformed}
+    topic = request.params['topic'][:100]
+    direction = request.params['direction']
+    if not isinstance(topic, str) or direction not in ('up', 'down'):
+        return {'status': 'behave.'}
+    votes[topic][direction] += 1
+    return {'status': 'Thanks for the feedback'}
 
 
 

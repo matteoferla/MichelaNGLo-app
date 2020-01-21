@@ -307,7 +307,8 @@ def renumber(request):
     trans = PyMolTranspiler().renumber(pdb, definitions)
     return {'pdb': f'REMARK 100 THIS ENTRY IS RENUMBERED FROM {pdb}.\n' +
                    '\n'.join(trans.ss) +
-                   '\n'+trans.raw_pdb}
+                   '\n'+trans.raw_pdb,
+            'offsets': definitions}
 
 @view_config(route_name='remove_chains', renderer="json")
 def removal(request):
@@ -370,17 +371,32 @@ def premutate(request):
         return {'status': malformed}
     ## variant of mutate...
     pdb = get_pdb_block(request)
-    chain = request.params['chain']
-    mutations = request.params['mutations'].split()
+    if 'chain' in request.params:
+        chain = request.params['chain']
+        chains = None
+    elif 'chain[]' in request.params:
+        chain = None
+        chains = request.params.getall('chain[]')
+    else:
+        TypeError
+    if 'mutations' in request.params:
+        mutations = request.params['mutations'].split()
+    elif 'mutations[]' in request.params:
+        mutations = request.params.getall('mutations[]')
+        print(mutations)
+    else:
+        TypeError
     try:
         return operation(request,
                       pdb=pdb,
                       fun_code = PyMolTranspiler().mutate_code,
                       fun_file = PyMolTranspiler().mutate_file,
-                      mutations=mutations, chain=chain)
+                      mutations=mutations, chain=chain, chains=chains)
     except ValueError:
         request.response.status = 422
         return {'status': f'Invalid mutations'}
+
+
 
 
 def operation(request, pdb, fun_code, fun_file, **kargs):

@@ -43,11 +43,11 @@ def my_view(request):
         bootstrap = 4
     # some special parts...
     if request.matched_route is None:
-        log.warn(f'Could not match {request.url} for {User.get_username(request)}')
+        log.warning(f'Could not match {request.url} for {User.get_username(request)}')
         page = '404'
         # up the log status if its illegal
     elif request.matched_route.name == 'admin' and (not user or (user and user.role != 'admin')):
-        log.warn(f'Non admin user ({User.get_username(request)}) attempted to view admin page')
+        log.warning(f'Non admin user ({User.get_username(request)}) attempted to view admin page')
         page = request.matched_route.name
     else:
         log.info(f'page {request.matched_route.name} {"("+request.matchdict["id"]+")" if request.matchdict and "id" in request.matchdict else ""} for {User.get_username(request)}')
