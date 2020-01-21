@@ -211,7 +211,7 @@ $(document).ready(function () {
 %if firsttime:
     const voter = (target, direction) => {
         let row = $(target).parents('.row');
-        $('#wrong_modal ul button').attr('disabled','disabled');
+        row.find('button').attr('disabled','disabled');
         $.post('/vote',{direction: direction, topic: row.find('h3').text()});
     };
     const uppers = $('#wrong_modal .fa-thumbs-up').parent();

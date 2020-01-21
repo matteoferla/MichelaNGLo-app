@@ -10,8 +10,8 @@
       </div>
       <div class="col-2">
   <div class="btn-group-vertical float-right">
-      <button type="button" class="btn btn-outline-success"><i class="far fa-thumbs-up"></i></button>
-      <button type="button" class="btn btn-outline-danger"><i class="far fa-thumbs-down"></i></button>
+      <button type="button" class="btn btn-outline-success"><i class="far fa-thumbs-up"></i> <span class="badge badge-secondary">${votes[title]["up"] if title in votes else 0}</span></button>
+      <button type="button" class="btn btn-outline-danger"><i class="far fa-thumbs-down"></i> <span class="badge badge-secondary">${votes[title]["down"] if title in votes else 0}</span></button>
     </div>
 </div>
   </div>
@@ -30,7 +30,7 @@
             <div class="modal-body">
                 <p>Sometimes something is not quite right with the conversion. Here are some possible solutions:</p>
                 <ul class="list-group">
-                    ${entry('<i class="far fa-ufo-beam"></i> Oohh buttons','You want to press a button, but don\t want to mess up our reports?','Press this entry')}
+                    ${entry('Oohh buttons','You want to press a button, but don\t want to mess up our reports? <i class="far fa-ufo-beam"></i> ','Press this entry')}
                     ${entry('Wrong protein off-camera', 'One of the options was whether to use a PDB 4-letter code (default) or to include the coordinate data in the page, this was not checked even if the coordinated data was unique.', 'Check the include PDB coordinates.')}
                     ${entry('Slightly-off orientation', 'The PyMol window shape and size and the viewport shape and size differ.', 'Check the PSE file and reorient. If this is still odd and the field of view has been changed to something highly distorting, return to normal values.')}
                     ${entry('My PSE had a disabled object, but not the NGL', 'Disabled objects are removed to save on data to send across the web.', 'Enable it and change chain ID (Michelaɴɢʟo will do it, but you won\'t be told to what), but hide all its representations.')}
