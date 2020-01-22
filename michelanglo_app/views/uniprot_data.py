@@ -15,8 +15,10 @@ try:
     organism = json.load(open(os.path.join(global_settings.dictionary_folder,'organism.json')))
     human = json.load(open(os.path.join(global_settings.dictionary_folder, 'taxid9606-names2uniprot.json')))
     uniprot2pdb = json.load(open(os.path.join(global_settings.dictionary_folder, 'uniprot2pdb.json')))
+    uniprot2name = json.load(open(os.path.join(global_settings.dictionary_folder,'uniprot2name.json')))
 except FileNotFoundError:
     organism = {}
     human = {}
     uniprot2pdb = {}
+    uniprot2name = {}
     log.error('Data files do not exist. Running in data-less mode. Did you know about this?')

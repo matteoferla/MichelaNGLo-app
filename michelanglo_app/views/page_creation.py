@@ -13,6 +13,7 @@ import re
 import json
 import requests
 from . import valid_extensions
+from .uniprot_data import uniprot2name
 
 PyMolTranspiler.tmp = os.path.join('michelanglo_app', 'temp')
 
@@ -255,8 +256,9 @@ def convert_pdb(request):
     pdb = request.params['pdb']
     if request.params['mode'] == 'code':
         if len(pdb) == 4:
-            settings['proteinJSON'] = '[{{"type": "rcsb", "value": "{0}"}}]'.format(pdb)  # PDB code.
+            settings['proteinJSON'] = json.dumps([{'type': 'rcsb', 'value': pdb, 'chain_definitions': get_chain_definitions(pdb)}])
             settings['descriptors'] = PDBMeta(pdb).describe()
+            ### The difference between chain_definition and PDBMeta is that the latter has ligand info, but not Uniprot.
             settings['title'] = f'User created page (PDB: {pdb})'
         else:
             settings['proteinJSON'] = '[{{"type": "file", "value": "{0}"}}]'.format(pdb)  # url
@@ -274,7 +276,7 @@ def convert_pdb(request):
         if rex:
             code = rex.group(2)
             ### this is mad wasteful. TO DO Fix.
-            definitions = Structure(id=code, description='', x=0, y=0, code=code).lookup_sifts().chain_definitions
+            definitions = get_chain_definitions(code)
             settings['descriptors'] = {'peptide': [(':'+d['chain'], f"{d['uniprot']} [offset by {d['offset']}]") for d in definitions]}
             settings['title'] = f'User created page (PDB: {code} {rex.group(1)})'
         else:
@@ -293,6 +295,20 @@ def convert_pdb(request):
 def clean_data_other(data_other):
     return Page.sanitise_HTML(f'<span {data_other}></span>').replace('<span ','').replace('></span>','')
 
+def get_chain_definitions(code):
+    """
+    In parts of the code (backend) it is called definition. in the frontend it is descriptions.
+    """
+    code = code.split('_')[0]
+    if len(code) == 4:
+        definitions = Structure(id=code, description='', x=0, y=0, code=code).lookup_sifts().chain_definitions
+        for d in definitions:
+            if d['name'] is None and d['uniprot'] in uniprot2name:
+                d['name'] = uniprot2name[d['uniprot']]
+        return definitions
+    else:
+        return []
+
 @view_config(route_name='renumber', renderer="json")
 def renumber(request):
     #PDB code only
@@ -303,7 +319,7 @@ def renumber(request):
     if len(pdb) != 4 or re.search('\W', pdb) is not None: ## renumber is for PDB structures only. There is no point otherwise.
         request.response.status = 422
         return {'status': f'{pdb} is not PDB code'}
-    definitions = Structure(id=pdb, description='', x=0, y=0, code=pdb).lookup_sifts().chain_definitions
+    definitions = get_chain_definitions(pdb)
     trans = PyMolTranspiler().renumber(pdb, definitions)
     return {'pdb': f'REMARK 100 THIS ENTRY IS RENUMBERED FROM {pdb}.\n' +
                    '\n'.join(trans.ss) +

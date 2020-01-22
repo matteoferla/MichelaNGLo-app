@@ -171,8 +171,12 @@ window.interactive_builder = () => {
 };
 
 
-window.chain_descriptor = () => {
-    let structure = NGL.getStage().getComponentByType('structure').structure;
+window.chain_definer = () => {
+    if (myData.proteins[myData.currentIndex].chain_definitions) {
+        return myData.proteins[myData.currentIndex].chain_definitions;
+    }
+    else {  //fallback.
+        let structure = NGL.getStage().getComponentByType('structure').structure;
         // get the chainame:
         let chainNames = structure.chainStore.chainname;
         // chainname is a structure where the first of each three entires is the actual chain letter as a int:
@@ -189,7 +193,7 @@ window.chain_descriptor = () => {
                         let I = entityList[i].chainIndexList[j];
                         if (chainNames[I]) {
                             values.push({'idx': I,
-                                     'value': chainNames[I], // let's hope that order matches.
+                                     'chain': chainNames[I], // let's hope that order matches.
                                      'name': entityList[i].description
                                     });
                         }
@@ -203,14 +207,17 @@ window.chain_descriptor = () => {
             chainNames = chainNames.filter((v, i, a) => a.indexOf(v) === i);
             values = chainNames.sort().map((v, i) => ({idx: i, value: v, name: v}));
         }
+        myData.proteins[myData.currentIndex].chain_definitions = values;
         return values;
+
+    }
 };
 
  $('#selection_modal').on('shown.bs.modal', () => {
         $('#sele_chain,#sele_chain2').html('<option value=" ">from all chains</option>');
         //get names if present...
-        let names = chain_descriptor();
-        names.forEach(v => $('#sele_chain,#sele_chain2').append(`<option value=":${v.value}">from chain ${v.value} (${v.name})</option>`));
+        let names = chain_definer();
+        names.forEach(v => $('#sele_chain,#sele_chain2').append(`<option value=":${v.chain}">from chain ${v.chain} (${v.name})</option>`));
         // add elements
 
         $('#sele_chain option').eq(0).attr('selected', 'selected');

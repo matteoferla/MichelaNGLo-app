@@ -223,8 +223,8 @@ NGL.specialOps.showBlur = function (id,selection, color, radius, view, scale, la
     NGL.getStage(id).removeClashes();
     protein.removeAllRepresentations();
     let bfactors = protein.structure.atomStore.bfactor;
-    console.log(scale);
-    console.log(bfactors.length / bfactors.reduce((a,b)=> a+b, 0));
+    //console.log(scale);
+    //console.log(bfactors.length / bfactors.reduce((a,b)=> a+b, 0));
     scale = scale || bfactors.length / bfactors.reduce((a,b)=> a+b, 0);
   protein.addRepresentation("tube", {
     sele: "polymer",
