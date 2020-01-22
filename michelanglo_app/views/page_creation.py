@@ -1,23 +1,23 @@
 from pyramid.view import view_config
-from pyramid.renderers import render_to_response
-import traceback
 from ..models import Page, User
 from ..models.trashcan import get_trashcan
-from michelanglo_protein import Structure
 from michelanglo_transpiler import PyMolTranspiler
-import uuid
-import shutil
 import os
 import io
 import re
 import json
-import requests
-from . import valid_extensions
-from .uniprot_data import uniprot2name
+
 
 PyMolTranspiler.tmp = os.path.join('michelanglo_app', 'temp')
 
-from ._common_methods import is_js_true, is_malformed, PDBMeta, get_uuid
+from ._common_methods import is_js_true,\
+                             is_malformed,\
+                             PDBMeta,\
+                             get_uuid, \
+                             save_file,\
+                             save_coordinates,\
+                             get_chain_definitions, \
+                             get_history
 import logging
 
 log = logging.getLogger(__name__)
@@ -32,33 +32,6 @@ def demo_file(request):
         return os.path.join('michelanglo_app', 'demo', request.params['demo_filename'])
     else:
         raise Exception('Non existant demo file requested. Possible attack!')
-
-
-def save_file(request, extension, field='file'):
-    filename = os.path.join('michelanglo_app', 'temp', '{0}.{1}'.format(get_uuid(request), extension))
-    with open(filename, 'wb') as output_file:
-        if isinstance(request.params[field], str):  ###API user made a mess.
-            log.warning(f'user uploaded a str not a file!')
-            output_file.write(request.params[field].encode('utf-8'))
-        else:
-            request.params[field].file.seek(0)
-            shutil.copyfileobj(request.params[field].file, output_file)
-    return filename
-
-def save_coordinates(request, mod_fx=None):
-    """
-    Saves the request['pdb'] file. Does not accept str.
-    """
-    extension = request.params['pdb'].filename.split('.')[-1]
-    if extension not in valid_extensions:
-        log.warning(f'Odd format in pdb upload: {extension} {valid_extensions}')
-        extension = 'pdb'
-    filename = save_file(request, extension, field='pdb')
-    trans = PyMolTranspiler().load_pdb(file=filename, mod_fx=mod_fx)
-    os.remove(filename)
-    if extension != 'pdb':
-        os.remove(filename.replace(extension, 'pdb'))
-    return trans
 
 
 ########################################################################################
@@ -240,47 +213,63 @@ def convert_mesh(request):
 @view_config(route_name='convert_pdb', renderer="json")
 def convert_pdb(request):
     # mode = code | file
+    ##### Check is good
     log.info(f'PDB page creation requested by {User.get_username(request)}')
     malformed = is_malformed(request, 'viewcode', 'mode', 'pdb')
     if malformed:
         return {'status': malformed}
+    ##### Get the details
     pagename = get_uuid(request)
     viewcode = request.params['viewcode']
-    data_other = re.sub(r'<\w+ (.*?)>.*', r'\1', viewcode).replace('data-toggle="protein"','').replace('data-toggle=\'protein\'','').replace('data-toggle=protein','')
+    data_other = re.sub(r'<\w+ (.*?)>.*', r'\1', viewcode)\
+                    .replace('data-toggle="protein"','')\
+                    .replace('data-toggle=\'protein\'','')\
+                    .replace('data-toggle=protein','')
     if not request.user or request.user.role not in ('admin', 'friend'):
         data_other = clean_data_other(data_other)
     settings = {'data_other': data_other,
-                'page': pagename, 'editable': True,
+                'page': pagename, 'editable': True, 'descriptors': {},
                 'backgroundcolor': 'white', 'validation': None, 'js': None, 'pdb': [], 'loadfun': ''}
     extension = 'pdb'
     pdb = request.params['pdb']
+    history = get_history(request)
+    definitions = get_chain_definitions(request)
+    #### determine wheat we have
     if request.params['mode'] == 'code':
         if len(pdb) == 4:
-            settings['proteinJSON'] = json.dumps([{'type': 'rcsb', 'value': pdb, 'chain_definitions': get_chain_definitions(pdb)}])
             settings['descriptors'] = PDBMeta(pdb).describe()
+            settings['proteinJSON'] = json.dumps([{'type': 'rcsb',
+                                                   'value': pdb,
+                                                   'chain_definitions': definitions,
+                                                   'history': history}])
             ### The difference between chain_definition and PDBMeta is that the latter has ligand info, but not Uniprot.
             settings['title'] = f'User created page (PDB: {pdb})'
-        else:
-            settings['proteinJSON'] = '[{{"type": "file", "value": "{0}"}}]'.format(pdb)  # url
+        else:  #type file means external file.
+            settings['proteinJSON'] = json.dumps([{'type': 'file',
+                                                   'value': pdb,
+                                                   'chain_definitions': definitions,
+                                                   'history': history}])
             settings['title'] = 'User submitted structure (from external PDB)'
             settings['descriptors'] = {'text': f'PDB loaded from [{pdb}](source <i class="far fa-external-link"></i>)'}
             if 'https://swissmodel.expasy.org' in pdb:
                 settings['model'] = True
     elif request.params['mode'] == 'renumbered':
         ### same as file but with mod.
-        settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true}]'
-        pdb_data = request.params['pdb'].replace("'",'').replace('"','') #XSS treat.
-        settings['pdb'] = [('pdb', pdb_data)]
+        settings['proteinJSON'] = json.dumps([{'type': 'data',
+                                               'value': 'startingProtBlock',
+                                               'isVariable': 'true',
+                                               'chain_definitions': definitions,
+                                               'history': history}])
+        pdb_data = request.params['pdb'].replace("'",'').replace('"','').replace('&','').replace('\\','') #XSS treat.
+        settings['pdb'] = [('startingProtBlock', pdb_data)]
         settings['js'] = 'external'
-        rex = re.match('REMARK 100 THIS ENTRY IS (\w+) FROM (\w+)\.', pdb_data)
-        if rex:
-            code = rex.group(2)
-            ### this is mad wasteful. TO DO Fix.
-            definitions = get_chain_definitions(code)
-            settings['descriptors'] = {'peptide': [(':'+d['chain'], f"{d['uniprot']} [offset by {d['offset']}]") for d in definitions]}
-            settings['title'] = f'User created page (PDB: {code} {rex.group(1)})'
+        if history['changes']:
+            settings['descriptors']['text'] = f'\n## Changes\n {history["changes"]}'
+            settings['title'] = f'User created page (PDB: {history["code"]} {history["changes"]})'
         else:
             settings['title'] = f'User created page'
+        if definitions:
+            settings['descriptors']['peptide'] = [(f":{d['chain']}", f"{d['name']} [offset by {d['offset']}]") for d in definitions]
     elif hasattr(request.params['pdb'], 'filename'):
         settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true}]'
         trans = save_coordinates(request)
@@ -295,164 +284,6 @@ def convert_pdb(request):
 def clean_data_other(data_other):
     return Page.sanitise_HTML(f'<span {data_other}></span>').replace('<span ','').replace('></span>','')
 
-def get_chain_definitions(code):
-    """
-    In parts of the code (backend) it is called definition. in the frontend it is descriptions.
-    """
-    code = code.split('_')[0]
-    if len(code) == 4:
-        definitions = Structure(id=code, description='', x=0, y=0, code=code).lookup_sifts().chain_definitions
-        for d in definitions:
-            if d['name'] is None and d['uniprot'] in uniprot2name:
-                d['name'] = uniprot2name[d['uniprot']]
-        return definitions
-    else:
-        return []
-
-@view_config(route_name='renumber', renderer="json")
-def renumber(request):
-    #PDB code only
-    malformed = is_malformed(request, 'pdb')
-    if malformed:
-        return {'status': malformed}
-    pdb = get_pdb_block(request)
-    if len(pdb) != 4 or re.search('\W', pdb) is not None: ## renumber is for PDB structures only. There is no point otherwise.
-        request.response.status = 422
-        return {'status': f'{pdb} is not PDB code'}
-    definitions = get_chain_definitions(pdb)
-    trans = PyMolTranspiler().renumber(pdb, definitions)
-    return {'pdb': f'REMARK 100 THIS ENTRY IS RENUMBERED FROM {pdb}.\n' +
-                   '\n'.join(trans.ss) +
-                   '\n'+trans.raw_pdb,
-            'offsets': definitions}
-
-@view_config(route_name='remove_chains', renderer="json")
-def removal(request):
-    malformed = is_malformed(request, 'pdb', 'chains')
-    if malformed:
-        return {'status': malformed}
-    ## variant of mutate...
-    pdb = get_pdb_block(request)
-    chains = request.params['chains'].split()
-    return operation(request,
-                      pdb=pdb,
-                      fun_code = PyMolTranspiler().chain_removal_code,
-                      fun_file = PyMolTranspiler().chain_removal_file,
-                      chains=chains)
-
-@view_config(route_name='dehydrate', renderer="json") #as in dehydrate a structure before page creation.
-def dehydrate(request):
-    malformed = is_malformed(request, 'pdb', 'water', 'ligand', 'format')
-    if malformed:
-        return {'status': malformed}
-    pdb = get_pdb_block(request)
-    try:
-        water = is_js_true(request.params['water'])
-        ligand = is_js_true(request.params['ligand'])
-        if not (water or ligand):
-            raise ValueError
-        return operation(request,
-                      pdb=pdb,
-                      fun_code = PyMolTranspiler().dehydrate_code,
-                      fun_file = PyMolTranspiler().dehydrate_file,
-                      water=water,
-                      ligand=ligand
-                         )
-    except ValueError:
-        request.response.status = 422
-        return {'status': f'Nothing to delete'}
-
-def get_pdb_block(request):
-    """
-    This does an unneccassry round trip.
-    """
-    if isinstance(request.params['pdb'], str): #string
-        if 'format' not in request.params:
-            return request.params['pdb']
-        elif request.params['format'].lower() == 'pdb':
-            return request.params['pdb']
-        elif request.params['format'].lower() not in valid_extensions:
-                log.warning(f'Odd format in pdb upload: {request.params["format"]} {valid_extensions}')
-                return request.params['pdb']
-        else:
-            filename = save_file(request, request.params['format'].lower(), field='pdb')  # save_file is abivalent to file or str
-            return PyMolTranspiler().load_pdb(file=filename).raw_pdb
-    elif hasattr(request.params['pdb'], "filename"): #file
-        return save_coordinates(request).raw_pdb
-
-@view_config(route_name='premutate', renderer="json") #as in mutate a structure before page creation.
-def premutate(request):
-    malformed = is_malformed(request, 'pdb', 'mutations', 'chain', 'format')
-    if malformed:
-        return {'status': malformed}
-    ## variant of mutate...
-    pdb = get_pdb_block(request)
-    if 'chain' in request.params:
-        chain = request.params['chain']
-        chains = None
-    elif 'chain[]' in request.params:
-        chain = None
-        chains = request.params.getall('chain[]')
-    else:
-        TypeError
-    if 'mutations' in request.params:
-        mutations = request.params['mutations'].split()
-    elif 'mutations[]' in request.params:
-        mutations = request.params.getall('mutations[]')
-        print(mutations)
-    else:
-        TypeError
-    try:
-        return operation(request,
-                      pdb=pdb,
-                      fun_code = PyMolTranspiler().mutate_code,
-                      fun_file = PyMolTranspiler().mutate_file,
-                      mutations=mutations, chain=chain, chains=chains)
-    except ValueError:
-        request.response.status = 422
-        return {'status': f'Invalid mutations'}
-
-
-
-
-def operation(request, pdb, fun_code, fun_file, **kargs):
-    """
-    This method is called by premutate and removal, neither changes anything serverside.
-    """
-    # get_uuid is not really needed as it does not go to DB.
-    filename = os.path.join('michelanglo_app', 'temp', f'{uuid.uuid4()}.pdb')
-    ## type is determined
-    if hasattr(pdb, 'filename'):
-        #this is a special case wherein the uses has sent a file upload.
-        #for now it is simply saved and annotated and reopened.
-        #totally wasteful but for now none of the methods upload a file.
-        trans = save_coordinates(request, mod_fx=None)
-        block = trans.raw_pdb()  ### xxxxxxxx
-        print(block)
-        raise NotImplementedError
-    else:
-        if len(pdb) == 4: ##PDB code.
-            code = pdb
-            fun_code(pdb, filename, **kargs)
-        elif len(pdb.strip()) == 0:
-            request.response.status = 422
-            return {'status': f'Empty PDB string?!'}
-        else: #string
-            if re.match('https://swissmodel.expasy.org', pdb): ## swissmodel
-                pdb = requests.get(pdb).text
-            with open(filename, 'w') as fh:
-                fh.write(pdb)
-            fun_file(filename,  filename, **kargs)
-        with open(filename, 'r') as fh:
-            block = fh.read()
-        os.remove(filename)
-    if len(pdb) == 4:
-        return {'pdb': f'REMARK 100 THIS ENTRY IS ALTERED FROM {pdb}.\n' +block}
-    elif 'REMARK 100 THIS ENTRY' in block:
-        code = re.match('REMARK 100 THIS ENTRY IS \w+ FROM (\w+).', pdb).group(1)
-        return {'pdb': f'REMARK 100 THIS ENTRY IS ALTERED FROM {code}.\n' + block}
-    else:
-        return {'pdb': block}
 
 @view_config(route_name='convert_pdb_w_sdf', renderer="json")
 def with_sdf(request):
@@ -509,7 +340,7 @@ def with_sdf(request):
                 'descriptors': {'text': descr}}
     trans = PyMolTranspiler().load_pdb(file=pdbfile)
     os.remove(pdbfile)
-    settings['pdb'] = [('apo', '\n'.join(trans.ss) + '\n' + trans.raw_pdb.lstrip())]
+    settings['pdb'] = [('apo', trans.pdb_block)]
     settings['title'] = 'User submitted structure (from uploaded PDB+SDF)'
     commit_submission(request, settings, pagename)
     return {'page': pagename}

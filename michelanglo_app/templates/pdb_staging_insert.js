@@ -1,10 +1,6 @@
 //<%text>
 $('#create').click(function (event) {
     $(event.target).attr('disabled', "disabled");
-    //hard reset to prove all runs fine
-    $('#viewport').detach();
-    window.myData = undefined;
-    NGL.stageIds = {};
     // get data.
     var data = new FormData();
     if (window.mode === undefined) {
@@ -16,6 +12,8 @@ $('#create').click(function (event) {
     else {data.append('pdb',$('#upload_pdb')[0].files[0]);}
     data.append('viewcode',$('#results code').text()); //needs two to make it list.
     data.append('mode',window.mode); //file | code
+    if (myData.proteins[0].history !== undefined) data.append('history', JSON.stringify(myData.proteins[0].history));
+    if (myData.proteins[0].chain_definitions !== undefined) data.append('definitions', JSON.stringify(myData.proteins[0].chain_definitions));
     //ajax it.
     ops.addToast('submitting','Submission','Submission in progress.','bg-info');
     $.ajax({
@@ -33,6 +31,11 @@ $('#create').click(function (event) {
                 window.location.href = "/data/"+msg.page;
         })
         .fail(ops.addErrorToast);
+
+    //hard reset to prove all runs fine
+    $('#viewport').detach();
+    window.myData = undefined;
+    NGL.stageIds = {};
 });
 
 window.getCoordinates = async () => {
@@ -50,74 +53,6 @@ window.getCoordinates = async () => {
         return [null, null];} //impossible anyway.
     return [pdb, extension];
 };
-
-$('#mutate').click(async (event)  => {
-    $(event.target).attr('disabled','disabled');
-    let mutate_chain = $('#mutate_chain').val() || 'A';
-    let mutations = $('#mutate_mutations').val().replace(/p\./gm, '').trim().split(/[\W,]+/);
-    let [pdb, extension] = await getCoordinates();
-    if (pdb === null) return 0;
-    $.ajax({
-        url: "/premutate",
-        type: 'POST',
-        dataType: 'json',
-        data: {
-            'pdb': pdb,
-            'chain': mutate_chain,
-            'mutations': mutations.join(' '),
-            'format': extension
-        },
-        success: msg => {
-            window.loadMyMsg(msg);
-            mutations.forEach(v => $('#mutate_collapse').append(`<a href="#viewport"
-                                                                    onclick="$('#markup_selection').val('${parseInt(v.replace(/\D/g,''))}:${mutate_chain}'); $('#markup_view').val(''); $('#clash').click();">
-                                                                    Set view builder to show clashes at ${v}?</a>`));
-                        },
-        error: ops.addErrorToast
-    });
-});
-
-
-$('#delete').click(async (event)  => {
-    $(event.target).attr('disabled','disabled');
-    let chains = $('#delete_chains').val().replace(/p\./gm, '').trim().split(/[\W,]+/);
-    let [pdb, extension] = await getCoordinates();
-    if (pdb === null) return 0;
-    $.ajax({
-        url: "/remove_chains",
-        type: 'POST',
-        dataType: 'json',
-        data: {
-            pdb: pdb,
-            chains: chains.join(' '),
-            format: extension
-        },
-        success: window.loadMyMsg,
-        error: ops.addErrorToast
-    });
-
-});
-
-$('#dehydrate').click(async (event)  => {
-    $(event.target).attr('disabled','disabled');
-    let chains = $('#delete_chains').val().replace(/p\./gm, '').trim().split(/[\W,]+/);
-    let [pdb, extension] = await getCoordinates();
-    if (pdb === null) return 0;
-    $.ajax({
-        url: "/dehydrate",
-        type: 'POST',
-        dataType: 'json',
-        data: {
-            pdb: pdb,
-            format: extension,
-            water: $('#water_toggle').prop('checked'),
-            ligand: $('#artefact_toggle').prop('checked')
-        },
-        success: window.loadMyMsg,
-        error: ops.addErrorToast
-    });
-
-});
 
 $('#markup_model').detach();
 
@@ -192,55 +127,16 @@ window.naturalise_alerter = (pdb) => {
                                     )
 };
 
-// deal with click of alert.
-$('#renumber').click(async event => {
-    $(event.target).attr('disabled','disabled');
-    let [pdb, extension] = await getCoordinates();
-    if (pdb === null) return 0;
-    $.post({
-                url: "/renumber",
-                data: {
-                    pdb: pdb,
-                    format: extension
-                },
-                success: msg => {window.loadMyMsg(msg);
-                                $('#renumber_alert').removeClass('show');
-                                $('#renumber').removeAttr('disabled');
-                                if (msg.offsets !== undefined && window.engineered.length > 0) {
-                                    // convert [{chain: X1, offset: n1},{chain: X2, offset: n2}] to {X1: n1, X2: n2}
-                                    let o = msg.offsets.reduce((o, d) => ({ ...o, [d.chain]: d.offset}), {});
-                                    window.engineered = window.engineered.map(c => ({chains: c.chains,
-                                                                                     resi: c.resi.map(m => m[0]+
-                                                                                                         (parseInt(m.slice(1,-1))+ o[c.chains[0]])+
-                                                                                                         m.charAt(m.length-1))}));
-                                    $('#naturalise_details').text(window.engineered.map(c => c.resi.join(' ')+' in chain '+c.chains.join('+')).join(', and '));
-                                }},
-                error: ops.addErrorToast
-            });
-});
 
-$('#naturalise').click(async event => {
+window.get_data = async event => {
     $(event.target).attr('disabled','disabled');
     let [pdb, extension] = await getCoordinates();
     if (pdb === null) return 0;
-    const reverseMutation = m => m.charAt(-1)+m.slice(1,-1)+m[0];
-    $.ajax({
-        url: "/premutate",
-        type: 'POST',
-        dataType: 'json',
-        data: {
-            'pdb': pdb,
-            'chain': window.engineered.reduce((acc, {chains, resi}) => acc.concat(chains.reduce((a2, c) => a2.concat(resi.map(x => c)), [])), []),
-            'mutations': window.engineered.reduce((acc, {chains, resi}) => acc.concat(chains.reduce((a2, c) => a2.concat(resi.map(reverseMutation)), [])), []),
-            'format': extension
-        },
-        success: msg => {window.loadMyMsg(msg);
-                        $('#naturalise_alert').removeClass('show');
-                        $('#naturalise').removeAttr('disabled');
-                        },
-        error: ops.addErrorToast
-    });
-});
+    let data = {pdb: pdb, format: extension};
+    if (myData.proteins[0].chain_definitions && myData.proteins[0].chain_definitions[0].uniprot) data['definitions'] = JSON.stringify(myData.proteins[0].chain_definitions);
+    if (myData.proteins[0].history !== undefined) data['history'] = JSON.stringify(myData.proteins[0].history);
+    return data;
+};
 
 window.loadMyMsg = (msg) => {
     window.pdbString = msg.pdb;
@@ -249,9 +145,109 @@ window.loadMyMsg = (msg) => {
     NGL.stageIds = {};
     $('#viewport').html('');
     $('#viewcode').text('<div role="NGL" data-proteins=\'[{"type": "data", "value": "pdbString", "isVariable": true}]\'></div>');
-    NGL.specialOps.multiLoader('viewport',[{type: 'data', value: "pdbString", isVariable: true}]);
+    NGL.specialOps.multiLoader('viewport',[{type: 'data',
+                                                        value: "pdbString",
+                                                        isVariable: true,
+                                                        history: msg.history,
+                                                        chain_definitions: msg.definitions}]);
     window.mode = 'renumbered';
     interactive_builder();
     $('[disabled="disabled"]').removeAttr('disabled');
 };
+
+////////////////////////// SPECIAL OPERATION WITH COORDINATES ////////////////////////////////////////////////
+// deal with click of alert.
+$('#renumber').click(async event => {
+    let data = await get_data(event);
+    $.post({
+                url: "/renumber",
+                data: data,
+                dataType: 'json',
+                success: msg => {window.loadMyMsg(msg);
+                                $('#renumber_alert').removeClass('show');
+                                $('#renumber').removeAttr('disabled');
+                                if (msg.definitions !== undefined) {
+                                    if (window.engineered.length > 0) {
+                                        // convert [{chain: X1, offset: n1},{chain: X2, offset: n2}] to {X1: n1, X2: n2}
+                                        let o = msg.definitions.reduce((o, d) => ({ ...o, [d.chain]: d.applied_offset}), {});
+                                        window.engineered = window.engineered.map(c => ({chains: c.chains,
+                                                                                         resi: c.resi.map(m => m[0]+
+                                                                                                             (parseInt(m.slice(1,-1))+ o[c.chains[0]])+
+                                                                                                             m.charAt(m.length-1))}));
+                                        $('#naturalise_details').text(window.engineered.map(c => c.resi.join(' ')+' in chain '+c.chains.join('+')).join(', and '));
+                                    }
+                                }
+                                },
+                error: ops.addErrorToast
+            });
+});
+
+$('#mutate').click(async (event)  => {
+    let mutate_chain = $('#mutate_chain').val() || 'A';
+    let mutations = $('#mutate_mutations').val().replace(/p\./gm, '').trim().split(/[\W,]+/);
+    let data = await get_data(event);
+    data.chain = mutate_chain;
+    data.mutations = mutations.join(' ');
+    $.post({
+        url: "/premutate",
+        dataType: 'json',
+        data: data,
+        success: msg => {
+            window.loadMyMsg(msg);
+            mutations.forEach(v => $('#mutate_collapse').append(`<a href="#viewport"
+                                                                    onclick="$('#markup_selection').val('${parseInt(v.replace(/\D/g,''))}:${mutate_chain}'); $('#markup_view').val(''); $('#clash').click();">
+                                                                    Set view builder to show clashes at ${v}?</a>`));
+                        },
+        error: ops.addErrorToast
+    });
+});
+
+
+$('#naturalise').click(async event => {
+    let data = await get_data(event);
+    const reverseMutation = m => m.charAt(-1)+m.slice(1,-1)+m[0];
+    data.chain = window.engineered.reduce((acc, {chains, resi}) => acc.concat(chains.reduce((a2, c) => a2.concat(resi.map(x => c)), [])), []);
+    data.mutations = window.engineered.reduce((acc, {chains, resi}) => acc.concat(chains.reduce((a2, c) => a2.concat(resi.map(reverseMutation)), [])), []);
+    $.post({
+        url: "/premutate",
+        dataType: 'json',
+        data: data,
+        success: msg => {window.loadMyMsg(msg);
+                        $('#naturalise_alert').removeClass('show');
+                        $('#naturalise').removeAttr('disabled');
+                        },
+        error: ops.addErrorToast
+    });
+});
+
+
+$('#delete').click(async (event)  => {
+    let data = await get_data(event);
+    data.chains =  $('#delete_chains').val().replace(/p\./gm, '').trim().split(/[\W,]+/).join(' ');
+    $.post({
+        url: "/remove_chains",
+        type: 'POST',
+        dataType: 'json',
+        data: data,
+        success: window.loadMyMsg,
+        error: ops.addErrorToast
+    });
+
+});
+
+$('#dehydrate').click(async (event)  => {
+    let data = await get_data(event);
+    data.water = $('#water_toggle').prop('checked');
+    data.ligand = $('#artefact_toggle').prop('checked');
+    let [pdb, extension] = await getCoordinates();
+    if (pdb === null) return 0;
+    $.post({
+        url: "/dehydrate",
+        dataType: 'json',
+        data: data,
+        success: window.loadMyMsg,
+        error: ops.addErrorToast
+    });
+
+});
 //</%text>

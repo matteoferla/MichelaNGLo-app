@@ -1,7 +1,12 @@
-import os, requests, logging, re, unicodedata, uuid
+import os, requests, logging, re, unicodedata, uuid, shutil, json
 from ..models import User, Page
 from michelanglo_transpiler import PyMolTranspiler
+from michelanglo_protein import Structure
+from . import valid_extensions
+from .uniprot_data import uniprot2name
+from pyramid.request import Request
 log = logging.getLogger(__name__)
+from typing import Union
 
 ## convert booleans and settings
 def is_js_true(value):
@@ -133,3 +138,116 @@ class PDBMeta:
                    "/".join(entity["molecule_name"])) for entity in self.get_nonproteins() for chain in
                   entity["in_chains"] if not self.is_boring_ligand(entity)]
         return {'peptide': peptide, 'hetero': hetero}
+    
+    
+def save_file(request, extension, field='file'):
+    """
+    Saves the file without doing anything to it.
+    """
+    filename = os.path.join('michelanglo_app', 'temp', '{0}.{1}'.format(get_uuid(request), extension))
+    with open(filename, 'wb') as output_file:
+        if isinstance(request.params[field], str):  ###API user made a mess.
+            log.warning(f'user uploaded a str not a file!')
+            output_file.write(request.params[field].encode('utf-8'))
+        else:
+            request.params[field].file.seek(0)
+            shutil.copyfileobj(request.params[field].file, output_file)
+    return filename
+
+def save_coordinates(request, mod_fx=None):
+    """
+    Saves the request['pdb'] file. Does not accept str.
+    """
+    extension = request.params['pdb'].filename.split('.')[-1]
+    if extension not in valid_extensions:
+        log.warning(f'Odd format in pdb upload: {extension} {valid_extensions}')
+        extension = 'pdb'
+    filename = save_file(request, extension, field='pdb')
+    trans = PyMolTranspiler().load_pdb(file=filename, mod_fx=mod_fx)
+    os.remove(filename)
+    if extension != 'pdb':
+        os.remove(filename.replace(extension, 'pdb'))
+    return trans
+
+def get_chain_definitions(source: Union[Request,str]):
+    """
+    In parts of the code (backend) it is called definition. in the frontend it is descriptions.
+    It accepts either a 4 letter code or a request object.
+    """
+    def get_from_code(code):
+        code = code.split('_')[0]
+        if len(code) == 4:
+            definitions = Structure(id=code, description='', x=0, y=0, code=code).lookup_sifts().chain_definitions
+            for d in definitions:
+                if d['name'] is None and d['uniprot'] in uniprot2name:
+                    d['name'] = uniprot2name[d['uniprot']]
+            return definitions
+        else:
+            return []
+
+    if isinstance(source, str):
+        return get_from_code(source)
+    elif isinstance(source, Request):
+        request = source
+        if 'definitions' in request.params:
+            definitions = json.loads(request.params['definitions'])
+        elif len(request.params['pdb']) == 4:
+            definitions = get_from_code(request.params['pdb'])
+        else:
+            raise ValueError('Neither a pdb code or a definition json')
+        return definitions
+    else:
+        raise TypeError
+
+def get_pdb_block(request):
+    """
+    This does an unneccassry round trip.
+    """
+    ##
+    if isinstance(request.params['pdb'], str): #string
+        ## see if it's mmCIF
+        text = request.params['pdb']
+        if len(text) == 4:
+            return requests.get(f'https://files.rcsb.org/download/{text.upper()}.pdb').text
+        elif len(text.strip()) == 0:
+            request.response.status = 422
+            return {'status': f'Empty PDB string?!'}
+        elif any([re.match(white, text) for white in ['https://swissmodel.expasy.org', 'https://www.well.ox.ac.uk']]):
+            return requests.get(text).text
+        elif 'format' not in request.params:
+            return text
+        elif request.params['format'].lower() == 'pdb':
+            return request.params['pdb']
+        elif request.params['format'].lower() not in valid_extensions:
+                log.warning(f'Odd format in pdb upload: {request.params["format"]} {valid_extensions}')
+                return request.params['pdb']
+        else: ## mmCIF save_file is abivalent to file or str
+            filename = save_file(request, request.params['format'].lower(), field='pdb')
+            return PyMolTranspiler().load_pdb(file=filename).pdb_block
+    elif hasattr(request.params['pdb'], "filename"): #file
+        return save_coordinates(request).pdb_block # has its own check to deal with mmCIF.
+    else:
+        raise TypeError
+
+
+def get_pdb_code(request):
+    if 'pdb' in request.params:
+        pdb = request.params['pdb']
+        if isinstance(pdb, str):  # string
+            if len(pdb.strip()) == 4:
+                return pdb.strip().upper()
+        elif hasattr(pdb, "filename"):
+            return os.path.splitext(pdb.filename)[0].strip()
+        else:
+            pass
+    if 'history' in request.params:
+        return json.loads(request.params['history'])['code']
+    return ''
+
+def get_history(request):
+    if 'history' in request.params:
+        history = json.loads(request.params['history'])
+    else:
+        code = get_pdb_code(request)
+        history = {'code': code, 'changes': ''}
+    return history
