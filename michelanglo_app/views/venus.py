@@ -152,7 +152,7 @@ def analyse_view(request):
         if handle not in system_storage:
             protein_step()
         protein = system_storage[handle]
-        return render_to_response("../templates/results/features.js.mako", {'protein': protein}, request)
+        return render_to_response("../templates/results/features.js.mako", {'protein': protein, 'featureView': '#fv', 'include_pdb': True}, request)
     else:
         return {'status': 'error', 'error': 'Unknown step'}
 

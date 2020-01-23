@@ -74,6 +74,7 @@
                         </div>
                     %endif
                 <p>${descr_mdowned|n}</p>
+                <div id="uniprot_btns"></div>
                 <hr/>
                 %if not no_user:
                     <button type="button" class="btn btn-outline-primary w-100 my-1" id="getimplement" data-toggle="tooltip" title="Show instructions on how to create a view on a different site you control"><i class="far fa-code"></i> Implementation code</button>
@@ -220,6 +221,15 @@ $(document).ready(function () {
     const downers = $('#wrong_modal .fa-thumbs-down').parent();
     downers.click(event => voter(event.target, 'down'));
     downers.tooltip({title: 'This is your problem and you want this fixed!!'});
+% endif
+
+% if not no_user:
+    // <%text>
+
+
+    // </%text>
+
+    <%include file="results/uniprot_modal.js"/>
 % endif
 
 }); //ready

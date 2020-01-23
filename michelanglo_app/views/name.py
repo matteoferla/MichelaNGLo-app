@@ -110,13 +110,19 @@ def choose_pdb(request):
             return {'pdb': pdb, 'chains': definitions}
     ####### get_uniprot: uniprot > feature map as a js to excecute
     elif request.params['item'] == 'get_uniprot':
-        malformed = is_malformed(request, 'uniprot', 'species')
+        malformed = is_malformed(request, 'uniprot')
         if malformed:
             return {'status': malformed}
         uniprot = request.params['uniprot']
-        taxid = request.params['species']
+        if 'species' in request.params:
+            taxid = request.params['species']
+        else:
+            try:
+                taxid = uniprot2species[uniprot]
+            except:
+                request.response.status = 422
+                return {'status': 'error'}
         log.info(f'{User.get_username(request)} wants uniprot data')
-
         try:
             protein = ProteinCore(uniprot=uniprot, taxid=taxid).load()
         except:
@@ -126,7 +132,9 @@ def choose_pdb(request):
             except:
                 request.response.status = 410 #malformed
                 return {'status': 'Unknown Uniprot code.'}
-        return render_to_response("../templates/results/features.js.mako", {'protein': protein}, request)
+        fv = request.params['fv'] if 'fv' in request.params else '#fv'
+        ip = False if 'no_pdb' in request.params else True
+        return render_to_response("../templates/results/features.js.mako", {'protein': protein, 'featureView': fv, 'include_pdb': ip}, request)
     ######### get_name: uniprot > json of name
     elif request.params['item'] == 'get_name':   ### a smaller version...
         malformed = is_malformed(request, 'uniprot', 'species')

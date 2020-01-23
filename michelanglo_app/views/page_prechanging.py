@@ -28,9 +28,9 @@ def renumber(request):
     trans = PyMolTranspiler().renumber(pdb, definitions)
     for current_chain_def in definitions:
         current_chain_def['applied_offset'] = current_chain_def['offset']
-        current_chain_def['x'] += current_chain_def['offset']
-        current_chain_def['y'] += current_chain_def['offset']
-        current_chain_def['range'] = f"{current_chain_def['x']}-{current_chain_def['y']}"
+        #current_chain_def['x'] += current_chain_def['offset']
+        #current_chain_def['y'] += current_chain_def['offset']
+        #current_chain_def['range'] = f"{current_chain_def['x']}-{current_chain_def['y']}"
         current_chain_def['offset'] = 0
     history['changes'] += 'Renamed. '
     return {'pdb': trans.pdb_block,
@@ -84,6 +84,9 @@ def removal(request):
     history['changes'] += f'Chains removed. '
     chains = request.params['chains'].split()
     trans = PyMolTranspiler().chain_removal_block(block=pdb, chains=chains)
+    for i in range(len(definitions)):
+        if definitions[i]['chain'] in chains:
+            definitions.pop(i)
     return {'pdb': trans.pdb_block,
             'definitions': definitions,
             'history': history}

@@ -162,7 +162,21 @@ window.load_pdb = pdb => {
     $('#viewport').html('');
     $('#viewcode').text('<div role="NGL" data-load="'+pdb+'" ></div>');
     if (pdb.length === 4) {NGL.specialOps.multiLoader('viewport',[{'type': 'rcsb','value': pdb}]);  $('#model_alert').removeClass('show').hide();}
-    else {NGL.specialOps.multiLoader('viewport',[{'type': 'file','value': pdb}]); $('#model_alert').addClass('show').show();}
+    else if (pdb.match('https://swissmodel.expasy.org/repository/') !== null) {
+            $('#model_alert').addClass('show').show();
+            NGL.specialOps.multiLoader('viewport',[{type: 'file',
+                                                                'value': pdb,
+                                                                chain_definitions: [{chain: 'A',
+                                                                                     uniprot: pdb.match(/uniprot\/(.*?)\.pdb/)[1],
+                                                                                     x: pdb.match(/from\=(.*?)\&/)[1],
+                                                                                     y: pdb.match(/to\=(.*?)\&/)[1],
+                                                                                     name: $('#gene').val(),
+                                                                                     offset: 0
+                                                                                    }
+                                                                                    ]
+                                                                }]);
+        }
+    else { NGL.specialOps.multiLoader('viewport',[{type: 'file', 'value': pdb}]); }
     NGL.specialOps.showTitle('viewport', 'Loaded: '+ pdb);
     renumber_alerter(pdb);
     naturalise_alerter(pdb);

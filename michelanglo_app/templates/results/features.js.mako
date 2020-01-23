@@ -1,6 +1,7 @@
 ####### THIS IS A JS FILE ##########################
 ####### THE EXTENSION IS MAKO AS THE RENDERER IS MAKO
 ####### THIS IS NOT GREAT CODING.
+// <script>
 
 
 
@@ -12,7 +13,7 @@
 ### copied from results.js.mako in VENUS
 ###################################################
 window.ft = new FeatureViewer('${protein.sequence}',
-           '#fv',
+           '${featureView}',
             {
                 showAxis: true,
                 showSequence: true,
@@ -236,13 +237,17 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
     });
     addFeatureTooltip("Flexibility","Flexibility predicted by amino acid identity. low flexibility generally means a structured protein");
 %endif
-
 ################### Structures #######################
 <%
     limited = 45
-    p = sorted(protein.pdbs, key=lambda n: n.y - n.x, reverse=True)[0:limited]
-    s = sorted(protein.swissmodel, key=lambda n: n.y - n.x, reverse=True)[0:limited-len(protein.pdbs)]
-    m = sorted(protein.pdb_matches, key=lambda n: n.y - n.x, reverse=True)[0:limited-len(protein.pdbs)-len(protein.swissmodel)]
+    if include_pdb:
+        p = sorted(protein.pdbs, key=lambda n: n.y - n.x, reverse=True)[0:limited]
+        s = sorted(protein.swissmodel, key=lambda n: n.y - n.x, reverse=True)[0:limited-len(protein.pdbs)]
+        m = sorted(protein.pdb_matches, key=lambda n: n.y - n.x, reverse=True)[0:limited-len(protein.pdbs)-len(protein.swissmodel)]
+    else:
+        p = []
+        s = []
+        m = []
 %>
 %for title, data, color, classname in (("Crystal structures",p, 'lime', 'pdb'), ("Swissmodel", s, 'GreenYellow', 'swiss'), ("Homologue structures", m, 'khaki', 'homo')):
     %if data:
@@ -274,7 +279,11 @@ $('.swiss').click(function () {
 
 $('#label_protName').html("${protein.recommended_name} (encoded by <i>${protein.gene_name}</i>)");
 
+% if include_pdb:
 window.pdbOptions = ${json.dumps([s.__dict__ for s in protein.pdbs])|n};
+% else:
+    window.pdbOptions = [];
+% endif
 
 if (pdbOptions.length) {
     $('#partner_table').html(`<table class="table table-hover" style="table-layout: fixed;"><thead class="thead-light"><tr>
@@ -375,3 +384,6 @@ if (pdbOptions.length) {
 } else {
 $('#partner_table').html('<p>No crystal structures to show.</p>');
 }
+
+
+// </script>

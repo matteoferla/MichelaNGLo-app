@@ -63,6 +63,8 @@ NGL.getStage = function (id) {
 
 ///////////////////////////// NGL.SpecialOps ///////////////
 
+NGL.specialOps.isValid = (id, sele) => NGL.getStage(id).getComponentByType('structure').structure.getView(new NGL.Selection(sele)).atomCount > 0;
+
 NGL.specialOps.slowOrient = function (id, view) {
     //wrapper for a string view.
     NGL.getStage(id).getComponentByType('structure').autoView(2000); //zoom out.
