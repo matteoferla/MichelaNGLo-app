@@ -84,7 +84,7 @@ def removal(request):
     history['changes'] += f'Chains removed. '
     chains = request.params['chains'].split()
     trans = PyMolTranspiler().chain_removal_block(block=pdb, chains=chains)
-    for i in range(len(definitions)):
+    for i in reversed(range(len(definitions))):
         if definitions[i]['chain'] in chains:
             definitions.pop(i)
     return {'pdb': trans.pdb_block,
