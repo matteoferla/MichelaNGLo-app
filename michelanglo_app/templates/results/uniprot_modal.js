@@ -38,31 +38,50 @@ add_uniprot();
 
 ////////////////////////////////// Loading triggered
 window.UniprotData = {};
+
+//NGL does not accept rgb(173, 216, 230) type colors.
+window.fixColor = (rgb) => '#'+rgb.match(/rgb\((\d+)\, (\d+)\, (\d+)\)/)
+                                .slice(1,)
+                                .map(c => Number(c).toString(16))
+                                .map(h => h.length === 2 ? h : '0'+h)
+                                .join('');
+
 window.show_uniprot = (uniprotValue, chain) => {
     const loadFV = (uniprotValue) => {$('#fv_'+uniprotValue).html('');
                                         $('#fv_'+uniprotValue).off();
                                         m.off('shown.bs.modal');
                                         m.on('shown.bs.modal', e => eval(UniprotData[uniprotValue]));
                                         setTimeout((uniprotValue) => {
-                                            $('.domain').css('cursor','pointer');
+                                            let clickable = $('.domain, .modified');
+                                           clickable.css('cursor','pointer');
+                                           // when the squares are clicked the colors change to red. which is not good.
+                                            let defaultColors = clickable.map(function () {
+                                                return {id: this.id, color: $(this).css('fill')}
+                                            }).get().reduce(function(acc, {id, color}) {if (color !== 'none') {acc[id] = fixColor(color)}
+                                                                                        return acc},
+                                                            {});
                                             $('.domain').click(function (event) {
                                                 //fnucleotidephosphatebindingregion_116_119
-                                                let p = $(this).attr('id').split('_');
+                                                let p = this.id.split('_');
+                                                let color = defaultColors[this.id];
                                                 let sele = p[1]+'-'+p[2]+':'+myData.currentChain;
                                                 if (NGL.specialOps.isValid('viewport',sele)) {
-                                                    NGL.specialOps.showDomain('viewport', sele);
+                                                    NGL.specialOps.showDomain('viewport', sele, color);
                                                     $(`#${uniprotValue}_modal`).modal('hide');
                                                 } else {
                                                     ops.addToast('outer','Selection out of bounds', 'Unfortunately the structure does not conver that', 'bg-warning');
                                                 }
                                             });
-                                            $('.modified').css('cursor','pointer');
                                             $('.modified').click(function (event) {
                                                 //fnucleotidephosphatebindingregion_116_119
-                                                let p = $(this).attr('id').split('_');
+                                                let p = this.id.split('_');
+                                                if (p.length === 1) {
+                                                    p.push(p[0].match(/\d+/)[0])
+                                                }
+                                                let color = defaultColors[this.id];
                                                 let sele = p[1]+':'+myData.currentChain;
                                                 if (NGL.specialOps.isValid('viewport',sele)) {
-                                                    NGL.specialOps.showResidue('viewport', sele);
+                                                    NGL.specialOps.showResidue('viewport', sele, color);
                                                     $(`#${uniprotValue}_modal`).modal('hide');
                                                 } else {
                                                     ops.addToast('outer','Selection out of bounds', 'Unfortunately the structure does not conver that', 'bg-warning');
