@@ -171,7 +171,7 @@ def set_ajax(request):
 
 
 @view_config(route_name='vote', renderer='json')
-def set_ajax(request):
+def vote(request):
     malformed = is_malformed(request, 'topic','direction')
     if malformed:
         return {'status': malformed}
