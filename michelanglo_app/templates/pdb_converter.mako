@@ -69,6 +69,8 @@
     window.start_stage_two = () => {
         $('#staging').show();
         window.myData = undefined;
+        window.engineered = undefined;
+        window.mode = 'code';
         NGL.stageIds = {};
         $('#viewport').html('');
     };

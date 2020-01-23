@@ -156,6 +156,8 @@ window.load_pdb = pdb => {
     $('#staging').show();
     window.pdbCode = pdb;
     window.myData = undefined;
+    window.engineered = undefined;
+    window.mode = 'code';
     NGL.stageIds = {};
     $('#viewport').html('');
     $('#viewcode').text('<div role="NGL" data-load="'+pdb+'" ></div>');
