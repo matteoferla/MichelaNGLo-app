@@ -10,7 +10,7 @@ import json, re
 import datetime
 import requests
 
-from ._common_methods import is_js_true,  is_malformed, get_uuid
+from ._common_methods import is_js_true,  is_malformed, get_uuid, get_pdb_block
 
 import logging
 log = logging.getLogger(__name__)
@@ -249,43 +249,40 @@ def mutate(request):
             chain = request.params['chain']
             mutations = request.params['mutations'].split()
             all_protein_data = json.loads(settings['proteinJSON'])
-            protein_data = json.loads(settings['proteinJSON'])[model]
+            protein_data = all_protein_data[model]
             filename = os.path.join('michelanglo_app', 'temp', f'{page.identifier}.mut.pdb')
             if protein_data['type'] == 'data':
                 if protein_data['isVariable'] is True or protein_data['isVariable'] == 'true':
-                    seq = [p[1] for p in settings['pdb'] if p[0] == protein_data['value']][0]
+                    # if is variable is true the pdb block is in settings pdb.
+                    # Legacy pages have been update, so there are no settings['pdb']:str
+                    name = protein_data['value']
+                    pdb_block = dict(settings['pdb'])[name]
                 else:
-                    seq = protein_data['value']
-                with open(filename, 'w') as fh:
-                    fh.write(seq)
-                PyMolTranspiler().mutate_file(filename, filename, mutations, chain)
-            elif protein_data['type'] == 'rcsb':
-                PyMolTranspiler().mutate_code(protein_data['value'], filename, mutations, chain)
+                    pdb_block = protein_data['value']
             else:
-                if protein_data['type'] == 'file' and 'https://swissmodel.expasy.org/' in protein_data['value']:
-                    seq = requests.get(protein_data['value']).text
-                    with open(filename, 'w') as fh:
-                        fh.write(seq)
-                    PyMolTranspiler().mutate_file(filename, filename, mutations, chain)
-                else:
-                    request.response.status = 406
-                    ## this is a super corner case. I am not sure at all how to proceed. Clickbait?
-                    return {'status': 'Cannot create mutations from URL for security reasons. Please download the PDB file and upload it or ask the site admin to whitelist the URL.'}
-            with open(filename, 'r') as fh:
-                seq = fh.read()
+                pdb_block = get_pdb_block(protein_data['value'])
+            ## covert
+            trans = PyMolTranspiler().mutate_block(block=pdb_block, chain=chain, mutations=mutations)
+            new_block = trans.pdb_block
+            #return {'status': 'Cannot create mutations from URL for security reasons. Please download the PDB file and upload it or ask the site admin to whitelist the URL.'}
             new_variable = sanitise_name(request.params['name'], f"mutant_{len(all_protein_data)}", all_protein_data)
             if 'inplace' in request.params and is_js_true(request.params['inplace']):
-                all_protein_data[model] = {"type": "data",
+                all_protein_data[model] = {**all_protein_data[model],
+                                         "type": "data",
                                          "value": new_variable,
                                          "isVariable": "true"}
                 settings['proteinJSON'] = json.dumps(all_protein_data)
-                settings['pdb'][model] = (new_variable, seq)
+                settings['pdb'][model] = (new_variable, new_block)
             else:
                 all_protein_data.append({"type": "data",
                                          "value": new_variable,
+                                         "history": "mutagenesis",
                                          "isVariable": "true"})
+                if 'chain_definitions' in all_protein_data[model]:
+                    all_protein_data[-1]['chain_definitions'] = all_protein_data[model]['chain_definitions']
+
                 settings['proteinJSON'] = json.dumps(all_protein_data)
-                settings['pdb'].append((new_variable, seq))
+                settings['pdb'].append((new_variable, new_block))
                 new_model = len(all_protein_data) - 1
                 settings['description'] += f'\n\nProtein variants generated for model #{model} ({all_protein_data[model]["value"] if "value" in all_protein_data[model] else "no name given"}) as model #{new_model} ({new_variable}).\n\n'
                 common = '<span class="prolink" data-toggle="protein" data-hetero="true"'

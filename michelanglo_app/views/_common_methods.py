@@ -199,36 +199,48 @@ def get_chain_definitions(source: Union[Request,str]):
     else:
         raise TypeError
 
-def get_pdb_block(request):
-    """
-    This does an unneccassry round trip.
-    """
-    ##
-    if isinstance(request.params['pdb'], str): #string
-        ## see if it's mmCIF
+def get_pdb_block_from_str(text):
+    if len(text) == 4:
+        return requests.get(f'https://files.rcsb.org/download/{text.upper()}.pdb').text
+    elif len(text.strip()) == 0:
+        raise ValueError('Empty PDB string?!')
+    elif any([re.match(white, text) for white in ['https://swissmodel.expasy.org', 'https://www.well.ox.ac.uk']]):
+        return requests.get(text).text
+
+def get_pdb_block_from_request(request):
+    if isinstance(request.params['pdb'], str):  # string
         text = request.params['pdb']
-        if len(text) == 4:
-            return requests.get(f'https://files.rcsb.org/download/{text.upper()}.pdb').text
-        elif len(text.strip()) == 0:
-            request.response.status = 422
-            return {'status': f'Empty PDB string?!'}
-        elif any([re.match(white, text) for white in ['https://swissmodel.expasy.org', 'https://www.well.ox.ac.uk']]):
-            return requests.get(text).text
-        elif 'format' not in request.params:
-            return text
-        elif request.params['format'].lower() == 'pdb':
-            return request.params['pdb']
-        elif request.params['format'].lower() not in valid_extensions:
+        ## see if it's mmCIF
+        if 'format' in request.params:
+            if request.params['format'].lower() == 'pdb':
+                return text
+            elif request.params['format'].lower() not in valid_extensions:
                 log.warning(f'Odd format in pdb upload: {request.params["format"]} {valid_extensions}')
-                return request.params['pdb']
-        else: ## mmCIF save_file is abivalent to file or str
-            filename = save_file(request, request.params['format'].lower(), field='pdb')
-            return PyMolTranspiler().load_pdb(file=filename).pdb_block
-    elif hasattr(request.params['pdb'], "filename"): #file
-        return save_coordinates(request).pdb_block # has its own check to deal with mmCIF.
+                return text
+            else:  ## mmCIF save_file is abivalent to file or str
+                filename = save_file(request, request.params['format'].lower(), field='pdb')
+                return PyMolTranspiler().load_pdb(file=filename).pdb_block
+        else:
+            return get_pdb_block_from_str(text)
+    elif hasattr(request.params['pdb'], "filename"):  # file
+        return save_coordinates(request).pdb_block  # has its own check to deal with mmCIF.
     else:
         raise TypeError
 
+def get_pdb_block(source):
+    """
+    This may do an unneccassry round trip.
+    The output is a PDB block. Do not call if you want to keep using a pdb code.
+    """
+    ##
+    if isinstance(source, str):
+        text = source
+        return get_pdb_block_from_str(text)
+    elif isinstance(source, Request):
+        request = source
+        return get_pdb_block_from_request(request)
+    else:
+        raise TypeError
 
 def get_pdb_code(request):
     if 'pdb' in request.params:

@@ -167,7 +167,12 @@ def convert_pse(request):
             settings['pdb'] = [
                 ('pdb', '\n'.join(trans.ss) + '\n' + trans.raw_pdb)]  # note that this used to be a string,
         elif len(trans.pdb) == 4:
-            settings['proteinJSON'] = '[{{"type": "rcsb", "value": "{0}", "loadFx": "loadfun"}}]'.format(trans.pdb)
+            settings['proteinJSON'] = json.dumps([{"type": "rcsb",
+                                                   "value": trans.pdb,
+                                                   "loadFx": "loadfun",
+                                                   'history': 'from PyMOL',
+                                                   "chain_definitions": get_chain_definitions(request)
+                                                   }])
         else:
             settings['proteinJSON'] = '[{{"type": "file", "value": "{0}", "loadFx": "loadfun"}}]'.format(trans.pdb)
         settings['title'] = 'User submitted structure (from PyMOL file)'
