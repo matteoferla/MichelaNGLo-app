@@ -206,6 +206,8 @@ def get_pdb_block_from_str(text):
         raise ValueError('Empty PDB string?!')
     elif any([re.match(white, text) for white in ['https://swissmodel.expasy.org', 'https://www.well.ox.ac.uk']]):
         return requests.get(text).text
+    else:
+        return text
 
 def get_pdb_block_from_request(request):
     if isinstance(request.params['pdb'], str):  # string
@@ -213,10 +215,10 @@ def get_pdb_block_from_request(request):
         ## see if it's mmCIF
         if 'format' in request.params:
             if request.params['format'].lower() == 'pdb':
-                return text
+                return get_pdb_block_from_str(text)
             elif request.params['format'].lower() not in valid_extensions:
                 log.warning(f'Odd format in pdb upload: {request.params["format"]} {valid_extensions}')
-                return text
+                return get_pdb_block_from_str(text)
             else:  ## mmCIF save_file is abivalent to file or str
                 filename = save_file(request, request.params['format'].lower(), field='pdb')
                 return PyMolTranspiler().load_pdb(file=filename).pdb_block
@@ -234,6 +236,7 @@ def get_pdb_block(source):
     """
     ##
     if isinstance(source, str):
+        print('heree!!')
         text = source
         return get_pdb_block_from_str(text)
     elif isinstance(source, Request):
