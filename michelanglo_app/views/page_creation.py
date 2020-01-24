@@ -260,7 +260,7 @@ def convert_pdb(request):
                                                'isVariable': 'true',
                                                'chain_definitions': definitions,
                                                'history': history}])
-        pdb_data = request.params['pdb'].replace("'",'').replace('"','').replace('&','').replace('\\','') #XSS treat.
+        pdb_data = request.params['pdb'].replace('"','').replace('&','').replace('\\','') #XSS treat? it gets escaped tho!
         settings['pdb'] = [('startingProtBlock', pdb_data)]
         settings['js'] = 'external'
         if history['changes']:

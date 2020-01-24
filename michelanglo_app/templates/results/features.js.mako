@@ -279,6 +279,7 @@ $('.swiss').click(function () {
 
 $('#label_protName').html("${protein.recommended_name} (encoded by <i>${protein.gene_name}</i>)");
 
+############################################ This is the table #############
 % if include_pdb:
 window.pdbOptions = ${json.dumps([s.__dict__ for s in protein.pdbs])|n};
 % else:
@@ -295,6 +296,7 @@ if (pdbOptions.length) {
                                         <th data-toggle="tooltip" title="What other proteins are there?">Bound partner(s)</th>
                                         <th data-toggle="tooltip" title="What small molecules are in the structure?">Ligand(s)</th>
                                 </tr></thead><tbody></tbody></table>`);
+    $('#partner_table [data-toggle="tooltip"]').tooltip();
     const table = $('#partner_table tbody');
     const protLen = ${len(protein)};
     let partnerNames = [];
