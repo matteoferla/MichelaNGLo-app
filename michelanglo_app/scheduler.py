@@ -6,6 +6,7 @@ from sqlalchemy.sql.expression import and_
 import transaction
 from apscheduler.schedulers.background import BackgroundScheduler
 from .views._common_methods import notify_admin
+from michelanglo_transpiler import GlobalPyMOL
 
 from datetime import datetime,timedelta
 
@@ -23,6 +24,7 @@ def includeme(config):
     scheduler.add_job(kill_task, 'interval', days=1, args=[settings['scheduler.days_delete_unedited'], settings['scheduler.days_delete_untouched']])
     scheduler.add_job(monitor_task, 'interval', days=30)
     scheduler.add_job(daily_task, 'interval', days=1)
+    scheduler.add_job(unjam, 'interval', hours=1)
     #### START UP TASKS ####################################################
     scheduler.add_job(monitor_task, 'date', run_date=datetime.now() + timedelta(minutes=60))
     #scheduler.add_job(sanitycheck_task, 'date', run_date=datetime.now() + timedelta(minutes=2))
@@ -117,3 +119,12 @@ def sanitycheck_task():
     #I need to think about this more.
     pass
 
+def unjam():
+    """
+    The context manager already deals with this. But this is just to prevent the context manager from dealing with this.
+    """
+    gp = GlobalPyMOL()
+    if gp.pylock.acquire(timeout=120):
+        gp.pylock.release()
+    else:
+        gp.kill()

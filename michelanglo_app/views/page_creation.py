@@ -17,7 +17,8 @@ from ._common_methods import is_js_true,\
                              save_file,\
                              save_coordinates,\
                              get_chain_definitions, \
-                             get_history
+                             get_history, \
+                             get_references
 import logging
 
 log = logging.getLogger(__name__)
@@ -61,7 +62,9 @@ def stringify_protein_description(settings):
                     else:
                         descr += '* ' + template.format(focus='residue', selection=p, label=p) + '\n'
         if 'text' in settings['descriptors'] and settings['descriptors']['text']:
-            descr += settings['descriptors']['text']
+            descr += '\n\n' + settings['descriptors']['text']
+        if 'ref' in settings['descriptors'] and settings['descriptors']['ref']:
+            descr += '\n### References\n'+settings['descriptors']['ref']
     return descr
 
 
@@ -167,6 +170,7 @@ def convert_pse(request):
             settings['pdb'] = [
                 ('pdb', '\n'.join(trans.ss) + '\n' + trans.raw_pdb)]  # note that this used to be a string,
         elif len(trans.pdb) == 4:
+            settings['descriptors']['ref'] = get_references(trans.pdb)
             settings['proteinJSON'] = json.dumps([{"type": "rcsb",
                                                    "value": trans.pdb,
                                                    "loadFx": "loadfun",
@@ -255,9 +259,10 @@ def convert_pdb(request):
                                                    'chain_definitions': definitions,
                                                    'history': history}])
             settings['title'] = 'User submitted structure (from external PDB)'
-            settings['descriptors'] = {'text': f'PDB loaded from [{pdb}](source <i class="far fa-external-link"></i>)'}
+            settings['descriptors'] = {'text': f'PDB loaded from [source <i class="far fa-external-link"></i>]({pdb})'}
             if 'https://swissmodel.expasy.org' in pdb:
                 settings['model'] = True
+                settings['descriptors']['ref'] = get_references(pdb)
     elif request.params['mode'] == 'renumbered':
         ### same as file but with mod.
         settings['proteinJSON'] = json.dumps([{'type': 'data',
@@ -270,7 +275,13 @@ def convert_pdb(request):
         settings['js'] = 'external'
         if history['changes']:
             settings['descriptors']['text'] = f'\n## Changes\n {history["changes"]}'
-            settings['title'] = f'User created page (PDB: {history["code"]} {history["changes"]})'
+            if "swissmodel" in history["code"]:
+                code = 'SWISSMODEL'
+                settings['descriptors']['text'] += f'\n\n##Source\nPDB loaded from [Swissmodel <i class="far fa-external-link"></i>]({history["code"]})'
+            else:
+                code = history["code"]
+            settings['title'] = f'User created page (PDB: {code} {history["changes"]})'
+            settings['descriptors']['ref'] = get_references(history["code"])
         else:
             settings['title'] = f'User created page'
         if definitions:

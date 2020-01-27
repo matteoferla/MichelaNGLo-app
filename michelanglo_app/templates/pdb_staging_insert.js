@@ -1,30 +1,13 @@
 //<%text>
-$('#create').click(function (event) {
+$('#create').click(async function (event) {
     $(event.target).attr('disabled', "disabled");
     // get data.
-    var data = new FormData();
-    if (window.mode === undefined) {
-        // we are in name.mako
-        window.mode = 'code';
-        data.append('pdb',window.pdbCode);
-    } else if (window.mode === 'code') {data.append('pdb',$('#pdb').val());}
-    else if (window.mode === 'renumbered') {data.append('pdb', window.pdbString);}
-    else {data.append('pdb',$('#upload_pdb')[0].files[0]);}
-    data.append('viewcode',$('#results code').text()); //needs two to make it list.
-    data.append('mode',window.mode); //file | code
-    if (myData.proteins[0].history !== undefined) data.append('history', JSON.stringify(myData.proteins[0].history));
-    if (myData.proteins[0].chain_definitions !== undefined) data.append('definitions', JSON.stringify(myData.proteins[0].chain_definitions));
-    //ajax it.
-    ops.addToast('submitting','Submission','Submission in progress.','bg-info');
-    $.ajax({
-        type: "POST",
-        url: "convert_pdb",
-        processData: false,
-        enctype: "multipart/form-data",
-        cache: false,
-        contentType: false,
-        data:  data
-    }).done(function (msg) {
+    let data = await get_data(event);
+    if (data === 0) return 0;
+    data['viewcode'] =  $('#results code').text();
+    data['mode'] = window.mode; /// relic code. change!
+    $.post({url: "convert_pdb", data: data, dataType: 'json'})
+        .done(function (msg) {
                 ops.addToast('jobcompletion','Conversion complete','The data has been converted successfully.','bg-success');
                 ops.addToast('redirect','Conversion complete','Redirecting you to page '+msg.page,'bg-info');
                 console.log(msg);
@@ -159,6 +142,7 @@ window.loadMyMsg = (msg) => {
 // deal with click of alert.
 $('#renumber').click(async event => {
     let data = await get_data(event);
+    if (data === 0) return 0;
     $.post({
                 url: "/renumber",
                 data: data,

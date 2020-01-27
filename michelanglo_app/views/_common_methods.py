@@ -137,7 +137,36 @@ class PDBMeta:
         hetero = [(f'{entity["chem_comp_ids"][0]} and :{chain}',
                    "/".join(entity["molecule_name"])) for entity in self.get_nonproteins() for chain in
                   entity["in_chains"] if not self.is_boring_ligand(entity)]
-        return {'peptide': peptide, 'hetero': hetero}
+
+        return {'peptide': peptide, 'hetero': hetero, 'ref': get_references(self.code)}
+
+
+def get_references(code):
+    if len(code) == 0:
+        return ''
+    elif 'swissmodel' in code:
+        return 'Model derived from SWISSMODEL <a href="https://academic.oup.com/nar/article/46/W1/W296/5000024" target="_blank">'+\
+               'Waterhouse, A., Bertoni, M., Bienert, S., Studer, G., Tauriello, G., Gumienny, R., Heer, F.T., de Beer, T.A.P., Rempfer, C., Bordoli, L., Lepore, R., Schwede, T.'+\
+               ' (2018) SWISS-MODEL: homology modelling of protein structures and complexes. <i>Nucleic Acids Res.</i> <b>46(W1)</b>, W296-W303.</a>'
+    else:
+        reply = requests.get(f'https://www.ebi.ac.uk/pdbe/api/pdb/entry/publications/{code}').json()
+        if reply:
+            citations = []
+            for ref in reply[code.lower()]:
+                authors = ', '.join([author["full_name"] for author in ref["author_list"]])
+                if ref["doi"] is None:
+                        continue
+                try:
+                    jname = ref["journal_info"]["ISO_abbreviation"] if ref["journal_info"]["ISO_abbreviation"] is not None else ref["journal_info"]["pdb_abbreviation"]
+                    issue = ref["journal_info"]["issue"] if ref["journal_info"]["issue"] is not None else ''
+                    pages = ref["journal_info"]["pages"] if ref["journal_info"]["pages"] is not None else ''
+                    journal = f'({ref["journal_info"]["year"]}) {ref["title"]} <i>{jname}</i> <b>{issue}</b> {pages}'
+                except:
+                    journal = 'NA'
+                citations.append(f'Structure {code} was reported in <a target="_blank" href="https://dx.doi.org/{ref["doi"]}">{authors} {journal}</a>')
+            return '<br/>'.join(citations)
+        else:
+            return ''
     
     
 def save_file(request, extension, field='file'):
@@ -251,6 +280,8 @@ def get_pdb_code(request):
         if isinstance(pdb, str):  # string
             if len(pdb.strip()) == 4:
                 return pdb.strip().upper()
+            elif 'swissmodel' in pdb:
+                return pdb
         elif hasattr(pdb, "filename"):
             return os.path.splitext(pdb.filename)[0].strip()
         else:

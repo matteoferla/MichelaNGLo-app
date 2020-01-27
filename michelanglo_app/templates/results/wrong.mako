@@ -30,10 +30,9 @@
             <div class="modal-body">
                 <p>Sometimes something is not quite right with the conversion. Here are some possible solutions:</p>
                 <ul class="list-group">
-                    ${entry('Oohh buttons','You want to press a button, but don\t want to mess up our reports? <i class="far fa-ufo-beam"></i> ','Press this entry')}
+                    ${entry('My PSE had a disabled object, but not the NGL', 'Disabled objects are removed to save on data to send across the web.', 'Enable it and change chain ID (Michelaɴɢʟo will do it, but you won\'t be told to what), but hide all its representations.')}
                     ${entry('Wrong protein off-camera', 'One of the options was whether to use a PDB 4-letter code (default) or to include the coordinate data in the page, this was not checked even if the coordinated data was unique.', 'Check the include PDB coordinates.')}
                     ${entry('Slightly-off orientation', 'The PyMol window shape and size and the viewport shape and size differ.', 'Check the PSE file and reorient. If this is still odd and the field of view has been changed to something highly distorting, return to normal values.')}
-                    ${entry('My PSE had a disabled object, but not the NGL', 'Disabled objects are removed to save on data to send across the web.', 'Enable it and change chain ID (Michelaɴɢʟo will do it, but you won\'t be told to what), but hide all its representations.')}
                     ${entry('My PSE had a CGO object (e.g. arrow) or a map', 'mesh and map data does not appear to be extractable from PyMOL.', 'Meshes and maps can be added in JS. As it\'s a corner case, please <a href="#" data-toggle="modal" data-target="#chat_modal">contact the admin</a> to get your protein fixed or get JS editing rights.')}
                     ${entry('My huge membrane is not connected', 'NGL stops predicting connects for ligands (HETATMs) if they are too big.', 'The PDB data needs CONECT lines, as it\'s a corner case, please <a href="#" data-toggle="modal" data-target="#chat_modal">contact the admin</a> to get your protein fixed or get JS editing rights.')}
                     ${entry('I had an ensemble','''In a file with multiple states only the first is used, while in a file with multiple objects these are merged into a single object.
