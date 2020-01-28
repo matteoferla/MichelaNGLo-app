@@ -137,7 +137,7 @@ window.loadMyMsg = (msg) => {
     let loadMe = {type: 'data',
                 value: "pdbString",
                 isVariable: true};
-    if (msg.history && msg.history.length) loadMe.history = msg.history;
+    if (msg.history && msg.history.code) loadMe.history = msg.history;
     if (msg.definitions && msg.definitions.length) loadMe.chain_definitions = msg.definitions;
     NGL.specialOps.multiLoader('viewport',[loadMe]);
     window.mode = 'renumbered';
