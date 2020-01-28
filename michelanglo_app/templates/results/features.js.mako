@@ -126,7 +126,7 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
     addFeatureTooltip("Modified residues", "A collection of various Uniprot annotations: 'initiator methionine','modified residue','glycosylation site','non-standard amino acid'");
 %endif
 
-%if protein.features['PSP_modified_residues']:
+%if 'PSP_modified_residues' in protein.features and protein.features['PSP_modified_residues']:
     ft.addFeature({
         data: ${str(feature_viewer_standardise(protein.features['PSP_modified_residues']))|n},
         name: "Mod. residues (HT)",

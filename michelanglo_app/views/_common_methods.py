@@ -223,7 +223,8 @@ def get_chain_definitions(source: Union[Request,str]):
         elif len(request.params['pdb']) == 4:
             definitions = get_from_code(request.params['pdb'])
         else:
-            raise ValueError('Neither a pdb code or a definition json')
+            #raise ValueError('Neither a pdb code or a definition json')
+            return []
         return definitions
     else:
         raise TypeError

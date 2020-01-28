@@ -18,7 +18,8 @@ from ._common_methods import is_js_true,\
                              save_coordinates,\
                              get_chain_definitions, \
                              get_history, \
-                             get_references
+                             get_references, \
+                             get_pdb_block
 import logging
 
 log = logging.getLogger(__name__)
@@ -263,14 +264,14 @@ def convert_pdb(request):
             if 'https://swissmodel.expasy.org' in pdb:
                 settings['model'] = True
                 settings['descriptors']['ref'] = get_references(pdb)
-    elif request.params['mode'] == 'renumbered':
+    elif request.params['mode'] in ('renumbered', 'file'):
         ### same as file but with mod.
         settings['proteinJSON'] = json.dumps([{'type': 'data',
                                                'value': 'startingProtBlock',
                                                'isVariable': 'true',
                                                'chain_definitions': definitions,
                                                'history': history}])
-        pdb_data = request.params['pdb'].replace('"','').replace('&','').replace('\\','') #XSS treat? it gets escaped tho!
+        pdb_data = get_pdb_block(request)
         settings['pdb'] = [('startingProtBlock', pdb_data)]
         settings['js'] = 'external'
         if history['changes']:

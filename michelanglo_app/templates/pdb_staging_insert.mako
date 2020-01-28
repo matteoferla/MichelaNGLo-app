@@ -5,7 +5,7 @@
 <p>Choose how the view of the protein should look like when page first loads (initial view) by either using the view-building interface or by editing the tag directly. See <a href="/docs/markup" target="_blank">documentation</a> for more information.</p>
 
 ############## ALERTS
-<div id="renumber_alert" class="alert alert-warning alert-dismissable fade" role="alert">
+<div id="renumber_alert" class="alert alert-danger alert-dismissable fade" role="alert">
     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
     <span aria-hidden="true">&times;</span>
   </button>

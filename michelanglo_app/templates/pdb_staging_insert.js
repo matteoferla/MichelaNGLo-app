@@ -1,8 +1,11 @@
 //<%text>
+// to do. convert this to a class!
+// with interactive_builder? That is markup builder.
+
 $('#create').click(async function (event) {
     $(event.target).attr('disabled', "disabled");
     // get data.
-    let data = await get_data(event);
+    let data = await getData(event);
     if (data === 0) return 0;
     data['viewcode'] =  $('#results code').text();
     data['mode'] = window.mode; /// relic code. change!
@@ -27,6 +30,7 @@ window.getCoordinates = async () => {
     if ((window.mode === undefined) || (window.mode === 'code')) { pdb = window.pdbCode}
     else if (window.mode === 'renumbered') { pdb = window.pdbString}
     else if (window.mode === 'file') {
+        // this is really stupid, but the FileList remembers what happened before (autofill) in FireFox! so this is easier.
         let f = $('#upload_pdb')[0].files[0];
         pdb = await f.text();
         extension = f.name.split('\.').pop().toLowerCase()
@@ -95,7 +99,7 @@ window.naturalise_alerter = (pdb) => {
                                                    //mse
                                                    let m = Object.entries(chain.pdb_sequence_indices_with_multiple_residues).filter(([r, v]) => v.three_letter_code === "MSE").map(([r, v]) => r);
 
-                                                   if (m.length > 0) chEng = chEng.concat(m.map(v => 'X'+v+'M'));
+                                                   if (m.length > 0) chEng = chEng.concat(m.map(v => 'M'+v+'X'));
                                                    console.log(chEng);
                                                    //engineered
                                                    if (chain.mutation_flag !== null) chEng = chEng.concat(chain.mutation_flag.split('/'));
@@ -111,8 +115,10 @@ window.naturalise_alerter = (pdb) => {
 };
 
 
-window.get_data = async event => {
+window.getData = async event => {
     $(event.target).attr('disabled','disabled');
+    const text = $(event.target).html();
+    $(event.target).html('<i class="far fa-spinner fa-spin"></i> '+text);
     let [pdb, extension] = await getCoordinates();
     if (pdb === null) return 0;
     let data = {pdb: pdb, format: extension};
@@ -128,20 +134,25 @@ window.loadMyMsg = (msg) => {
     NGL.stageIds = {};
     $('#viewport').html('');
     $('#viewcode').text('<div role="NGL" data-proteins=\'[{"type": "data", "value": "pdbString", "isVariable": true}]\'></div>');
-    NGL.specialOps.multiLoader('viewport',[{type: 'data',
-                                                        value: "pdbString",
-                                                        isVariable: true,
-                                                        history: msg.history,
-                                                        chain_definitions: msg.definitions}]);
+    let loadMe = {type: 'data',
+                value: "pdbString",
+                isVariable: true};
+    if (msg.history && msg.history.length) loadMe.history = msg.history;
+    if (msg.definitions && msg.definitions.length) loadMe.chain_definitions = msg.definitions;
+    NGL.specialOps.multiLoader('viewport',[loadMe]);
     window.mode = 'renumbered';
     interactive_builder();
     $('[disabled="disabled"]').removeAttr('disabled');
+    const spinner = $('.fa-spin');
+    spinner.parent().removeClass('btn-success');
+    spinner.parent().addClass('btn-secondary'); // you can click it again. But I am not too sure why.
+    spinner.detach();
 };
 
 ////////////////////////// SPECIAL OPERATION WITH COORDINATES ////////////////////////////////////////////////
 // deal with click of alert.
 $('#renumber').click(async event => {
-    let data = await get_data(event);
+    let data = await getData(event);
     if (data === 0) return 0;
     $.post({
                 url: "/renumber",
@@ -167,9 +178,30 @@ $('#renumber').click(async event => {
 });
 
 $('#mutate').click(async (event)  => {
+    // pre filter mutations.
+    // serverside filtering happens too.
+    const protein = NGL.getStage().compList[0];
+    const aa = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
+              'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N',
+              'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W',
+              'ALA': 'A', 'VAL': 'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M'};
     let mutate_chain = $('#mutate_chain').val() || 'A';
-    let mutations = $('#mutate_mutations').val().replace(/p\./gm, '').trim().split(/[\W,]+/);
-    let data = await get_data(event);
+    let mutations = $('#mutate_mutations').val().toUpperCase().replace(/p\./gm, '').trim().split(/[\W,]+/);
+    let checkedMuts = mutations.map(v => {let parts = v.match(/^(\D{1,3})(\d+)(\D{1,3})$/);
+                                           if (parts === null) return [v, false];
+                                           if (aa[parts[1]] !== undefined) {parts[1] = aa[parts[1]]}
+                                           if (aa[parts[3]] !== undefined) {parts[3] = aa[parts[3]]}
+                                           if ('ACDEFGHIKLMNPQRSTVWYX'.includes(parts[1]) && 'ACDEFGHIKLMNPQRSTVWY'.includes(parts[3])) {return [parts.slice(1,).join(''), true]}
+                                           else {return [parts.slice(1,).join(''), false]}
+                                           });
+    let invalid = checkedMuts.filter(([m, c]) => ! c).map(([m, c]) => m);
+    invalid.forEach(v => ops.addToast(v, 'Mutation issue', v+' is not recognised as a valid mutation. Please check this and note that only missense mutations accepted.','bg-danger'));
+    if (invalid.length > 0 ) return 0;
+    let includedMuts = checkedMuts.map(([m, c]) => [m, protein.structure.getView(new NGL.Selection(m.match(/^(\D)(\d+)(\D)$/)[2]+':'+mutate_chain)).atomCount !== 0]);
+    includedMuts.filter(([m, c]) => ! c).forEach(m => ops.addToast(m, 'Cannot mutate unsolved residues', m+' Appears to be absent in the model.','bg-info'));
+    mutations =  includedMuts.filter(([m, c]) => c).map(([m, c]) => m);
+    if (mutations.length === 0 ) return 0;
+    let data = await getData(event);
     data.chain = mutate_chain;
     data.mutations = mutations.join(' ');
     $.post({
@@ -188,7 +220,7 @@ $('#mutate').click(async (event)  => {
 
 
 $('#naturalise').click(async event => {
-    let data = await get_data(event);
+    let data = await getData(event);
     const reverseMutation = m => m.charAt(-1)+m.slice(1,-1)+m[0];
     data.chain = window.engineered.reduce((acc, {chains, resi}) => acc.concat(chains.reduce((a2, c) => a2.concat(resi.map(x => c)), [])), []);
     data.mutations = window.engineered.reduce((acc, {chains, resi}) => acc.concat(chains.reduce((a2, c) => a2.concat(resi.map(reverseMutation)), [])), []);
@@ -206,7 +238,7 @@ $('#naturalise').click(async event => {
 
 
 $('#delete').click(async (event)  => {
-    let data = await get_data(event);
+    let data = await getData(event);
     data.chains =  $('#delete_chains').val().replace(/p\./gm, '').trim().split(/[\W,]+/).join(' ');
     $.post({
         url: "/remove_chains",
@@ -220,11 +252,9 @@ $('#delete').click(async (event)  => {
 });
 
 $('#dehydrate').click(async (event)  => {
-    let data = await get_data(event);
+    let data = await getData(event);
     data.water = $('#water_toggle').prop('checked');
     data.ligand = $('#artefact_toggle').prop('checked');
-    let [pdb, extension] = await getCoordinates();
-    if (pdb === null) return 0;
     $.post({
         url: "/dehydrate",
         dataType: 'json',

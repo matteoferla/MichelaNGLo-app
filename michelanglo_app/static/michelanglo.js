@@ -316,7 +316,7 @@ NGL.specialOps.load = function (option, noLoadFun) {
         NGL.stageIds[myData.id] = new NGL.Stage( "viewport",{backgroundColor: myData.backgroundColor});
         window.addEventListener( "resize", function( event ){NGL.stageIds[myData.id].handleResize();}, false );
     } else { //tabula rasa!
-        NGL.stageIds[myData.id].removeAllComponents();
+        NGL.getStage(myData.id).removeAllComponents();
     }
     //new model. Force reset
     if (myData.proteins[index].type === 'file') {
