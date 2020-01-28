@@ -1,12 +1,15 @@
 import os, requests, logging, re, unicodedata, uuid, shutil, json
 from ..models import User, Page
 from michelanglo_transpiler import PyMolTranspiler
-from michelanglo_protein import Structure
+from michelanglo_protein import Structure, global_settings
 from . import valid_extensions
 from .uniprot_data import uniprot2name
 from pyramid.request import Request
 log = logging.getLogger(__name__)
 from typing import Union
+### The latter two are utterly stupid usage.
+from Bio.PDB.MMCIF2Dict import MMCIF2Dict
+import io
 
 ## convert booleans and settings
 def is_js_true(value):
@@ -222,6 +225,26 @@ def get_chain_definitions(source: Union[Request,str]):
             definitions = json.loads(request.params['definitions'])
         elif len(request.params['pdb']) == 4:
             definitions = get_from_code(request.params['pdb'])
+        elif 'format' in request.params and request.params['format'] == 'cif':
+            try:
+                data = MMCIF2Dict(io.StringIO(request.params['pdb']))
+                forced_list = lambda v: v if isinstance(v, list) else [v]
+                chains = forced_list(data['_entity_poly.pdbx_strand_id'])
+                species = forced_list(data['_entity_src_gen.pdbx_gene_src_ncbi_taxonomy_id'])
+                name = forced_list(data['_entity_src_gen.pdbx_gene_src_gene'])
+                details = []
+                for i, c in enumerate(chains):
+                    n = name[i].split(',')[0]
+                    assert species[i].isdigit()
+                    uniprot = json.load(open(os.path.join(global_settings.dictionary_folder, f'taxid{species[i]}-names2uniprot.json')))[n]
+                    for x in c.split(','):
+                        details.append({'chain': x,
+                                        'name': n,
+                                        'offset': 0,
+                                        'uniprot': uniprot})
+                return details
+            except:
+                return []
         else:
             #raise ValueError('Neither a pdb code or a definition json')
             return []

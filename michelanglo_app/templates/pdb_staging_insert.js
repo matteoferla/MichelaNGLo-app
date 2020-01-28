@@ -94,17 +94,14 @@ window.naturalise_alerter = (pdb) => {
                             .then(response => { const components = response[pdb.toLowerCase()];
                                                window.engineered = [];
                                                for (let chain of components.filter(e=>e.molecule_type === 'polypeptide(L)')) {
-                                                   console.log(chain);
                                                    let chEng = [];
                                                    //mse
                                                    let m = Object.entries(chain.pdb_sequence_indices_with_multiple_residues).filter(([r, v]) => v.three_letter_code === "MSE").map(([r, v]) => r);
 
                                                    if (m.length > 0) chEng = chEng.concat(m.map(v => 'M'+v+'X'));
-                                                   console.log(chEng);
                                                    //engineered
                                                    if (chain.mutation_flag !== null) chEng = chEng.concat(chain.mutation_flag.split('/'));
                                                    if (chEng.length > 0) {
-                                                       console.log(chEng);
                                                        engineered.push({chains: chain.in_chains, resi: chEng});
                                                        $('#naturalise_alert').addClass('show').show();
                                                        $('#naturalise_details').text($('#naturalise_details').text()+chEng.join(' ')+' in chain '+chain.in_chains.join('+'));
@@ -159,7 +156,7 @@ $('#renumber').click(async event => {
                 data: data,
                 dataType: 'json',
                 success: msg => {window.loadMyMsg(msg);
-                                $('#renumber_alert').removeClass('show');
+                                $('#renumber_alert').removeClass('show').hide();
                                 $('#renumber').removeAttr('disabled');
                                 if (msg.definitions !== undefined) {
                                     if (window.engineered.length > 0) {
@@ -198,7 +195,8 @@ $('#mutate').click(async (event)  => {
     invalid.forEach(v => ops.addToast(v, 'Mutation issue', v+' is not recognised as a valid mutation. Please check this and note that only missense mutations accepted.','bg-danger'));
     if (invalid.length > 0 ) return 0;
     let includedMuts = checkedMuts.map(([m, c]) => [m, protein.structure.getView(new NGL.Selection(m.match(/^(\D)(\d+)(\D)$/)[2]+':'+mutate_chain)).atomCount !== 0]);
-    includedMuts.filter(([m, c]) => ! c).forEach(m => ops.addToast(m, 'Cannot mutate unsolved residues', m+' Appears to be absent in the model.','bg-info'));
+    console.log(includedMuts);
+    includedMuts.filter(([m, c]) => ! c).forEach(([m, c]) => ops.addToast(m, 'Cannot mutate unsolved residues', m+' Appears to be absent in the model.','bg-info'));
     mutations =  includedMuts.filter(([m, c]) => c).map(([m, c]) => m);
     if (mutations.length === 0 ) return 0;
     let data = await getData(event);
@@ -229,7 +227,7 @@ $('#naturalise').click(async event => {
         dataType: 'json',
         data: data,
         success: msg => {window.loadMyMsg(msg);
-                        $('#naturalise_alert').removeClass('show');
+                        $('#naturalise_alert').removeClass('show').hide();
                         $('#naturalise').removeAttr('disabled');
                         },
         error: ops.addErrorToast

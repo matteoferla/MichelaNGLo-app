@@ -71,6 +71,7 @@
         window.myData = undefined;
         window.engineered = undefined;
         NGL.stageIds = {};
+        $('#model_alert').hide();
         $('#viewport').html('');
     };
 
