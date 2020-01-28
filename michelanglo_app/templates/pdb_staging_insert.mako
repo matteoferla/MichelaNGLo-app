@@ -27,7 +27,7 @@
     <span aria-hidden="true">&times;</span>
   </button>
     <h5 class="alert-heading">Engineered residues</h5>
-    <p>The protein contains engineered residues (<span id="naturalise_details"></span>) <span data-toggle="tooltip" title="This can be one of many changes, such as selenomethionines (MSE, will appear as X1M formatted mutations), which help solve the phase problem, mutations to improve crystallisation or mutations that prevent catalysis. Do note that these may cause issues with the ligand."><i class="far fa-question-circle"></i></span>. Click this to make the residues in the structure to match Uniprot (irreversible): <button type="button" class="btn btn-success" id="naturalise">Fix</button></p>
+    <p>The protein contains engineered residues (<span id="naturalise_details"></span>) <span data-toggle="tooltip" title="Engineered residues came in different forms and this protein may have one of the following. (1) To help solve the phasing problem, instead of methionine, selenomethionines (MSE) is used (this will appear as M1X formatted mutations). (2) mutations to improve crystallisation or (3) mutations that prevent catalysis. Do note that the latter of these categories may cause clashes with ligands if present."><i class="far fa-question-circle"></i></span>. Click this to make the residues in the structure to match Uniprot (irreversible): <button type="button" class="btn btn-success" id="naturalise">Fix</button></p>
 </div>
 ############## MAIN BLOCK
 <div class="row">
