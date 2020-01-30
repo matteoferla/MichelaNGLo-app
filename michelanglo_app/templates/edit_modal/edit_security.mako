@@ -45,6 +45,7 @@
         <br/>
     <p>Lastly, you can make the page publicly listed. Search engines do not and cannot know about your page and cannot parse them otherwise. Enabling this will disable encryption.</p>
         %if user and user.role in ('admin', 'friend'):
+            <p>Note that you need to set this each time!!!</p>
             <select class="custom-select" id="public">
                 <option selected value="private">Private</option>
                 <option value="public">Public</option>

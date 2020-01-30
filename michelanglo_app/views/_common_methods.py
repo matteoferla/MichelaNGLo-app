@@ -57,7 +57,7 @@ def is_malformed(request, *args):
     missing = [k for k in args if k not in request.params and f'{k}[]' not in request.params]
     if missing:
         request.response.status = 422
-        log.warn(f'{User.get_username(request)} malformed request due to missing {missing}')
+        log.warning(f'{User.get_username(request)} malformed request due to missing {missing}')
         return f'Missing field ({missing})'
     else:
         return None
