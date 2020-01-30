@@ -291,10 +291,10 @@ def get_pdb_block(source):
     if isinstance(source, str):
         print('heree!!')
         text = source
-        return get_pdb_block_from_str(text).replace('`','').replace('\\','')
+        return get_pdb_block_from_str(text).replace('`','').replace('\\','').replace('$','')
     elif isinstance(source, Request):
         request = source
-        return get_pdb_block_from_request(request).replace('`','').replace('\\','')
+        return get_pdb_block_from_request(request).replace('`','').replace('\\','').replace('$','')
     else:
         raise TypeError
 
