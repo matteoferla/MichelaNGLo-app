@@ -230,6 +230,8 @@ $(document).ready(function () {
     // </%text>
 
     <%include file="results/uniprot_modal.js"/>
+    ///// Make buttons
+    UniprotFV.addUniprot();
 % endif
 
 }); //ready

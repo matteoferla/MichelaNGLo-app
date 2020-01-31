@@ -74,6 +74,7 @@
 <script type="text/javascript">
     $(document).ready(function () {
         <%include file="../name.js"/>
+        <%include file="../results/uniprot_modal.js"/>
         <%include file="venus.js"/>
     });
     ####include file="../markup/markup_builder_modal.js"/>
