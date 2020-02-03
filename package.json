@@ -4,7 +4,7 @@
   "description": "Michelaɴɢʟo is a web app to convert a PyMOL PSE file or PDB file to a easy to implement NGL.js view that can be implemented easily on any site.",
   "main": "index.js",
   "dependencies": {
-    "puppeteer": "^1.20.0"
+    "puppeteer": "^2.1.0"
   },
   "devDependencies": {},
   "scripts": {
