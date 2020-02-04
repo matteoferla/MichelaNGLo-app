@@ -116,7 +116,7 @@ def edit(request):
         if 'columns_viewport' in request.params:
             page.settings['columns_viewport'] = int(request.params['columns_viewport'])
             page.settings['columns_text'] = int(request.params['columns_text'])
-        if 'location_viewport' in request.params:
+        if 'location_viewport' in request.params: #left | right (or anything)
             page.settings['location_viewport'] = request.params['location_viewport']
         if 'proteinJSON' in request.params:
             page.settings['proteinJSON'] = request.params['proteinJSON']

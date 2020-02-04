@@ -298,6 +298,61 @@ def convert_pdb(request):
     commit_submission(request, settings, pagename)
     return {'page': pagename}
 
+
+############################## Make the page for venus.
+@view_config(route_name='venus_create', renderer="json")
+def create_venus(request):
+    """
+    request params: uniprot, species, mutation, text, code, block (=pdb block), definitions, history
+    """
+    # Get data.
+    malformed = is_malformed(request, 'uniprot', 'species', 'mutation', 'text', 'code', 'block', 'definitions')
+    if malformed:
+        return {'status': malformed}
+    log.info(f'VENUS page creation requested by {User.get_username(request)}')
+    pagename = get_uuid(request)
+    uniprot = request.params['uniprot']
+    mutation = request.params['mutation']
+    code = request.params['code']
+    block = request.params['block']
+    text = request.params['text']
+    definitions = get_chain_definitions(request)
+    history = get_history(request)
+    # List[tuple[selection, label]]
+    defstr = [(f":{d['chain']}", str(d['name'])) for d in definitions]
+
+    # Prepare response.
+    settings = {##'data_other': data_other,
+                'title': f'VENUS generated page for {uniprot} {mutation}',
+                'page': pagename,
+                'editable': True,
+                'descriptors': {'ref': get_references(code),
+                                'text': text,
+                                'peptide': defstr},
+                'backgroundcolor': 'white',
+                'validation': None,
+                'js': 'external',
+                'model': True if 'https://swissmodel.expasy.org' in code else False,
+                'pdb': [['wt', block]],
+                'loadfun': '',
+                'columns_viewport': 5,
+                'columns_text': 7,
+                'location_viewport': 'right',
+                'proteinJSON': json.dumps([{'type': 'data',
+                                           'value': 'wt',
+                                           'isVariable': 'true',
+                                           'chain_definitions': definitions,
+                                           'history': history}])
+    }
+
+    ## Special JS to always show mutation
+    # to do.
+
+    ## save and return
+    commit_submission(request, settings, pagename)
+    return {'page': pagename}
+
+###################################
 def clean_data_other(data_other):
     return Page.sanitise_HTML(f'<span {data_other}></span>').replace('<span ','').replace('></span>','')
 

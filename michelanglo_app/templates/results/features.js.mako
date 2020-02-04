@@ -384,7 +384,9 @@ if (pdbOptions.length) {
     $('#partner_table tbody tr').hover(e => $(e.target).css('cursor','pointer'));
     //</%text>
 } else {
+    % if include_pdb:
 $('#partner_table').html('<p>No crystal structures to show.</p>');
+    %endif
 }
 
 

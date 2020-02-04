@@ -81,6 +81,7 @@ class Venus {
         this.position = null;
         this.mutation = null;
         this.structural = null;
+        this.mutaColor = NGL.ColormakerRegistry.addSelectionScheme([['hotpink','_C'],["blue",'_N'],["red",'_O'],["white",'_H'],["yellow",'_S'],["orange","*"]]);
     }
 
     reset() {
@@ -122,6 +123,38 @@ class Venus {
                     </div>
                 </li>`
     }
+
+    makeProlink(v, label) {
+        // v string and label exists.
+        // v is array of gnomad
+        // v is dictionary
+        if (typeof v === "string") {
+            return `<span class="prolink" data-target="viewport" data-toggle="protein" data-color="cyan" data-focus="residue" data-selection="${v}">${label}</span>`;
+        }
+        else if (Array.isArray(v)) {
+            //gnomad
+            //["gnomAD_101_101_rs1131691997",101,101,"MODERATE","K101R (rs1131691997)",0]
+            let p = v[4];
+            if (parseInt(v[1]) === this.position) p = '<b>'+p+'</b>';
+            return `<span class="prolink" data-target="viewport" data-toggle="protein" data-focus="residue" data-color="cyan" data-selection="${v[1]}:A">${p}</span>`;
+        }
+        else if (v.x !== undefined) {
+            //feature!
+            //{"x":105,"y":107,"description":"strand","id":"strand_105_107","type":"strand"}
+            let df = 'residue';
+            let ds = v.x+':A';
+            let p = 'Residue '+v.x;
+            if (parseInt(v.x)=== this.position) p = '<b>Residue '+v.x+'</b>';
+            let dc='cyan';
+            if (v.x !== v.y) { df = 'domain'; ds = `${v.x}-${v.y}:A`; p = `Residues ${v.x}&ndash;${v.y}`; dc='darkgreen';}
+            return `<span class="prolink" data-target="viewport" data-toggle="protein" data-color="${dc}"  data-focus="${df}" data-selection="${ds}">${p}</span>`;
+            }
+        else {
+            console.log('ERRRROR'+JSON.stringify(v));
+        }
+        }
+
+    makeExt(url, txt) {return `<a href="${url}" target="_blank">${txt} <i class="far fa-external-link-square"></i></a>`}
 
     analyseProtein() {
         return venus.analyse('protein')
@@ -179,10 +212,11 @@ class Venus {
                 // TO COPYPASTE
 
                 //Features
-                let locationtext = `<p>The mutation is ${this.mutation.position_as_protein_percent}% along the protein.</p>`
+                let locationtext = `<p>The mutation is ${this.mutation.position_as_protein_percent}% along the protein.</p>`;
                 if (this.mutation.features_near_mutation.length) {
+                    locationtext += '<span>Nearby features:</span>';
                     locationtext += '<ul>';
-                    locationtext += this.mutation.features_near_mutation.map(v => `<li>(${JSON.stringify(v)}</li>`).join('');
+                    locationtext += this.mutation.features_near_mutation.map(v => `<li>${this.makeProlink(v)}: ${v.type} (${v.description})</li>`).join('');
                     locationtext += '</ul>';
                 }
                 this.mutalist.append(this.makeCard('Location', locationtext));
@@ -191,17 +225,21 @@ class Venus {
 
                 //gnomAD
                 if (this.mutation.gnomAD_near_mutation.length) {
-                    let gnomADtext = '<p>Structure independent, sequence proximity.</p>';
+                    let omni = this.makeProlink(this.mutation.gnomAD_near_mutation.map(v => v[1]+':A').join(' or '), '(all)');
+                    let gnomADtext = `<p>Structure independent, sequence proximity (see structural neighbour for 3D) ${omni}.</p>`;
                     gnomADtext += '<ul>';
-                    gnomADtext += this.mutation.gnomAD_near_mutation.map(v => `<li>(${JSON.stringify(v)}</li>`).join('');
+                    gnomADtext += this.mutation.gnomAD_near_mutation.map(v => `<li>${this.makeProlink(v)}: (${v[3].toLowerCase()})</li>`).join('');
                     gnomADtext += '</ul>';
                     this.mutalist.append(this.makeCard('gnomAD', gnomADtext));
                 }
 
-                let exttext = `<a href="https://www.uniprot.org/uniprot/${uniprotValue}" target="_blank">Uniprot:${uniprotValue} <i class="far fa-external-link-square"></i></a> &mdash;
-                                                                        <a href="https://www.rcsb.org/pdb/protein/${this.protein.uniprot}" target="_blank">PDB:${uniprotValue} <i class="far fa-external-link-square"></i></a> &mdash;
-                                                                        <a href="https://gnomAD.broadinstitute.org/gene/${this.protein.gene_name}" target="_blank">gnomAD:${this.protein.gene_name} <i class="far fa-external-link-square"></i></a>`;
-                this.mutalist.append(this.makeCard('External links', exttext));
+                if (this.mutation.elm.length) {
+                    let elmtext = '<p>Some of the following predicted motifs might be valid:</p>';
+                    elmtext += '<ul>';
+                    elmtext += this.mutation.elm.map(v => `<li>${this.makeProlink(v)}: <span data-target="tooltip" title="${v.description}">${v.name} ${v.status} (${v.regex})</li>`).join('');
+                    elmtext += '</ul>';
+                    this.mutalist.append(this.makeCard('Motif', elmtext));
+                }
             }
         })
     }
@@ -214,6 +252,20 @@ class Venus {
                 this.structural = msg.structural;
                 if (!!this.structural.coordinates.length) this.loadStructure();
             }
+            // activate all prolinks
+            $('#results_mutalist .prolink').protein();
+            // hack them to always show the mutatns.
+            const showMut = (sele) => {
+                const prot = NGL.getStage().getComponentByType('structure');
+                if (prot !== undefined) prot.addRepresentation( "hyperball", sele);
+            };
+            $('#results_mutalist .prolink').click(event => setTimeout((sele) => showMut(sele),100, { sele: this.position+':A', color: this.mutaColor}));
+
+            let exttext = this.makeExt('https://www.uniprot.org/uniprot/'+uniprotValue, 'Uniprot:'+uniprotValue) + ' &mdash; '+
+                          this.makeExt('https://www.rcsb.org/pdb/protein/'+this.protein.uniprot, 'PDB:'+uniprotValue) + ' &mdash; '+
+                          this.makeExt('https://gnomAD.broadinstitute.org/gene/'+this.protein.gene_name, 'gnomAD:'+this.protein.gene_name);
+            this.mutalist.append(this.makeCard('External links', exttext));
+            $('[data-target="tooltip"]').tooltip();
         })
     }
 
@@ -221,18 +273,43 @@ class Venus {
         NGL.specialOps.multiLoader('viewport', [{ type: "data", value: this.structural.coordinates, ext: 'pdb', chain: 'A'}])
                         .then(protein => NGL.specialOps.showResidue('viewport', this.position+':A'))
         UniprotFV.enpower();
-        let strloctext = `<p>Chosen model: ${this.structural.code}</p>`;
-        strloctext += `<p>${(this.structural.buried) ? 'buried' : 'surface'} ${this.structural.SS} (RSA: ${this.structural.RSA})</p>`;
-        strloctext += `<p>${(this.structural.has_all_heavy_atoms) ? 'Resolved in crystal' : 'Some heavy atoms unresolved (too dynamic)'}</p>`;
+        let strloctext = '<p><i>Chosen model:</i> '+this.makeExt("https://www.rcsb.org/structure/"+this.structural.code, this.structural.code)+'</p>';
+        strloctext += `<p><i>Solvent exposure:</i> ${(this.structural.buried) ? 'buried' : 'surface'} (RSA: ${Math.round(this.structural.RSA*100)/100})</p>`;
+        strloctext += `<p><i>Secondary structure type:</i> ${this.structural.SS}</p>`;
+        strloctext += `<p><i>Residue resolution:</i> ${(this.structural.has_all_heavy_atoms) ? 'Resolved in crystal' : 'Some heavy atoms unresolved (too dynamic)'}</p>`;
         if (!! this.structural.ligand_list.length) {
-            strloctext += `<p>Closest ligand atom: ${this.structural.closest_ligand.match(/\[.*\]/)[0].slice(1,-1)} ${this.structural.distance_to_closest_ligand}</p>`;
+            //this.structural.closest_ligand = [GDP]180.O3B:A
+            let lig = this.structural.closest_ligand.match(/\[.*\]/)[0].slice(1,-1);
+            let ds = lig+' and '+this.structural.closest_ligand.match(/\:\w/)[0];
+            let d = Math.round(this.structural.distance_to_closest_ligand)+' &Aring;'
+            strloctext += `<p><i>Closest ligand:</i> <span class="prolink" data-target="viewport" data-color="teal" data-focus="residue" data-selection="${ds}">${lig}</span> (${d})</p>`;
         }
         this.mutalist.append(this.makeCard('Structural character', strloctext));
 
-
-        let strtext = '<p>Structural neighbourhood.</p>';
-        strtext += '<ul>'+this.structural.neighbours.map(v => `<li>${v}</li>`).join()+'</ul>';
+        let omni = this.makeProlink(this.structural.neighbours.map(v => v.resi+':A').join(' or '), '(all)');
+        let strtext = `<p>Structural neighbourhood ${omni}.</p>`;
+        strtext += '<ul>'+this.structural.neighbours.map(v => `<li>${this.makeProlink(v.resi+":"+v.chain, v.resn+v.resi)} ${v.detail}</li>`).join('')+'</ul>';
         this.mutalist.append(this.makeCard('Structural neighbourhood', strtext));
+    }
+
+    createPage () {
+        let data = {uniprot: window.uniprotValue, //same as this.protein.uniprot,
+                    species: window.taxidValue,
+                    mutation: this.mutation,
+                    text: $('#results_mutalist').html(),
+                    code: this.structural.code,
+                    block: this.structural.coordinates,
+                    definitions: JSON.stringify(this.structural.chain_definitions),
+                    history: JSON.stringify(this.structural.history)};
+        // other end at page_creation.py
+        return $.post({url: "venus_create", data: data, dataType: 'json'})
+        .done(function (msg) {
+                ops.addToast('jobcompletion','Conversion complete','The data has been converted successfully.','bg-success');
+                ops.addToast('redirect','Conversion complete','Redirecting you to page '+msg.page,'bg-info');
+                console.log(msg);
+                window.location.href = "/data/"+msg.page;
+        })
+        .fail(ops.addErrorToast);
     }
 }
 
@@ -240,6 +317,21 @@ window.venus = new Venus();
 
 
 /////////////////// CALCULATE
+
+$(window).scroll(function() {
+	    var card = $('#vieport_side');
+        var currentY = $(window).scrollTop();
+	    var windowY = $(window).innerHeight();
+	    var offsetY = card.offset().top - parseInt(card.css('top')) - 4;
+        if ((currentY > offsetY) && (currentY + windowY > offsetY + card.height())) {
+    	$('#viewport').parent().parent().css('top', currentY - offsetY);
+    }
+    else {$('#viewport').parent().parent().css('top', 0);}
+        //console.log(`scrolltop: ${currentY} win height ${windowY} off: ${offsetY} card top: ${card.offset().top}`);
+	});
+
+
+
 const vbtn = $('#venus_calc');
 $('#mutation').keyup(e => {
     if ($(e.target).val().search(/\d+/) !== -1 && uniprotValue !== 'ERROR') {
@@ -273,17 +365,32 @@ $('#new_analysis').click(venus.reset);
 
 const alert = text => `<div class="alert alert-danger"><b>To do</b> ${text}</div>`;
 
-$('#viewport').parent().parent().parent().append([alert('rewire NGL viewport following screen'),
-                                                  //alert('pipe structure to PDB offset fix.'),
-                                                  //alert('structural route.'),
-                                                  //alert('autoload the sequence chosen by Analyser.get_best_model'),
-                                                  alert('write documentation md!'),
-                                                  alert('Fix load of swissmodel.'),
-                                                  alert('cp the code for the domains from table ---what does this mean?'),
-                                                  alert('add collapsed sequence viewer'),
-                                                  alert('Fix RDKit matched structures to not claim that a sp2 Carbon os the same as sp3!'),
-                                                  alert('Mike exporter')
+$('#results_mutalist').parent().append([//alert('rewire NGL viewport following screen'),
+                              //alert('pipe structure to PDB offset fix.'),
+                              //alert('structural route.'),
+                              //alert('autoload the sequence chosen by Analyser.get_best_model'),
+                              alert('write documentation md!'),
+                              alert('Fix load of swissmodel.'),
+                              alert('cp the code for the domains from table ---what does this mean?'),
+                              alert('add collapsed sequence viewer'),
+                              alert('Fix RDKit matched structures to not claim that a sp2 Carbon os the same as sp3!'),
+                              alert('Mike exporter'),
+                              alert('Fix links in Mutation li')
+                             ]);
 
-                                                 ]);
+// for now....
+$('#report-btn').click(event => {
+    if (venus.structural === undefined) {
+        ops.addToast('patience','Please be patient','The analysis is not complete.','bg-warning');
+        return 0;
+    }
+    $(event.target).attr('disabled','disabled');
+    const text = $(event.target).html();
+    $(event.target).html('<i class="far fa-spinner fa-spin"></i> '+text);
+    venus.createPage().then(() => {
+        $(event.target).attr('disabled','disabled');
+        $(event.target).html(text);
+    });
+});
 
 //</%text>

@@ -43,14 +43,14 @@
 
                         <div id="fv"></div>
 
-                          <div>
-                              <button class="btn btn-outline-secondary bindersCollapse collapse show" data-toggle="collapse" data-target=".bindersCollapse"><i class="far fa-eye"></i> Show PDB structure details</button>
-                              <button class="btn btn-outline-secondary bindersCollapse collapse" data-toggle="collapse" data-target=".bindersCollapse"><i class="far fa-eye-slash"></i> Hide PDB structure details</button>
-                          </div>
-                          <div id="matches_collapse" class="col-12 collapse bindersCollapse">
-                            <p>Proteins can be crystallised with ligands or binding partners and it is often beneficial to choose a specific one.</p>
-                            <div id="partner_table"></div>
-                        </div>
+##                           <div>
+##                               <button class="btn btn-outline-secondary bindersCollapse collapse show" data-toggle="collapse" data-target=".bindersCollapse"><i class="far fa-eye"></i> Show PDB structure details</button>
+##                               <button class="btn btn-outline-secondary bindersCollapse collapse" data-toggle="collapse" data-target=".bindersCollapse"><i class="far fa-eye-slash"></i> Hide PDB structure details</button>
+##                           </div>
+##                           <div id="matches_collapse" class="col-12 collapse bindersCollapse">
+##                             <p>Proteins can be crystallised with ligands or binding partners and it is often beneficial to choose a specific one.</p>
+##                             <div id="partner_table"></div>
+##                         </div>
                       </div>
                     </div>
                     ##### secodn block: Mutation results
@@ -78,7 +78,7 @@
                 <div class="col-6 mb-4 pr-4">
                     ###### Viewport
                     <!-- style="width:47vw; position:fixed; top:7rem; bottom: 24px; right: 24px;"-->
-                    <div class="card mb-4 shadow-sm">
+                    <div class="card mb-4 shadow-sm" id="vieport_side">
                         <div class="card-header"><h5 class="card-title">
                             <i class="far fa-cubes"></i> Structure
                         </h5></div>

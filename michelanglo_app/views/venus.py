@@ -2,6 +2,9 @@ __description___ = """
 
 """
 
+###########
+# venus_create is in page_creation.py
+
 from .uniprot_data import *
 #ProteinCore organism human uniprot2pdb
 from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore
@@ -152,9 +155,10 @@ def analyse_view(request):
         if handle not in system_storage:
             protein_step()
         protein = system_storage[handle]
-        return render_to_response("../templates/results/features.js.mako", {'protein': protein, 'featureView': '#fv', 'include_pdb': True}, request)
+        return render_to_response("../templates/results/features.js.mako", {'protein': protein, 'featureView': '#fv', 'include_pdb': False}, request)
     else:
         return {'status': 'error', 'error': 'Unknown step'}
+
 
 """
 @view_config(route_name='venus_analyse', renderer="../templates/venus/venus_results.mako")

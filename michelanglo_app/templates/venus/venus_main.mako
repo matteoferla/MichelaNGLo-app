@@ -13,9 +13,7 @@
 </%block>
 
 <%block name="alert">
-    <div class="alert alert-warning" role="alert">
-  This page is still being built, therefore some features may not work.
-    </div>
+    ### nothing.
 </%block>
 
 <%block name="main">
@@ -61,6 +59,28 @@
             <button type="button" class="btn btn-outline-primary w-100" id="venus_calc" style="display: none;">Analyse</button>
         </div>
     </div>
+            #################### ALERTS
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+  This page is still being built, therefore some features may not work. See bottom for more.
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="alert alert-info  alert-dismissible fade show" role="alert">
+        <a href="/venus_analyse?uniprot=P01112&species=9606&mutation=Y40W">Click here for the request (API).</a>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="alert alert-info  alert-dismissible fade show" role="alert">
+        This is for academic use only and not intended to be used commercially. Conclusions drawn are suggestions and not diagnostic.
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+
+
 </%block>
 
 <%block name='after_main'>
