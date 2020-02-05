@@ -290,6 +290,9 @@ NGL.specialOps.load = function (option, noLoadFun) {
         myData.proteins.push(object);
         index = myData.proteins.length - 1;
     }
+    else if ((typeof option === "string") && (myData.proteins.some(v => v.name === option))) {
+        index = myData.proteins.map(v => v.name).indexOf(option);
+    }
     else if ((typeof option === "string") && (myData.proteins.some(v => v.value === option))) {
         index = myData.proteins.map(v => v.value).indexOf(option);
     }

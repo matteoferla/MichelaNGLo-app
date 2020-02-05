@@ -380,7 +380,7 @@ if (pdbOptions.length) {
                                     })
 							);
 
-    // add glove. Do this properly in a bit.
+    // add michael jackson mouse. Do this properly in a bit.
     $('#partner_table tbody tr').hover(e => $(e.target).css('cursor','pointer'));
     //</%text>
 } else {

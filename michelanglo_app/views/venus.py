@@ -128,14 +128,31 @@ def analyse_view(request):
             status = mutation_step()
             if 'error' in status:
                 return status
+            status = structural_step()
+            if 'error' in status:
+                return status
         protein = system_storage[handle]
         try:
             protein.analyse_structure()
             return {'structural': jsonable(protein.structural),
                     'status': 'success'}
-        except DeprecationWarning as err:  #Exception
+        except Exception as err:  #Exception
             log.warning(f'Structural analysis failed {err} {type(err).__name__}.')
             return {'status': 'error'}
+
+    def ddG_step():
+        handle = request.params['uniprot'] + request.params['mutation']
+        if handle not in system_storage:
+            status = protein_step()
+            if 'error' in status:
+                return status
+            status = mutation_step()
+            if 'error' in status:
+                return status
+        protein = system_storage[handle]
+        return {'ddG': protein.analyse_FF()} #{ddG: float, scores: Dict[str, float], native:str, mutant:str, rmsd:int}
+
+
 
     ### check valid
     log.info(f'Analysis requested by {User.get_username(request)}')
@@ -150,6 +167,8 @@ def analyse_view(request):
         return mutation_step()
     elif request.params['step'] == 'structural':
         return structural_step()
+    elif request.params['step'] == 'ddG':
+        return ddG_step()
     elif request.params['step'] == 'fv': ## this is the same as get_uniprot but does not redundantly redownload the data.
         handle = request.params['uniprot'] + request.params['mutation']
         if handle not in system_storage:

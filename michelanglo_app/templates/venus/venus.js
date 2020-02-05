@@ -81,7 +81,18 @@ class Venus {
         this.position = null;
         this.mutation = null;
         this.structural = null;
+        this.ddG = null;
         this.mutaColor = NGL.ColormakerRegistry.addSelectionScheme([['hotpink','_C'],["blue",'_N'],["red",'_O'],["white",'_H'],["yellow",'_S'],["orange","*"]]);
+        this.documentation = {  'mut': 'Residue identity, note that because a difference in shape is present it does not mean that the structure cannot accommodate the change',
+                                'indestr': 'This is a purely based on the nature of the amino acids without taking into account the position. Despite this, it is a strong predictor.',
+                                'strcha': 'Model based residue details',
+                                'ddg': 'Forcefield calculations. REU is roughly kcal/mol. A hydrogen bond has about 1 kcal/mol. A water collision has on average 0.6 kcal/mol (Boltzmann constant &times; temperature).',
+                                'location': 'What domains are nearby linearly &mdash;but not necessarily containing the residue',
+                                'domdet': 'what is this?',
+                                'neigh': 'Model based, what residues are within 4 &aring;ngstr&ouml;m?',
+                                'motif': 'Motifs predicted using the linear motif patterns from the ELM database. The presence of a linear motif does not mean it is valid, in fact the secondary structure is important: in a helix residues 3 along are facing the same direction, in a sheet alternating residues and in a loop it varies. If a motif is a phosphosite and the residue is not phosphorylated it is likely not legitimate.',
+                                'extlink': 'Links to external resources related to this gene'
+                    }
     }
 
     reset() {
@@ -89,11 +100,30 @@ class Venus {
         $('#venus_calc').removeAttr('disabled');
         $('result_title').html('<i class="far fa-dna fa-spin"></i> Loading');
         $('#fv').html('');
-        this.mutalist .html('');
+        this.mutalist.html('');
         this.protein = null;
         this.mutation = null;
         this.structural = null;
         this.position = null;
+        this.ddG = null;
+    }
+
+    setStatus(label, mode) { //working, crash, done
+        const s = $('#results_status');
+        switch(mode) {
+          case 'working':
+            s.html(`<i class="far fa-dna fa-spin"></i> ${label}`);
+            break;
+          case 'crash':
+            s.html(`<i class="far fa-skull-crossbones"></i> ${label}`);
+            break;
+        case 'done':
+            s.html(`<i class="fas fa-check"></i> ${label}`);
+            setTimeout(() => s.hide(), 1000);
+            break;
+          default:
+            s.html(label);
+        }
     }
 
     analyse(step) {
@@ -109,15 +139,40 @@ class Venus {
         }).fail(ops.addErrorToast)
     }
 
-    makeCard(title, text) {
+    //an 'entry' is a flush li within the card (within these there may be li).
+    createEntry(id, title, text) { //adds or creates the entry.
+        const el = $('#'+id);
+        const keys = Object.keys(this.documentation);
+        const n = keys.indexOf(id);
+        if (el.length === 1) {
+            el.html(text);
+        } else if (this.documentation[id] === undefined) {
+            this.mutalist.append(this.makeEntry(id, title, text));
+        } else if (n === -1) {
+            this.mutalist.append(this.makeEntry(id, title, text)) //non standard entry
+        } else if (n === 0) {
+            this.mutalist.prepend(this.makeEntry(id, title, text)) //first entry
+        } else {
+                const prev = keys.map((k,i) => [k,i])
+                                 .filter(([k,i]) => ($('#'+k).length === 1) && (i < n));
+                if (prev.length === 0) {this.mutalist.append(this.makeEntry(id, title, text))}
+                else {$("#"+prev.reverse()[0][0]).parents('li').after(this.makeEntry(id, title, text))}
+
+        }
+    }
+
+    //make methods output text
+    makeEntry(id, title, text) {
+        const q = (this.documentation[id] !== undefined) ? ' <i class="far fa-question-circle"></i></span>' : '';
+        const tt = (this.documentation[id] !== undefined) ? `data-toggle="tooltip" title="${this.documentation[id]}"` : '';
         return `<li class="list-group-item">
                     <div class="row">
                         <div class="col-12 col-md-3">
-                            <span class="font-weight-bold text-right align-middle">
-                            ${title}
+                            <span class="font-weight-bold text-right align-middle" ${tt}>
+                            ${title}${q}
                              </span>
                         </div>
-                        <div class="col-12 col-md-9 text-left border-left">
+                        <div class="col-12 col-md-9 text-left border-left" id="${id}">
                             ${text}
                         </div>
                     </div>
@@ -125,18 +180,19 @@ class Venus {
     }
 
     makeProlink(v, label) {
+        // near static method. this.prolink
         // v string and label exists.
         // v is array of gnomad
         // v is dictionary
         if (typeof v === "string") {
-            return `<span class="prolink" data-target="viewport" data-toggle="protein" data-color="cyan" data-focus="residue" data-selection="${v}">${label}</span>`;
+            return `<span ${this.prolink} data-color="cyan" data-focus="residue" data-selection="${v}">${label}</span>`;
         }
         else if (Array.isArray(v)) {
             //gnomad
             //["gnomAD_101_101_rs1131691997",101,101,"MODERATE","K101R (rs1131691997)",0]
             let p = v[4];
             if (parseInt(v[1]) === this.position) p = '<b>'+p+'</b>';
-            return `<span class="prolink" data-target="viewport" data-toggle="protein" data-focus="residue" data-color="cyan" data-selection="${v[1]}:A">${p}</span>`;
+            return `<span  ${this.prolink} data-focus="residue" data-color="cyan" data-selection="${v[1]}:A">${p}</span>`;
         }
         else if (v.x !== undefined) {
             //feature!
@@ -147,7 +203,7 @@ class Venus {
             if (parseInt(v.x)=== this.position) p = '<b>Residue '+v.x+'</b>';
             let dc='cyan';
             if (v.x !== v.y) { df = 'domain'; ds = `${v.x}-${v.y}:A`; p = `Residues ${v.x}&ndash;${v.y}`; dc='darkgreen';}
-            return `<span class="prolink" data-target="viewport" data-toggle="protein" data-color="${dc}"  data-focus="${df}" data-selection="${ds}">${p}</span>`;
+            return `<span  ${this.prolink} data-color="${dc}"  data-focus="${df}" data-selection="${ds}">${p}</span>`;
             }
         else {
             console.log('ERRRROR'+JSON.stringify(v));
@@ -157,8 +213,10 @@ class Venus {
     makeExt(url, txt) {return `<a href="${url}" target="_blank">${txt} <i class="far fa-external-link-square"></i></a>`}
 
     analyseProtein() {
+        this.setStatus('Running step 1/4', 'working');
         return venus.analyse('protein')
             .fail(xhr => {
+                this.setStatus('Failure at step 1/4', 'crash');
                 $('#venus_calc').removeAttr('disabled');
                 ops.addErrorToast(xhr)
             })
@@ -178,13 +236,20 @@ class Venus {
                                                                 new MutantLocation(this.position);}));
                     $('html, body').animate({scrollTop: $('#results').offset().top}, 2000);
                     $('#result_title').html(`${this.protein.gene_name} ${this.protein._mutation} <small>(${this.protein.recommended_name})</small>`);
+                    let exttext = this.makeExt('https://www.uniprot.org/uniprot/'+uniprotValue, 'Uniprot:'+uniprotValue) + ' &mdash; '+
+                            this.makeExt('https://www.rcsb.org/pdb/protein/'+this.protein.uniprot, 'PDB:'+uniprotValue) + ' &mdash; '+
+                            this.makeExt('https://gnomAD.broadinstitute.org/gene/'+this.protein.gene_name, 'gnomAD:'+this.protein.gene_name);
+                    this.createEntry('extlink','External links', exttext);
                 }
-            })
+            });
+
     }
 
     analyseMutation() {
+        this.setStatus('Running step 2/4', 'working');
         return this.analyse('mutation').done(msg => {
             if (msg.error) {
+                this.setStatus('Failure at step 2/4', 'crash');
                 ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
             } else {
                 this.analyseStructural();
@@ -192,22 +257,21 @@ class Venus {
                 // rdkit images
                 let mutationtext = `<span ${this.prolink} data-focus="residue" data-load="wt" data-selection="${this.mutation.residue_index}:A">
                                             ${this.names[this.mutation.from_residue]} at position ${this.mutation.residue_index}</span> is mutated to
-                                      <span ${this.prolink} data-focus="residue" data-load="mut" data-selection="${this.mutation.residue_index}:A">${this.names[this.mutation.to_residue]}</span>
+                                      <span ${this.prolink} data-focus="residue" data-load="mutant" data-selection="${this.mutation.residue_index}:A">${this.names[this.mutation.to_residue]}</span>
                                       <div class="row">
                                             <div class="col-6"><img src="/static/aa/${this.mutation.from_residue}${this.mutation.to_residue}.svg" width="100%">
                                             <p>Differing atoms in  ${this.names[this.mutation.from_residue]} highlighted in red</p></div>
                                             <div class="col-6"><img src="/static/aa/${this.mutation.to_residue}${this.mutation.from_residue}.svg" width="100%">
                                             <p>Differing atoms in  ${this.names[this.mutation.to_residue]} highlighted in red</p></div>
                                         </div>`;
-                this.mutalist.append(this.makeCard('Mutation', mutationtext));
+                this.createEntry('mut', 'Mutation', mutationtext);
                 // apriori
                 let aprioritext = this.mutation.apriori_effect;
                 if (this.mutation.to_residue === '*') {
-                    aprioritext += `
-                                                                            <span ${this.prolink} data-focus="domain" data-selection="1-${this.mutation.residue_index}:A">remnant</span>
-                                                                            and <span ${this.prolink} data-focus="domain" data-selection="${this.mutation.residue_index}-99999:A">lost</span>`
+                    aprioritext += `<span ${this.prolink} data-focus="domain" data-selection="1-${this.mutation.residue_index}:A">remnant</span>
+                                    and <span ${this.prolink} data-focus="domain" data-selection="${this.mutation.residue_index}-99999:A">lost</span>`
                 }
-                this.mutalist.append(this.makeCard('Effect independent of structure', aprioritext));
+                this.createEntry('indestr', 'Effect independent of structure', aprioritext);
                 //structural card
                 // TO COPYPASTE
 
@@ -219,9 +283,9 @@ class Venus {
                     locationtext += this.mutation.features_near_mutation.map(v => `<li>${this.makeProlink(v)}: ${v.type} (${v.description})</li>`).join('');
                     locationtext += '</ul>';
                 }
-                this.mutalist.append(this.makeCard('Location', locationtext));
+                this.createEntry('location', 'Location', locationtext);
 
-                this.mutalist.append(this.makeCard('Domain detail', 'To Do figure out how to mine what the domain does. See notes "domain_function".'));
+                this.createEntry('domdet','Domain detail', 'To Do figure out how to mine what the domain does. See notes "domain_function".');
 
                 //gnomAD
                 if (this.mutation.gnomAD_near_mutation.length) {
@@ -230,26 +294,31 @@ class Venus {
                     gnomADtext += '<ul>';
                     gnomADtext += this.mutation.gnomAD_near_mutation.map(v => `<li>${this.makeProlink(v)}: (${v[3].toLowerCase()})</li>`).join('');
                     gnomADtext += '</ul>';
-                    this.mutalist.append(this.makeCard('gnomAD', gnomADtext));
+                    this.createEntry('gnomad', 'gnomAD', gnomADtext);
                 }
 
                 if (this.mutation.elm.length) {
                     let elmtext = '<p>Some of the following predicted motifs might be valid:</p>';
                     elmtext += '<ul>';
-                    elmtext += this.mutation.elm.map(v => `<li>${this.makeProlink(v)}: <span data-target="tooltip" title="${v.description}">${v.name} ${v.status} (${v.regex})</li>`).join('');
+                    // converts a regex str to a sele str.
+                    const reg2sele = (regex,offset) => regex.replace('$','').replace(')','').replace('(','').replace('^','').replace(/\[.*?\]/g, 'X').split('').map((v,i)=> (v !== '.') ? i + offset : null).filter(v => v !== null).map(v => v+':A').join(' or ');
+                    elmtext += this.mutation.elm.map(v => `<li>${this.makeProlink(reg2sele(v.regex, v.x), `Residues ${v.x}&ndash;${v.y}`)}: <span data-target="tooltip" title="${v.description}">${v.name} ${v.status} (${v.regex})</li>`).join('');
                     elmtext += '</ul>';
-                    this.mutalist.append(this.makeCard('Motif', elmtext));
+                    this.createEntry('motif','Motif', elmtext);
                 }
             }
         })
     }
 
     analyseStructural() {
+        this.setStatus('Running step 3/4', 'working');
         return this.analyse('structural').done(msg => {
             if (msg.error) {
+                this.setStatus('Failure at step 3/4', 'crash');
                 ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
             } else {
                 this.structural = msg.structural;
+                this.analyseddG();
                 if (!!this.structural.coordinates.length) this.loadStructure();
             }
             // activate all prolinks
@@ -260,20 +329,70 @@ class Venus {
                 if (prot !== undefined) prot.addRepresentation( "hyperball", sele);
             };
             $('#results_mutalist .prolink').click(event => setTimeout((sele) => showMut(sele),100, { sele: this.position+':A', color: this.mutaColor}));
-
-            let exttext = this.makeExt('https://www.uniprot.org/uniprot/'+uniprotValue, 'Uniprot:'+uniprotValue) + ' &mdash; '+
-                          this.makeExt('https://www.rcsb.org/pdb/protein/'+this.protein.uniprot, 'PDB:'+uniprotValue) + ' &mdash; '+
-                          this.makeExt('https://gnomAD.broadinstitute.org/gene/'+this.protein.gene_name, 'gnomAD:'+this.protein.gene_name);
-            this.mutalist.append(this.makeCard('External links', exttext));
             $('[data-target="tooltip"]').tooltip();
         })
     }
 
+    analyseddG() {
+        this.setStatus('Running step 4/4', 'working');
+        return this.analyse('ddG').done(msg => {
+            if (msg.error) {
+                this.setStatus('Failure at step 4/4', 'crash');
+                ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
+            } else {
+                this.setStatus('All tasks complete', 'done');
+                this.ddG = msg.ddG;
+                //this.loadStructure();
+                let ddgtext = `<i>ddG:</i> ${Math.round(this.ddG.ddG)} <span title="Roughly kcal/mol">REU</span> `;
+                if (this.ddG.ddG < -5) {ddgtext += '(stabilising)'}
+                else if (this.ddG.ddG > +5) {ddgtext += '(destabilising)'}
+                else {ddgtext += '(neutral)'}
+                ddgtext += '<br/>';
+                if (this.ddG.scores.mutate + 3 > this.ddG.scores.mutarelax) {
+                    ddgtext += `Results in backbone change (RMSD<sub>CA</sub>: ${Math.round(venus.ddG.rmsd*100)/100})<br/>`;
+                }
+                myData.proteins[0].name = 'model'; //need the name.
+                myData.proteins.push({ name: "wt",
+                                      type: "data",
+                                      value: this.ddG.native,
+                                      ext: 'pdb',
+                                      chain: 'A',
+                                      chain_definitions:this.structural.chain_definitions,
+                                      history: {code: this.structural.history.code,
+                                                changes: this.structural.history.changes + 'Rosetta locally relaxed'
+                                                }
+                                    });
+                myData.proteins.push({ name: "mutant",
+                                      type: "data",
+                                      value: this.ddG.mutant,
+                                      ext: 'pdb',
+                                      chain: 'A',
+                                      chain_definitions:this.structural.chain_definitions,
+                                      history: {code: this.structural.history.code,
+                                                changes: this.structural.history.changes + 'Rosetta locally relaxed, mutated and relaxed'
+                                                }
+                                    });
+
+
+                this.createEntry('ddg','Free energy calculation', ddgtext);
+
+            }
+        //{ddG: float, scores: Dict[str, float], native:str, mutant:str, rmsd:int}
+        });
+    }
+
     loadStructure () {
-        NGL.specialOps.multiLoader('viewport', [{ type: "data", value: this.structural.coordinates, ext: 'pdb', chain: 'A'}])
+        NGL.specialOps.multiLoader('viewport', [{ name: "wt",
+                                                              type: "data",
+                                                              value: this.structural.coordinates,
+                                                              ext: 'pdb',
+                                                              chain: 'A',
+                                                              chain_definitions:this.structural.chain_definitions,
+                                                              history: this.structural.history}])
                         .then(protein => NGL.specialOps.showResidue('viewport', this.position+':A'))
         UniprotFV.enpower();
-        let strloctext = '<p><i>Chosen model:</i> '+this.makeExt("https://www.rcsb.org/structure/"+this.structural.code, this.structural.code)+'</p>';
+        let strloctext = '<p><i>Chosen model:</i> ';
+        strloctext += this.makeExt("https://www.rcsb.org/structure/"+this.structural.code, this.structural.code)+'</p>';
         strloctext += `<p><i>Solvent exposure:</i> ${(this.structural.buried) ? 'buried' : 'surface'} (RSA: ${Math.round(this.structural.RSA*100)/100})</p>`;
         strloctext += `<p><i>Secondary structure type:</i> ${this.structural.SS}</p>`;
         strloctext += `<p><i>Residue resolution:</i> ${(this.structural.has_all_heavy_atoms) ? 'Resolved in crystal' : 'Some heavy atoms unresolved (too dynamic)'}</p>`;
@@ -284,12 +403,12 @@ class Venus {
             let d = Math.round(this.structural.distance_to_closest_ligand)+' &Aring;'
             strloctext += `<p><i>Closest ligand:</i> <span class="prolink" data-target="viewport" data-color="teal" data-focus="residue" data-selection="${ds}">${lig}</span> (${d})</p>`;
         }
-        this.mutalist.append(this.makeCard('Structural character', strloctext));
+        this.createEntry('strcha', 'Structural character', strloctext);
 
         let omni = this.makeProlink(this.structural.neighbours.map(v => v.resi+':A').join(' or '), '(all)');
         let strtext = `<p>Structural neighbourhood ${omni}.</p>`;
         strtext += '<ul>'+this.structural.neighbours.map(v => `<li>${this.makeProlink(v.resi+":"+v.chain, v.resn+v.resi)} ${v.detail}</li>`).join('')+'</ul>';
-        this.mutalist.append(this.makeCard('Structural neighbourhood', strtext));
+        this.createEntry('neigh','Structural neighbourhood', strtext);
     }
 
     createPage () {
@@ -369,13 +488,15 @@ $('#results_mutalist').parent().append([//alert('rewire NGL viewport following s
                               //alert('pipe structure to PDB offset fix.'),
                               //alert('structural route.'),
                               //alert('autoload the sequence chosen by Analyser.get_best_model'),
-                              alert('write documentation md!'),
-                              alert('Fix load of swissmodel.'),
-                              alert('cp the code for the domains from table ---what does this mean?'),
+                              alert('URGENT!!! write documentation you idiot!'),
                               alert('add collapsed sequence viewer'),
-                              alert('Fix RDKit matched structures to not claim that a sp2 Carbon os the same as sp3!'),
-                              alert('Mike exporter'),
-                              alert('Fix links in Mutation li')
+                              alert('add rudimentary scoring metric to bump up entries'),
+                              alert('deal with truncations'),
+                              alert('b factor and disorder'),
+                              alert('improve useless structurally class'),
+                              alert('Mike exporter --make selective'),
+                              alert('Fix load of swissmodel. ?! Why did this fix itself??'),
+                              alert('cp the code for the domains from table ---what does this mean?'),
                              ]);
 
 // for now....
