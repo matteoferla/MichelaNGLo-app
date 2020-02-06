@@ -134,9 +134,12 @@ def analyse_view(request):
         protein = system_storage[handle]
         try:
             protein.analyse_structure()
-            return {'structural': jsonable(protein.structural),
-                    'status': 'success'}
-        except Exception as err:  #Exception
+            if protein.structural:
+                return {'structural': jsonable(protein.structural),
+                        'status': 'success'}
+            else:
+                return {'status': 'terminated', 'error': 'No crystal structures or models available.', 'msg': 'Structrual analyses cannot be performed.'}
+        except NotImplementedError as err:  #Exception
             log.warning(f'Structural analysis failed {err} {type(err).__name__}.')
             return {'status': 'error'}
 
