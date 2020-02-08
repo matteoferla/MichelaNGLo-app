@@ -1,5 +1,5 @@
 ## TL;DR
-This assumes:
+This is for the ultra-impatient and assumes:
 
 * have conda already, if not read Step 1 and 2.
 * have a licence to FontAwesome-Pro, if not read Step 3
@@ -12,26 +12,29 @@ Install modules in a folder called michelanglo:
 
     mkdir michelanglo
     cd michelanglo/
-    git clone --recursive https://github.com/matteoferla/MichelaNGLo.git app
+    git clone --recursive https://github.com/matteoferla/MichelaNGLo.git app app
     git clone https://github.com/matteoferla/MichelaNGLo-protein-module.git protein-module
     git clone https://github.com/matteoferla/MichelaNGLo-transpiler transpiler
     cd protein-module
     python3 setup.py install
-    #python3 create.py & #do this to get protein data.
+    #python3 create.py & #do this to get protein data. else:
+    mkdir ../protein-data
+    mkdir ../protein-data/reference
+    touch ../protein-data/reference/pdb_chain_uniprot.tsv
+    # end of hacky way round.
     cd ../transpiler
     python3 setup.py install
     cd ../app
     python3 setup.py install
     npm i puppeteer
-    # not sqlite? change the env variable accordingly and read below
-    touch mike.db
-    SQL_URL=sqlite:///mike.db alembic -c development.ini revision --autogenerate -m "init"
-    SQL_URL=sqlite:///mike.db alembic -c development.ini alembic upgrade head
+    # do not want sqlite? change the env variable accordingly and read below
+    cp demo.db mike.db
     PROTEIN_DATA='../protein-data' SECRETCODE='needed-for-remote-reset' SQL_URL='sqlite:///mike.db' SLACK_WEBHOOK='https://hooks.slack.com/services/xxx/xxx/xxx' python3 app.py > ../mike.log 2>&1
 
+The last command runs it (to run in dev mode add `--d`).
+The admin user in the `demo.db` file is `admin` with password `admin`.
 Additional adding the env var `SENTRY_DNS_MICHELANGLO='https://xxxx@sentry.io/xxx'` will send errors.
-The Slack webhook isn't optional, but giving a dummy value will just make errors.
-
+The Slack webhook isn't optional, but giving a dummy value will just make errors, but not crash it.
 
 ## Preface
 This is why there are many commands to copy.
@@ -192,8 +195,9 @@ However, if there is a species you are interested in, email me and I can save yo
 
 ## Step 5. Create the database
 
-The database needs starting...
+The database needs starting, for SQLite make a copy of `demo.db` or do the following:
 
+    touch mike.db
     SQL_URL=sqlite:///mike.db alembic -c development.ini revision --autogenerate -m "init"
     SQL_URL=sqlite:///mike.db alembic -c development.ini upgrade head
     
@@ -203,6 +207,8 @@ Obviously, nothing ever goes smoothly. If you get an error with the second line 
 
 * an error about explicit contraint names: change all `sa.Boolean()` to `sa.Boolean(create_constraint=False)`. SQLite does not know about Booleans.
 * ... ?
+
+For a more robust system, use postgres (as used in our version).
 
 ## Step 6. NPM
 
@@ -254,6 +260,6 @@ Also, the app.py serves on port 8088.
 # Future
 ## Rosetta
 
-For Venus, upcoming, Rosetta will be optionally required (maybe)
+For Venus, upcoming, pyrosetta will be optionally required.
 
     curl -o a.tar.gz  -u Academic_User:**** https://www.rosettacommons.org/downloads/academic/3.11/rosetta_bin_linux_3.11_bundle.tgz
