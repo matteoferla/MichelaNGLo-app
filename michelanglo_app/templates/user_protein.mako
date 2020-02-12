@@ -32,7 +32,7 @@
     <div class='col-12 col-lg-${columns_viewport} ${part_order[0]}'>
         <div class='card shadow'>
             <div class="card-body">
-                <div id="viewport" role="NGL" data-proteins='${proteinJSON|n}' data-backgroundcolor="${backgroundcolor}" ${data_other|n}>
+                <div id="viewport" role="NGL" data-proteins='${proteinJSON|h}' data-backgroundcolor="${backgroundcolor}" ${data_other|n}>
                     %if image:
                         <img src="${image}" class="w-100"/>
                     %endif

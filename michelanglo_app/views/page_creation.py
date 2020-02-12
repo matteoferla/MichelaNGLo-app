@@ -303,10 +303,10 @@ def convert_pdb(request):
 @view_config(route_name='venus_create', renderer="json")
 def create_venus(request):
     """
-    request params: uniprot, species, mutation, text, code, block (=pdb block), definitions, history
+    request params: uniprot, species, mutation, text, code, wt_block (=pdb block), mut_block (=pdb block), block, definitions, history
     """
     # Get data.
-    malformed = is_malformed(request, 'uniprot', 'species', 'mutation', 'text', 'code', 'block', 'definitions')
+    malformed = is_malformed(request, 'uniprot', 'species', 'mutation', 'text', 'code', 'definitions')
     if malformed:
         return {'status': malformed}
     log.info(f'VENUS page creation requested by {User.get_username(request)}')
@@ -314,13 +314,38 @@ def create_venus(request):
     uniprot = request.params['uniprot']
     mutation = request.params['mutation']
     code = request.params['code']
-    block = request.params['block']
     text = request.params['text']
     definitions = get_chain_definitions(request)
     history = get_history(request)
     # List[tuple[selection, label]]
     defstr = [(f":{d['chain']}", str(d['name'])) for d in definitions]
-
+    # deal with PDB blocks.
+    if 'block' in request.params:
+        block = request.params['block'].replace('`','').replace('\\','').replace('$','')
+        pdbblocks = [['wt', block]]
+        pj = [{'type': 'data',
+               'value': 'wt',
+               'name': 'wt',
+               'isVariable': 'true',
+               'chain_definitions': definitions,
+               'history': history}]
+    elif 'wt_block'  in request.params and 'mut_block'  in request.params:
+        wt_block = request.params['wt_block'].replace('`','').replace('\\','').replace('$','')
+        mut_block = request.params['mut_block'].replace('`','').replace('\\','').replace('$','')
+        pdbblocks = [['wt', wt_block], ['mutant', mut_block]]
+        pj = [{'type': 'data',
+               'value': 'wt',
+               'name': 'wt',
+               'isVariable': 'true',
+               'chain_definitions': definitions,
+               'history': history},
+              {'type': 'data',
+               'value': 'mutant',
+               'name': 'mutant',
+               'isVariable': 'true',
+               'chain_definitions': definitions,
+               'history': history}
+              ]
     # Prepare response.
     settings = {##'data_other': data_other,
                 'title': f'VENUS generated page for {uniprot} {mutation}',
@@ -333,16 +358,12 @@ def create_venus(request):
                 'validation': None,
                 'js': 'external',
                 'model': True if 'https://swissmodel.expasy.org' in code else False,
-                'pdb': [['wt', block]],
+                'pdb': pdbblocks,
                 'loadfun': '',
                 'columns_viewport': 5,
                 'columns_text': 7,
                 'location_viewport': 'right',
-                'proteinJSON': json.dumps([{'type': 'data',
-                                           'value': 'wt',
-                                           'isVariable': 'true',
-                                           'chain_definitions': definitions,
-                                           'history': history}])
+                'proteinJSON': json.dumps(pj)
     }
 
     ## Special JS to always show mutation

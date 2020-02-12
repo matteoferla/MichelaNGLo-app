@@ -553,7 +553,7 @@ $.prototype.viewport = function () {
         var data = $(this).data('proteins');
         if (typeof data == "object") {/*pass*/}
         else if (data === 'ERROR') {throw 'The data-protein is attribute is literally ERROR'}
-        else if (typeof data == "string") {data = JSON.parse(data.replace("'",'"'));}
+        else if (typeof data == "string") {console.log(data); data = JSON.parse(data);}
         else if ($(this).data('load')) { data = $(this).data('load').split(',').map(v => ({name: v, value: v, type: 'rcsb'}));
         } else {data = [];}
         var promise = NGL.specialOps.multiLoader($(this).attr('id'), data, backgroundcolor);

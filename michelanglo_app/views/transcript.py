@@ -93,8 +93,8 @@ class ENSTMapper:
         alignement = pairwise2.align.globalxx(ref, seq)[0]
         a_ref = alignement[0]
         a_query = alignement[1]
-        mapping_ref = [i for i, r in enumerate(a_ref) if r != '-']
-        mapping_query = [i for i, r in enumerate(a_query) if r != '-']
+        mapping_ref = [i+1 for i, r in enumerate(a_ref) if r != '-']
+        mapping_query = [i+1 for i, r in enumerate(a_query) if r != '-']
         mp = mapping_ref[position]  # this is the position in the aligned sequence.
         ar = a_ref[mp]  # residue at mp
         aq = a_query[mp]  # residue at mp

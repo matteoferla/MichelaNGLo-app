@@ -147,7 +147,7 @@ class PDBMeta:
 def get_references(code):
     if len(code) == 0:
         return ''
-    elif 'swissmodel' in code:
+    elif 'swissmodel' in code or len(code) == 24:
         return 'Model derived from SWISSMODEL <a href="https://academic.oup.com/nar/article/46/W1/W296/5000024" target="_blank">'+\
                'Waterhouse, A., Bertoni, M., Bienert, S., Studer, G., Tauriello, G., Gumienny, R., Heer, F.T., de Beer, T.A.P., Rempfer, C., Bordoli, L., Lepore, R., Schwede, T.'+\
                ' (2018) SWISS-MODEL: homology modelling of protein structures and complexes. <i>Nucleic Acids Res.</i> <b>46(W1)</b>, W296-W303.</a>'

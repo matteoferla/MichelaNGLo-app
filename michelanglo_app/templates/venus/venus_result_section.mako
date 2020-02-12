@@ -18,6 +18,7 @@
                             </div>
                             <hr>
                             <h3 id="result_title"></h3>
+                          <p id="results_status" class="px-5">Error.</p>
                         </div>
                     </div>
                 </div>
@@ -69,7 +70,6 @@
                       <div class="card-body p-0">
                           <div class="arrow-right"></div><div class="arrow-right2">
                           </div>
-                          <p id="results_status" class="px-5">Error.</p>
                       <ul class="list-group list-group-flush" id="results_mutalist">
                       </ul>
                       </div>

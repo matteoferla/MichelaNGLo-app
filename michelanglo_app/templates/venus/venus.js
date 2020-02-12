@@ -88,7 +88,7 @@ class Venus {
         this.documentation = {  'mut': 'Residue identity, note that because a difference in shape is present it does not mean that the structure cannot accommodate the change',
                                 'indestr': 'This is a purely based on the nature of the amino acids without taking into account the position. Despite this, it is a strong predictor.',
                                 'strcha': 'Model based residue details',
-                                'ddg': 'Forcefield calculations. REU is roughly kcal/mol. A hydrogen bond has about 1 kcal/mol. A water collision has on average 0.6 kcal/mol (Boltzmann constant &times; temperature).',
+                                'ddg': 'Forcefield calculations. REU is roughly kcal/mol. A hydrogen bond has about 1-2 kcal/mol. A water collision has on average 0.6 kcal/mol (Boltzmann constant &times; temperature).',
                                 'location': 'What domains are nearby linearly &mdash;but not necessarily containing the residue',
                                 'domdet': 'what is this?',
                                 'neigh': 'Model based, what residues are within 4 &aring;ngstr&ouml;m?',
@@ -120,13 +120,13 @@ class Venus {
         const s = $('#results_status');
         switch(mode) {
           case 'working':
-            s.html(`<i class="far fa-dna fa-spin"></i> ${label}`);
+            s.html(`<div class="alert alert-warning w-100"><i class="far fa-dna fa-spin"></i> ${label}</div>`);
             break;
           case 'crash':
-            s.html(`<i class="far fa-skull-crossbones"></i> ${label}`);
+            s.html(`<div class="alert alert-danger w-100"><i class="far fa-skull-crossbones"></i> ${label}</div>`);
             break;
         case 'done':
-            s.html(`<i class="fas fa-check"></i> ${label}`);
+            s.html(`<div class="alert alert-success w-100"><i class="fas fa-check"></i> ${label}</div>`);
             setTimeout(() => s.hide(), 1000);
             break;
           default:
@@ -380,7 +380,7 @@ class Venus {
                 this.setStatus('All tasks complete', 'done');
                 this.energetical = msg.ddG;
                 //this.loadStructure();
-                let ddgtext = `<i>ddG:</i> ${Math.round(this.energetical.ddG)} <span title="Roughly kcal/mol">REU</span> `;
+                let ddgtext = `<i>ddG:</i> ${Math.round(this.energetical.ddG)} <span title="Technically REU, which is an approximation to kcal/mol">predicted kcal/mol</span> `;
                 if (this.energetical.ddG < -5) {ddgtext += '(stabilising)'}
                 else if (this.energetical.ddG > +5) {ddgtext += '(destabilising)'}
                 else {ddgtext += '(neutral)'}
@@ -409,10 +409,7 @@ class Venus {
                                                 changes: this.structural.history.changes + 'Rosetta locally relaxed, mutated and relaxed'
                                                 }
                                     });
-
-
                 this.createEntry('ddg','Free energy calculation', ddgtext);
-
             }
         //{ddG: float, scores: Dict[str, float], native:str, mutant:str, rmsd:int}
         });
@@ -454,9 +451,14 @@ class Venus {
                     mutation: this.mutation,
                     text: $('#results_mutalist').html(),
                     code: this.structural.code,
-                    block: this.structural.coordinates,
                     definitions: JSON.stringify(this.structural.chain_definitions),
                     history: JSON.stringify(this.structural.history)};
+        if (this.energetical === undefined) {
+            data.block = this.structural.coordinates;
+        } else {
+            data.wt_block = this.energetical.native;
+            data.mut_block = this.energetical.mutant;
+        }
         // other end at page_creation.py
         return $.post({url: "venus_create", data: data, dataType: 'json'})
         .done(function (msg) {
