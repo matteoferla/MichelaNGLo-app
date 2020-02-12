@@ -16,7 +16,10 @@ def venus_transcript(request):
     if malformed:
         return {'status': malformed}
     data = get_transcript(request)
-    return HTTPFound(location=f'/venus?gene={data["uniprot"]}&species=9606&mutation={data["mutation"]}')
+    if 'redirect' in request.params:
+        return HTTPFound(location=f'/venus?gene={data["uniprot"]}&species=9606&mutation={data["mutation"]}')
+    else:
+        return data
 
 
 def get_transcript(request):
