@@ -1,6 +1,14 @@
 //<%text>
 
-$('#species').on('keyup', event => {
+
+let species = $('#species'); //es6 is node, not jquery element.
+let gene = $('#gene');
+let mutation = $('#mutation'); // applies only to VENUS, not PDB route.
+window.uniprotValue = 'ERROR';
+window.taxidValue = undefined;
+
+//species
+species.on('keyup', event => {
             let species = $('#species');
             window.taxidValue ='ERROR';
             $('#error_species,#taxid,#uniprot').hide();
@@ -34,22 +42,16 @@ $('#species').on('keyup', event => {
                      error: (xhr) => {if (xhr.statusText ==='abort' || xhr.status === 0 || xhr.readyState === 0) {return;} else {ops.addErrorToast(xhr)}}
             });
     });
-// starting value. Cannot guarantee the default/stored value is correct.
-let species = $('#species');
-if (species.val().toLowerCase() === 'human') {species.val('Human'); window.taxidValue=9606; species.addClass('is-valid'); $('#taxid').show().text('Taxid: 9606');}
-else { species.trigger('input');}
 
 // gene.
-window.uniprotValue = 'ERROR';
-$('#gene').on('keyup', event => {
+gene.on('keyup', event => {
     if (window.gene_xhr !== undefined) {
         window.gene_xhr.abort();}
     if ((window.taxidValue === 'ERROR') || (window.taxidValue === undefined)) {
         //ops.addToast('taxid','Issue','Please check species is correct.','bg-info');
-        $('#species').trigger('keyup');
+        species.trigger('keyup');
         return 0;
     }
-    let gene = $('#gene');
 
     if (gene.val() === '') return 0;
     gene.popover('dispose');
@@ -93,9 +95,9 @@ $('#gene').on('keyup', event => {
                             },
              error: (xhr) => {if (xhr.statusText ==='abort' || xhr.status === 0 || xhr.readyState === 0) {return;} else {ops.addErrorToast(xhr)}}
             });
-
 });
 
+// Common
 window.reset_gene = () => {
     $('#gene').removeClass('is-valid').removeClass('is-invalid');
     $('#error_gene').hide();
@@ -107,8 +109,7 @@ window.reset_gene = () => {
     $('#pdb_fetch').hide();
 };
 
-if ($('#gene').val()) $('#gene').trigger('keyup');
-
+// PDB route only.
 window.get_pdbs = pdbs => {
     //this gets the PBDe data.
     // it is getting removed.
@@ -140,6 +141,7 @@ window.get_pdbs = pdbs => {
     });
 };
 
+// Common
 window.get_uniprot = () => $.ajax({
         url: "/choose_pdb",
         data: {
@@ -152,6 +154,7 @@ window.get_uniprot = () => $.ajax({
         error: ops.addErrorToast
     });
 
+// PDB route only.
 window.load_pdb = pdb => {
     $('#staging').show();
     window.pdbCode = pdb;
@@ -168,8 +171,8 @@ window.load_pdb = pdb => {
                                                                 'value': pdb,
                                                                 chain_definitions: [{chain: 'A',
                                                                                      uniprot: pdb.match(/uniprot\/(.*?)\.pdb/)[1],
-                                                                                     x: pdb.match(/from\=(.*?)\&/)[1],
-                                                                                     y: pdb.match(/to\=(.*?)\&/)[1],
+                                                                                     x: pdb.match(/range\=(\d+)/)[1],
+                                                                                     y: pdb.match(/range\=\d+\-(\d+)/)[1],
                                                                                      name: $('#gene').val(),
                                                                                      offset: 0
                                                                                     }
@@ -184,6 +187,7 @@ window.load_pdb = pdb => {
     if ($('#staging').length) $('html, body').animate({scrollTop: $('#staging').offset().top}, 2000);
 };
 
+// PDB route only.
 $('#pdb_fetch').click(event => {
     $(event.target).hide();
     $('#ext_links').html('<p>For more information see the <a href="https://www.rcsb.org/pdb/protein/'+window.uniprotValue+'" target="_blank">PDB entry <i class="far fa-external-link-alt"></i></a>. If no structures are available see <a href="https://swissmodel.expasy.org/repository/uniprot/'+window.uniprotValue+'" target="_blank">Swiss-Model entry <i class="far fa-external-link-alt"></i></a>.</p>');
@@ -203,5 +207,59 @@ $('#pdb_fetch').click(event => {
 
 
 // renumber button moved to pdb staging insert as it's shared.
+
+// START UP TRIGGER
+
+//URL QUERY
+//uniprot=Q14185&species=9606&step=protein&mutation=A100E
+const urlQueriest = () => {
+    const query = new URLSearchParams(window.location.search);
+    let querySpecies = query.get('species');
+    let queryGene = query.get('uniprot') || query.get('gene');
+    let queryMutation = query.get('mutation');
+    if (!!querySpecies) {
+        species.val(querySpecies);
+    }
+    if (!!queryGene) {
+        gene.val(queryGene);
+    }
+    if (!!queryMutation) {
+        $('#mutation').val(queryMutation);
+    }
+};
+
+urlQueriest();
+
+// starting value for species. Cannot guarantee the default/stored value is correct.
+if (species.val().toLowerCase() === 'human') {
+    species.val('Human');
+    window.taxidValue=9606;
+    species.addClass('is-valid');
+    $('#taxid').show().text('Taxid: 9606');}
+else { species.keyup();}
+
+// startup trigger for gene.
+if (gene.val())  {
+    //if (window.gene_xhr !== undefined) {
+    //    window.gene_xhr = {abort: ()=> null}; //mocked abort
+    //}
+    if (window.species_xhr === undefined || species_xhr.status === 200) {
+        gene.keyup();
+    } else {
+        window.species_xhr.then(msg => gene.keyup());
+    }
+}
+// startup trigger for mutation
+if (mutation.val())  {
+    if (window.gene_xhr === undefined) {
+        setTimeout(() => $('#venus_calc').click(), 500);
+    }
+    else if (gene_xhr.status === 200) {
+        $('#venus_calc').click();
+    } else {
+        window.gene_xhr.then(msg => $('#venus_calc').click());
+    }
+}
+
 
 //</%text>
