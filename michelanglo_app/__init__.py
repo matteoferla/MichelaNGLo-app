@@ -27,3 +27,12 @@ def main(global_config, **settings):
     config.include('.scheduler')
     config.scan()
     return config.make_wsgi_app()
+
+
+##################################
+# import signal
+#
+# def sig_handler(signum, frame):
+#     print("segfault caught")
+#
+# signal.signal(signal.SIGSEGV, sig_handler)

@@ -380,9 +380,15 @@ class Venus {
                 this.setStatus('All tasks complete', 'done');
                 this.energetical = msg.ddG;
                 //this.loadStructure();
-                let ddgtext = `<i>ddG:</i> ${Math.round(this.energetical.ddG)} <span title="Technically REU, which is an approximation to kcal/mol">predicted kcal/mol</span> `;
+                let ddgtext = `<i>ddG (with backbone movement allowed):</i> ${Math.round(this.energetical.ddG)} <span title="Technically REU, which is an approximation to kcal/mol">predicted kcal/mol</span> `;
                 if (this.energetical.ddG < -5) {ddgtext += '(stabilising)'}
                 else if (this.energetical.ddG > +5) {ddgtext += '(destabilising)'}
+                else {ddgtext += '(neutral)'}
+                ddgtext += '<br/>';
+                let bb = this.energetical.scores.mutate - this.energetical.scores.relaxed;
+                ddgtext += `<i>ddG (with backbone movement forbidden):</i> ${Math.round(bb)} <span title="Technically REU, which is an approximation to kcal/mol">predicted kcal/mol</span> `;
+                if (bb < -5) {ddgtext += '(stabilising)'}
+                else if (bb > +5) {ddgtext += '(destabilising)'}
                 else {ddgtext += '(neutral)'}
                 ddgtext += '<br/>';
                 if (this.energetical.scores.mutate + 3 > this.energetical.scores.mutarelax) {
