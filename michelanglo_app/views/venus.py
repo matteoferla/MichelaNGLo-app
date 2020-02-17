@@ -153,7 +153,11 @@ def analyse_view(request):
             if 'error' in status:
                 return status
         protein = system_storage[handle]
-        return {'ddG': protein.analyse_FF()} #{ddG: float, scores: Dict[str, float], native:str, mutant:str, rmsd:int}
+        analysis = protein.analyse_FF()
+        if 'error' in analysis:
+            return {'status': 'error', 'error': 'pyrosetta', 'msg': analysis['error']}
+        else:
+            return {'ddG': analysis} #{ddG: float, scores: Dict[str, float], native:str, mutant:str, rmsd:int}
 
 
 
