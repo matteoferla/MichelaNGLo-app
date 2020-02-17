@@ -64,12 +64,11 @@ $('#dehydrate_collapse').on('shown.bs.collapse',event => {
 
 // fun for the loading of a pdb.
 window.renumber_alerter = (pdb) => {
+    let data = {'item': 'get_pdb', 'pdb': pdb};
+    if (window.taxidValue !== undefined) {data.species=taxidValue; data.uniprot = uniprotValue;}
     if (pdb.length === 4) $.ajax({
                                 url: "/choose_pdb",
-                                data: {
-                                    'item': 'get_pdb',
-                                    'pdb': pdb
-                                },
+                                data: data,
                                 method: 'POST',
                                 success: msg => {
                                     if (msg.chains.length === 0) return 1;

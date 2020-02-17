@@ -100,14 +100,16 @@ def choose_pdb(request):
         pdb = request.params['pdb']
         #chain = request.params['chain'] if 'chain' in request.params else 'A'
         log.info(f'{User.get_username(request)} wants pdb info')
-        if 1 == 0: #via PDBe. PDBMeta is in common methods
-            try:
-                return PDBMeta(entry).describe()
-            except KeyError:
-                return {'status': "removed protein"}
-        else:
-            definitions = Structure(id=pdb, description='', x=0, y=0, code=pdb).lookup_sifts().chain_definitions
-            return {'pdb': pdb, 'chains': definitions}
+        #Fomerly via PDBe. PDBMeta is in common methods `PDBMeta(entry).describe()`
+        if 'uniprot' in request.params and 'species' in request.params and len(pdb) == 4:
+            protein = ProteinCore(uniprot=request.params['uniprot'], taxid=request.params['species']).load()
+            structure = [s for s in protein.pdbs if s.code == pdb]
+            if len(structure) > 0:
+                definitions = structure[0].chain_definitions
+                return {'pdb': pdb, 'chains': definitions}
+        # Convoluted fallback way in case its new!
+        definitions = Structure(id=pdb, description='', x=0, y=0, code=pdb).lookup_sifts().chain_definitions
+        return {'pdb': pdb, 'chains': definitions}
     ####### get_uniprot: uniprot > feature map as a js to excecute
     elif request.params['item'] == 'get_uniprot':
         malformed = is_malformed(request, 'uniprot')

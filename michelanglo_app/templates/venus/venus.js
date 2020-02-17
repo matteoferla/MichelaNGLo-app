@@ -1,50 +1,6 @@
 //<%text>
 //venus main.mako imports uniprot_modal.js 's UniprotFV.
 
-class MutantLocation {
-  /*
-  This is not perfect.
-  There is an inexplicable initial offset.
-  When zoomed in and the first block is lost, the line is lost too even when it is inplace.
-   */
-  constructor(x) {
-    this.x = x;
-    this.class = 'myVar';
-    this.addLine();
-    const s = $('#fv svg');
-    s.mouseup(event => setTimeout(() => this.addLine.call(this), 1000));
-    //s.mousedown(this.make);
-  }
-
-  addLine() {
-    d3.select('.'+this.class).remove();
-    const svgContainer = d3.select("#fv svg g");
-    let dOri = d3.select('.domainGroup').data()[0].y - d3.select('.domainGroup').data()[0].x;
-    let prime = parseFloat(d3.select('.domainGroup').attr("transform").match(/[-\d.]+/)[0]);
-    let dPrime = parseFloat(d3.select('.domainGroup rect').attr("width"));
-    this.scaleFactor = dPrime/dOri;
-    this.offset = prime - this.scaleFactor * d3.select('.domainGroup').data()[0].x;
-    this.h = d3.select(".background").attr("height");
-    this.w = this.scaleFactor + 2;
-    this.xPrime = this.scaleFactor * this.x - 1;
-
-    svgContainer.append("rect")
-            .attr("width", this.w)
-            .attr("height", this.h)
-            .attr("transform", `translate(${this.xPrime},0)`)
-            .attr("class",this.class)
-            .style("fill","rgba(200, 0, 0, 0.2)")
-            .style("z-index", -1)
-            .style("cursor","pointer");
-    $('.'+this.class).click(event => this.onClick.call(this));
-    return this;
-  }
-
-  onClick() {
-      if (window.myData !== undefined) NGL.specialOps.showResidue('viewport', this.x+':A');
-  }
-}
-
 class Venus {
     constructor() {
         this.prolink = ' class="prolink" data-target="#viewport" data-toggle="protein" ';
@@ -266,7 +222,9 @@ class Venus {
                     //this.analyse('fv') is the same as get_uniprot but utilising the protein data.
                     $('#results').show(500, () => this.analyse('fv').done(msg => {eval(msg);
                                                                 d3.selectAll('.axis text').style("font-size", "0.6em");
-                                                                new MutantLocation(this.position);}));
+                                                                //new MutantLocation(this.position);
+                                                                ft.addMutation(this.position);
+                    }));
                     $('html, body').animate({scrollTop: $('#results').offset().top}, 2000);
                     $('#result_title').html(`${this.protein.gene_name} ${this.protein._mutation} <small>(${this.protein.recommended_name})</small>`);
                     let exttext = this.makeExt('https://www.uniprot.org/uniprot/'+uniprotValue, 'Uniprot:'+uniprotValue) + ' &mdash; '+
@@ -429,7 +387,7 @@ class Venus {
                                                               chain: 'A',
                                                               chain_definitions:this.structural.chain_definitions,
                                                               history: this.structural.history}])
-                        .then(protein => NGL.specialOps.showResidue('viewport', this.position+':A'))
+                        .then(protein => NGL.specialOps.showResidue('viewport', this.position+':A'));
         UniprotFV.enpower();
         let strloctext = '<p><i>Chosen model:</i> ';
         strloctext += this.makeExt("https://www.rcsb.org/structure/"+this.structural.code, this.structural.code)+'</p>';
