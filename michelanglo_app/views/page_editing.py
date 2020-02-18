@@ -10,7 +10,7 @@ import json, re
 import datetime
 import requests
 
-from ._common_methods import is_js_true,  is_malformed, get_uuid, get_pdb_block
+from .common_methods import is_js_true,  is_malformed, get_uuid, get_pdb_block
 
 import logging
 log = logging.getLogger(__name__)

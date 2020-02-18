@@ -11,7 +11,7 @@ from . import valid_extensions
 
 PyMolTranspiler.tmp = os.path.join('michelanglo_app', 'temp')
 
-from ._common_methods import is_js_true, is_malformed, PDBMeta, get_uuid, save_file, save_coordinates, get_chain_definitions, get_pdb_code, get_pdb_block, get_history
+from .common_methods import is_js_true, is_malformed, PDBMeta, get_uuid, save_file, save_coordinates, get_chain_definitions, get_pdb_code, get_pdb_block, get_history
 import logging
 
 log = logging.getLogger(__name__)

@@ -10,7 +10,7 @@ import json
 
 PyMolTranspiler.tmp = os.path.join('michelanglo_app', 'temp')
 
-from ._common_methods import is_js_true,\
+from .common_methods import is_js_true,\
                              is_malformed,\
                              PDBMeta,\
                              get_uuid, \

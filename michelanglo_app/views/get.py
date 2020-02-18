@@ -5,7 +5,7 @@ import os
 
 import logging
 log = logging.getLogger(__name__)
-from ._common_methods import is_malformed, notify_admin
+from .common_methods import is_malformed, notify_admin
 
 from . import custom_messages, votes
 

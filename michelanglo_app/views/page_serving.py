@@ -12,7 +12,7 @@ import logging, json, os
 log = logging.getLogger(__name__)
 
 from . import custom_messages, votes
-from ._common_methods import is_malformed, is_js_true
+from .common_methods import is_malformed, is_js_true
 
 @view_config(route_name='userdata', renderer="../templates/user_protein.mako")
 def userdata_view(request):

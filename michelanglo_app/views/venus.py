@@ -10,7 +10,7 @@ from .uniprot_data import *
 from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore
 
 from ..models import User ##needed solely for log.
-from ._common_methods import is_malformed
+from .common_methods import is_malformed
 from . import custom_messages
 
 import random

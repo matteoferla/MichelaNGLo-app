@@ -2,7 +2,7 @@ import csv, re, os
 from typing import Dict, Union
 from Bio import SeqIO, pairwise2
 from michelanglo_protein import global_settings, ProteinCore
-from ._common_methods import is_malformed
+from .common_methods import is_malformed
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 

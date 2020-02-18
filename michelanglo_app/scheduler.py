@@ -5,41 +5,46 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql.expression import and_
 import transaction
 from apscheduler.schedulers.background import BackgroundScheduler
-from .views._common_methods import notify_admin
+from .views.common_methods import notify_admin
 from michelanglo_transpiler import GlobalPyMOL
 
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 
 from .views.buffer import system_storage
 
 import logging
+
 log = logging.getLogger('apscheduler')
 
+################################  MAIN   ###############################################################################
 
 def includeme(config):
-    #scheduler.days_delete_unedited = 30
-    #scheduler.days_delete_untouched = 365
+    # scheduler.days_delete_unedited = 30
+    # scheduler.days_delete_untouched = 365
     settings = config.get_settings()
     scheduler = BackgroundScheduler()
 
     #### PERIODIC TASKS ####################################################
-    scheduler.add_job(kill_task, 'interval', days=1, args=[settings['scheduler.days_delete_unedited'], settings['scheduler.days_delete_untouched']])
+    scheduler.add_job(kill_task, 'interval', days=1,
+                      args=[settings['scheduler.days_delete_unedited'], settings['scheduler.days_delete_untouched']])
     scheduler.add_job(monitor_task, 'interval', days=30)
     scheduler.add_job(daily_task, 'interval', days=1)
-    scheduler.add_job(unjam, 'interval', hours=1)
+    scheduler.add_job(unjam_task, 'interval', hours=1)
     scheduler.add_job(clear_buffer_task, 'interval', hours=6)
     #### START UP TASKS ####################################################
     scheduler.add_job(monitor_task, 'date', run_date=datetime.now() + timedelta(minutes=60))
-    #scheduler.add_job(sanitycheck_task, 'date', run_date=datetime.now() + timedelta(minutes=2))
+    # scheduler.add_job(sanitycheck_task, 'date', run_date=datetime.now() + timedelta(minutes=2))
     #### GO! ####################################################
     scheduler.start()
 
 
-def get_session(): ## not request bound.
+def get_session():  ## not request bound.
     engine = engine_from_config({'sqlalchemy.url': os.environ['SQL_URL'], 'sqlalchemy.echo': 'False'},
                                 prefix='sqlalchemy.')
     Session = sessionmaker(bind=engine)
     return Session()
+
+#############################   TASKS    ###############################################################################
 
 def daily_task():
     ## odds and ends
@@ -51,17 +56,20 @@ def daily_task():
     sesh.commit()
     # PDB?
 
+
 def spam_task(days_delete_unedited, days_delete_untouched):
     notify_admin(f'{days_delete_unedited} and {days_delete_untouched}')
+
 
 def kill_task(days_delete_unedited, days_delete_untouched):
     sesh = get_session()
     with transaction.manager:
         unedited_time = datetime.now() - timedelta(days=int(days_delete_unedited))
         n = 0
-        for page in sesh.query(Page).filter(and_(Page.existant == True, Page.edited == False, Page.timestamp < unedited_time)):
+        for page in sesh.query(Page).filter(
+                and_(Page.existant == True, Page.edited == False, Page.timestamp < unedited_time)):
             log.info(f'Deleting unedited page {page.identifier} by {page}')
-            n+=1
+            n += 1
             page.delete()
         untouched_time = datetime.now() - timedelta(days=int(days_delete_untouched))
         for page in sesh.query(Page).filter(and_(Page.existant == True, Page.timestamp < untouched_time)):
@@ -76,12 +84,13 @@ def kill_task(days_delete_unedited, days_delete_untouched):
                 page.existant = False
                 log.warning(f'{page.identifier} does not exist.')
                 notify_admin(f'{page.identifier} does not exist.')
-            n+=1
+            n += 1
         notify_admin(f'Deleted {n} pages in cleanup.')
     sesh.commit()
 
+
 def clear_buffer_task():
-    system_storage.delete_before(6) #delete stuff over 6 hours old.
+    system_storage.delete_before(6)  # delete stuff over 6 hours old.
 
 
 def monitor_task():
@@ -93,10 +102,11 @@ def monitor_task():
             try:
                 if os.system(f'node michelanglo_app/monitor.js {page.identifier} tmp_'):
                     raise ValueError(f'monitor crashed: node michelanglo_app/monitor.js {page.identifier} tmp_')
-                details = json.load(open(os.path.join('michelanglo_app','user-data-monitor', page.identifier+'.json')))
+                details = json.load(
+                    open(os.path.join('michelanglo_app', 'user-data-monitor', page.identifier + '.json')))
                 for i in range(len(details)):
-                    ref = os.path.join('michelanglo_app','user-data-monitor', f'{page.identifier}-{i}.png')
-                    new = os.path.join('michelanglo_app','user-data-monitor', f'tmp_{page.identifier}-{i}.png')
+                    ref = os.path.join('michelanglo_app', 'user-data-monitor', f'{page.identifier}-{i}.png')
+                    new = os.path.join('michelanglo_app', 'user-data-monitor', f'tmp_{page.identifier}-{i}.png')
                     assert os.path.exists(ref), 'Reference image does not exist'
                     assert os.path.exists(new), 'Generated image does not exist'
                     ref_img = imageio.imread(ref).flatten()
@@ -110,23 +120,27 @@ def monitor_task():
                         msg = f'Page monitoring unsuccessful for {page.identifier} image {i}'
                         notify_admin(msg)
             except Exception as err:
-                        msg = f'Page monitoring unsuccessful for {page.identifier} {err}'
-                        log.warning(msg)
-                        notify_admin(msg)
+                msg = f'Page monitoring unsuccessful for {page.identifier} {err}'
+                log.warning(msg)
+                notify_admin(msg)
             else:
                 log.info(f'Page monitoring successful for {page.identifier}')
-            pickle.dump(state, open(os.path.join('michelanglo_app', 'user-data-monitor', f'verdict_{page.identifier}.p'), 'wb'))
+            pickle.dump(state,
+                        open(os.path.join('michelanglo_app', 'user-data-monitor', f'verdict_{page.identifier}.p'),
+                             'wb'))
+
 
 def sanitycheck_task():
-    #verify that the database pages table and the pickles files are consistent.
-    #why? In case I add a pickle manually.
-    #actually how would I do that? It would require rsync the data to /temp and then moving it as the correct user.
-    #it would be way easier to fix it by API.
-    #also, who would win in case of conflict?
-    #I need to think about this more.
+    # verify that the database pages table and the pickles files are consistent.
+    # why? In case I add a pickle manually.
+    # actually how would I do that? It would require rsync the data to /temp and then moving it as the correct user.
+    # it would be way easier to fix it by API.
+    # also, who would win in case of conflict?
+    # I need to think about this more.
     pass
 
-def unjam():
+
+def unjam_task():
     """
     The context manager already deals with this. But this is just to prevent the context manager from dealing with this.
     """

@@ -1,4 +1,4 @@
-from ._common_methods import notify_admin
+from .common_methods import notify_admin
 from pyramid.view import view_config
 from ..models import User
 

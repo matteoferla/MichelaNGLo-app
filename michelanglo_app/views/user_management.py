@@ -12,7 +12,7 @@ the reply "status" and occasionally "username"
 The modal that controls it is `login/user_modal.mako`. However the content is controlled by a ajax to `/get` to get the relevant `*_modalcont.mako` (content).
 """
 from pyramid.view import view_config
-from ._common_methods import notify_admin
+from .common_methods import notify_admin
 from ..models import User, Page
 
 import time
