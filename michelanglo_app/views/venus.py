@@ -24,7 +24,7 @@ from pprint import PrettyPrinter
 pprint = PrettyPrinter().pprint
 
 ### This is a weird way to solve the status 206 issue.
-system_storage = {}
+from .buffer import system_storage
 
 @view_config(route_name='venus', renderer="../templates/venus/venus_main.mako")
 def venus_view(request):

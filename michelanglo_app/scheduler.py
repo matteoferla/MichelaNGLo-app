@@ -10,6 +10,8 @@ from michelanglo_transpiler import GlobalPyMOL
 
 from datetime import datetime,timedelta
 
+from .views.buffer import system_storage
+
 import logging
 log = logging.getLogger('apscheduler')
 
@@ -25,6 +27,7 @@ def includeme(config):
     scheduler.add_job(monitor_task, 'interval', days=30)
     scheduler.add_job(daily_task, 'interval', days=1)
     scheduler.add_job(unjam, 'interval', hours=1)
+    scheduler.add_job(clear_buffer_task, 'interval', hours=6)
     #### START UP TASKS ####################################################
     scheduler.add_job(monitor_task, 'date', run_date=datetime.now() + timedelta(minutes=60))
     #scheduler.add_job(sanitycheck_task, 'date', run_date=datetime.now() + timedelta(minutes=2))
@@ -76,6 +79,10 @@ def kill_task(days_delete_unedited, days_delete_untouched):
             n+=1
         notify_admin(f'Deleted {n} pages in cleanup.')
     sesh.commit()
+
+def clear_buffer_task():
+    system_storage.delete_before(6) #delete stuff over 6 hours old.
+
 
 def monitor_task():
     sesh = get_session()
