@@ -25,8 +25,8 @@ def includeme(config):
     scheduler = BackgroundScheduler()
 
     #### PERIODIC TASKS ####################################################
-    scheduler.add_job(kill_task, 'interval', days=1,
-                      args=[settings['scheduler.days_delete_unedited'], settings['scheduler.days_delete_untouched']])
+    scheduler.add_job(kill_task, 'interval', days=1, args=[settings['scheduler.days_delete_unedited'],
+                                                           settings['scheduler.days_delete_untouched']])
     scheduler.add_job(monitor_task, 'interval', days=30)
     scheduler.add_job(daily_task, 'interval', days=1)
     scheduler.add_job(unjam_task, 'interval', hours=1)
