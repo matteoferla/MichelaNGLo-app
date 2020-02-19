@@ -77,14 +77,13 @@ def edit(request):
         if user.role == 'admin' and request.params['public'] not in (None, False, True, 'false','true'):
             ## only admin can set to anything that is not private | public
             page.privacy = request.params['public'].lower() # private | public | published | sgc | pinned
+        elif page.privacy not in ('public', 'private'):
+                pass # keep page privacy. admin set it to published or sgc or pinned.
         elif is_js_true(request.params['public']):
-            if page.privacy not in ('public', 'private'):
-                pass # keep page privacy. admin set it to published or sgc.
-            else:
-                page.privacy = 'public'
+            page.privacy = 'public'
         else:
             page.privacy = 'private'
-        page.settings['public'] = page.is_public()
+        page.settings['public'] = page.privacy
         if not page.is_public():
             page.settings['freelyeditable'] = is_js_true(request.params['freelyeditable'])
         else:

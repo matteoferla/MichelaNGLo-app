@@ -59,6 +59,7 @@ def get_userdata(request, pagename):
     else:
         ## yay! you are not a terrorist!
         settings = page.settings
+        settings['public'] = page.privacy  # Legacy fix.
         if page.encrypted:
             settings['encryption_key'] = request.params['key']   ### For the Mako!
             settings['key'] = request.params['key']  #to be fixed...

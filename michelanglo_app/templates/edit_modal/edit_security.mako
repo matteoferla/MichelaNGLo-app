@@ -47,16 +47,19 @@
         %if user and user.role in ('admin', 'friend'):
             <p>Note that you need to set this each time!!!</p>
             <select class="custom-select" id="public">
-                <option selected value="private">Private</option>
-                <option value="public">Public</option>
-                <option value="sgc">SGC TEP</option>
-                <option value="pinned">Pinned</option>
-                <option value="published">Published</option>
+                % for key, label in (('private', 'Private'), ('public', 'Public'), ('sgc', 'SGC TEP'), ('pinned', 'Pinned'), ('published', 'Published')):
+                %if public == key:
+                    <option selected value="${key}">${label}</option>
+                %else:
+                    <option value="${key}">${label}</option>
+                %endif
+
+                % endfor
               </select>
         %else:
             <div class="custom-control custom-switch">
           <input type="checkbox" class="custom-control-input user-editable-state" id="public"
-                 %if public:
+                 %if public == 'public' or public is True:  ##remove bool in future.
                     checked
                  %endif
                     >

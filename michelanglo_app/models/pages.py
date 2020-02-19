@@ -52,7 +52,7 @@ class Page(Base):
     encrypted = Column(Boolean, default=False)
     timestamp = Column(DateTime, nullable=False) #, default=datetime.datetime.utcnow)
     protected = Column(Boolean, default=False)
-    privacy = Column(Text, default='private') #private | public | published | sgc
+    privacy = Column(Text, default='private') #private | public | published | sgc | pinned
     settings = None  #watchout this ought to be a dict, but dict is mutable.
     key = None
     unencrypted_path = property(lambda self: os.path.join('michelanglo_app', 'user-data', self.identifier + '.p'))
@@ -175,6 +175,10 @@ class Page(Base):
 
     def is_public(self):
         if self.privacy == 'private':
+            return False
+        elif self.privacy is False:
+            ## This is a legacy page!
+            self.privacy = 'private'
             return False
         else:
             return True
