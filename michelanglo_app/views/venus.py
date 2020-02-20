@@ -89,7 +89,14 @@ def analyse_view(request):
     def protein_step():
         uniprot = request.params['uniprot']
         taxid = request.params['species']
-        mutation = Mutation(request.params['mutation'])
+        mutation_text = request.params['mutation']
+        ## Get analysis from memory if possible.
+        handle = uniprot + mutation_text
+        if handle in system_storage:
+            protein = system_storage[handle]
+            return {'protein': jsonable(protein), 'status': 'success'}
+        ## Do analysis
+        mutation = Mutation(mutation_text)
         protein = ProteinAnalyser(uniprot=uniprot, taxid=taxid)
         try:
             protein.load()
@@ -101,16 +108,18 @@ def analyse_view(request):
             log.info('protein mutation discrepancy error')
             return {'error': 'mutation', 'msg': protein.mutation_discrepancy(), 'status': 'error'}
         else:
-            handle = request.params['uniprot'] + request.params['mutation']
             system_storage[handle] = protein
             return {'protein': jsonable(protein), 'status': 'success'}
     ### STEP 2
     def mutation_step():
         handle = request.params['uniprot'] + request.params['mutation']
+        ## has the previous step been done?
         if handle not in system_storage:
             status = protein_step()
             if 'error' in status:
                 return status
+        #if protein.mutation has already run??
+        #no shortcut useful.
         protein = system_storage[handle]
         protein.predict_effect()
         return {'mutation': {**jsonable(protein.mutation),
@@ -132,6 +141,9 @@ def analyse_view(request):
             if 'error' in status:
                 return status
         protein = system_storage[handle]
+        if hasattr(protein, 'structural') and protein.structural is not None:
+            return {'structural': jsonable(protein.structural),
+                    'status': 'success'}
         try:
             protein.analyse_structure()
             if protein.structural:
@@ -153,6 +165,7 @@ def analyse_view(request):
             if 'error' in status:
                 return status
         protein = system_storage[handle]
+        ## if pre-run? No precatched.
         analysis = protein.analyse_FF()
         if 'error' in analysis:
             return {'status': 'error', 'error': 'pyrosetta', 'msg': analysis['error']}
@@ -162,19 +175,23 @@ def analyse_view(request):
 
 
     ### check valid
-    log.info(f'Analysis requested by {User.get_username(request)}')
     malformed = is_malformed(request, 'uniprot', 'species', 'mutation')
     if malformed:
         return {'status': malformed}
     if 'step' not in request.params:
+        log.info(f'Full analysis requested by {User.get_username(request)}')
         return {**protein_step(), **mutation_step(), **structural_step()}
     if request.params['step'] == 'protein':
+        log.info(f'Step 1 analysis requested by {User.get_username(request)}')
         return protein_step()
     elif request.params['step'] == 'mutation':
+        log.info(f'Step 2 analysis requested by {User.get_username(request)}')
         return mutation_step()
     elif request.params['step'] == 'structural':
+        log.info(f'Step 3 analysis requested by {User.get_username(request)}')
         return structural_step()
     elif request.params['step'] == 'ddG':
+        log.info(f'Step 4 analysis requested by {User.get_username(request)}')
         return ddG_step()
     elif request.params['step'] == 'fv': ## this is the same as get_uniprot but does not redundantly redownload the data.
         handle = request.params['uniprot'] + request.params['mutation']

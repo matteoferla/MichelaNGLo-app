@@ -26,6 +26,9 @@ class SysStorage(MutableMapping):
     def __iter__(self):
         return iter(self.mapping)
 
+    def __contains__(self, value):
+        return value in self.mapping
+
     def __len__(self):
         return len(self.mapping)
 
