@@ -40,6 +40,7 @@ class Venus {
         this.mutational = null;
         this.structural = null;
         this.energetical = null;
+        this.alwaysShowMutant = true;
         this.mutaColor = NGL.ColormakerRegistry.addSelectionScheme([['hotpink','_C'],["blue",'_N'],["red",'_O'],["white",'_H'],["yellow",'_S'],["orange","*"]]);
         this.documentation = {  'mut': 'Residue identity, note that because a difference in shape is present it does not mean that the structure cannot accommodate the change',
                                 'indestr': 'This is a purely based on the nature of the amino acids without taking into account the position. Despite this, it is a strong predictor.',
@@ -51,6 +52,7 @@ class Venus {
                                 'motif': 'Motifs predicted using the linear motif patterns from the ELM database. The presence of a linear motif does not mean it is valid, in fact the secondary structure is important: in a helix residues 3 along are facing the same direction, in a sheet alternating residues and in a loop it varies. If a motif is a phosphosite and the residue is not phosphorylated it is likely not legitimate.',
                                 'extlink': 'Links to external resources related to this gene'
                     }
+
     }
 
     reset() {
@@ -64,6 +66,7 @@ class Venus {
             delete window.myData;
             NGL.getStage().removeAllComponents();
         }
+        this.updateStructureOption();
         this.mutalist.html('');
         $('#results').hide();
         $('#venus_calc').removeAttr('disabled');
@@ -270,10 +273,22 @@ class Venus {
 
                 //Features
                 let locationtext = `<p>The mutation is ${this.mutational.position_as_protein_percent}% along the protein.</p>`;
-                if (this.mutational.features_near_mutation.length) {
+                const locTxter = v => `<li>${this.makeProlink(v)}:
+                                        ${v.type} (${v.description},
+                                        gnomaAD: ${v.gnomad.missense || 0} missenses,
+                                                 ${v.gnomad.nonsenses || 0} nonsenses)</li>`;
+                if (this.mutational.features_at_mutation.length) {
+                    locationtext += '<span>Encompassing features:</span>';
+                    locationtext += '<ul>';
+                    locationtext += this.mutational.features_at_mutation.map(locTxter).join('');
+                    locationtext += '</ul>';
+                }
+                const atIdx = this.mutational.features_at_mutation.map(({id}) => id);
+                const otherFeats = this.mutational.features_near_mutation.filter(v => atIdx.indexOf(v.id) === -1);
+                if (otherFeats.length) {
                     locationtext += '<span>Nearby features:</span>';
                     locationtext += '<ul>';
-                    locationtext += this.mutational.features_near_mutation.map(v => `<li>${this.makeProlink(v)}: ${v.type} (${v.description})</li>`).join('');
+                    locationtext += otherFeats.map(locTxter).join('');
                     locationtext += '</ul>';
                 }
                 this.createEntry('location', 'Location', locationtext);
@@ -318,13 +333,27 @@ class Venus {
             // activate all prolinks
             $('#results_mutalist .prolink').protein();
             // hack them to always show the mutatns.
+
+            $('[data-target="tooltip"]').tooltip();
+        })
+    }
+
+    showMutant() {
+        if (window.myData === undefined) return 0;
+        const pros = $('#results_mutalist .prolink');
+        //reset
+        pros.off('click');
+        pros.protein();
+        //add if needed
+        if (this.alwaysShowMutant) {
             const showMut = (sele) => {
                 const prot = NGL.getStage().getComponentByType('structure');
                 if (prot !== undefined) prot.addRepresentation( "hyperball", sele);
             };
-            $('#results_mutalist .prolink').click(event => setTimeout((sele) => showMut(sele),100, { sele: this.position+':A', color: this.mutaColor}));
-            $('[data-target="tooltip"]').tooltip();
-        })
+        pros.click(event => setTimeout((sele) => showMut(sele),100, { sele: this.position+':A', color: this.mutaColor}));
+        }
+
+
     }
 
     analyseddG() {
@@ -373,6 +402,7 @@ class Venus {
                                                 changes: this.structural.history.changes + 'Rosetta locally relaxed, mutated and relaxed'
                                                 }
                                     });
+                this.updateStructureOption();
                 this.createEntry('ddg','Free energy calculation', ddgtext);
             }
         //{ddG: float, scores: Dict[str, float], native:str, mutant:str, rmsd:int}
@@ -389,6 +419,7 @@ class Venus {
                                                               history: this.structural.history}])
                         .then(protein => NGL.specialOps.showResidue('viewport', this.position+':A'));
         UniprotFV.enpower();
+        this.updateStructureOption();
         let strloctext = '<p><i>Chosen model:</i> ';
         strloctext += this.makeExt("https://www.rcsb.org/structure/"+this.structural.code, this.structural.code)+'</p>';
         strloctext += `<p><i>Solvent exposure:</i> ${(this.structural.buried) ? 'buried' : 'surface'} (RSA: ${Math.round(this.structural.RSA*100)/100})</p>`;
@@ -401,12 +432,20 @@ class Venus {
             let d = Math.round(this.structural.distance_to_closest_ligand)+' &Aring;'
             strloctext += `<p><i>Closest ligand:</i> <span class="prolink" data-target="viewport" data-color="teal" data-focus="residue" data-selection="${ds}">${lig}</span> (${d})</p>`;
         }
+        // structural character
         this.createEntry('strcha', 'Structural character', strloctext);
-
         let omni = this.makeProlink(this.structural.neighbours.map(v => v.resi+':A').join(' or '), '(all)');
         let strtext = `<p>Structural neighbourhood ${omni}.</p>`;
         strtext += '<ul>'+this.structural.neighbours.map(v => `<li>${this.makeProlink(v.resi+":"+v.chain, v.resn+v.resi)} ${v.detail}</li>`).join('')+'</ul>';
         this.createEntry('neigh','Structural neighbourhood', strtext);
+    }
+
+    updateStructureOption() {
+        if (window.myData === undefined) return 0;
+        const so = $('#structureOption');
+        so.html('');
+        myData.proteins.map(({name}) => so.append(`<li><span ${this.prolink} data-load="${name}">${name}</span></li>`));
+        so.find('.prolink').each((i,e) => $(e).protein());
     }
 
     createPage () {
@@ -516,5 +555,11 @@ $('#report-btn').click(event => {
         $(event.target).html(text);
     });
 });
+
+$('#showMutant').click(event => {
+    venus.alwaysShowMutant = $(event.target).prop('checked');
+    venus.showMutant()
+    }
+)
 
 //</%text>

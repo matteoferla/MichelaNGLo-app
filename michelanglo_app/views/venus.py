@@ -92,9 +92,9 @@ def analyse_view(request):
         mutation_text = request.params['mutation']
         ## Get analysis from memory if possible.
         handle = uniprot + mutation_text
-        if handle in system_storage:
-            protein = system_storage[handle]
-            return {'protein': jsonable(protein), 'status': 'success'}
+        # if handle in system_storage:
+        #     protein = system_storage[handle]
+        #     return {'protein': jsonable(protein), 'status': 'success'}
         ## Do analysis
         mutation = Mutation(mutation_text)
         protein = ProteinAnalyser(uniprot=uniprot, taxid=taxid)
@@ -122,8 +122,11 @@ def analyse_view(request):
         #no shortcut useful.
         protein = system_storage[handle]
         protein.predict_effect()
+        featpos = protein.get_features_at_position(protein.mutation.residue_index)
+        featnear = protein.get_features_near_position(protein.mutation.residue_index)
         return {'mutation': {**jsonable(protein.mutation),
-                             'features_near_mutation': protein.get_features_near_position(protein.mutation.residue_index),
+                             'features_at_mutation': featpos,
+                             'features_near_mutation': featnear,
                              'position_as_protein_percent': round(protein.mutation.residue_index/len(protein)*100),
                              'gnomAD_near_mutation': protein.get_gnomAD_near_position()},
                 'status': 'success'}
@@ -155,6 +158,7 @@ def analyse_view(request):
             log.warning(f'Structural analysis failed {err} {type(err).__name__}.')
             return {'status': 'error'}
 
+    ## Step 4
     def ddG_step():
         handle = request.params['uniprot'] + request.params['mutation']
         if handle not in system_storage:
@@ -172,15 +176,13 @@ def analyse_view(request):
         else:
             return {'ddG': analysis} #{ddG: float, scores: Dict[str, float], native:str, mutant:str, rmsd:int}
 
-
-
     ### check valid
     malformed = is_malformed(request, 'uniprot', 'species', 'mutation')
     if malformed:
         return {'status': malformed}
     if 'step' not in request.params:
         log.info(f'Full analysis requested by {User.get_username(request)}')
-        return {**protein_step(), **mutation_step(), **structural_step()}
+        return {**protein_step(), **mutation_step(), **structural_step(), **ddG_step()}
     if request.params['step'] == 'protein':
         log.info(f'Step 1 analysis requested by {User.get_username(request)}')
         return protein_step()

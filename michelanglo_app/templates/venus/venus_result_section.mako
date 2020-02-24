@@ -86,6 +86,18 @@
                       <div class="card-body">
                         <div id="viewport" style="width:100%; height: 0; padding-bottom: 70%;">
                         </div>
+
+                        <div>
+                            <hr/>
+                            ############ toggle
+                            <div class="custom-control custom-switch">
+                              <input type="checkbox" class="custom-control-input" id="showMutant">
+                              <label class="custom-control-label" for="showMutant">Always show mutant</label>
+                            </div>
+                            ######################
+                            <h3>Structure</h3>
+                            <ul id="structureOption"><!--filled dynamically by venus.updateStructure()--></ul>
+                            </div>
                       </div>
                     </div>
                 </div>
