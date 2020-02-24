@@ -331,7 +331,9 @@ class Venus {
                 if (!!this.structural.coordinates.length) this.loadStructure();
             }
             // activate all prolinks
-            $('#results_mutalist .prolink').protein();
+            const pros = $('#results_mutalist .prolink');
+            pros.protein();
+            pros.click(event => this.showMutant.call(this) );
             // hack them to always show the mutatns.
 
             $('[data-target="tooltip"]').tooltip();
@@ -339,21 +341,14 @@ class Venus {
     }
 
     showMutant() {
-        if (window.myData === undefined) return 0;
-        const pros = $('#results_mutalist .prolink');
-        //reset
-        pros.off('click');
-        pros.protein();
-        //add if needed
         if (this.alwaysShowMutant) {
+            console.log(venus.alwaysShowMutant, this.alwaysShowMutant);
             const showMut = (sele) => {
                 const prot = NGL.getStage().getComponentByType('structure');
-                if (prot !== undefined) prot.addRepresentation( "hyperball", sele);
+                if (prot !== undefined) prot.addRepresentation("hyperball", sele);
             };
-        pros.click(event => setTimeout((sele) => showMut(sele),100, { sele: this.position+':A', color: this.mutaColor}));
+            setTimeout((sele) => showMut(sele), 100, {sele: this.position + ':A', color: this.mutaColor});
         }
-
-
     }
 
     analyseddG() {
@@ -446,6 +441,7 @@ class Venus {
         so.html('');
         myData.proteins.map(({name}) => so.append(`<li><span ${this.prolink} data-load="${name}">${name}</span></li>`));
         so.find('.prolink').each((i,e) => $(e).protein());
+
     }
 
     createPage () {
@@ -558,8 +554,7 @@ $('#report-btn').click(event => {
 
 $('#showMutant').click(event => {
     venus.alwaysShowMutant = $(event.target).prop('checked');
-    venus.showMutant()
     }
-)
+);
 
 //</%text>

@@ -45,6 +45,9 @@ window.UniprotFV = {
                                     if (NGL.specialOps.isValid('viewport',sele)) {
                                         NGL.specialOps.showDomain('viewport', sele, color);
                                         if (uniprotValue !== undefined) $(`#${uniprotValue}_modal`).modal('hide');
+                                        if (window.venus && venus.alwaysShowMutant) {
+                                            venus.showMutant.call(venus);
+                                        }
                                     } else {
                                         ops.addToast('outer','Selection out of bounds', 'Unfortunately the structure does not conver that', 'bg-warning');
                                     }
@@ -60,6 +63,9 @@ window.UniprotFV = {
                                     if (NGL.specialOps.isValid('viewport',sele)) {
                                         NGL.specialOps.showResidue('viewport', sele, color);
                                         if (uniprotValue !== undefined) $(`#${uniprotValue}_modal`).modal('hide');
+                                        if (window.venus && venus.alwaysShowMutant) {
+                                            setTimeout((sele) => showMut(sele),100, { sele: this.position+':A', color: this.mutaColor});
+                                        }
                                     } else {
                                         ops.addToast('outer','Selection out of bounds', 'Unfortunately the structure does not conver that', 'bg-warning');
                                     }
