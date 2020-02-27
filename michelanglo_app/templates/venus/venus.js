@@ -45,7 +45,7 @@ class Venus {
         this.documentation = {  'mut': 'Residue identity, note that because a difference in shape is present it does not mean that the structure cannot accommodate the change',
                                 'indestr': 'This is a purely based on the nature of the amino acids without taking into account the position. Despite this, it is a strong predictor.',
                                 'strcha': 'Model based residue details',
-                                'ddg': 'Forcefield calculations. REU is roughly kcal/mol. A hydrogen bond has about 1-2 kcal/mol. A water collision has on average 0.6 kcal/mol (Boltzmann constant &times; temperature).',
+                                'ddg': 'Forcefield calculations. Rosetta Energy Units (REU), which are proportional to kcal/mol. The score function used, ref2015, in particular is calibrated such that there is a one to one relationship (aside from predicted/empirical differeneces). A hydrogen bond has about 1-2 kcal/mol. A water collision has on average 0.6 kcal/mol (Boltzmann constant &times; temperature).',
                                 'location': 'What domains are nearby linearly &mdash;but not necessarily containing the residue',
                                 'domdet': 'what is this?',
                                 'neigh': 'Model based, what residues are within 4 &aring;ngstr&ouml;m?',
@@ -334,7 +334,7 @@ class Venus {
             const pros = $('#results_mutalist .prolink');
             pros.protein();
             pros.click(event => this.showMutant.call(this) );
-            // hack them to always show the mutatns.
+            // hack them to always show the mutants.
 
             $('[data-target="tooltip"]').tooltip();
         })
@@ -362,13 +362,14 @@ class Venus {
                 this.setStatus('All tasks complete', 'done');
                 this.energetical = msg.ddG;
                 //this.loadStructure();
-                let ddgtext = `<i>ddG (with backbone movement allowed):</i> ${Math.round(this.energetical.ddG)} <span title="Technically REU, which is an approximation to kcal/mol">predicted kcal/mol</span> `;
+                const units = '<span title="Technically REU, Rosetta Energy Units, which are approximately the same as kcal/mol when using the ref2015 force-field score function">kcal/mol</span> ';
+                let ddgtext = `<i>ddG (with backbone movement allowed):</i> ${Math.round(this.energetical.ddG)} ${units} `;
                 if (this.energetical.ddG < -5) {ddgtext += '(stabilising)'}
                 else if (this.energetical.ddG > +5) {ddgtext += '(destabilising)'}
                 else {ddgtext += '(neutral)'}
                 ddgtext += '<br/>';
                 let bb = this.energetical.scores.mutate - this.energetical.scores.relaxed;
-                ddgtext += `<i>ddG (with backbone movement forbidden):</i> ${Math.round(bb)} <span title="Technically REU, which is an approximation to kcal/mol">predicted kcal/mol</span> `;
+                ddgtext += `<i>ddG (with backbone movement forbidden):</i> ${Math.round(bb)}  ${units} `;
                 if (bb < -5) {ddgtext += '(stabilising)'}
                 else if (bb > +5) {ddgtext += '(destabilising)'}
                 else {ddgtext += '(neutral)'}

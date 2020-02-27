@@ -112,6 +112,8 @@ def route_docs(request, reply):
         return render_to_response("../templates/docs/users_n_pages.mako", reply, request)
     elif request.matchdict['id'] == 'video':
         return render_to_response("../templates/docs/video.mako", reply, request)
+    elif request.matchdict['id'] == 'venus':
+        return render_to_response("../templates/docs/venus.mako", reply, request)
     else:
         return reply
 

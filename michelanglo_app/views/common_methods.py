@@ -12,7 +12,7 @@ from Bio.PDB.MMCIF2Dict import MMCIF2Dict
 import io
 
 ## convert booleans and settings
-def is_js_true(value):
+def is_js_true(value:str):
     """
     booleans get converted into strings in json. This fixes that.
     """
