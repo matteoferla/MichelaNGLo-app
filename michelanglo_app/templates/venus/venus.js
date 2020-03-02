@@ -388,7 +388,7 @@ class Venus {
                                  liEl('ddG contributed by residue', this.energetical.ddG_residue +' kcal/mol') +
                                  liEl('Native residue terms', innerList(this.energetical.native_residue_terms))+
                                  liEl('Mutant residue terms', innerList(this.energetical.mutant_residue_terms));
-                $('#ddG_extra .modal-body').html('<ul>'+extraParts+'</ul>');
+                $('#ddG_extra .modal-body').html('<p>Detail for ddG score. For meaning, see <a href="/docs/venus" target="_blank">documentation</a>.</p><ul>'+extraParts+'</ul>');
                 myData.proteins[0].name = 'model'; //need the name.
                 myData.proteins.push({ name: "wt",
                                       type: "data",
