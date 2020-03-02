@@ -40,7 +40,7 @@ class Venus {
         this.mutational = null;
         this.structural = null;
         this.energetical = null;
-        this.alwaysShowMutant = true;
+        this.alwaysShowMutant = $('#showMutant').prop('checked'); //remembered from browser weird habit.
         this.mutaColor = NGL.ColormakerRegistry.addSelectionScheme([['hotpink','_C'],["blue",'_N'],["red",'_O'],["white",'_H'],["yellow",'_S'],["orange","*"]]);
         this.documentation = {  'mut': 'Residue identity, note that because a difference in shape is present it does not mean that the structure cannot accommodate the change',
                                 'indestr': 'This is a purely based on the nature of the amino acids without taking into account the position. Despite this, it is a strong predictor.',
@@ -377,6 +377,18 @@ class Venus {
                 if (this.energetical.scores.mutate + 3 > this.energetical.scores.mutarelax) {
                     ddgtext += `Results in backbone change (RMSD<sub>CA</sub>: ${Math.round(this.energetical.rmsd*100)/100})<br/>`;
                 }
+                ddgtext += '<button class="btn btn-outline-info" data-toggle="modal" data-target="#ddG_extra">More</button>';
+                this.createEntry('ddg','Free energy calculation', ddgtext);
+                const liEl = (l, v) => `<li><b>${l}:</b> ${v}</li>`;
+                const innerList = d => '<ul>'+Object.entries(d).map(([k, v]) => liEl(k,v)).join('')+'</ul>';
+                let extraParts = liEl('Scorefunction', this.energetical.score_fxn) +
+                                 liEl('ddG', this.energetical.ddG +' kcal/mol') +
+                                 liEl('solvatation term in ddG', this.energetical.dsol +' kcal/mol') +
+                                 liEl('Scores (meaningless due to only partial energy minimisation)', innerList(this.energetical.scores)) +
+                                 liEl('ddG contributed by residue', this.energetical.ddG_residue +' kcal/mol') +
+                                 liEl('Native residue terms', innerList(this.energetical.native_residue_terms))+
+                                 liEl('Mutant residue terms', innerList(this.energetical.mutant_residue_terms));
+                $('#ddG_extra .modal-body').html('<ul>'+extraParts+'</ul>');
                 myData.proteins[0].name = 'model'; //need the name.
                 myData.proteins.push({ name: "wt",
                                       type: "data",
@@ -399,7 +411,6 @@ class Venus {
                                                 }
                                     });
                 this.updateStructureOption();
-                this.createEntry('ddg','Free energy calculation', ddgtext);
             }
         //{ddG: float, scores: Dict[str, float], native:str, mutant:str, rmsd:int}
         });
