@@ -344,8 +344,41 @@ class Venus {
     }
 
     //step 5
-    analyse_target() {
-        //pass
+    analyse_target(mutation, algorithm) {
+        // if (this.busy === true) {
+        //     window.ops.addToast('busy', 'Please be patient', 'To prevent overuse, only one at the time', 'bg-warning');
+        //     return null;
+        // }
+        this.setStatus(`Running extra job ${mutation}`, 'working');
+        return $.post({
+            url: "venus_analyse", data: {
+                uniprot: uniprotValue,
+                species: taxidValue,
+                step: 'extra',
+                mutation: this.mutation, //the data is stored serverside for an hour. and this is one part of the hash.
+                extra: mutation,
+                algorithm: algorithm
+            }
+        }).fail(ops.addErrorToast).done(msg => {
+            if (msg.error) {
+                this.setStatus('Failure at extra job', 'crash');
+                ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
+            } else {
+                this.setStatus('All tasks complete', 'done');
+                myData.proteins.push({ name: mutation,
+                                      type: "data",
+                                      value: msg.coordinates,
+                                      ext: 'pdb',
+                                      chain: 'A',
+                                      chain_definitions:this.structural.chain_definitions,
+                                      history: {code: this.structural.history.code,
+                                                changes: algorithm+' '+msg.ddg
+                                                }
+                                    });
+                ops.addToast(mutation, 'Extra analysis complete', `${mutation} has a ddG of ${parseInt(msg.ddg)} kcal/mol (calculated via local ${algorithm})`, 'bg-success');
+                this.updateStructureOption();
+            }
+        });
     }
 
     //progress bar.
@@ -667,11 +700,20 @@ class Venus {
         const so = $('#structureOption');
         so.html('');
         myData.proteins.map(({name}) => so.append(`<li><span ${this.prolink} data-load="${name}">${name}</span></li>`));
+        // special case: mutant structure
         $('#structureOption [data-load="mutant"]').attr('data-focus','clash')
                                                   .attr('data-selection', this.position);
+        // special case: PTMs
         $('#structureOption [data-load="phosphorylated"]').attr('data-focus','residue')
                                                           .attr('data-selection','SEP or TPO or PTR or ALY or NMM or DA2 or MLZ')
                                                           .attr('data-radius', -1);
+        // special cases: custom mutations.
+        window.myData.proteins.map(({name}) => name)
+                              .filter(name => name.match(/\w\d+\w/))
+                              .forEach(name => $(`#structureOption [data-load="${name}"]`)
+                                                                .attr('data-focus', 'clash')
+                                                                .attr('data-selection', name.slice(1,-1)+':A')
+                                );
         so.find('.prolink').each((i,e) => $(e).protein());
 
     }
