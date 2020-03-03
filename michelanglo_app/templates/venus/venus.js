@@ -1,5 +1,7 @@
 //<%text>
-//venus main.mako imports uniprot_modal.js 's UniprotFV.
+// venus main.mako imports uniprot_modal.js 's UniprotFV.
+// .venus-no-mike css classes do not get ported to Michelanglo
+// .venus-plain-mike css classes is ported as text to Michelanglo
 
 class Venus {
     constructor() {
@@ -33,7 +35,6 @@ class Venus {
         };
         this.mutalist = $('#results_mutalist');
         // these will be declared later. these here are for documentation.
-
         this.mutation = null;
         this.position = null;
         this.protein = null;
@@ -53,6 +54,8 @@ class Venus {
                                 'motif': 'Motifs predicted using the linear motif patterns from the ELM database. The presence of a linear motif does not mean it is valid, in fact the secondary structure is important: in a helix residues 3 along are facing the same direction, in a sheet alternating residues and in a loop it varies. If a motif is a phosphosite and the residue is not phosphorylated it is likely not legitimate.',
                                 'extlink': 'Links to external resources related to this gene'
                     }
+        this.entry_order = Object.keys(this.documentation); //order is changed dynamically.
+        this.animation_speed = 1000;
 
     }
 
@@ -77,24 +80,8 @@ class Venus {
         $('#fv').html('');
     }
 
-    setStatus(label, mode) { //working, crash, done
-        const s = $('#results_status');
-        switch(mode) {
-          case 'working':
-            s.html(`<div class="alert alert-warning w-100"><i class="far fa-dna fa-spin"></i> ${label}</div>`);
-            break;
-          case 'crash':
-            s.html(`<div class="alert alert-danger w-100"><i class="far fa-skull-crossbones"></i> ${label}</div>`);
-            break;
-        case 'done':
-            s.html(`<div class="alert alert-success w-100"><i class="fas fa-check"></i> ${label}</div>`);
-            setTimeout(() => s.hide(), 1000);
-            break;
-          default:
-            s.html(label);
-        }
-    }
-
+    //###################  Steps
+    //Ajax
     analyse(step) {
         return $.post({
             url: "venus_analyse", data: {
@@ -106,87 +93,7 @@ class Venus {
         }).fail(ops.addErrorToast)
     }
 
-    //an 'entry' is a flush li within the card (within these there may be li).
-    createEntry(id, title, text) { //adds or creates the entry.
-        const el = $('#'+id);
-        const keys = Object.keys(this.documentation);
-        const n = keys.indexOf(id);
-        if (el.length === 1) {
-            el.html(text);
-        } else if (this.documentation[id] === undefined) {
-            this.mutalist.append(this.makeEntry(id, title, text));
-        } else if (n === -1) {
-            this.mutalist.append(this.makeEntry(id, title, text)) //non standard entry
-        } else if (n === 0) {
-            this.mutalist.prepend(this.makeEntry(id, title, text)) //first entry
-        } else {
-                const prev = keys.map((k,i) => [k,i])
-                                 .filter(([k,i]) => ($('#'+k).length === 1) && (i < n));
-                if (prev.length === 0) {this.mutalist.append(this.makeEntry(id, title, text))}
-                else {$("#"+prev.reverse()[0][0]).parents('li').after(this.makeEntry(id, title, text))}
-
-        }
-        $('[data-toggle="tooltip"]').tooltip();
-        setTimeout((venus) => {
-            //$('#'+id+' [data-toggle="tooltip"]').tooltip();
-            const pros = $('#'+id+' .prolink');
-            pros.protein();
-            pros.click(event => venus.showMutant.call(venus) );
-        }, 200, this);
-
-    }
-
-    //make methods output text
-    makeEntry(id, title, text) {
-        const q = (this.documentation[id] !== undefined) ? ' <i class="far fa-question-circle"></i></span>' : '';
-        const tt = (this.documentation[id] !== undefined) ? `data-toggle="tooltip" title="${this.documentation[id]}"` : '';
-        return `<li class="list-group-item">
-                    <div class="row">
-                        <div class="col-12 col-md-3">
-                            <span class="font-weight-bold text-right align-middle" ${tt}>
-                            ${title}${q}
-                             </span>
-                        </div>
-                        <div class="col-12 col-md-9 text-left border-left" id="${id}">
-                            ${text}
-                        </div>
-                    </div>
-                </li>`
-    }
-
-    makeProlink(v, label) {
-        // near static method. this.prolink
-        // v string and label exists.
-        // v is array of gnomad
-        // v is dictionary
-        if (typeof v === "string") {
-            return `<span ${this.prolink} data-color="cyan" data-focus="residue" data-selection="${v}">${label}</span>`;
-        }
-        else if (Array.isArray(v)) {
-            //gnomad
-            //["gnomAD_101_101_rs1131691997",101,101,"MODERATE","K101R (rs1131691997)",0]
-            let p = v[4];
-            if (parseInt(v[1]) === this.position) p = '<b>'+p+'</b>';
-            return `<span  ${this.prolink} data-focus="residue" data-color="cyan" data-selection="${v[1]}:A">${p}</span>`;
-        }
-        else if (v.x !== undefined) {
-            //feature!
-            //{"x":105,"y":107,"description":"strand","id":"strand_105_107","type":"strand"}
-            let df = 'residue';
-            let ds = v.x+':A';
-            let p = 'Residue '+v.x;
-            if (parseInt(v.x)=== this.position) p = '<b>Residue '+v.x+'</b>';
-            let dc='cyan';
-            if (v.x !== v.y) { df = 'domain'; ds = `${v.x}-${v.y}:A`; p = `Residues ${v.x}&ndash;${v.y}`; dc='darkgreen';}
-            return `<span  ${this.prolink} data-color="${dc}"  data-focus="${df}" data-selection="${ds}">${p}</span>`;
-            }
-        else {
-            console.log('ERRRROR'+JSON.stringify(v));
-        }
-        }
-
-    makeExt(url, txt) {return `<a href="${url}" target="_blank">${txt} <i class="far fa-external-link-square"></i></a>`}
-
+    //step 0
     isValidMutation() {
         //check the mutation is valid
         //this is a copy paste of the fun from pdb_staging_insert.js
@@ -206,6 +113,7 @@ class Venus {
         return true;
     }
 
+    //step 1
     analyseProtein() {
         //step one
         this.mutation = $('#mutation').val().replace('p.','').toUpperCase();
@@ -249,48 +157,7 @@ class Venus {
 
     }
 
-    createLocation() {
-        //Features
-        let locationtext = `<p>The mutation is ${this.mutational.position_as_protein_percent}% along the protein.</p>`;
-        const effectSplit = v => {
-            if (! this.energetical_gnomAD) {return ''}
-            else {
-                let effect = Object.keys(this.energetical_gnomAD)
-                                  .filter(g => { //which are within?
-                                                let i = parseInt(g.match(/\d+/)[0]);
-                                                return v.x <= i && v.y >= i;
-                                                })
-                                  .map(g => this.energetical_gnomAD[g])
-                                  .reduce((acc,gs,i) => {
-                                      if (gs > 2) {acc.destabilising++}
-                                      else if (gs < -2) {acc.stabilising++}
-                                      else {acc.neutral++}
-                                      return acc;
-                                  }, {destabilising: 0, neutral: 0, stabilising: 0});
-                return ` (stabilising: ${effect.stabilising}, neutral: ${effect.neutral}, destabilising: ${effect.destabilising})`;
-            }};
-
-        const locTxter = v => `<li>${this.makeProlink(v)}:
-                                ${v.type} (${v.description},
-                                gnomaAD: ${v.gnomad.missense || 0} missenses${effectSplit(v)},
-                                         ${v.gnomad.nonsenses || 0} nonsenses)</li>`;
-        if (this.mutational.features_at_mutation.length) {
-            locationtext += '<span>Encompassing features:</span>';
-            locationtext += '<ul>';
-            locationtext += this.mutational.features_at_mutation.map(locTxter).join('');
-            locationtext += '</ul>';
-        }
-        const atIdx = this.mutational.features_at_mutation.map(({id}) => id);
-        const otherFeats = this.mutational.features_near_mutation.filter(v => atIdx.indexOf(v.id) === -1);
-        if (otherFeats.length) {
-            locationtext += '<span>Nearby features:</span>';
-            locationtext += '<ul>';
-            locationtext += otherFeats.map(locTxter).join('');
-            locationtext += '</ul>';
-        }
-        this.createEntry('location', 'Location', locationtext);
-    }
-
+    //step 2
     analyseMutation() {
         //step 2
         this.setStatus('Running step 2/4', 'working');
@@ -341,7 +208,16 @@ class Venus {
                     let elmtext = '<p>Some of the following predicted motifs might be valid:</p>';
                     elmtext += '<ul>';
                     // converts a regex str to a sele str.
-                    const reg2sele = (regex,offset) => regex.replace('$','').replace(')','').replace('(','').replace('^','').replace(/\[.*?\]/g, 'X').split('').map((v,i)=> (v !== '.') ? i + offset : null).filter(v => v !== null).map(v => v+':A').join(' or ');
+                    const reg2sele = (regex,offset) => regex.replace('$','')
+                                                            .replace(')','')
+                                                            .replace('(','')
+                                                            .replace('^','')
+                                                            .replace(/\[.*?\]/g, 'X')
+                                                            .replace(/\{(\d?)\,(\d?)}/,(match, p1, p2, offset, string) => 'X'.repeat(parseInt(p1))) //will need fixing...
+                                                            .split('')
+                                                            .map((v,i)=> (v !== '.') ? i + offset : null)
+                                                            .filter(v => v !== null).map(v => v+':A')
+                                                            .join(' or ');
                     elmtext += this.mutational.elm.map(v => `<li>${this.makeProlink(reg2sele(v.regex, v.x), `Residues ${v.x}&ndash;${v.y}`)}: <span data-target="tooltip" title="${v.description}">${v.name} ${v.status} (${v.regex})</li>`).join('');
                     elmtext += '</ul>';
                     this.createEntry('motif','Motif', elmtext);
@@ -350,6 +226,7 @@ class Venus {
         })
     }
 
+    //step 3
     analyseStructural() {
         //step 3
         this.setStatus('Running step 3/4', 'working');
@@ -370,17 +247,7 @@ class Venus {
         })
     }
 
-    showMutant() {
-        if (this.alwaysShowMutant) {
-            console.log(venus.alwaysShowMutant, this.alwaysShowMutant);
-            const showMut = (sele) => {
-                const prot = NGL.getStage().getComponentByType('structure');
-                if (prot !== undefined) prot.addRepresentation("hyperball", sele);
-            };
-            setTimeout((sele) => showMut(sele), 100, {sele: this.position + ':A', color: this.mutaColor});
-        }
-    }
-
+    //step 4
     analyseddG() {
         //step 4
         this.setStatus('Running step 4/5', 'working');
@@ -407,7 +274,7 @@ class Venus {
                 if (this.energetical.scores.mutate + 3 > this.energetical.scores.mutarelax) {
                     ddgtext += `Results in backbone change (RMSD<sub>CA</sub>: ${Math.round(this.energetical.rmsd*100)/100})<br/>`;
                 }
-                ddgtext += '<button class="btn btn-outline-info" data-toggle="modal" data-target="#ddG_extra">More</button>';
+                ddgtext += '<button class="btn btn-outline-info venus-no-mike" data-toggle="modal" data-target="#ddG_extra">More</button>';
                 this.createEntry('ddg','Free energy calculation', ddgtext);
                 const liEl = (l, v) => `<li><b>${l}:</b> ${v}</li>`;
                 const innerList = d => '<ul>'+Object.entries(d).map(([k, v]) => liEl(k,v)).join('')+'</ul>';
@@ -452,11 +319,13 @@ class Venus {
                                                 }
                                     });
                 }
+                this.updateStructureOption();
             }
         //{ddG: float, scores: Dict[str, float], native:str, mutant:str, rmsd:int}
         });
     }
 
+    //step 5
     analyseddG_gnomad() {
         //step 5
         this.setStatus('Running step 5/5', 'working');
@@ -469,8 +338,297 @@ class Venus {
                 this.energetical_gnomAD = msg.gnomAD_ddG;
                 //refill
                 this.createLocation();
+                this.activate_data_gnomad();
             }
         });
+    }
+
+    //step 5
+    analyse_target() {
+        //pass
+    }
+
+    //progress bar.
+    setStatus(label, mode) { //working, crash, done
+        const s = $('#results_status');
+        switch(mode) {
+          case 'working':
+            s.html(`<div class="alert alert-warning w-100"><i class="far fa-dna fa-spin"></i> ${label}</div>`);
+            break;
+          case 'crash':
+            s.html(`<div class="alert alert-danger w-100"><i class="far fa-skull-crossbones"></i> ${label}</div>`);
+            break;
+        case 'done':
+            s.html(`<div class="alert alert-success w-100"><i class="fas fa-check"></i> ${label}</div>`);
+            setTimeout(() => s.hide(), this.animation_speed);
+            break;
+          default:
+            s.html(label);
+        }
+    }
+
+    //###################  Entry
+    //an 'entry' is a flush li within the card (within these there may be li).
+    createEntry(id, title, text) { //adds or creates the entry.
+        const el = $('#'+id);
+        const n = this.entry_order.indexOf(id);
+        // add entry appropriately
+        const entry = $(this.makeEntry(id, title, text));
+        entry.hide(0);
+        if (el.length === 1) {
+            //refresh case.
+            el.parents('li').addClass('text-muted').addClass('bg-light');
+            el.html(text); //title will be ignored.
+            setTimeout(() => el.parents('li').removeClass('text-muted').removeClass('bg-light'), this.animation_speed);
+        } else if (this.documentation[id] === undefined) {
+            this.mutalist.append(entry);
+            entry.show(this.animation_speed);
+        } else if (n === -1) {
+            this.mutalist.append(entry) //non standard entry
+            entry.show(this.animation_speed);
+        } else if (n === 0) {
+            this.mutalist.prepend(entry) //first entry
+            entry.show(this.animation_speed);
+        } else {
+                const prev = this.entry_order.map((k,i) => [k,i])
+                                 .filter(([k,i]) => ($('#'+k).length === 1) && (i < n));
+                if (prev.length === 0) {this.mutalist.append(entry); entry.show(this.animation_speed);}
+                else {$("#"+prev.reverse()[0][0]).parents('li').after(entry); entry.show(this.animation_speed);}
+
+        }
+
+        //activate parts.
+        //the DOM changes need to take effect.
+        setTimeout(([venus, id]) => { //venus = this of this class
+            const parent = $('#'+id).parents('li');
+            const pros = parent.find('.prolink');
+            pros.protein();
+            pros.click(event => venus.showMutant.call(venus) );
+            parent.find('.venus-entry-up').click(event => venus.moveEntry.call(venus, id, 'up'));
+            parent.find('.venus-entry-down').click(event => venus.moveEntry.call(venus, id, 'down'));
+            parent.find('.venus-entry-kill').click(event => venus.killEntry.call(venus, id));
+            parent.find('[data-toggle="tooltip"]').tooltip();
+        }, 100, [this, id]);
+
+    }
+
+    moveEntry(id, direction) {
+        console.log('move!!');
+        // documentation also determines the order.
+        const n = this.entry_order.indexOf(id);
+        if (n === -1) return null; //silent error.
+        let offset = direction === 'up' ? -1 : 1;
+        console.log(offset);
+        let d = this.entry_order.splice(n, 1)[0];
+        console.log(id);
+        console.log(d);
+        console.log(n);
+        this.entry_order.splice(n + offset, 0, d);
+        // get the existing element, break it up, destroy it and remake it.
+        const el = $('#'+id);
+        const text = el.html();
+        const title = el.parent().find('span').eq(0).html();
+        const li = el.parents('li');
+        li.hide(this.animation_speed);
+        setTimeout(() => {li.detach();
+                                 this.createEntry(id, title, text);}, this.animation_speed);
+        if (id === 'location') this.activate_data_gnomad();
+        }
+
+    killEntry(id) {
+        console.log('die!!');
+        const el = $('#'+id).parents('li').hide(this.animation_speed);
+        setTimeout(()=> el.detach(), this.animation_speed);
+    }
+
+    //###################  sprintf
+    //make methods output text
+    makeEntry(id, title, text) {
+        if (this.documentation[id] !== undefined) {
+            //pass
+        }
+        else if (title.includes('<i class="far fa-question-circle"></i></span>')) {
+            //pass
+        }
+        else {
+            title +=' <i class="far fa-question-circle"></i></span>';
+        }
+        const tt = (this.documentation[id] !== undefined) ? `data-toggle="tooltip" title="${this.documentation[id]}"` : '';
+        return `<li class="list-group-item">
+                    <div class="row">
+                        <div class="col-12 col-md-3">
+                        <div class="btn-group mb-3 d-flex justify-content-center venus-no-mike" role="group" aria-label="Basic example">
+                          <button type="button" class="btn btn-sm btn-outline-secondary venus-entry-up"><i class="far fa-caret-up"></i></button>
+                          <button type="button" class="btn btn-sm btn-outline-secondary venus-entry-down"><i class="far fa-caret-down"></i></button>
+                          <button type="button" class="btn btn-sm btn-outline-secondary venus-entry-kill"><i class="far fa-times"></i></button>
+                        </div>
+                            <span class="font-weight-bold text-right align-middle" ${tt}>
+                            ${title}
+                             </span>
+                        </div>
+                        <div class="col-12 col-md-9 text-left border-left" id="${id}">
+                            ${text}
+                        </div>
+                    </div>
+                </li>`
+    }
+
+    makeProlink(v, label) {
+        // near static method. this.prolink
+        // v string and label exists.
+        // v is array of gnomad
+        // v is dictionary
+        if (typeof v === "string") {
+            return `<span ${this.prolink} data-color="cyan" data-focus="residue" data-selection="${v}">${label}</span>`;
+        }
+        else if (Array.isArray(v)) {
+            //gnomad
+            //["gnomAD_101_101_rs1131691997",101,101,"MODERATE","K101R (rs1131691997)",0]
+            let p = v[4];
+            if (parseInt(v[1]) === this.position) p = '<b>'+p+'</b>';
+            return `<span  ${this.prolink} data-focus="residue" data-color="cyan" data-selection="${v[1]}:A">${p}</span>`;
+        }
+        else if (v.x !== undefined) {
+            //feature!
+            //{"x":105,"y":107,"description":"strand","id":"strand_105_107","type":"strand"}
+            let df = 'residue';
+            let ds = v.x+':A';
+            let p = 'Residue '+v.x;
+            if (parseInt(v.x)=== this.position) p = '<b>Residue '+v.x+'</b>';
+            let dc='cyan';
+            if (v.x !== v.y) { df = 'domain'; ds = `${v.x}-${v.y}:A`; p = `Residues ${v.x}&ndash;${v.y}`; dc='darkgreen';}
+            return `<span  ${this.prolink} data-color="${dc}"  data-focus="${df}" data-selection="${ds}">${p}</span>`;
+            }
+        else {
+            console.log('ERRRROR'+JSON.stringify(v));
+        }
+        }
+
+    makeExt(url, txt) {
+        //sprintf an external link
+        return `<a href="${url}" target="_blank">${txt} <i class="far fa-external-link-square"></i></a>`}
+
+    //###################  other
+    createLocation() {
+        //Features
+        let locationtext = `<p>The mutation is ${this.mutational.position_as_protein_percent}% along the protein.</p>`;
+        const effectSplit = v => {
+            if (! this.energetical_gnomAD) {return ''}
+            else {
+                let gnomads = Object.keys(this.energetical_gnomAD)
+                                      .filter(g => { //which are within?
+                                                    let i = parseInt(g.match(/\d+/)[0]);
+                                                    return v.x <= i && v.y >= i;
+                                                    });
+                let effect = gnomads.map(g => this.energetical_gnomAD[g])
+                                    .reduce((acc,gs,i) => {
+                                          if (gs > 2) {acc.destabilising++}
+                                          else if (gs < -2) {acc.stabilising++}
+                                          else {acc.neutral++}
+                                          return acc;
+                                      }, {destabilising: 0, neutral: 0, stabilising: 0});
+                if (Object.values(effect).reduce((a,v) => a+v, 0) === 0) return '';
+                let variants = gnomads.map(g => `${g} (≈${parseInt(this.energetical_gnomAD[g])} kcal/mol)`).join(', ');
+                return ` <span class="underlined venus-plain-mike" style="cursor: pointer;"
+                                data-toggle="tooltip" title="${variants}"
+                                data-gnomad='${JSON.stringify(gnomads)}'
+                                >(`+Object.entries(effect)
+                                  .filter(([k,v]) => v !== 0)
+                                  .map(([k,v]) => `${k}: ${v}`).join(', ')
+                           +')</span>';
+            }};
+
+        const locTxter = v => `<li>${this.makeProlink(v)}:
+                                ${v.type} (${v.description}),
+                                <br/>
+                                <i>gnomAD missenses</i>: ${v.gnomad.missense || 0}${effectSplit(v)},<br/>
+                                <i>gnomAD nonsenses</i>: ${v.gnomad.nonsenses || 0}.</li>`;
+        if (this.mutational.features_at_mutation.length) {
+            locationtext += '<span>Encompassing features:</span>';
+            locationtext += '<ul>';
+            locationtext += this.mutational.features_at_mutation.map(locTxter).join('');
+            locationtext += '</ul>';
+        }
+        const atIdx = this.mutational.features_at_mutation.map(({id}) => id);
+        const otherFeats = this.mutational.features_near_mutation.filter(v => atIdx.indexOf(v.id) === -1);
+        if (otherFeats.length) {
+            locationtext += '<br/><span>Nearby features:</span>';
+            locationtext += '<ul>';
+            locationtext += otherFeats.map(locTxter).join('');
+            locationtext += '</ul>';
+        }
+        this.createEntry('location', 'Location', locationtext);
+    }
+
+    activate_data_gnomad() { //called by step 5.
+                const dg = $('[data-gnomad]');
+                dg.off('click'); //Unsure when this would occur.
+                dg.click(event => {
+                    $('#gnomad_extra').modal('show');
+                    const el = $(event.target);
+                    let content = '<p>Mutations within feature present in the healthy population (gnomAD). Note that the free energy calculations are very crude for expediency (local repacking only).</p>';
+                    content += '<ul class="fa-ul">';
+                    const addLi = mutation => {
+                        let detail = this.get_gnomAD_details(mutation);
+                        //deal with homozygous icon.
+                        let icon = detail.homozygous === 0 ? 'far fa-adjust' : 'fas fa-circle';
+                        let hom = `${detail.homozygous} homozygous cases`;
+                        return `<li><span class="fa-li" data-toggle="tooltip" title="${hom}">
+                                    <i class="far ${icon}"></i></span>
+                                    ${detail.description} (≈${parseInt(this.energetical_gnomAD[mutation])} kcal/mol)
+                                    <br/>
+                                    <div class="btn-group small" role="group" aria-label="Basic example">
+                                      <button type="button" class="btn btn-outline-info"
+                                                data-toggle="protein" data-selection="${detail.x}:A" data-focus="residue" data-title="${detail.description} (wild type shown)"
+                                                >
+                                      show wild type (${this.names[mutation[0]]})</button>
+                                      <button type="button" class="btn btn-outline-info modal-hider"
+                                      data-mutation="${mutation}" data-algorithm="repack">
+                                      show variant (${this.names[mutation.slice(-1)]}) (fast prediction)
+                                      </button>
+                                      <button type="button" class="btn btn-outline-info modal-hider"
+                                      data-mutation="${mutation}" data-algorithm="relax">show variant (${this.names[mutation.slice(-1)]}) (accurate prediction)</button>
+                                    </div>
+                                </li>`;
+                    };
+                    content += el.data('gnomad').map(v => addLi(v)).join('');
+                    content +='</ul>';
+                    $('#gnomad_extra .modal-body').html(content);
+                    const pros =$('#gnomad_extra [data-toggle="protein"]');
+                    pros.each((i,e) => $(e).protein());
+                    pros.click(event => $('#gnomad_extra').modal('hide'));
+                    $('#gnomad_extra .modal-hider').click(event => {
+                                $('#gnomad_extra').modal('hide');
+                                const mutation = $(event.target).data('mutation');
+                                const algorithm =  $(event.target).data('algorithm');
+                                window.ops.addToast('calculatin'+mutation, 'Prediction in progress', 'The model requested will appear below the structural viewport when available', 'bg-info');
+                                this.analyse_target(mutation, algorithm);
+                    });
+
+                });
+    }
+
+    showMutant() {
+        if (this.alwaysShowMutant) {
+            console.log(venus.alwaysShowMutant, this.alwaysShowMutant);
+            const showMut = (sele) => {
+                const prot = NGL.getStage().getComponentByType('structure');
+                if (prot !== undefined) prot.addRepresentation("hyperball", sele);
+            };
+            setTimeout((sele) => showMut(sele), 100, {sele: this.position + ':A', color: this.mutaColor});
+        }
+    }
+
+    get_gnomAD_details (mutation) {
+        // mutation is str "A23Q" returns { id: "gnomAD_114_114_rs1163968308", x: 114, y: 114, impact: "MODERATE", description: "V114L (rs1163968308)", homozygous: 0 }
+        //Oh dear. Python Variant object (gnomad) is saved as string.
+        return Object.fromEntries(this.protein.gnomAD.filter(v => v.includes(mutation))[0]
+                                                    .replace(/Variant\((.*)\)/,'$1')
+                                                    .replace(/\'/g,'')
+                                                    .split(',')
+                                                    .map(v => v.split('='))
+                                                    .map(([k,v]) => [k.trim(), isNaN(parseInt(v)) ? v : parseInt(v)])
+                                        );
     }
 
     loadStructure () {
@@ -594,22 +752,22 @@ vbtn.click(e => {
 
 $('#new_analysis').click(e => venus.reset.call(venus));
 
-const alert = text => `<div class="alert alert-danger"><b>To do</b> ${text}</div>`;
-
-$('#results_mutalist').parent().append([//alert('rewire NGL viewport following screen'),
-                              //alert('pipe structure to PDB offset fix.'),
-                              //alert('structural route.'),
-                              //alert('autoload the sequence chosen by Analyser.get_best_model'),
-                              alert('URGENT!!! write documentation you idiot!'),
-                              alert('add collapsed sequence viewer'),
-                              alert('add rudimentary scoring metric to bump up entries'),
-                              alert('deal with truncations'),
-                              alert('b factor and disorder'),
-                              alert('improve useless structurally class'),
-                              alert('Mike exporter --make selective'),
-                              alert('Fix load of swissmodel. ?! Why did this fix itself??'),
-                              alert('cp the code for the domains from table ---what does this mean?'),
-                             ]);
+// const alert = text => `<div class="alert alert-danger"><b>To do</b> ${text}</div>`;
+//
+// $('#results_mutalist').parent().append([//alert('rewire NGL viewport following screen'),
+//                               //alert('pipe structure to PDB offset fix.'),
+//                               //alert('structural route.'),
+//                               //alert('autoload the sequence chosen by Analyser.get_best_model'),
+//                               alert('URGENT!!! write documentation you idiot!'),
+//                               alert('add collapsed sequence viewer'),
+//                               alert('add rudimentary scoring metric to bump up entries'),
+//                               alert('deal with truncations'),
+//                               alert('b factor and disorder'),
+//                               alert('improve useless structurally class'),
+//                               alert('Mike exporter --make selective'),
+//                               alert('Fix load of swissmodel. ?! Why did this fix itself??'),
+//                               alert('cp the code for the domains from table ---what does this mean?'),
+//                              ]);
 
 // for now....
 $('#report-btn').click(event => {

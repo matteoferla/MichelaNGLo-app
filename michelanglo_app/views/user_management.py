@@ -12,7 +12,7 @@ the reply "status" and occasionally "username"
 The modal that controls it is `login/user_modal.mako`. However the content is controlled by a ajax to `/get` to get the relevant `*_modalcont.mako` (content).
 """
 from pyramid.view import view_config
-from .common_methods import notify_admin
+from .common_methods import notify_admin, is_malformed
 from ..models import User, Page
 
 import time
@@ -60,11 +60,11 @@ def has_exceeded_tries(request):
 @log_reply
 def user_view(request):
     # sort out inputs
-    action   = request.params['action']
-    if 'username' in request.params:
-        username = sanitise_text(request.params['username']).strip()
-    else:
-        username ='ERROR'
+    malformed = is_malformed(request, 'action', 'username')
+    if malformed:
+        return malformed
+    action = request.params['action']
+    username = sanitise_text(request.params['username']).strip()
     if 'password' in request.params:
         password = sanitise_text(request.params['password']).strip()
     else:
@@ -176,16 +176,16 @@ def permission(request, page, mode='edit', key_label='encryption_key'):
     user = request.user
     if page is None:
         request.response.status_int = 404
-        log.warn(f'{User.get_username(request)} requested a missing page {page}')
+        log.warning(f'{User.get_username(request)} requested a missing page {page}')
         return {'status': 'page not found'}
     elif not page.existant: #but used to exist.
         request.response.status_int = 410
-        log.warn(f'{User.get_username(request)} requested a deleted page')
+        log.warning(f'{User.get_username(request)} requested a deleted page')
         return {'status': 'page no longer existent'}
     elif page.encrypted:
         if key_label not in request.params:
             request.response.status_int = 403
-            log.warn(f'{User.get_username(request)} requested an encrypted page {page.identifier} without {key_label}')
+            log.warning(f'{User.get_username(request)} requested an encrypted page {page.identifier} without {key_label}')
             return {'status': 'page requires key'}
         else:
             page.key = request.params[key_label].encode('utf-8')
@@ -207,13 +207,13 @@ def permission(request, page, mode='edit', key_label='encryption_key'):
             return {'status': 'Page not found!'}
         if mode != 'view' and not user:
             request.response.status_int = 401
-            log.warn(f'{User.get_username(request)} not authorised to {mode} page {page.identifier}')
+            log.warning(f'{User.get_username(request)} not authorised to {mode} page {page.identifier}')
             return {'status': f'not authorised to {mode} page without at least logging in'}
         elif mode != 'view' and not (page.identifier in user.owned.pages or
                                       user.role == 'admin' or ('freelyeditable' in page.settings and page.settings['freelyeditable'])):
             ## only owners and admins can edit freely.
             request.response.status_int = 403
-            log.warn(f'{User.get_username(request)} not authorised to {mode} page {page.identifier}')
+            log.warning(f'{User.get_username(request)} not authorised to {mode} page {page.identifier}')
             return {'status': f'not authorised to {mode} page'}
         else:
             return {'status': 'OK'}
