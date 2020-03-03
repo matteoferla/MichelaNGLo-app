@@ -40,12 +40,13 @@ class Venus {
         this.mutational = null;
         this.structural = null;
         this.energetical = null;
+        this.energetical_gnomAD = null;
         this.alwaysShowMutant = $('#showMutant').prop('checked'); //remembered from browser weird habit.
         this.mutaColor = NGL.ColormakerRegistry.addSelectionScheme([['hotpink','_C'],["blue",'_N'],["red",'_O'],["white",'_H'],["yellow",'_S'],["orange","*"]]);
         this.documentation = {  'mut': 'Residue identity, note that because a difference in shape is present it does not mean that the structure cannot accommodate the change',
                                 'indestr': 'This is a purely based on the nature of the amino acids without taking into account the position. Despite this, it is a strong predictor.',
                                 'strcha': 'Model based residue details',
-                                'ddg': 'Forcefield calculations. Rosetta Energy Units (REU), which are proportional to kcal/mol. The score function used, ref2015, in particular is calibrated such that there is a one to one relationship (aside from predicted/empirical differeneces). A hydrogen bond has about 1-2 kcal/mol. A water collision has on average 0.6 kcal/mol (Boltzmann constant &times; temperature).',
+                                'ddg': 'Forcefield calculations. A negative value is stabilising, and a value of 1-2 kcal/mol is neutral. A hydrogen bond has about 1-2 kcal/mol. For more see documentation.',
                                 'location': 'What domains are nearby linearly &mdash;but not necessarily containing the residue',
                                 'domdet': 'what is this?',
                                 'neigh': 'Model based, what residues are within 4 &aring;ngstr&ouml;m?',
@@ -61,6 +62,7 @@ class Venus {
         this.structural = null;
         this.position = null;
         this.energetical = null;
+        this.energetical_gnomAD = null;
         delete window.myData;
         if (window.myData !== undefined) {
             delete window.myData;
@@ -124,6 +126,14 @@ class Venus {
                 else {$("#"+prev.reverse()[0][0]).parents('li').after(this.makeEntry(id, title, text))}
 
         }
+        $('[data-toggle="tooltip"]').tooltip();
+        setTimeout((venus) => {
+            //$('#'+id+' [data-toggle="tooltip"]').tooltip();
+            const pros = $('#'+id+' .prolink');
+            pros.protein();
+            pros.click(event => venus.showMutant.call(venus) );
+        }, 200, this);
+
     }
 
     //make methods output text
@@ -239,6 +249,48 @@ class Venus {
 
     }
 
+    createLocation() {
+        //Features
+        let locationtext = `<p>The mutation is ${this.mutational.position_as_protein_percent}% along the protein.</p>`;
+        const effectSplit = v => {
+            if (! this.energetical_gnomAD) {return ''}
+            else {
+                let effect = Object.keys(this.energetical_gnomAD)
+                                  .filter(g => { //which are within?
+                                                let i = parseInt(g.match(/\d+/)[0]);
+                                                return v.x <= i && v.y >= i;
+                                                })
+                                  .map(g => this.energetical_gnomAD[g])
+                                  .reduce((acc,gs,i) => {
+                                      if (gs > 2) {acc.destabilising++}
+                                      else if (gs < -2) {acc.stabilising++}
+                                      else {acc.neutral++}
+                                      return acc;
+                                  }, {destabilising: 0, neutral: 0, stabilising: 0});
+                return ` (stabilising: ${effect.stabilising}, neutral: ${effect.neutral}, destabilising: ${effect.destabilising})`;
+            }};
+
+        const locTxter = v => `<li>${this.makeProlink(v)}:
+                                ${v.type} (${v.description},
+                                gnomaAD: ${v.gnomad.missense || 0} missenses${effectSplit(v)},
+                                         ${v.gnomad.nonsenses || 0} nonsenses)</li>`;
+        if (this.mutational.features_at_mutation.length) {
+            locationtext += '<span>Encompassing features:</span>';
+            locationtext += '<ul>';
+            locationtext += this.mutational.features_at_mutation.map(locTxter).join('');
+            locationtext += '</ul>';
+        }
+        const atIdx = this.mutational.features_at_mutation.map(({id}) => id);
+        const otherFeats = this.mutational.features_near_mutation.filter(v => atIdx.indexOf(v.id) === -1);
+        if (otherFeats.length) {
+            locationtext += '<span>Nearby features:</span>';
+            locationtext += '<ul>';
+            locationtext += otherFeats.map(locTxter).join('');
+            locationtext += '</ul>';
+        }
+        this.createEntry('location', 'Location', locationtext);
+    }
+
     analyseMutation() {
         //step 2
         this.setStatus('Running step 2/4', 'working');
@@ -271,27 +323,7 @@ class Venus {
                 //structural card
                 // TO COPYPASTE
 
-                //Features
-                let locationtext = `<p>The mutation is ${this.mutational.position_as_protein_percent}% along the protein.</p>`;
-                const locTxter = v => `<li>${this.makeProlink(v)}:
-                                        ${v.type} (${v.description},
-                                        gnomaAD: ${v.gnomad.missense || 0} missenses,
-                                                 ${v.gnomad.nonsenses || 0} nonsenses)</li>`;
-                if (this.mutational.features_at_mutation.length) {
-                    locationtext += '<span>Encompassing features:</span>';
-                    locationtext += '<ul>';
-                    locationtext += this.mutational.features_at_mutation.map(locTxter).join('');
-                    locationtext += '</ul>';
-                }
-                const atIdx = this.mutational.features_at_mutation.map(({id}) => id);
-                const otherFeats = this.mutational.features_near_mutation.filter(v => atIdx.indexOf(v.id) === -1);
-                if (otherFeats.length) {
-                    locationtext += '<span>Nearby features:</span>';
-                    locationtext += '<ul>';
-                    locationtext += otherFeats.map(locTxter).join('');
-                    locationtext += '</ul>';
-                }
-                this.createEntry('location', 'Location', locationtext);
+                this.createLocation();
 
                 this.createEntry('domdet','Domain detail', 'To Do figure out how to mine what the domain does. See notes "domain_function".');
 
@@ -331,12 +363,10 @@ class Venus {
                 if (!!this.structural.coordinates.length) this.loadStructure();
             }
             // activate all prolinks
-            const pros = $('#results_mutalist .prolink');
-            pros.protein();
-            pros.click(event => this.showMutant.call(this) );
+            // const pros = $('#results_mutalist .prolink');
+            // pros.protein();
+            // pros.click(event => this.showMutant.call(this) );
             // hack them to always show the mutants.
-
-            $('[data-target="tooltip"]').tooltip();
         })
     }
 
@@ -353,13 +383,13 @@ class Venus {
 
     analyseddG() {
         //step 4
-        this.setStatus('Running step 4/4', 'working');
+        this.setStatus('Running step 4/5', 'working');
         return this.analyse('ddG').done(msg => {
             if (msg.error) {
-                this.setStatus('Failure at step 4/4', 'crash');
+                this.setStatus('Failure at step 4/5', 'crash');
                 ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
             } else {
-                this.setStatus('All tasks complete', 'done');
+                this.analyseddG_gnomad();
                 this.energetical = msg.ddG;
                 //this.loadStructure();
                 const units = '<span title="Technically REU, Rosetta Energy Units, which are approximately the same as kcal/mol when using the ref2015 force-field score function">kcal/mol</span> ';
@@ -410,9 +440,36 @@ class Venus {
                                                 changes: this.structural.history.changes + 'Rosetta locally relaxed, mutated and relaxed'
                                                 }
                                     });
-                this.updateStructureOption();
+                if (this.energetical.phospho) {
+                    myData.proteins.push({ name: "phosphorylated",
+                                      type: "data",
+                                      value: this.energetical.phospho,
+                                      ext: 'pdb',
+                                      chain: 'A',
+                                      chain_definitions:this.structural.chain_definitions,
+                                      history: {code: this.structural.history.code,
+                                                changes: this.structural.history.changes + 'Rosetta locally relaxed, phosphorylated (no repacking)'
+                                                }
+                                    });
+                }
             }
         //{ddG: float, scores: Dict[str, float], native:str, mutant:str, rmsd:int}
+        });
+    }
+
+    analyseddG_gnomad() {
+        //step 5
+        this.setStatus('Running step 5/5', 'working');
+        return this.analyse('ddG_gnomad').done(msg => {
+            if (msg.error) {
+                this.setStatus('Failure at step 5/5', 'crash');
+                ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
+            } else {
+                this.setStatus('All tasks complete', 'done');
+                this.energetical_gnomAD = msg.gnomAD_ddG;
+                //refill
+                this.createLocation();
+            }
         });
     }
 
@@ -452,6 +509,11 @@ class Venus {
         const so = $('#structureOption');
         so.html('');
         myData.proteins.map(({name}) => so.append(`<li><span ${this.prolink} data-load="${name}">${name}</span></li>`));
+        $('#structureOption [data-load="mutant"]').attr('data-focus','clash')
+                                                  .attr('data-selection', this.position);
+        $('#structureOption [data-load="phosphorylated"]').attr('data-focus','residue')
+                                                          .attr('data-selection','SEP or TPO or PTR or ALY or NMM or DA2 or MLZ')
+                                                          .attr('data-radius', -1);
         so.find('.prolink').each((i,e) => $(e).protein());
 
     }

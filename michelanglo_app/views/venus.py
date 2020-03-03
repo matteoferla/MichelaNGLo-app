@@ -112,6 +112,9 @@ def analyse_view(request):
             return {'protein': jsonable(protein), 'status': 'success'}
     ### STEP 2
     def mutation_step():
+        """
+        Runs protein.predict_effect()
+        """
         handle = request.params['uniprot'] + request.params['mutation']
         ## has the previous step been done?
         if handle not in system_storage:
@@ -132,6 +135,9 @@ def analyse_view(request):
                 'status': 'success'}
     ### STEP 3
     def structural_step():
+        """
+        runs protein.analyse_structure()
+        """
         handle = request.params['uniprot'] + request.params['mutation']
         if handle not in system_storage:
             status = protein_step()
@@ -169,12 +175,35 @@ def analyse_view(request):
             if 'error' in status:
                 return status
         protein = system_storage[handle]
-        ## if pre-run? No precatched.
-        analysis = protein.analyse_FF()
+        if hasattr(protein, 'energetics') and protein.energetics is not None:
+            analysis = protein.energetics
+        else:
+            analysis = protein.analyse_FF()
         if 'error' in analysis:
-            return {'status': 'error', 'error': 'pyrosetta', 'msg': analysis['error']}
+            return {'status': 'error', 'error': 'pyrosetta step', 'msg': analysis['error']}
         else:
             return {'ddG': analysis} #{ddG: float, scores: Dict[str, float], native:str, mutant:str, rmsd:int}
+
+    ## Step 5
+    def ddG_gnomad_step():
+        handle = request.params['uniprot'] + request.params['mutation']
+        if handle not in system_storage:
+            status = protein_step()
+            if 'error' in status:
+                return status
+            status = mutation_step()
+            if 'error' in status:
+                return status
+        protein = system_storage[handle]
+        if hasattr(protein, 'energetics_gnomAD') and protein.energetics_gnomAD is not None:
+            analysis = protein.energetics_gnomAD
+        else:
+            analysis = protein.analyse_gnomad_FF()
+        if 'error' in analysis:
+            return {'status': 'error', 'error': 'pyrosetta step', 'msg': analysis['error']}
+        else:
+            return {'gnomAD_ddG': analysis}
+
 
     ### check valid
     malformed = is_malformed(request, 'uniprot', 'species', 'mutation')
@@ -182,7 +211,11 @@ def analyse_view(request):
         return {'status': malformed}
     if 'step' not in request.params:
         log.info(f'Full analysis requested by {User.get_username(request)}')
-        return {**protein_step(), **mutation_step(), **structural_step(), **ddG_step()}
+        return {**protein_step(),
+                **mutation_step(),
+                **structural_step(),
+                **ddG_step(),
+                **ddG_gnomad_step()}
     if request.params['step'] == 'protein':
         log.info(f'Step 1 analysis requested by {User.get_username(request)}')
         return protein_step()
@@ -195,6 +228,8 @@ def analyse_view(request):
     elif request.params['step'] == 'ddG':
         log.info(f'Step 4 analysis requested by {User.get_username(request)}')
         return ddG_step()
+    elif request.params['step'] == 'ddG_gnomad':
+        return ddG_gnomad_step()
     elif request.params['step'] == 'fv': ## this is the same as get_uniprot but does not redundantly redownload the data.
         handle = request.params['uniprot'] + request.params['mutation']
         if handle not in system_storage:
