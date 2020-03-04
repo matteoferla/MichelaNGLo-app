@@ -214,6 +214,7 @@ class Venus:
                 return {'structural': jsonable(protein.structural),
                         'status': 'success'}
             else:
+                log.info('No structural data available')
                 return {'status': 'terminated', 'error': 'No crystal structures or models available.',
                         'msg': 'Structrual analyses cannot be performed.'}
         except NotImplementedError as err:  # Exception
@@ -236,6 +237,7 @@ class Venus:
         else:
             analysis = protein.analyse_FF()
         if 'error' in analysis:
+            self.log_if_error('extra_step', analysis)
             return {'status': 'error', 'error': 'pyrosetta step', 'msg': analysis['error']}
         else:
             return {'ddG': analysis}  # {ddG: float, scores: Dict[str, float], native:str, mutant:str, rmsd:int}
@@ -256,6 +258,7 @@ class Venus:
         else:
             analysis = protein.analyse_gnomad_FF()
         if 'error' in analysis:
+            self.log_if_error('ddG_gnomad_step', analysis)
             return {'status': 'error', 'error': 'pyrosetta step', 'msg': analysis['error']}
         else:
             return {'gnomAD_ddG': analysis}
@@ -267,6 +270,15 @@ class Venus:
                 return status
         protein = system_storage[self.handle]
         log.info(f'Extra analysis ({algorithm}) requested by {User.get_username(self.request)}')
-        return protein.analyse_other_FF(mutation=mutation, algorithm=algorithm, spit_process=True)
+        response = protein.analyse_other_FF(mutation=mutation, algorithm=algorithm, spit_process=True)
+        self.log_if_error('extra_step', response)
+        return response
+
+    def log_if_error(self, operation,response):
+        if isinstance(response, dict):
+            if 'error' in response and 'msg' in response:
+                log.warning(f'Error during {operation}: {response["error"]} ({response["msg"]})')
+            elif 'error' in response:
+                log.warning(f'Error during {operation}: {response["error"]}')
 
 
