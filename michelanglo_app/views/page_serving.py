@@ -255,7 +255,7 @@ def save_pdb(request):
         pdb = settings['pdb']
         if p['type'] == 'rcsb': #rcsb PDB code
             return HTTPFound(location=f"https://files.rcsb.org/download/{p['value']}.cif")
-        elif p['type'] == 'file': #external file
+        elif p['type'] == 'url': #external file
             return HTTPFound(location=p['value'])
         elif isinstance(pdb, str):
             log.warning(f'{page} has a pre-beta PDB!??')

@@ -21,7 +21,7 @@ NGL.specialOps = {'note': `This is a monkeypatch to allow HTML control of the st
 * $.prototype.protein to enable a link --will run on click.
 NB. this file ends with $('[data-toggle="protein"]').protein(); to activate all links.
 
-proteins is an array of {name: 'unique_name', type: 'rcsb' (default) | 'file' | 'data', value: xxx, 'ext': 'pdb' (default), loadFx: xxx}
+proteins is an array of {name: 'unique_name', type: 'rcsb' (default) | 'url' | 'data', value: xxx, 'ext': 'pdb' (default), loadFx: xxx}
 where the optional loadFx is a function that is run on loading.
 `, version: '1.0'};
 
@@ -322,7 +322,7 @@ NGL.specialOps.load = function (option, noLoadFun) {
         NGL.getStage(myData.id).removeAllComponents();
     }
     //new model. Force reset
-    if (myData.proteins[index].type === 'file') {
+    if (myData.proteins[index].type === 'url') {
         return NGL.stageIds[myData.id].loadFile(myData.proteins[index].value, {'firstModelOnly': true}).then(function (protein) {
                 if (noLoadFun === false || noLoadFun === undefined) {NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);}
             });

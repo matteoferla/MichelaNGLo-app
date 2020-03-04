@@ -179,7 +179,7 @@ def convert_pse(request):
                                                    "chain_definitions": get_chain_definitions(request)
                                                    }])
         else:
-            settings['proteinJSON'] = '[{{"type": "file", "value": "{0}", "loadFx": "loadfun"}}]'.format(trans.pdb)
+            settings['proteinJSON'] = '[{{"type": "url", "value": "{0}", "loadFx": "loadfun"}}]'.format(trans.pdb)
         settings['title'] = 'User submitted structure (from PyMOL file)'
         commit_submission(request, settings, pagename)
         # save sharable page data
@@ -254,8 +254,8 @@ def convert_pdb(request):
                                                    'history': history}])
             ### The difference between chain_definition and PDBMeta is that the latter has ligand info, but not Uniprot.
             settings['title'] = f'User created page (PDB: {pdb})'
-        else:  #type file means external file.
-            settings['proteinJSON'] = json.dumps([{'type': 'file',
+        else:  #type url means external file.
+            settings['proteinJSON'] = json.dumps([{'type': 'url',
                                                    'value': pdb,
                                                    'chain_definitions': definitions,
                                                    'history': history}])

@@ -167,7 +167,7 @@ window.load_pdb = pdb => {
     if (pdb.length === 4) {NGL.specialOps.multiLoader('viewport',[{'type': 'rcsb','value': pdb}]);  $('#model_alert').removeClass('show').hide();}
     else if (pdb.match('https://swissmodel.expasy.org/repository/') !== null) {
             $('#model_alert').addClass('show').show();
-            NGL.specialOps.multiLoader('viewport',[{type: 'file',
+            NGL.specialOps.multiLoader('viewport',[{type: 'url',
                                                                 'value': pdb,
                                                                 chain_definitions: [{chain: 'A',
                                                                                      uniprot: pdb.match(/uniprot\/(.*?)\.pdb/)[1],
@@ -179,7 +179,7 @@ window.load_pdb = pdb => {
                                                                                     ]
                                                                 }]);
         }
-    else { NGL.specialOps.multiLoader('viewport',[{type: 'file', 'value': pdb}]); }
+    else { NGL.specialOps.multiLoader('viewport',[{type: 'url', 'value': pdb}]); }
     NGL.specialOps.showTitle('viewport', 'Loaded: '+ pdb);
     renumber_alerter(pdb);
     naturalise_alerter(pdb);

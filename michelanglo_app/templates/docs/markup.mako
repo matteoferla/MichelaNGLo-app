@@ -179,7 +179,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
             NGL.specialOps.showTitle('viewport', '<i class="far fa-dna fa-spin"></i> Loading...');
-            NGL.specialOps.multiLoader('viewport', [{type: 'file', value: '/static/gfp.pdb'}]);
+            NGL.specialOps.multiLoader('viewport', [{type: 'url', value: '/static/gfp.pdb'}]);
         });
         <%include file="../markup/markup_builder_modal.js"/>
     </script>
