@@ -1,3 +1,11 @@
+# ['data_other', 'page', 'editable', 'backgroundcolor', 'validation', 'js', 'pdb', 'loadfun', 'proteinJSON', 'descriptors',
+# 'title', 'description', 'authors', 'editors', 'is_unseen', 'visitors', 'image', 'uniform_non_carbon', 'verbose', 'save',
+# 'public', 'confidential', 'encryption', 'viewport', 'stick', 'date', 'encryption_key', 'key', 'encrypted', 'firsttime',
+# 'freelyeditable', 'columns_viewport', 'columns_text', 'location_viewport', 'user', 'model', 'revisions', 'descr_mdowned',
+# 'no_user', 'no_analytics', 'no_buttons', 'current_page']
+
+
+
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
 from ..models.pages import Page
@@ -53,7 +61,7 @@ def edit(request):
         page.settings['revisions'].append({'user': user.name, 'time': str(page.timestamp), 'text': page.settings['description']})
         # only admins and friends can edit html fully
         if user.role in ('admin', 'friend'):
-            for key in ('loadfun', 'title', ):
+            for key in ('loadfun', 'title', 'data_other'):
                 if key in request.params:
                     page.settings[key] = request.params[key]
             if 'description' in request.params:
