@@ -52,6 +52,7 @@ class Venus {
                                 'domdet': 'what is this?',
                                 'neigh': 'Model based, what residues are within 4 &aring;ngstr&ouml;m?',
                                 'motif': 'Motifs predicted using the linear motif patterns from the ELM database. The presence of a linear motif does not mean it is valid, in fact the secondary structure is important: in a helix residues 3 along are facing the same direction, in a sheet alternating residues and in a loop it varies. If a motif is a phosphosite and the residue is not phosphorylated it is likely not legitimate.',
+                                'link': 'Link to this search (will be redone) for browser or programmatic access',
                                 'extlink': 'Links to external resources related to this gene'
                     }
         this.entry_order = Object.keys(this.documentation); //order is changed dynamically.
@@ -109,7 +110,7 @@ class Venus {
         if (aa[parts[3]] !== undefined) {parts[3] = aa[parts[3]]}
         if (! 'ACDEFGHIKLMNPQRSTVWYX'.includes(parts[1])) return false;
         // it's good
-        this.mutation = parts.join('');
+        this.mutation = parts.splice(1,3).join('');
         return true;
     }
 
@@ -139,6 +140,9 @@ class Venus {
                 } else {
                     this.analyseMutation();
                     this.protein = msg.protein;
+                    let linktext = `<i>this search (browser)</i>: <code>https://venus.sgc.ox.ac.uk/?uniprot=${uniprotValue}&species=${taxidValue}&mutation=${this.mutation}</code><br/>`;
+                    linktext += `<i>this search (API)</i>: <code>https://venus.sgc.ox.ac.uk/venus_analyse?uniprot=${uniprotValue}&species=${taxidValue}&mutation=${this.mutation}</code>`;
+                    this.createEntry('link', 'Links', linktext);
 
                     //this.analyse('fv') is the same as get_uniprot but utilising the protein data.
                     $('#results').show(500, () => this.analyse('fv').done(msg => {eval(msg);
