@@ -252,10 +252,22 @@ NGL.specialOps.showBlur = function (id, selection, color, radius, view, scale, l
 NGL.specialOps.showOverlay = function (id, partner, selection, color, radius, view, label) {
     // to do. deal with color.
     // Prepare
+    let wtColor = 0x00c78e;
+    let mutColor = 0xff5733;
+    if (color !== undefined) {
+        if (typeof(color) === 'string' && color.includes(' ')) {
+            wtColor = color.split(/\W/)[0];
+            mutColor = color.split(/\W/)[1];}
+        else {
+             wtColor = color;
+             mutColor = color;
+        }
+    }
     radius = radius || 4;
     NGL.specialOps.postInitialise(); //worst case schenario prevention.
     const stage = NGL.getStage(id);
     stage.removeClashes();
+
     const commonChange = (protein, scheme) => {
         protein.removeAllRepresentations();
         protein.addRepresentation("cartoon", {color: scheme, sele: '*'});
@@ -271,21 +283,26 @@ NGL.specialOps.showOverlay = function (id, partner, selection, color, radius, vi
     };
 
     const wildtypeChange = (wtProtein) => {
-        let wtScheme = NGL.specialOps.schemeMaker(0x00c78e);
+        let wtScheme = NGL.specialOps.schemeMaker(wtColor);
         commonChange(wtProtein, wtScheme);
     };
     const mutChange = (mutProtein) => {
-        let mutScheme = NGL.specialOps.schemeMaker(0xff5733);
+        let mutScheme = NGL.specialOps.schemeMaker(mutColor);
         commonChange(mutProtein, mutScheme);
         NGL.specialOps.getClash(mutProtein, selection)
            .map(position => NGL.specialOps.addSpikyball(mutProtein.stage, position));
-        window.ops.addToast('azzxa', partner,  selection,'bg-info');
     };
     let N_proteins = stage.getComponentsByType('structure').length;
     if (N_proteins === 0) {throw 'no protein.'}
     else if (N_proteins === 1) {
         //load the partner
-        NGL.getStage(id).loadFile(new Blob ([window[partner], { type: 'text/plain'}]), { ext: 'pdb', firstModelOnly: true})
+
+        console.log(partner);
+        console.log(window[partner]);
+        // this assumes it is data type.
+        let m = myData.proteins.filter(({name}, {value}) => name === partner || value === partner)[0];
+        let pdbblock = m.isVariable === undefined ? m.value : window[partner];
+        NGL.getStage(id).loadFile(new Blob ([ pdbblock, { type: 'text/plain'}]), { ext: 'pdb', firstModelOnly: true})
                     .then(mutProtein => {
                         let proteins = stage.getComponentsByType('structure');
                         mutChange(mutProtein);

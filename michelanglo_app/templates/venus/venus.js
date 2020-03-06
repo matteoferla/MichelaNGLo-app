@@ -718,8 +718,10 @@ class Venus {
                                                                 .attr('data-focus', 'clash')
                                                                 .attr('data-selection', name.slice(1,-1)+':A')
                                 );
+        if (window.myData.proteins.filter(({name}) => name === 'mutant').length === 1) {
+            so.append(`<li><span ${this.prolink} data-load="wt" data-focus="overlay mutant" data-selection="${this.position}:A">Overlay of wild-type and mutant</span></li>`);
+        }
         so.find('.prolink').each((i,e) => $(e).protein());
-
     }
 
     createPage () {
