@@ -76,7 +76,8 @@ NGL.getStage = function (id) {
 
 ///////////////////////////// NGL.SpecialOps ///////////////
 
-NGL.specialOps.isValid = (id, sele) => NGL.getStage(id).getComponentByType('structure').structure.getView(new NGL.Selection(sele)).atomCount > 0;
+
+/// show series.
 
 NGL.specialOps.slowOrient = function (id, view) {
     //wrapper for a string view.
@@ -122,7 +123,6 @@ NGL.specialOps.showResidue = function (id, selection, color, radius, view, label
         console.log('Show residues ' + selection)
     }
     //try the selection (its better to crash now than after clearing the scene...)
-    let selector = new NGL.Selection(selection.toString());
     // Prepare
     NGL.specialOps.postInitialise(); //worst case schenario prevention.
     // defaults
@@ -131,7 +131,7 @@ NGL.specialOps.showResidue = function (id, selection, color, radius, view, label
     //selection = typeof selection === "string" ? new NGL.Selection(selection) : selection;
     //get protein
     let proteins = NGL.getStage(id).getComponentsByType('structure');
-    let expandedSelection = proteins.map(protein => {
+    let firstExpandedSelection = proteins.map(protein => {
         // corner case that there is no cartoon.
         if (protein.reprList.length === 0) {
             /* so if it is undefined (default) and there is a current Scheme it is set to that but if for some reason there is
@@ -160,16 +160,14 @@ NGL.specialOps.showResidue = function (id, selection, color, radius, view, label
         var schemeId = NGL.ColormakerRegistry.addSelectionScheme([
             [color, '_C'], ["blue", '_N'], ["red", '_O'], ["white", '_H'], ["yellow", '_S'], ["orange", "*"] //this is such a weird way of doing it.
         ]);
-        var atomSet = protein.structure.getAtomSetWithinSelection(selector, parseFloat(radius));
-        // expand selection to complete groups
-        var atomSet2 = protein.structure.getAtomSetWithinGroup(atomSet);
-        var licoriceRep = protein.addRepresentation("licorice", {sele: atomSet2.toSeleString() + ' and not (' + selection.toString() + ' and not (.C or .N)'});
-        var hyperRep = protein.addRepresentation("hyperball", {sele: selection.toString(), color: schemeId});
+        const expanded = NGL.specialOps.expandSelection(protein, selection, radius);
+        protein.addRepresentation("licorice", {sele: expanded});
+        protein.addRepresentation("hyperball", {sele: selection.toString(), color: schemeId});
         protein.addRepresentation("contact", {
             masterModelIndex: 0,
             weakHydrogenBond: true,
             maxHbondDonPlaneAngle: 35,
-            sele: atomSet2.toSeleString()
+            sele: expanded
         });
         if (!!label) {
             protein.addRepresentation('label', {
@@ -180,10 +178,10 @@ NGL.specialOps.showResidue = function (id, selection, color, radius, view, label
                 labelGrouping: 'residue'
             });
         }
-        return atomSet2.toSeleString();
+        return expanded;
     })[0];
     //reorient.
-    NGL.specialOps._orientAfterShow(id, view, expandedSelection);
+    NGL.specialOps._orientAfterShow(id, view, firstExpandedSelection);
 };
 
 NGL.specialOps.showClash = function (id, selection, color, radius, tolerance, view, label, cartoonScheme) {
@@ -195,6 +193,124 @@ NGL.specialOps.showClash = function (id, selection, color, radius, tolerance, vi
     let proteins = NGL.getStage(id).getComponentsByType('structure');
     proteins.map(protein => NGL.specialOps.getClash(protein, selection)
                                           .map(position => NGL.specialOps.addSpikyball(protein.stage, position)));
+};
+
+NGL.specialOps.showSurface = function (id, selection, view) {
+    if (NGL.debug) {
+        console.log('Show surface ' + selection)
+    }
+    // Prepare
+    NGL.specialOps.postInitialise(); //worst case schenario prevention.
+    selection = selection || "polymer";
+    var color = 'electrostatic'; //not changeable for now.
+    var proteins = NGL.getStage(id).getComponentsByType('structure');
+    proteins.map(protein => {
+        protein.addRepresentation("surface", {
+                                                            sele: selection,
+                                                            colorScheme: color,
+                                                            colorDomain: [-0.3, 0.3],
+                                                            surfaceType: "av"
+                                                        });
+    });
+
+    NGL.specialOps._orientAfterShow(id, view, selection);
+};
+
+NGL.specialOps.showBlur = function (id, selection, color, radius, view, scale, label) {
+    if (NGL.debug) {
+        console.log('Show surface ' + selection)
+    }
+    // Prepare
+    NGL.specialOps.postInitialise(); //worst case schenario prevention.
+    let proteins = NGL.getStage(id).getComponentsByType('structure');
+    NGL.getStage(id).removeClashes();
+    proteins.map(protein => {
+        protein.removeAllRepresentations();
+        let bfactors = protein.structure.atomStore.bfactor;
+        //console.log(scale);
+        //console.log(bfactors.length / bfactors.reduce((a,b)=> a+b, 0));
+        scale = scale || bfactors.length / bfactors.reduce((a, b) => a + b, 0);
+        protein.addRepresentation("tube", {
+            sele: "polymer",
+            radiusType: "bfactor",
+            radiusScale: scale,
+            color: "bfactor",
+            colorScale: "RdYlBu"
+        });
+    });
+
+    if (selection) {
+        NGL.specialOps.showResidue(id, selection, color, radius, view, label); //cartoonScheme must/cannot not be implemented!
+    } else if (!!view) {
+        NGL.specialOps.slowOrient(id, view);
+    } else {
+        // no selection. NGL.specialOps._orientAfterShow(id, view, selection) needs selection.
+        proteins[0].autoView(2000);
+    }
+};
+
+NGL.specialOps.showOverlay = function (id, partner, selection, color, radius, view, label) {
+    // to do. deal with color.
+    // Prepare
+    radius = radius || 4;
+    NGL.specialOps.postInitialise(); //worst case schenario prevention.
+    const stage = NGL.getStage(id);
+    stage.removeClashes();
+    const commonChange = (protein, scheme) => {
+        protein.removeAllRepresentations();
+        protein.addRepresentation("cartoon", {color: scheme, sele: '*'});
+        protein.addRepresentation("hyperball", {color: scheme, sele: selection});
+        const expanded = NGL.specialOps.expandSelection(protein, selection, radius);
+        protein.addRepresentation("licorice", {sele: expanded});
+        protein.addRepresentation("contact", {
+            masterModelIndex: 0,
+            weakHydrogenBond: true,
+            maxHbondDonPlaneAngle: 35,
+            sele: expanded
+        });
+    };
+
+    const wildtypeChange = (wtProtein) => {
+        let wtScheme = NGL.specialOps.schemeMaker(0x00c78e);
+        commonChange(wtProtein, wtScheme);
+    };
+    const mutChange = (mutProtein) => {
+        let mutScheme = NGL.specialOps.schemeMaker(0xff5733);
+        commonChange(mutProtein, mutScheme);
+        NGL.specialOps.getClash(mutProtein, selection)
+           .map(position => NGL.specialOps.addSpikyball(mutProtein.stage, position));
+        window.ops.addToast('azzxa', partner,  selection,'bg-info');
+    };
+    let N_proteins = stage.getComponentsByType('structure').length;
+    if (N_proteins === 0) {throw 'no protein.'}
+    else if (N_proteins === 1) {
+        //load the partner
+        NGL.getStage(id).loadFile(new Blob ([window[partner], { type: 'text/plain'}]), { ext: 'pdb', firstModelOnly: true})
+                    .then(mutProtein => {
+                        let proteins = stage.getComponentsByType('structure');
+                        mutChange(mutProtein);
+                        wildtypeChange(proteins[0]);
+                        proteins[0].autoView(selection, 2000);
+                    });
+    } else {
+        let proteins = stage.getComponentsByType('structure');
+        mutChange(proteins[1]);
+        wildtypeChange(proteins[0]);
+        proteins[0].autoView(selection, 2000);
+    }
+};
+
+///  other.
+
+NGL.specialOps.isValid = (id, sele) => NGL.getStage(id).getComponentByType('structure').structure.getView(new NGL.Selection(sele)).atomCount > 0;
+
+NGL.specialOps.expandSelection = (protein, selection, radius) => {
+
+            let selector = new NGL.Selection(selection.toString());
+            const atomSet = protein.structure.getAtomSetWithinSelection(selector, parseFloat(radius));
+            // expand selection to complete groups
+            const atomSet2 = protein.structure.getAtomSetWithinGroup(atomSet);
+            return atomSet2.toSeleString() + ' and not (' + selection.toString() + ' and not (.C or .N)';
 };
 
 NGL.specialOps.getClash = function (protein, selection, tolerance) {
@@ -1131,60 +1247,6 @@ NGL.specialOps.addSpikyball = function (stage, position) {
     //spikyball made and added.
 };
 
-NGL.specialOps.showSurface = function (id, selection, view) {
-    if (NGL.debug) {
-        console.log('Show surface ' + selection)
-    }
-    // Prepare
-    NGL.specialOps.postInitialise(); //worst case schenario prevention.
-    selection = selection || "polymer";
-    var color = 'electrostatic'; //not changeable for now.
-    var proteins = NGL.getStage(id).getComponentsByType('structure');
-    proteins.map(protein => {
-        protein.addRepresentation("surface", {
-                                                            sele: selection,
-                                                            colorScheme: color,
-                                                            colorDomain: [-0.3, 0.3],
-                                                            surfaceType: "av"
-                                                        });
-    });
-
-    NGL.specialOps._orientAfterShow(id, view, selection);
-};
-
-NGL.specialOps.showBlur = function (id, selection, color, radius, view, scale, label) {
-    if (NGL.debug) {
-        console.log('Show surface ' + selection)
-    }
-    // Prepare
-    NGL.specialOps.postInitialise(); //worst case schenario prevention.
-    let proteins = NGL.getStage(id).getComponentsByType('structure');
-    NGL.getStage(id).removeClashes();
-    proteins.map(protein => {
-        protein.removeAllRepresentations();
-        let bfactors = protein.structure.atomStore.bfactor;
-        //console.log(scale);
-        //console.log(bfactors.length / bfactors.reduce((a,b)=> a+b, 0));
-        scale = scale || bfactors.length / bfactors.reduce((a, b) => a + b, 0);
-        protein.addRepresentation("tube", {
-            sele: "polymer",
-            radiusType: "bfactor",
-            radiusScale: scale,
-            color: "bfactor",
-            colorScale: "RdYlBu"
-        });
-    });
-
-    if (selection) {
-        NGL.specialOps.showResidue(id, selection, color, radius, view, label); //cartoonScheme must/cannot not be implemented!
-    } else if (!!view) {
-        NGL.specialOps.slowOrient(id, view);
-    } else {
-        // no selection. NGL.specialOps._orientAfterShow(id, view, selection) needs selection.
-        proteins[0].autoView(2000);
-    }
-};
-
 NGL.specialOps.hardReset = function () {  //when the page is faux-refreshed.
     Object.entries(NGL.stageIds).forEach(([k, v]) => $('#' + k).children().detach());
     window.myData = undefined;
@@ -1400,6 +1462,14 @@ NGL.specialOps._preventScroll = function (id) {
     setTimeout(() => $('#' + myData.id).css('overflow', 'visible'), 1000)
 };
 
+// make a scheme based on a color for carbons.
+NGL.specialOps.schemeMaker = CarbonColor => NGL.ColormakerRegistry.addScheme(function(params) {
+                                            this.atomColor = function (atom) {
+                                            let ColorMap = {'N': 0x3333ff, 'C': CarbonColor, 'O': 0xff4c4c, 'S': 0xe5c53f, 'P': 0xff7f00};
+                                            if (atom.element in ColorMap) {return +ColorMap[atom.element]}
+                                            else {return 0xdcdcdc} //gainsboro
+                                            };});
+
 ///////////////////////////// NGL.Stage monkeypatching ///////////////
 
 // NGL.Stage.prototype.getComponentByType = function(type) {
@@ -1501,6 +1571,9 @@ NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
             NGL.specialOps.showSurface(id, selection, view);
         } else if ((focus === 'blur') || (focus === 'bfactor')) {
             NGL.specialOps.showBlur(id, selection, color, radius, view, undefined, label);
+        } else if ((focus.includes('overlay'))) {
+            let partner = focus.match(/overlay.*?([\w\_]+)/)[1]
+            NGL.specialOps.showOverlay(id, partner, selection, color, radius, view, label);
         } else if (structure !== undefined) { //structure is a string/number argument (e.g. '1UBQ', 1, 'myProteinName')
             console.log('Please add view-reset if you are changing structure as its too ambiguous otherwise.');
         } else {
