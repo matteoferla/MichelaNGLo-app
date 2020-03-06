@@ -139,7 +139,7 @@
             }
 
             NGL.specialOps.showTitle('viewport','<i class="far fa-dna fa-spin"></i> Loading...');
-            NGL.specialOps.multiLoader('viewport', [{type: 'file', value: 'static/Sal_HisA.pdb', loadFx: pretty_hisA}], 'white');
+            NGL.specialOps.multiLoader('viewport', [{type: 'url', value: 'static/Sal_HisA.pdb', loadFx: pretty_hisA}], 'white');
 
 
     $('#pause').click((e) => {clearInterval(window.timer); $('#resume').show(); $('#pause').hide();});
