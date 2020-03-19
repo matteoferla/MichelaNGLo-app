@@ -18,6 +18,7 @@
     <h3>Index</h3>
     <p>Choose one of the following topics to continue:</p>
 <ul class="fa-ul">
+    ${list_entry('github', 'chart-network', 'Inner workings', 'Links to documentation about the inner workings of this site')}
     ${list_entry('implementations', 'code', 'Implementing a view', 'Generic instructions on embedding an interactive view on your own pages.')}
     ${list_entry('markup', 'link', 'Prolinks', 'Details and demo on protein view controlling links ("prolinks").')}
     ${list_entry('cite', 'feather-alt', 'Citation, typography and pronunciation', 'Papers to cite, how to write it and how to say it.')}
