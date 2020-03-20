@@ -1,5 +1,6 @@
 process.on('unhandledRejection', up => { throw up });
 //required!
+// if it crashes and complains about no sandbox try `export PUPPETEER_CHROME=/bin/chromium-browser` for dev'ing
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const uuid = process.argv[2];

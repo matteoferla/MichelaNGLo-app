@@ -1321,7 +1321,7 @@ NGL.specialOps.load = function (option, noLoadFun) {
         index = myData.proteins.map(v => v.name).indexOf(option);
     } else if ((typeof option === "string") && (myData.proteins.some(v => v.value === option))) {
         index = myData.proteins.map(v => v.value).indexOf(option);
-    } else if ((isNaN(parseInt(option))) && (parseInt(option) < myData.proteins.length)) { //user gave a number as a string.
+    } else if ((! isNaN(parseInt(option))) && (parseInt(option) < myData.proteins.length)) { //user gave a number as a string.
         index = parseInt(option);
     } else if ((typeof option === "string") && (option.length === 4)) { // user gave pdb code that is new.
         myData.proteins.push({type: 'rcsb', value: option.slice(0, 4)}); //no chains please.
