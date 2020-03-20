@@ -94,7 +94,7 @@
     ####include file="../markup/markup_builder_modal.js"/>
     window.interactive_builder = () => undefined; //burn the call.
 </script>
-    <link rel="stylesheet" href="https://www.matteoferla.com//feature-viewer/css/style.css">
+    <link rel="stylesheet" href="/static/feature.css" async>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script>
     ###<script src="https://cdn.rawgit.com/calipho-sib/feature-viewer/v1.0.0/dist/feature-viewer.min.js"></script>
     <script src="/static/ThirdParty/feature-viewer.js" async></script>

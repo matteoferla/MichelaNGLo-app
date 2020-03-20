@@ -67,7 +67,7 @@
 
                         ###################### lines ###################################
 
-                      <div class="card-body p-0">
+                      <div class="card-body p-0" id="results_card">
                           <div class="arrow-right"></div><div class="arrow-right2">
                           </div>
                       <ul class="list-group list-group-flush" id="results_mutalist">

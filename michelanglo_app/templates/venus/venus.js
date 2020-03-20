@@ -385,6 +385,33 @@ class Venus {
         });
     }
 
+    //step phospho
+    phosphorylate() {
+        $('#phosphorylate-btn').attr('disabled','disabled');
+        this.setStatus(`Running extra job post-translation modifications`, 'working');
+        return this.analyse('phosphorylate').done(msg => {
+            if (msg.error) {
+                this.setStatus('Failure at step PTMs', 'crash');
+                ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
+            } else {
+                this.setStatus('All tasks complete', 'done');
+                this.energetical.phospho = msg.coordinates;
+                myData.proteins.push({ name: "phosphorylated",
+                                      type: "data",
+                                      value: msg.coordinates,
+                                      ext: 'pdb',
+                                      chain: 'A',
+                                      chain_definitions:this.structural.chain_definitions,
+                                      history: {code: this.structural.history.code,
+                                                changes: 'phosphorylated'
+                                                }
+                                    });
+                //refill
+                this.updateStructureOption();
+            }
+        });
+    }
+
     //progress bar.
     setStatus(label, mode) { //working, crash, done
         const s = $('#results_status');
@@ -710,7 +737,7 @@ class Venus {
         // special case: PTMs
         $('#structureOption [data-load="phosphorylated"]').attr('data-focus','residue')
                                                           .attr('data-selection','SEP or TPO or PTR or ALY or NMM or DA2 or MLZ')
-                                                          .attr('data-radius', -1);
+                                                          .attr('data-radius', 1.5);
         // special cases: custom mutations.
         window.myData.proteins.map(({name}) => name)
                               .filter(name => name.match(/\w\d+\w/))
@@ -722,6 +749,9 @@ class Venus {
             so.append(`<li><span ${this.prolink} data-load="wt" data-focus="overlay mutant" data-selection="${this.position}:A">Overlay of wild-type and mutant</span></li>`);
         }
         so.find('.prolink').each((i,e) => $(e).protein());
+        if (this.energetical && window.myData.proteins.filter(({name}) => name === 'phosphorylated').length === 0) {
+            so.append('<li><button id="phosphorylate-btn" type="button" class="btn btn-outline-secondary btn-sm" onclick="venus.phosphorylate.call(venus)">Make phosphorylated model</button></li>');
+        }
     }
 
     createPage () {
@@ -755,15 +785,25 @@ window.venus = new Venus();
 
 /////////////////// DOM elements ////////////////////////////////////////////////////
 
-$(window).scroll(function() {
-	    var card = $('#vieport_side');
-        var currentY = $(window).scrollTop();
-	    var windowY = $(window).innerHeight();
-	    var offsetY = card.offset().top - parseInt(card.css('top')) - 4;
-        if ((currentY > offsetY) && (currentY + windowY > offsetY + card.height())) {
-    	$('#viewport').parent().parent().css('top', currentY - offsetY);
+$(window).scroll(() => {
+	    const card = $('#vieport_side');
+        let currentY = $(window).scrollTop();
+	    let windowH = $(window).innerHeight();
+	    let cardH = card.height();
+	    let offsetY = card.offset().top - parseInt(card.css('top')) - 4;
+	    const rcard = $('#results_card');
+	    let maxY = rcard.offset().top + rcard.height();
+	    //console.log(`currentY ${currentY}, windowH ${windowH}, cardH ${cardH}, offsetY ${offsetY}, maxY ${maxY}`)
+	    let position = 0;
+	    // the top is getting cut off:
+        if ((currentY > offsetY) && (currentY + windowH > offsetY + cardH)) {
+            // new position, without cutting off the bottom.
+            position = cardH > windowH ? currentY - offsetY - (cardH - windowH) : currentY - offsetY;
+            if (cardH + currentY > maxY) {
+                return 0; //no change. i.e. position = card.css('top')
+            }
     }
-    else {$('#viewport').parent().parent().css('top', 0);}
+    card.css('top', position);
         //console.log(`scrolltop: ${currentY} win height ${windowY} off: ${offsetY} card top: ${card.offset().top}`);
 	});
 

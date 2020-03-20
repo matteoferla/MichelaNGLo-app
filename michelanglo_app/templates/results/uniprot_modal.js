@@ -64,7 +64,7 @@ window.UniprotFV = {
                                         NGL.specialOps.showResidue('viewport', sele, color);
                                         if (uniprotValue !== undefined) $(`#${uniprotValue}_modal`).modal('hide');
                                         if (window.venus && venus.alwaysShowMutant) {
-                                            setTimeout((sele) => showMut(sele),100, { sele: this.position+':A', color: this.mutaColor});
+                                            setTimeout((sele) => venus.showMutant.call(venus),100);
                                         }
                                     } else {
                                         ops.addToast('outer','Selection out of bounds', 'Unfortunately the structure does not conver that', 'bg-warning');

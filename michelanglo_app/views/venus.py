@@ -132,6 +132,8 @@ class Venus:
             if malformed:
                 return {'status': malformed}
             return self.extra_step(mutation=self.request.params['extra'], algorithm=self.request.params['algorithm'])
+        elif self.request.params['step'] == 'phosphorylate':
+            return self.phospho_step()
         else:
             self.request.response.status = 422
             return {'status': 'error', 'error': 'Unknown step'}
@@ -221,7 +223,7 @@ class Venus:
             log.warning(f'Structural analysis failed {err} {type(err).__name__}.')
             return {'status': 'error'}
 
-    ## Step 4
+    ### Step 4
     def ddG_step(self):
         log.info(f'Step 4 analysis requested by {User.get_username(self.request)}')
         if self.handle not in system_storage:
@@ -242,7 +244,7 @@ class Venus:
         else:
             return {'ddG': analysis}  # {ddG: float, scores: Dict[str, float], native:str, mutant:str, rmsd:int}
 
-    ## Step 5
+    ### Step 5
     def ddG_gnomad_step(self):
         log.info(f'Step 5 analysis requested by {User.get_username(self.request)}')
         if self.handle not in system_storage:
@@ -263,6 +265,7 @@ class Venus:
         else:
             return {'gnomAD_ddG': analysis}
 
+    ### STEP EXTRA
     def extra_step(self, mutation, algorithm):
         if self.handle not in system_storage:
             status = self.ddG_step()
@@ -274,6 +277,25 @@ class Venus:
         self.log_if_error('extra_step', response)
         return response
 
+    ### STEP EXTRA2
+    def phospho_step(self):
+        if self.handle not in system_storage:
+            status = self.ddG_step()
+            if 'error' in status:
+                return status
+        protein = system_storage[self.handle]
+        log.info(f'Phosphorylation requested by {User.get_username(self.request)}')
+        coordinates = protein.phosphorylate_FF(spit_process=True)
+        if isinstance(coordinates, str):
+            response = {'coordinates': coordinates}
+        elif isinstance(coordinates, dict):
+            response = coordinates # it is an error msg!
+        else:
+            response = {'status': 'error', 'error': 'Unknown', 'msg': 'No coordinates returned'}
+        self.log_if_error('phospho_step', response)
+        return response
+
+    ### Other
     def log_if_error(self, operation,response):
         if isinstance(response, dict):
             if 'error' in response and 'msg' in response:
