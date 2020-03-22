@@ -300,7 +300,7 @@ NGL.specialOps.showOverlay = function (id, partner, selection, color, radius, vi
         console.log(partner);
         console.log(window[partner]);
         // this assumes it is data type.
-        let m = myData.proteins.filter(({name}, {value}) => name === partner || value === partner)[0];
+        let m = myData.proteins.filter((prot) => prot.name === partner || prot.value === partner)[0];
         let pdbblock = m.isVariable === undefined ? m.value : window[partner];
         NGL.getStage(id).loadFile(new Blob ([ pdbblock, { type: 'text/plain'}]), { ext: 'pdb', firstModelOnly: true})
                     .then(mutProtein => {
@@ -1362,7 +1362,7 @@ NGL.specialOps.load = function (option, noLoadFun) {
 
     } else if (myData.proteins[index].type === 'data') {
         var ext = myData.proteins[index].ext || 'pdb';
-        if (!!myData.proteins[index].isVariable) {
+        if (!! myData.proteins[index].isVariable) {
             let varname = myData.proteins[index].value.replace(/\W/g, '');
             if (window[varname] !== undefined) {
                 return NGL.stageIds[myData.id].loadFile(new Blob([window[varname], {type: 'text/plain'}]), {
