@@ -238,6 +238,7 @@ class Venus {
             if (msg.error) {
                 this.setStatus('Failure at step 3/4', 'crash');
                 ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
+                this.fallbackAnalyse();
             } else {
                 this.structural = msg.structural;
                 this.analyseddG();
@@ -347,7 +348,7 @@ class Venus {
         });
     }
 
-    //step 5
+    //step x
     analyse_target(mutation, algorithm) {
         // if (this.busy === true) {
         //     window.ops.addToast('busy', 'Please be patient', 'To prevent overuse, only one at the time', 'bg-warning');
@@ -410,6 +411,16 @@ class Venus {
                 this.updateStructureOption();
             }
         });
+    }
+
+    //step fallback
+    fallbackAnalyse() {
+        //viewport
+        let strloctext = '<p>No structure available: you may want to create your own protein model (see <a href="/docs/gene#modelling" target="_blank">documentation</a>)</p>';
+        this.createEntry('strcha', 'Structural character', strloctext);
+        $('#structureOption').append('<li>No structures available</li>');
+
+
     }
 
     //progress bar.
@@ -707,7 +718,11 @@ class Venus {
         UniprotFV.enpower();
         this.updateStructureOption();
         let strloctext = '<p><i>Chosen model:</i> ';
-        strloctext += this.makeExt("https://www.rcsb.org/structure/"+this.structural.code, this.structural.code)+'</p>';
+        if (this.structural.code.length === 4) {
+            strloctext += this.makeExt("https://www.rcsb.org/structure/"+this.structural.code, 'PDB:'+this.structural.code)+'</p>';
+        } else {
+            strloctext += this.makeExt("https://swissmodel.expasy.org/repository/uniprot/"+window.uniprotValue, 'SWISSMODEL:'+this.structural.code)+'</p>';
+        }
         strloctext += `<p><i>Solvent exposure:</i> ${(this.structural.buried) ? 'buried' : 'surface'} (RSA: ${Math.round(this.structural.RSA*100)/100})</p>`;
         strloctext += `<p><i>Secondary structure type:</i> ${this.structural.SS}</p>`;
         strloctext += `<p><i>Residue resolution:</i> ${(this.structural.has_all_heavy_atoms) ? 'Resolved in crystal' : 'Some heavy atoms unresolved (too dynamic)'}</p>`;
@@ -755,10 +770,17 @@ class Venus {
     }
 
     createPage () {
+        //Make a Michelanglo page
+        let results = $('#results_mutalist').clone();
+        results.find('.venus-no-mike').detach();
+        results.find('.venus-plain-mike').each((i, el) => $(el).html(`<span>${$(el).text()}</span>`));
+        results.find('#results_mutalist').append(`<li class="list-group-item">${$('#structureOption').html()}</li>`);
+
+        let text = results.html();
         let data = {uniprot: window.uniprotValue, //same as this.protein.uniprot,
                     species: window.taxidValue,
                     mutation: this.mutation,
-                    text: $('#results_mutalist').html(),
+                    text: text,
                     code: this.structural.code,
                     definitions: JSON.stringify(this.structural.chain_definitions),
                     history: JSON.stringify(this.structural.history)};

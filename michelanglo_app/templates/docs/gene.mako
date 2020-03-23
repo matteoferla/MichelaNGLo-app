@@ -30,7 +30,7 @@
     <p>In the case of crystal structures, often the protein with bound partners are found. The identity of each chain can be found in the PDB entry in the "Structure summary" tab (first one) in the card "Macromolecules". Sometimes protein from different organism are bound to interesting protein and it may be worth using that instead.
 Which bound macromolecule or small molecule is up to you, but if in doubt, check the Uniprot entry or better still the literature to find out what the proteins are.</p>
 
-    <h5>Modelling</h5>
+    <h5 id="modelling">Modelling</h5>
 <p>If you don't find a structure, there are several servers that model protein for you. First, determine the domains by looking in Uniprot or PDB protein feature view, because no modelling program deals with sequences larger than 500 amino acids &mdash;a lazy way of getting the sequence of a region is to click on a range for a domain in Uniprot and changing the numbers in the URL.
     <a href="https://zhanglab.ccmb.med.umich.edu/I-TASSER/" target="_blank">I-TASSER <i class="far fa-external-link"></i></a> is tool that consistently wins a model predicting challenge (CASP), but is slow (2-3 days).
     <a href="http://www.sbg.bio.ic.ac.uk/phyre2/html/page.cgi?id=index" target="_blank">Phyre2 <i class="far fa-external-link"></i></a> is a lot quicker and also recently they have released a set of over 1,000 computed structures.

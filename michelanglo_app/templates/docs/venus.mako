@@ -20,7 +20,7 @@
         <p>This tool has the aim of aiding structure-based exploration by using all the gathered information from
             different
             third-party databases that are pertinent to a given variant of interest, creating a sharable MichelaNGLo
-            page.</p>
+            page (see <a href="/docs/cite">Citation</a> for how to cite specific datasets).</p>
         <h3>Parts</h3>
         <p>
             The program runs in four parts.
@@ -30,6 +30,8 @@
                 <li>The third gives the location and neighbourhood of the residue</li>
                 <li>The fourth gives the change in energy potential resulting from the mutation</li>
             </ol>
+
+
         <h3>API and redirects</h3>
     <p>There are a few API routes available.
         Firstly the route<code>/venus_analyse</code>, with parameters <code>uniprot</code>, <code>species</code> and <code>mutation</code>
@@ -43,7 +45,9 @@
         <li>structural: cartesian neighbourhood of the mutation, best structure (offset fixed) and surface/buried, and helix/sheet/loop</li>
         <li>ddG: energetic assessment of the mutation ddG and scores[] in kcal/mol. contains also the energy minimised neighbourhood of the wt and mutant</li>
     </ul>
-        <h3>Redirected</h3>
+
+
+        <h4>Redirected</h4>
         The parameters <code>uniprot</code>, <code>species</code> and <code>mutation</code> also work the route <code>/venus</code> (the main VENUS page)
         to preload a mutation (e.g. for sharing it).
         Lastly there is the URL <code>/venus_transcript?enst=ENSTXXXXXXX&mutation=XNNX&redirect</code>, which redirects to VENUS a human transcript
@@ -65,6 +69,15 @@ However, I found out there is another issue with the data. For example:
 https://michelanglo.sgc.ox.ac.uk/venus?gene=Q96N67&species=9606&mutation=S1962W
 Is loading a Swissmodel model that is using the Unirprot canonical id...
 Also, VENUS still has a few issues that I need to fix, wherein a model analysis will crash and I am struggling to fix it.
+
+
+
+
+
+
+
+
+
 
         <h3>Energetics of protein destabilisation</h3>
         <h4>Free energy of folding</h4>

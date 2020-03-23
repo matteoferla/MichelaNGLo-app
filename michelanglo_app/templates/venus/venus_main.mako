@@ -61,7 +61,7 @@
     </div>
             #################### ALERTS
     <div class="alert alert-warning alert-dismissible fade show" role="alert">
-  This page is still being built, therefore some features may not work. See bottom for more.
+  This page is still being built, therefore some features may not work. Do feel free to contact me (Matteo) for any queries: I always welcome feedback be it on purpose or not.
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>

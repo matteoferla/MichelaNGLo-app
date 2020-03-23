@@ -120,7 +120,7 @@
         start_stage_two();
 
         $('#viewcode').text('<div role="NGL" data-proteins=\'[{"type": "data", "value": "pdbString", "isVariable": true, "ext": "'+extension+'"}]\'></div>');
-        NGL.specialOps.multiLoader('viewport',[{'type': 'file','value': pdb,'ext': extension}]);
+        NGL.specialOps.multiLoader('viewport',[{'type': 'data','value': pdb,'ext': extension}]);
         NGL.specialOps.showTitle('viewport', 'Loaded: '+ pdb );
         interactive_builder();
     });
