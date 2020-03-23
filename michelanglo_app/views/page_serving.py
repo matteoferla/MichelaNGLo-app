@@ -244,7 +244,7 @@ def save_pdb(request):
         return {'status': 'index must be number'}
     page = Page.select(request, request.params['uuid'])
     index = int(request.params['index'])
-    verdict = permission(request, page, key_label='key')
+    verdict = permission(request, page, key_label='key', mode='view')
     if verdict['status'] == 'OK':
         settings = page.load().settings
         protein = json.loads(settings['proteinJSON'])
