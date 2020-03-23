@@ -95,12 +95,14 @@
         interactive_builder();
     });
 
-    $('#upload_pdb').change(function () {
+    $('#upload_pdb').change(async function () {
         window.mode = 'file'; //file | code
         // check if good.
         let validExtensions = ${str(valid_extensions)|n};
         let filename=$(this).val().split('\\').slice(-1)[0];
-        let extension = filename.split('\.').pop().toLowerCase();
+        let coords = await window.getCoordinates();
+        let pdb = coords[0];
+        let extension = coords[1];
         if (!! $(this).val()) { //valid upload
             if (validExtensions.some(e => e == extension)) {
             $(this).addClass('is-valid');
@@ -116,10 +118,9 @@
         $('#upload_pdb+.custom-file-label').html(filename);
         } // else? nothing added. user chickened out. Dont yell at him/her
         start_stage_two();
-        let pdb = $('#pdb').val();
 
         $('#viewcode').text('<div role="NGL" data-proteins=\'[{"type": "data", "value": "pdbString", "isVariable": true, "ext": "'+extension+'"}]\'></div>');
-        NGL.specialOps.multiLoader('viewport',[{'type': 'file','value': $('#upload_pdb')[0].files[0],'ext': extension}]);
+        NGL.specialOps.multiLoader('viewport',[{'type': 'file','value': pdb,'ext': extension}]);
         NGL.specialOps.showTitle('viewport', 'Loaded: '+ pdb );
         interactive_builder();
     });

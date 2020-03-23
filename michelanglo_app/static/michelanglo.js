@@ -296,9 +296,10 @@ NGL.specialOps.showOverlay = function (id, partner, selection, color, radius, vi
     if (N_proteins === 0) {throw 'no protein.'}
     else if (N_proteins === 1) {
         //load the partner
-
-        console.log(partner);
-        console.log(window[partner]);
+        if (NGL.debug) {
+            console.log(partner);
+            console.log(window[partner]);
+        }
         // this assumes it is data type.
         let m = myData.proteins.filter((prot) => prot.name === partner || prot.value === partner)[0];
         let pdbblock = m.isVariable === undefined ? m.value : window[partner];
@@ -1359,7 +1360,6 @@ NGL.specialOps.load = function (option, noLoadFun) {
                 NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);
             }
         });
-
     } else if (myData.proteins[index].type === 'data') {
         var ext = myData.proteins[index].ext || 'pdb';
         if (!! myData.proteins[index].isVariable) {
