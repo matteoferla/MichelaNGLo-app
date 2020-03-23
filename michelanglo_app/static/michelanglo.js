@@ -1398,12 +1398,14 @@ NGL.specialOps.load = function (option, noLoadFun) {
         }
     } else if (myData.proteins[index].type === 'none') {
         myData.currentIndex = -1;  //pass. Super odd backdoor. Why is it needed? Let's keep it secret in case I think it's too weird.
-    } else { //PDB code.
+    } else if (myData.proteins[index].value.replace('rcsb://', '').trim().length === 4) { //PDB code.
         return NGL.stageIds[myData.id].loadFile('rcsb://' + myData.proteins[index].value.replace('rcsb://', '').toLowerCase().slice(0, 4), {firstModelOnly: true}).then(function (protein) {
             if (noLoadFun === false || noLoadFun === undefined) {
                 NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);
             }
         });
+    } else {
+        throw 'No idea what this is.';
     }
 };
 
