@@ -11,7 +11,7 @@ the reply "status" and occasionally "username"
 
 The modal that controls it is `login/user_modal.mako`. However the content is controlled by a ajax to `/get` to get the relevant `*_modalcont.mako` (content).
 """
-from pyramid.view import view_config
+from pyramid.view import view_config, view_defaults
 from .common_methods import notify_admin, is_malformed
 from ..models import User, Page
 
@@ -35,135 +35,178 @@ def sanitise_text(text):
         return 'blank'
     return value
 
-def log_reply(fun):
-    def inner(request):
-        reply = fun(request)
-        log.info(str(reply)+f'(code: {request.response.status})')
-        return reply
-    return inner
-
 from datetime import datetime
 
-def has_exceeded_tries(request):
-    now = datetime.now().timestamp()
-    if 'tries' in request.session:
-        if len(request.session['tries']) >10:
-            if now - request.session['tries'][-9] < 10*60: #ten minutes.
-                return True
-        request.session['tries'].append(now)
-    else:
-        request.session['tries'] = [now]
-    return False
+@view_defaults(route_name='login')
+class UserView:
+
+    def __init__(self, request):
+        self.request = request
+        self.requestor = self.request.user
+        # sort out inputs
+        if 'action' in self.request.params:
+            self.action = self.request.params['action']
+        else:
+            self.action = None
+        # to be filled conditionally
+        # logged in?
+        if 'username' in self.request.params:
+            self.username = sanitise_text(self.request.params['username']).strip()
+            self.targetuser = self.request.dbsession.query(User).filter_by(name=self.username).first()
+        else:
+            self.username = None
+            self.targetuser = None
+        # logging in?
+        if 'password' in self.request.params:
+            self.password = sanitise_text(self.request.params['password']).strip()
+        else:
+            self.password = ''
+
+    @view_config(renderer="json")
+    def respond(self):
+        reply = self.choose_response()
+        log.info(str(reply)+f'(code: {self.request.response.status})')
+        return reply
+
+    def choose_response(self):
+        if self.action is None:
+            return is_malformed(self.request, 'action')
+        # deal with username independent actions (post login).
+        if self.action in ('whoami', 'logout', 'change_password'):
+            if self.action == 'whoami':
+                return self.whoami()
+            elif self.action == 'logout':
+                return self.logout()
+            elif self.action == 'change_password':
+                return self.change_password()
+            else:
+                pass
+        elif self.action in ('login', 'register', 'forgot'):
+            if self.username is None:
+                return is_malformed(self.request, 'username')
+            elif self.action == 'login':
+                return self.login()
+            elif self.action == 'register':
+                return self.register()
+            elif self.action == 'forgot':
+                self.forgot()
+            else:
+                pass
+        elif self.action in ('promote', 'kill', 'reset'):
+            if self.requestor and self.requestor.role == 'admin':  ##only admins!
+                if self.username is None:
+                    return is_malformed(self.request, 'username')
+                elif self.action == 'promote':
+                    self.targetuser.role = self.request.POST['role']
+                    self.request.dbsession.add(self.targetuser)
+                    return {'status': 'promoted'}
+                elif self.action == 'kill':
+                    self.request.dbsession.delete(self.targetuser)
+                    return {'status': 'deleted'}
+                elif self.action == 'reset':
+                    self.targetuser.set_password('password')
+                    self.request.dbsession.add(self.targetuser)
+                    return {'status': 'reset'}
+            else:
+                self.request.response.status = 403
+                return {'status': 'access denied'}
+        else:
+            self.request.response.status = 405
+            return {'status': 'unknown request'}
 
 
-@view_config(route_name='login', renderer="json")
-@log_reply
-def user_view(request):
-    # sort out inputs
-    malformed = is_malformed(request, 'action', 'username')
-    if malformed:
-        return malformed
-    action = request.params['action']
-    username = sanitise_text(request.params['username']).strip()
-    if 'password' in request.params:
-        password = sanitise_text(request.params['password']).strip()
-    else:
-        password = ''
-
-    targetuser = request.dbsession.query(User).filter_by(name=username).first()
-    requestor = request.user
-    # deal with inputs.
-    if action == 'whoami':
-        if requestor is not None:
-            return {'status': 'verification', 'name': requestor.name, 'rank': requestor.role}
+    ####### Authenticated actions
+    def whoami(self):
+        # logged in action
+        if self.requestor is not None:
+            return {'status': 'verification', 'name': self.requestor.name, 'rank': self.requestor.role}
         else:
             return {'status': 'verification', 'name': 'guest', 'rank': 'guest'}
-    elif action == 'login':
-        if has_exceeded_tries(request):
-            request.response.status = 429
+
+    def logout(self):
+        # logged in action
+        headers = forget(self.request)
+        self.request.response.headerlist.extend(headers)
+        return {'status': 'logged out'}
+
+    def change_password(self):
+        # logged in action
+        if self.requestor and self.requestor.check_password(sanitise_text(self.request.params['password'])):
+            self.requestor.set_password(sanitise_text(self.request.params['newpassword']))
+            self.request.dbsession.add(self.requestor)
+        else:
+            self.request.response.status = 403
+            return {'status': 'wrong password'}
+
+    ####### Unauthenticated actions
+    def login(self):
+        #pre log in action
+        if self.has_exceeded_tries():
+            self.request.response.status = 429
             return {'status': 'Too many failures. Ten requests in ten minutes. Try again later.'}
-        elif targetuser is not None and targetuser.check_password(password):
-            headers = remember(request, targetuser.id)
-            request.response.headerlist.extend(headers)
-            return {'status': 'logged in', 'name': targetuser.name, 'rank': targetuser.role}
-        elif targetuser:
-            request.response.status = 400
+        elif self.targetuser is not None and self.targetuser.check_password(self.password):
+            headers = remember(self.request, self.targetuser.id)
+            self.request.response.headerlist.extend(headers)
+            return {'status': 'logged in', 'name': self.targetuser.name, 'rank': self.targetuser.role}
+        elif self.targetuser:
+            self.request.response.status = 400
             return {'status': 'wrong password'}
         else:
-            request.response.status = 400
+            self.request.response.status = 400
             return {'status': 'wrong username'}
-    elif action == 'register':
-        if targetuser:
-            request.response.status = 409
+
+    def register(self):
+        #pre log in action
+        if self.targetuser:
+            self.request.response.status = 409
             return {'status': 'existing username'}
-        elif username in ('guest', 'Anonymous', 'anonymous', 'error', '', 'trashcan', 'public'):
-            request.response.status = 403
+        elif self.username in ('guest', 'Anonymous', 'anonymous', 'error', '', 'trashcan', 'public'):
+            self.request.response.status = 403
             return {'status': 'forbidden'}
         else:
-            if username == 'admin': #once only...
-                new_user = User(name=username, role='admin')
+            if self.username == 'admin': #once only...
+                new_user = User(name=self.username, role='admin')
             else:
-                new_user = User(name=username, role='new', email=request.params['email'])
-            new_user.set_password(password)
-            request.dbsession.add(new_user)
-            new_user = request.dbsession.query(User).filter_by(name=username).first()
-            headers = remember(request, new_user.id)
-            request.response.headerlist.extend(headers)
+                new_user = User(name=self.username, role='new', email=self.request.params['email'])
+            new_user.set_password(self.password)
+            self.request.dbsession.add(new_user)
+            new_user = self.request.dbsession.query(User).filter_by(name=self.username).first()
+            headers = remember(self.request, new_user.id)
+            self.request.response.headerlist.extend(headers)
             return {'status': 'registered', 'name': new_user.name, 'rank': new_user.role}
-    elif action == 'logout':
-        headers = forget(request)
-        request.response.headerlist.extend(headers)
-        return {'status': 'logged out'}
-    elif action == 'promote':
-        if requestor and requestor.role == 'admin': ##only admins can make admins
-            target=request.dbsession.query(User).filter_by(name=username).one()
-            target.role = request.POST['role']
-            request.dbsession.add(target)
-            return {'status': 'promoted'}
-        else:
-            request.response.status = 403
-            return {'status': 'access denied'}
-    elif action == 'kill':
-        if requestor and requestor.role == 'admin': ##only admins have a licence to kill
-            target=request.dbsession.query(User).filter_by(name=username).one()
-            request.dbsession.delete(target)
-            return {'status': 'deleted'}
-        else:
-            request.response.status = 403
-            return {'status': 'access denied'}
-    elif action == 'change_password':
-        if requestor and requestor.check_password(sanitise_text(request.params['password'])):
-            requestor.set_password(sanitise_text(request.params['newpassword']))
-            request.dbsession.add(requestor)
-        else:
-            request.response.status = 403
-            return {'status': 'wrong password'}
-    elif action == 'reset':
-        if requestor and requestor.role == 'admin': ##only admins can set password this way.
-            target = request.dbsession.query(User).filter_by(name=username).one()
-            target.set_password('password')
-            request.dbsession.add(target)
-            return {'status': 'reset'}
-        else:
-            request.response.status = 403
-            return {'status': 'access denied'}
-    elif action == 'forgot':
-        if 'email' in request.params:
-            email = str(request.params['email'])
-            targetuser = request.dbsession.query(User).filter_by(email=email).first()
+
+    def forgot(self):
+        #pre log in action
+        if 'email' in self.request.params:
+            email = str(self.request.params['email'])
+            targetuser = self.request.dbsession.query(User).filter_by(email=email).first()
             if targetuser:
                 if notify_admin(f' {targetuser.name} ({email}) has requested a password reset.'):
                     return {'status': 'request sent'}
                 else:
-                    request.response.status = 503
+                    self.request.response.status = 503
                     return {'status': 'message could not be sent. Please email manually'}
             else:
-                request.response.status = 403
+                self.request.response.status = 403
                 return {'status': 'Unrecognised email address'}
-    else:
-        request.response.status = 405
-        return {'status': 'unknown request'}
+        else:
+            self.request.response.status = 402
+            return {'status': 'Missing email address'}
 
+    ### other
+
+    def has_exceeded_tries(self):
+        now = datetime.now().timestamp()
+        if 'tries' in self.request.session:
+            if len(self.request.session['tries']) > 10:
+                if now - self.request.session['tries'][-9] < 10 * 60:  # ten minutes.
+                    return True
+            self.request.session['tries'].append(now)
+        else:
+            self.request.session['tries'] = [now]
+        return False
+
+###################
 
 def permission(request, page, mode='edit', key_label='encryption_key'):
     """
