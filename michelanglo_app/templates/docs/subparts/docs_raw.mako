@@ -1,4 +1,4 @@
-<%namespace file="../layout_components/common_methods.mako" import="copy_btn"/>
+<%namespace file="../../layout_components/common_methods.mako" import="copy_btn"/>
 <h4>Raw HTML mode</h4>
 <div id="raw_html">
     <p>First, you can only use the code if you have a website that you can edit as raw HTML. Otherwise, you can only share links or zipped html files.</p>

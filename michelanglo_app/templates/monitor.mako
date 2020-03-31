@@ -39,7 +39,7 @@
     %endif
 
 
-    <%include file="docs/docs_protected.mako"/>
+    <%include file="docs/subparts/docs_protected.mako"/>
 
    <h2>Prolink monitoring</h2>
    %if status == 'monitoring':

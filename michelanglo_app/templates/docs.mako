@@ -11,7 +11,7 @@
 </%block>
 
 <%block name="main">
-    <%include file="docs/docs_nav.mako"/>
+    <%include file="docs/subparts/docs_nav.mako"/>
     <%def name="list_entry(url, icon, title, description, ico_type='far')">\
         <li><span class="fa-li"><i class="${ico_type} fa-${icon}"></i></span><a href="/docs/${url}">${title}</a> &mdash; ${description}</li>
     </%def>
@@ -26,6 +26,7 @@
     ${list_entry('clash', 'car-crash', 'Clash', 'Details about how clashes are represented.')}
     ${list_entry('users', 'user', 'Users & pages', 'Information and policy about users and personal pages.')}
     ${list_entry('gene', 'dna', 'Making the perfect structure', 'Advice on creating a protein model that suits your needs.')}
+    ${list_entry('venus', 'biohazard', 'VENUS', 'Predict the possible effects of a missense mutation on a given protein.')}
     ${list_entry('video', 'camera-movie', 'Videos', 'Tutorials ranging from protein basics to advanced editing')}
 </ul>
 </%block>

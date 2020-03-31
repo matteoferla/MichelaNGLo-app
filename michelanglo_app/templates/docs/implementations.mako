@@ -12,18 +12,18 @@
 
 <%block name="main">
 
-    <%include file="docs_nav.mako"/>
+    <%include file="subparts/docs_nav.mako"/>
 
 
 <p>This is a generalised instructions for implementing a view from Michelanglo on your site. For the code specific to your generated view see your pages and click the button "implement" on the side.</p>
 
 ############################################################ Raw
-<%include file="docs_raw.mako"/>
+<%include file="subparts/docs_raw.mako"/>
 
 ############################################################# CDN
-<%include file="docs_cdn.mako"/>
+<%include file="subparts/docs_cdn.mako"/>
 
 ############################################################# Viewport
-<%include file="docs_viewport.mako"/>
+<%include file="subparts/docs_viewport.mako"/>
 
 </%block>

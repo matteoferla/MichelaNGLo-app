@@ -28,7 +28,11 @@ requires = [
     'markdown',
     'psycopg2-binary',
     'requests',
-    'sentry-sdk'
+    'sentry-sdk',
+    'apscheduler',
+    'imageio'#,
+    #'bio',
+    #'pyrosetta'
 ]
 
 tests_require = [

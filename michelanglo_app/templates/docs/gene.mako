@@ -13,7 +13,7 @@
 
 <%block name="main">
 
-<%include file="docs_nav.mako"/>
+<%include file="subparts/docs_nav.mako"/>
 
 <h4>Getting a structure</h4>
 <p>You can search for structures corresponding to your gene name in the <a href="/name">name query page</a>.

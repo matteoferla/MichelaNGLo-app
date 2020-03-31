@@ -12,13 +12,13 @@
 </%block>
 
 <%block name="main">
-    <%include file="docs_nav.mako"/>
+    <%include file="subparts/docs_nav.mako"/>
 
 
     ############################################################# Users
-    <%include file="docs_users.mako"/>
+    <%include file="subparts/docs_users.mako"/>
 
     ######################################################### Pages
-    <%include file="docs_pages.mako"/>
-    <%include file="docs_protected.mako"/>
+    <%include file="subparts/docs_pages.mako"/>
+    <%include file="subparts/docs_protected.mako"/>
 </%block>

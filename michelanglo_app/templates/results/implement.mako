@@ -3,7 +3,7 @@
 <p>This modal guides you into implementing a NGL view on your website.</p>
 
 #################### raw
-<%include file="../docs/docs_raw.mako"/>
+<%include file="../docs/subparts/docs_raw.mako"/>
 
 
 
@@ -24,7 +24,7 @@
 % endif
 
 ###################### cdn
-<%include file="../docs/docs_cdn.mako"/>
+<%include file="../docs/subparts/docs_cdn.mako"/>
 
 ##################### data
 % if pdb:

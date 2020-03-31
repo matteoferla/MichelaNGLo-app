@@ -13,7 +13,7 @@
 
 <%block name="main">
 
-<%include file="docs_nav.mako"/>
+<%include file="subparts/docs_nav.mako"/>
 
     <ul class="list-group list-group-flush">
   <li class="list-group-item">

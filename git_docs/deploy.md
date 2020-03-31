@@ -12,7 +12,7 @@ Install modules in a folder called michelanglo:
 
     mkdir michelanglo
     cd michelanglo/
-    git clone --recursive https://github.com/matteoferla/MichelaNGLo.git app app
+    git clone --recursive https://github.com/matteoferla/MichelaNGLo.git app
     git clone https://github.com/matteoferla/MichelaNGLo-protein-module.git protein-module
     git clone https://github.com/matteoferla/MichelaNGLo-transpiler transpiler
     cd protein-module
@@ -26,7 +26,7 @@ Install modules in a folder called michelanglo:
     python3 setup.py install
     cd ../app
     python3 setup.py install
-    npm i puppeteer
+    npm install # installs puppeteer, but you will have to decide about the chromium sandboxing
     # do not want sqlite? change the env variable accordingly and read below
     cp demo.db mike.db
     PROTEIN_DATA='../protein-data' SECRETCODE='needed-for-remote-reset' SQL_URL='sqlite:///mike.db' SLACK_WEBHOOK='https://hooks.slack.com/services/xxx/xxx/xxx' python3 app.py > ../mike.log 2>&1

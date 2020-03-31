@@ -1,4 +1,4 @@
-<%namespace file="../layout_components/common_methods.mako" import="copy_btn"/>
+<%namespace file="../../layout_components/common_methods.mako" import="copy_btn"/>
 <h4>CDN</h4>
 <p>In order to make the JavaScript magic happen, the libraries need to be loaded.</p>
 <p>Add to the bottom of the page, but before the closing of the <code>body</code> element, the following lines.</p>

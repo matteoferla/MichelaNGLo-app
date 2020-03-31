@@ -93,30 +93,29 @@ def my_view(request):
 
 
 def route_docs(request, reply):
-    ## how I miss switches!
-    if request.matchdict['id'] == 'clash':
-        return render_to_response("../templates/docs/clash.mako", reply, request)
-    elif request.matchdict['id'] == 'markup':
-        return render_to_response("../templates/docs/markup.mako", reply, request)
-    elif request.matchdict['id'] == 'implementations':
-        return render_to_response("../templates/docs/implementations.mako", reply, request)
-    elif request.matchdict['id'] == 'imagetoggle' or request.matchdict['id'] == 'image':
-        return render_to_response("../templates/docs/image.mako", reply, request)
-    elif request.matchdict['id'] == 'api':
-        return render_to_response("../templates/docs/api.mako", reply, request)
-    elif request.matchdict['id'] == 'gene':
-        return render_to_response("../templates/docs/gene.mako", reply, request)
-    elif request.matchdict['id'] == 'cite':
-        return render_to_response("../templates/docs/cite.mako", reply, request)
-    elif request.matchdict['id'] == 'users' or request.matchdict['id'] == 'pages':
-        return render_to_response("../templates/docs/users_n_pages.mako", reply, request)
-    elif request.matchdict['id'] == 'video':
-        return render_to_response("../templates/docs/video.mako", reply, request)
-    elif request.matchdict['id'] == 'venus':
-        return render_to_response("../templates/docs/venus.mako", reply, request)
-    elif request.matchdict['id'] == 'github':
-        return render_to_response("../templates/docs/github.mako", reply, request)
-    else:
+
+    template = {'clash': 'clash',
+                'markup': 'markup',
+                'implementations': 'implementations',
+                'image': 'image',
+                'imagetoggle': 'image',
+                'gene': 'gene',
+                'api': 'api',
+                'cite': 'cite',
+                'pages': 'users_n_pages',
+                'users': 'users_n_pages',
+                'venus': 'venus',
+                'venus_energetics': 'venus_energetics',
+                'venus_model': 'venus_model',
+                'venus_urls': 'venus_urls',
+                'video': 'video',
+                'github': 'github'
+                }
+
+    if request.matchdict['id'] in template.keys():
+        rid = request.matchdict['id']
+        return render_to_response(f"../templates/docs/{template[rid]}.mako", reply, request)
+    else: # renderer="../templates/docs.mako" default
         return reply
 
 ########################################################################

@@ -15,7 +15,7 @@
 
 <%block name="body">
 
-    <%include file="docs_nav.mako"/>
+    <%include file="subparts/docs_nav.mako"/>
 
 
 <div class='row'>
@@ -150,7 +150,7 @@
     <p>When the dom loads the links are automatically enabled, however, if new links are added dynamically you have to activate them using <code>$(...).protein()</code>, for example <code>$('[data-toggle="protein"]').protein();</code></p>
 
 
-    <%include file="docs_viewport.mako"/>
+    <%include file="subparts/docs_viewport.mako"/>
 
 
     <h3 id="note">Note</h3>

@@ -13,7 +13,7 @@
 </%block>
 
 
-    <%include file="docs_nav.mako"/>
+    <%include file="subparts/docs_nav.mako"/>
 
 
 <div class='row'>
