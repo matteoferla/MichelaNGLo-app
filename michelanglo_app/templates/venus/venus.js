@@ -51,6 +51,7 @@ class Venus {
                                 'location': 'What domains are nearby linearly &mdash;but not necessarily containing the residue',
                                 'domdet': 'what is this?',
                                 'neigh': 'Model based, what residues are within 4 &aring;ngstr&ouml;m?',
+                                'gnomad': 'gnomAD mutations with 5 residues distance (structure independent)',
                                 'motif': 'Motifs predicted using the linear motif patterns from the ELM database. The presence of a linear motif does not mean it is valid, in fact the secondary structure is important: in a helix residues 3 along are facing the same direction, in a sheet alternating residues and in a loop it varies. If a motif is a phosphosite and the residue is not phosphorylated it is likely not legitimate.',
                                 'link': 'Link to this search (will be redone) for browser or programmatic access',
                                 'extlink': 'Links to external resources related to this gene'
@@ -203,7 +204,8 @@ class Venus {
                     let omni = this.makeProlink(this.mutational.gnomAD_near_mutation.map(v => v[1]+':A').join(' or '), '(all)');
                     let gnomADtext = `<p>Structure independent, sequence proximity (see structural neighbour for 3D) ${omni}.</p>`;
                     gnomADtext += '<ul>';
-                    gnomADtext += this.mutational.gnomAD_near_mutation.map(v => `<li>${this.makeProlink(v)}: (${v[3].toLowerCase()})</li>`).join('');
+                    const gMut = (v) => v[4].toUpperCase().split(' ')[0];
+                    gnomADtext += this.mutational.gnomAD_near_mutation.map(v => `<li>${this.makeProlink(v)}: (${v[3].toLowerCase()}, <i class="far fa-flask-potion" data-gnomad='${JSON.stringify([gMut(v)])}' style="cursor: pointer;"></i>)</li>`).join('');
                     gnomADtext += '</ul>';
                     this.createEntry('gnomad', 'gnomAD', gnomADtext);
                 }
@@ -737,7 +739,9 @@ class Venus {
         this.createEntry('strcha', 'Structural character', strloctext);
         let omni = this.makeProlink(this.structural.neighbours.map(v => v.resi+':A').join(' or '), '(all)');
         let strtext = `<p>Structural neighbourhood ${omni}.</p>`;
-        strtext += '<ul>'+this.structural.neighbours.map(v => `<li>${this.makeProlink(v.resi+":"+v.chain, v.resn+v.resi)} ${v.detail}</li>`).join('')+'</ul>';
+        const getGnomad = (detail) => detail.replace('gnomAD:','').split(' ')[0];
+        const makeDetail = ({detail}) => (detail.includes('gnomAD:')) ? `<span style='cursor: pointer;' class='underlined' data-gnomad='${JSON.stringify([getGnomad(detail)])}' >${detail}</span>` : detail;
+        strtext += '<ul>'+this.structural.neighbours.map(v => `<li>${this.makeProlink(v.resi+":"+v.chain, v.resn+v.resi)} ${makeDetail(v)}</li>`).join('')+'</ul>';
         this.createEntry('neigh','Structural neighbourhood', strtext);
     }
 
