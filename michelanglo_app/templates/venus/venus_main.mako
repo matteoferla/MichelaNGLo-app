@@ -60,8 +60,8 @@
         </div>
     </div>
             #################### ALERTS
-    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-  This page is still being built, therefore some features may not work. Do feel free to contact me (Matteo) for any queries: I always welcome feedback be it on purpose or not.
+    <div class="alert alert-warning alert-dismissible fade show my-3" role="alert">
+  This page is still being built, therefore some features may not work. Do feel free to contact me (Matteo) for any queries: I always welcome feedback be it on purpose or not. (<i class="far fa-comments"></i> button on the top right).
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>

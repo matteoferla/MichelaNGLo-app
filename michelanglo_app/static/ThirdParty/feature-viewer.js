@@ -675,7 +675,9 @@ var FeatureViewer = (function () {
                     });
                     Yposition += negativeNumbers ? pathLevel-5 : 0;
                 } else if (object.type === "mutation") { //#VENUS#//
-                    fillSVG.mutation(object);
+                    fillSVG.fullHeight(object);
+                } else if (object.type === "invalidRange") {
+                    fillSVG.fullHeight(object);
                 }
             },
             sequence: function (seq, position, start) {
@@ -1002,13 +1004,13 @@ var FeatureViewer = (function () {
 
                 forcePropagation(rects);
             },
-            mutation: function (object) {
+            fullHeight: function (object) {
                 let h = d3.select(".background").attr("height");
                 svgContainer.append("rect")
                         .data(object.data)
                         .attr("width", function (d) {
-                            if (scaling(d.x + 0.4) - scaling(d.x - 0.4) < 2) return 2;
-                            else return scaling(d.x + 0.4) - scaling(d.x - 0.4);
+                            if (scaling(d.y + 0.4) - scaling(d.x - 0.4) < 2) return 2;
+                            else return scaling(d.y + 0.4) - scaling(d.x - 0.4);
                         })
                         .attr("height", h)
                         // .attr("transform", function (d) {
@@ -1419,6 +1421,8 @@ var FeatureViewer = (function () {
                     transition.text(o, start);
                 } else if (o.type === "mutation") { //#VENUS#
                     transition.unique(o);
+                } else if (o.type === "invalidRange") { //#VENUS#
+                    transition.rectangle(o);
                 }
             });
         }
@@ -1816,7 +1820,7 @@ var FeatureViewer = (function () {
         initSVG(div, options);
 
         this.addFeature = function (object) {
-            if (object.type !== "mutation") Yposition += 20;
+            if ((object.type !== "mutation") && (object.type !== "invalidRange")) Yposition += 20;
             features.push(object);
             fillSVG.typeIdentifier(object);
             updateYaxis();
@@ -1832,6 +1836,9 @@ var FeatureViewer = (function () {
         };
 
         this.addMutation = function (position) {
+            /*
+            Adds a red line at `position`
+             */
             this.addFeature({ data: [{x: position, y: position}],
                                     className: "mutation",
                                     name: "mutation",
@@ -1841,6 +1848,24 @@ var FeatureViewer = (function () {
             $('.mutation').click(event => {
                 if (window.myData !== undefined) NGL.specialOps.showResidue('viewport', position+':A');
             });
+        };
+
+        this.addModel = function (start, stop, len) {
+            /*
+            Adds a grey box where the model does not cover...
+             */
+            this.addFeature({ data: [{x: 1, y: start}],
+                                    className: "invalidRange",
+                                    name: "invalidRange",
+                                    type: "invalidRange",
+                                    color: "rgba(192, 192, 192, 0.2)"
+                                });
+            this.addFeature({ data: [{x: stop, y: len}],
+                                    className: "invalidRange",
+                                    name: "invalidRange",
+                                    type: "invalidRange",
+                                    color: "rgba(192, 192, 192, 0.2)"
+                                });
         };
 
         this.clearInstance = function (){

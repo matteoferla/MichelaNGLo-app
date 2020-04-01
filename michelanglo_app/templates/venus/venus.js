@@ -714,10 +714,17 @@ class Venus {
                                                               value: this.structural.coordinates,
                                                               ext: 'pdb',
                                                               chain: 'A',
-                                                              chain_definitions:this.structural.chain_definitions,
+                                                              chain_definitions: this.structural.chain_definitions,
                                                               history: this.structural.history}])
                         .then(protein => NGL.specialOps.showResidue('viewport', this.position+':A'));
         UniprotFV.enpower();
+        if (this.structural.chain_definitions !== undefined) {
+            const chainAs = this.structural.chain_definitions.filter(c => c.chain === 'A');
+            const chainA = (chainAs.length > 0) ? chainAs[0] : this.structural.chain_definitions[0];
+            ft.addModel(chainA.x, chainA.y, venus.protein.sequence.length);
+        }
+
+
         this.updateStructureOption();
         let strloctext = '<p><i>Chosen model:</i> ';
         if (this.structural.code.length === 4) {
