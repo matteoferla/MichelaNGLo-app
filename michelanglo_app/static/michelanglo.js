@@ -300,16 +300,22 @@ NGL.specialOps.showOverlay = function (id, partner, selection, color, radius, vi
             console.log(partner);
             console.log(window[partner]);
         }
-        // this assumes it is data type.
         let m = myData.proteins.filter((prot) => prot.name === partner || prot.value === partner)[0];
-        let pdbblock = m.isVariable === undefined ? m.value : window[partner];
-        NGL.getStage(id).loadFile(new Blob ([ pdbblock, { type: 'text/plain'}]), { ext: 'pdb', firstModelOnly: true})
-                    .then(mutProtein => {
-                        let proteins = stage.getComponentsByType('structure');
-                        mutChange(mutProtein);
-                        wildtypeChange(proteins[0]);
-                        proteins[0].autoView(selection, 2000);
-                    });
+        let p;
+        if (m.type === 'data') {
+            let pdbblock = m.isVariable === undefined ? m.value : window[partner];
+            p = NGL.getStage(id).loadFile(new Blob ([ pdbblock, { type: 'text/plain'}]), { ext: 'pdb', firstModelOnly: true});
+        } else if (m.type === 'rcsb') {
+            p = NGL.getStage(id).loadFile('rcsb://'+m.value);
+        } else if (m.type === 'url') {
+            p = NGL.getStage(id).loadFile(m.value, { ext: 'pdb', firstModelOnly: true});
+        } else {throw 'Unknown type '+m.type}
+        p.then(mutProtein => {
+            let proteins = stage.getComponentsByType('structure');
+            mutChange(mutProtein);
+            wildtypeChange(proteins[0]);
+            proteins[0].autoView(selection, 2000);
+        });
     } else {
         let proteins = stage.getComponentsByType('structure');
         mutChange(proteins[1]);
