@@ -59,6 +59,8 @@ def edit(request):
             get_trashcan(request).owned.remove(page.identifier)
         # make a backup
         page.settings['revisions'].append({'user': user.name, 'time': str(page.timestamp), 'text': page.settings['description']})
+        if 'no_revisions' in request.params:
+            page.settings['revisions'] = []
         # only admins and friends can edit html fully
         if user.role in ('admin', 'friend'):
             for key in ('loadfun', 'title', 'data_other'):
@@ -132,6 +134,9 @@ def edit(request):
                 page.settings['image'] = request.params['image']
             else:
                 page.settings['image'] = False
+        if 'refresh_image' in request.params:
+            if os.path.exists(page.thumb_path):
+                os.remove(page.thumb_path)
         # save
         page.edited = True
         page.title = page.settings['title']
