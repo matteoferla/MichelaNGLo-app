@@ -15,7 +15,7 @@ process.on('UnhandledPromiseRejectionWarning', err => process.exit(1) ); //this 
 
 (async () => {
   //for some reason I cannot get npm to install chromium on centos.
-  const browser = process.env.PUPPETEER_CHROME ? await puppeteer.launch({executablePath: process.env.PUPPETEER_CHROME}) : await puppeteer.launch();
+  const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
    //{headless: false} if dev.
   const page = await browser.newPage();
   await page.setViewport({
