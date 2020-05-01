@@ -219,11 +219,11 @@ def permission(request, page, mode='edit', key_label='encryption_key'):
     user = request.user
     if page is None:
         request.response.status_int = 404
-        log.warning(f'{User.get_username(request)} requested a missing page {page}')
+        log.warning(f'{User.get_username(request)} requested a missing page {page.identifier}')
         return {'status': 'page not found'}
     elif not page.existant: #but used to exist.
         request.response.status_int = 410
-        log.warning(f'{User.get_username(request)} requested a deleted page')
+        log.warning(f'{User.get_username(request)} requested a deleted page {page.identifier}')
         return {'status': 'page no longer existent'}
     elif page.encrypted:
         if key_label not in request.params:

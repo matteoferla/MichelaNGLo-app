@@ -326,11 +326,11 @@
                     <img src="/static/SGC_reverse_trans.png" alt="SGC" class="footer-logo"
                          onclick="window.location.href = 'https://www.sgc.ox.ac.uk/';">
                 %else:
-                    <img src="https:/michelanglo.sgc.ox.ac.uk/static/ox_full.svg" alt="University of Oxford"
+                    <img src="static/ox_full.svg" alt="University of Oxford"
                          class="footer-logo" onclick="window.location.href = 'http://www.ox.ac.uk/';">&nbsp;&nbsp;&nbsp;
-                    <img src="https:/michelanglo.sgc.ox.ac.uk/static/OxfordBRC-logo-2019.png" alt="BRC"
+                    <img src="/static/OxfordBRC-logo-2019.png" alt="BRC"
                          class="footer-logo" onclick="window.location.href = 'https://oxfordbrc.nihr.ac.uk/';">&nbsp;&nbsp;&nbsp;
-                    <img src="https:/michelanglo.sgc.ox.ac.uk/static/SGC_reverse_trans.png" alt="SGC"
+                    <img src="/static/SGC_reverse_trans.png" alt="SGC"
                          class="footer-logo" onclick="window.location.href = 'https://www.sgc.ox.ac.uk/';">
                 %endif
             </div>
