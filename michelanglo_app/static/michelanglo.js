@@ -249,9 +249,42 @@ NGL.specialOps.showBlur = function (id, selection, color, radius, view, scale, l
     }
 };
 
-NGL.specialOps.showOverlay = function (id, partner, selection, color, radius, view, label) {
-    // to do. deal with color.
-    // Prepare
+NGL.specialOps.doubleLoader = function (stage, partner, resolve) {
+    let N_proteins = stage.getComponentsByType('structure').length;
+    if (N_proteins === 0) {throw 'no protein.'}
+    else if (N_proteins === 1) {
+        //load the partner
+        if (NGL.debug) {
+            console.log(partner);
+            console.log(window[partner]);
+        }
+        let m = myData.proteins.filter((prot) => prot.name === partner || prot.value === partner)[0];
+        let p;
+        window.myData.partner = partner;
+        if (m.type === 'data') {
+            let pdbblock = m.isVariable === undefined ? m.value : window[partner];
+            p = stage.loadFile(new Blob([pdbblock, {type: 'text/plain'}]), {ext: 'pdb', firstModelOnly: true});
+        } else if (m.type === 'rcsb') {
+            p = stage.loadFile('rcsb://' + m.value);
+        } else if (m.type === 'url') {
+            p = stage.loadFile(m.value, {ext: 'pdb', firstModelOnly: true});
+        } else {
+            throw 'Unknown type ' + m.type
+        }
+        p.then(mutProtein => {
+            let proteins = stage.getComponentsByType('structure');
+            return resolve(proteins[0], mutProtein);
+        });
+    } else if (window.myData.partner !== partner) {
+        stage.removeComponent(stage.compList[1]);
+        return NGL.specialOps.doubleLoader(stage, partner, resolve);
+    } else {
+        let proteins = stage.getComponentsByType('structure');
+        return resolve(proteins[0], proteins[1]);
+    }
+};
+
+NGL.specialOps.splitColor = function (color) {
     let wtColor = 0x00c78e;
     let mutColor = 0xff5733;
     if (color !== undefined) {
@@ -263,6 +296,13 @@ NGL.specialOps.showOverlay = function (id, partner, selection, color, radius, vi
              mutColor = color;
         }
     }
+    return [wtColor, mutColor];
+};
+
+NGL.specialOps.showOverlay = function (id, partner, selection, color, radius, view, label) {
+    // to do. deal with color.
+    // Prepare
+    let [wtColor, mutColor] = NGL.specialOps.splitColor(color);
     radius = radius || 4;
     NGL.specialOps.postInitialise(); //worst case schenario prevention.
     const stage = NGL.getStage(id);
@@ -292,36 +332,41 @@ NGL.specialOps.showOverlay = function (id, partner, selection, color, radius, vi
         NGL.specialOps.getClash(mutProtein, selection)
            .map(position => NGL.specialOps.addSpikyball(mutProtein.stage, position));
     };
-    let N_proteins = stage.getComponentsByType('structure').length;
-    if (N_proteins === 0) {throw 'no protein.'}
-    else if (N_proteins === 1) {
-        //load the partner
-        if (NGL.debug) {
-            console.log(partner);
-            console.log(window[partner]);
-        }
-        let m = myData.proteins.filter((prot) => prot.name === partner || prot.value === partner)[0];
-        let p;
-        if (m.type === 'data') {
-            let pdbblock = m.isVariable === undefined ? m.value : window[partner];
-            p = NGL.getStage(id).loadFile(new Blob ([ pdbblock, { type: 'text/plain'}]), { ext: 'pdb', firstModelOnly: true});
-        } else if (m.type === 'rcsb') {
-            p = NGL.getStage(id).loadFile('rcsb://'+m.value);
-        } else if (m.type === 'url') {
-            p = NGL.getStage(id).loadFile(m.value, { ext: 'pdb', firstModelOnly: true});
-        } else {throw 'Unknown type '+m.type}
-        p.then(mutProtein => {
-            let proteins = stage.getComponentsByType('structure');
-            mutChange(mutProtein);
-            wildtypeChange(proteins[0]);
-            proteins[0].autoView(selection, 2000);
-        });
-    } else {
-        let proteins = stage.getComponentsByType('structure');
-        mutChange(proteins[1]);
-        wildtypeChange(proteins[0]);
-        proteins[0].autoView(selection, 2000);
-    }
+    NGL.specialOps.doubleLoader(stage, partner, (wt, mt) => { mutChange(mt);
+                                                                    wildtypeChange(wt);
+                                                                    if (!!view) {
+                                                                        NGL.specialOps.slowOrient(id, view);
+                                                                    } else {wt.autoView(selection, 2000);}
+                                                                    if (!!label) {
+                                                                        NGL.specialOps.showTitle(id, label);
+                                                                    }
+                                                                    });
+
+};
+
+
+NGL.specialOps.showDomainOverlay = function (id, partner, selection, color, view, label) {
+    // to do. deal with color.
+    // Prepare
+    let [wtColor, mutColor] = NGL.specialOps.splitColor(color);
+    const change = (protein, color, selection) => {
+        protein.removeAllRepresentations();
+        protein.addRepresentation("cartoon", {color: 'white', sele: `not (${selection})`, smoothSheet: true});
+        protein.addRepresentation("cartoon", {color: color, sele: selection, smoothSheet: true});
+    };
+
+    NGL.specialOps.postInitialise(); //worst case schenario prevention.
+    const stage = NGL.getStage(id);
+    stage.removeClashes();
+    NGL.specialOps.doubleLoader(stage, partner, (wt, mt) => { change(mt, mutColor, selection);
+                                                                      change(wt, wtColor, selection);
+                                                                    if (!!view) {
+                                                                        NGL.specialOps.slowOrient(id, view);
+                                                                    } else {wt.autoView(selection, 2000);}
+                                                                    if (!!label) {
+                                                                        NGL.specialOps.showTitle(id, label);
+                                                                    }
+                                                                    });
 };
 
 ///  other.
@@ -1596,6 +1641,9 @@ NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
             NGL.specialOps.showSurface(id, selection, view);
         } else if ((focus === 'blur') || (focus === 'bfactor')) {
             NGL.specialOps.showBlur(id, selection, color, radius, view, undefined, label);
+        } else if ((focus.includes('domain-overlay'))) {
+            let partner = focus.match(/domain-overlay.*?([\w\_]+)/)[1]
+            NGL.specialOps.showDomainOverlay(id, partner, selection, color, view, label);
         } else if ((focus.includes('overlay'))) {
             let partner = focus.match(/overlay.*?([\w\_]+)/)[1]
             NGL.specialOps.showOverlay(id, partner, selection, color, radius, view, label);
