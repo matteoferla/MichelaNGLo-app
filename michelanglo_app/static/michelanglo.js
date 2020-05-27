@@ -112,7 +112,7 @@ NGL.specialOps._orientAfterShow = function (id, view, selection) {
         NGL.specialOps.slowOrient(id, view);
     } else {
         let protein = NGL.getStage(id).getComponentByType('structure');
-        protein.autoView(2000);
+        //protein.autoView(2000);
         protein.autoView(selection, 2000);
     }
 
@@ -1397,7 +1397,7 @@ NGL.specialOps.load = function (option, noLoadFun) {
     // toggle structure
     // - check if there is a stage.
     if (!NGL.getStage(myData.id)) {
-        NGL.stageIds[myData.id] = new NGL.Stage("viewport", {backgroundColor: myData.backgroundColor});
+        NGL.stageIds[myData.id] = new NGL.Stage(myData.id, {backgroundColor: myData.backgroundColor});
         window.addEventListener("resize", function (event) {
             NGL.stageIds[myData.id].handleResize();
         }, false);
