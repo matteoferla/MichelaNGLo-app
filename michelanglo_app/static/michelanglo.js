@@ -108,7 +108,7 @@ NGL.specialOps.showDomain = function (id, selection, color, view) {
 };
 
 NGL.specialOps._orientAfterShow = function (id, view, selection) {
-        if (!!view) {
+    if ((view === undefined) || (view === null)) {
         NGL.specialOps.slowOrient(id, view);
     } else {
         let protein = NGL.getStage(id).getComponentByType('structure');
@@ -363,9 +363,6 @@ NGL.specialOps.showDomainOverlay = function (id, partner, selection, color, view
                                                                     if (!!view) {
                                                                         NGL.specialOps.slowOrient(id, view);
                                                                     } else {wt.autoView(selection, 2000);}
-                                                                    if (!!label) {
-                                                                        NGL.specialOps.showTitle(id, label);
-                                                                    }
                                                                     });
 };
 
@@ -1588,7 +1585,7 @@ NGL.Stage.prototype.removeClashes = function () {
 
 NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
     //parse
-    var selection = $(prolink).data('selection'); //mandatory
+    var selection = $(prolink).data('selection'); //mandatory or nearly
     if (typeof selection === 'number') {
         selection = selection.toString()
     }
