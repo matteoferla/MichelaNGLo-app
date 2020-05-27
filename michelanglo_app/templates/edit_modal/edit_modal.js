@@ -23,12 +23,14 @@ window.prolinks = {
         $('#edit_description').html(description);
     },
     expandProlinkOnClick: (number) => {
+        // load it in the modal.
         window.currentRange = number;
         $('#markup_modal').modal('show');
         setTimeout(() => {  // really ought to override interactive builder, the fx at modal load
                 let pro = $('<span '+prolinks.elements[number-1].fore+' ></span>');
                 ['selection', 'color', 'title', 'radius', 'tolerance', 'load'].map((v) => {
                     if (pro.data(v) !== undefined) {$('#markup_'+v).val(pro.data(v) )}
+                    else {$('#markup_'+v).val('');}
                 });
                 if (pro.data('focus') !== undefined) {
                     $('#'+pro.data('focus')).click();
@@ -39,7 +41,15 @@ window.prolinks = {
                 }
                 if (pro.data('view') !== undefined) { //do I need to mod this?
                     $('#markup_view').val(JSON.stringify(pro.data('view')));
+                } else {$('#markup_view').val('');}
+                let i=1;
+                while (!! pro.data('selection-alt'+i)) {
+                    addAltResidue();
+                    $('#markup_selection'+i).val(pro.data('selection-alt'+i));
+                    $('#markup_color'+i).val(pro.data('color-alt'+i) || '');
+                    i++;
                 }
+                if (pro.data('selection-alt'))
                 interactive_changer();
                 }, 500);
     },
@@ -92,10 +102,13 @@ $('#edit_submit').click(function () {
     }
     if ($('#collapse_prolinks').prop('checked')) {prolinks.expandProlinks()}
     // convert description to markdown.
-    var description = $($('#edit_description')[0].outerHTML.replace(/<br.*?>/g,'\n')).text(); //changed from html
+    let htmlDescription = $('#edit_description')[0].innerHTML;
+    htmlDescription = htmlDescription.replace(/<br.*?>/g,'\n');
+    htmlDescription = htmlDescription.replace(/\n?<div>([\s\S]*?)<\/div>\n?/gm, '\n$1\n'); //firefox bug.
+    let description = $('<div>'+htmlDescription+'</div>').text(); //changed from html
     //description = description.replace(/<br.*?>/g,'\n\n').replace(/\n+/gm,'\n\n').replace('&gt;','>').replace('&lt;','<').replace('&amp;','&'); //unescape.
-    description = description.replace(/<div>([\s\S]*?)<\/div>/gm, '$1'); //firefox bug.
-    description = description.replace(/<br.*?>/g,'\n\n').replace(/\n\n+/gm,'\n\n'); //runaway newline bug.
+    description = description.replace(/<br.*?>/g,'\n\n'); //user physically wrote br.
+    description = description.replace(/\n\n+/gm,'\n\n'); //runaway newline bug.
     // @fa[icon-name]
     description = description.replace(/@fa\[(.*?)\]/gi,'<i class="far fa-$1"></i>');
 

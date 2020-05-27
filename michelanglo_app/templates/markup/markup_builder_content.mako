@@ -70,7 +70,8 @@
         </select>
     </div>
 
-    <div class="input-group mx-3">
+    <div class="col-12 col-md-12 mb-2">
+            <div class="input-group">
       <div class="input-group-prepend">
         <span class="input-group-text" >Orientation</span>
       </div>
@@ -84,7 +85,15 @@
           </div></button>
       </div>
     </div>
-    <div id="differing_view" class="alert alert-warning mx-3 w-100"><i class="far fa-exclamation-triangle"></i> The orientation of the protein differs from the stored one above.</div>
+    <div id="differing_view" class="alert alert-warning w-100"><i class="far fa-exclamation-triangle"></i> The orientation of the protein differs from the stored one above.</div>
+    </div>
+
+        <div class="col-12 col-md-12 mb-2">
+            <div id="altResidues" class="rounded border p-2">
+                <div id="addResidue" style="cursor: pointer;">Add additional residue selections <i class="far fa-layer-plus"></i></div>
+            </div>
+
+    </div>
 
     <div class="col-12 mt-2" id="results">
         <pre><code>&lt;span class="prolink" data-toggle="viewport"&gt;Change a setting!&lt;/span&gt;</code></pre>
