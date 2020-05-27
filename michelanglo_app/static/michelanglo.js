@@ -76,49 +76,49 @@ NGL.getStage = function (id) {
 
 ///////////////////////////// NGL.SpecialOps ///////////////
 
+NGL.specialOps.colorDefaults = {'domain': 'green', 'residue': 'hotpink'};
 
 /// show series.
 
-NGL.specialOps.slowOrient = function (id, view) {
+NGL.specialOps.slowOrient = function (id, view, selection) {
+    let protein = NGL.getStage(id).getComponentByType('structure');
     //wrapper for a string view.
-    NGL.getStage(id).getComponentByType('structure').autoView(2000); //zoom out.
-    if (typeof view !== 'string') {
-        NGL.getStage(id).animationControls.orient(view, 2000);
-    } else {
+    if (view === false) {
+        // pass. orient is disabled.
+    } else if ((view === undefined) && (selection === null)) {
+        protein.autoView(2000);
+    } else if ((view === undefined) && (selection !== null)) {
+        protein.autoView(selection, 2000);
+    } else if (typeof view !== 'string') {
+            protein.autoView(2000);
+            NGL.getStage(id).animationControls.orient(view, 2000);
+    } else { //array.
+        protein.autoView(2000);
         NGL.getStage(id).animationControls.orient(JSON.parse(view), 2000);
     }
 };
 
-NGL.specialOps.showDomain = function (id, selection, color, view) {
+NGL.specialOps.showDomain = function (id, selection, color, view, keepPrevious) {
     if (NGL.debug) {
         console.log('Show domain ' + selection)
     }
     // Prepare
     NGL.specialOps.postInitialise(); //worst case schenario prevention.
-    color = color || "green";
+    color = color || NGL.specialOps.colorDefaults['domain'];
     //selection = typeof selection === "string" ? new NGL.Selection(selection) : selection;
     let proteins = NGL.getStage(id).getComponentsByType('structure');
-    NGL.getStage(id).removeClashes();
-    proteins.map(protein => protein.removeAllRepresentations());
+    if (! keepPrevious) {
+        NGL.getStage(id).removeClashes();
+        proteins.map(protein => protein.removeAllRepresentations());
+    }
     // Color in!
     let schemeId = NGL.ColormakerRegistry.addSelectionScheme([[color, selection], ["white", "*"]]);
     myData.current_cartoonScheme = schemeId;
     proteins.map(protein => protein.addRepresentation("cartoon", {color: schemeId, smoothSheet: true}));
-    NGL.specialOps._orientAfterShow(id, view, selection);
+    NGL.specialOps.slowOrient(id, view, selection);
 };
 
-NGL.specialOps._orientAfterShow = function (id, view, selection) {
-    if ((view === undefined) || (view === null)) {
-        NGL.specialOps.slowOrient(id, view);
-    } else {
-        let protein = NGL.getStage(id).getComponentByType('structure');
-        //protein.autoView(2000);
-        protein.autoView(selection, 2000);
-    }
-
-};
-
-NGL.specialOps.showResidue = function (id, selection, color, radius, view, label, cartoonScheme) { //'chainid'
+NGL.specialOps.showResidue = function (id, selection, color, radius, view, label, cartoonScheme, keepPrevious) { //'chainid'
     if (NGL.debug) {
         console.log('Show residues ' + selection)
     }
@@ -126,7 +126,7 @@ NGL.specialOps.showResidue = function (id, selection, color, radius, view, label
     // Prepare
     NGL.specialOps.postInitialise(); //worst case schenario prevention.
     // defaults
-    color = color || "hotpink";
+    color = color || NGL.specialOps.colorDefaults['residue'];
     radius = radius || 4;
     //selection = typeof selection === "string" ? new NGL.Selection(selection) : selection;
     //get protein
@@ -152,11 +152,15 @@ NGL.specialOps.showResidue = function (id, selection, color, radius, view, label
         // Remove all bar cartoon-like representation
         ['ball+stick', 'contact', 'label', 'hyperball', 'licorice', 'line', 'point', 'spacefill', 'surface', 'tube'].map(function (value) {
             protein.stage.getRepresentationsByName(value).forEach(function (o) {
-                protein.removeRepresentation(o);
+                if (! keepPrevious) {
+                    protein.removeRepresentation(o);
+                }
             }); //.forEach representation
         }); //.map representation name
         //remove clashes
-        NGL.getStage(id).removeClashes();
+        if (! keepPrevious) {
+            NGL.getStage(id).removeClashes();
+        }
         var schemeId = NGL.ColormakerRegistry.addSelectionScheme([
             [color, '_C'], ["blue", '_N'], ["red", '_O'], ["white", '_H'], ["yellow", '_S'], ["orange", "*"] //this is such a weird way of doing it.
         ]);
@@ -181,21 +185,21 @@ NGL.specialOps.showResidue = function (id, selection, color, radius, view, label
         return expanded;
     })[0];
     //reorient.
-    NGL.specialOps._orientAfterShow(id, view, firstExpandedSelection);
+    NGL.specialOps.slowOrient(id, view, firstExpandedSelection);
 };
 
-NGL.specialOps.showClash = function (id, selection, color, radius, tolerance, view, label, cartoonScheme) {
+NGL.specialOps.showClash = function (id, selection, color, radius, tolerance, view, label, cartoonScheme, keepPrevious) {
     // This find and shows clashes at a given seletion. it calls getClash to find them and then addSpikyball to add them.
     // Prepare
     NGL.specialOps.postInitialise(); //worst case schenario prevention.
     radius = radius || 4;
-    NGL.specialOps.showResidue(id, selection, color, radius, view, label, cartoonScheme);
+    NGL.specialOps.showResidue(id, selection, color, radius, view, label, cartoonScheme, keepPrevious);
     let proteins = NGL.getStage(id).getComponentsByType('structure');
     proteins.map(protein => NGL.specialOps.getClash(protein, selection)
                                           .map(position => NGL.specialOps.addSpikyball(protein.stage, position)));
 };
 
-NGL.specialOps.showSurface = function (id, selection, view) {
+NGL.specialOps.showSurface = function (id, selection, view, keepPrevious) {
     if (NGL.debug) {
         console.log('Show surface ' + selection)
     }
@@ -213,10 +217,10 @@ NGL.specialOps.showSurface = function (id, selection, view) {
                                                         });
     });
 
-    NGL.specialOps._orientAfterShow(id, view, selection);
+    NGL.specialOps.slowOrient(id, view, selection);
 };
 
-NGL.specialOps.showBlur = function (id, selection, color, radius, view, scale, label) {
+NGL.specialOps.showBlur = function (id, selection, color, radius, view, scale, label, keepPrevious) {
     if (NGL.debug) {
         console.log('Show surface ' + selection)
     }
@@ -225,7 +229,7 @@ NGL.specialOps.showBlur = function (id, selection, color, radius, view, scale, l
     let proteins = NGL.getStage(id).getComponentsByType('structure');
     NGL.getStage(id).removeClashes();
     proteins.map(protein => {
-        protein.removeAllRepresentations();
+        if (! keepPrevious) {protein.removeAllRepresentations();}
         let bfactors = protein.structure.atomStore.bfactor;
         //console.log(scale);
         //console.log(bfactors.length / bfactors.reduce((a,b)=> a+b, 0));
@@ -238,14 +242,11 @@ NGL.specialOps.showBlur = function (id, selection, color, radius, view, scale, l
             colorScale: "RdYlBu"
         });
     });
-
     if (selection) {
-        NGL.specialOps.showResidue(id, selection, color, radius, view, label); //cartoonScheme must/cannot not be implemented!
-    } else if (!!view) {
-        NGL.specialOps.slowOrient(id, view);
+        NGL.specialOps.showResidue(id, selection, color, radius, view, label, undefined, true);
+        //cartoonScheme must/cannot not be implemented!
     } else {
-        // no selection. NGL.specialOps._orientAfterShow(id, view, selection) needs selection.
-        proteins[0].autoView(2000);
+        NGL.specialOps.slowOrient(id, view);
     }
 };
 
@@ -299,7 +300,8 @@ NGL.specialOps.splitColor = function (color) {
     return [wtColor, mutColor];
 };
 
-NGL.specialOps.showOverlay = function (id, partner, selection, color, radius, view, label) {
+NGL.specialOps.showOverlay = function (id, partner, selection, color, radius, view, label, keepPrevious) {
+    if (keepPrevious) {alert('Cannot use overlay in multiselection mode.')}
     // to do. deal with color.
     // Prepare
     let [wtColor, mutColor] = NGL.specialOps.splitColor(color);
@@ -345,7 +347,8 @@ NGL.specialOps.showOverlay = function (id, partner, selection, color, radius, vi
 };
 
 
-NGL.specialOps.showDomainOverlay = function (id, partner, selection, color, view, label) {
+NGL.specialOps.showDomainOverlay = function (id, partner, selection, color, view, label, keepPrevious) {
+    if (keepPrevious) {alert('Cannot use overlay in multiselection mode.')}
     // to do. deal with color.
     // Prepare
     let [wtColor, mutColor] = NGL.specialOps.splitColor(color);
@@ -1529,12 +1532,13 @@ NGL.specialOps._preventScroll = function (id) {
     setTimeout(() => $('#' + myData.id).css('overflow', 'visible'), 1000)
 };
 
-// make a scheme based on a color for carbons.
+// make a scheme based on a color for carbons. colorValue equivalent!
 NGL.specialOps.schemeMaker = CarbonColor => NGL.ColormakerRegistry.addScheme(function(params) {
                                             this.atomColor = function (atom) {
-                                            let ColorMap = {'N': 0x3333ff, 'C': CarbonColor, 'O': 0xff4c4c, 'S': 0xe5c53f, 'P': 0xff7f00};
-                                            if (atom.element in ColorMap) {return +ColorMap[atom.element]}
-                                            else {return 0xdcdcdc} //gainsboro
+                                                // colorValue does not work with all modes.
+                                                let ColorMap = {'N': 0x3333ff, 'C': CarbonColor, 'O': 0xff4c4c, 'S': 0xe5c53f, 'P': 0xff7f00};
+                                                if (atom.element in ColorMap) {return +ColorMap[atom.element]}
+                                                else {return 0xdcdcdc} //gainsboro
                                             };});
 
 ///////////////////////////// NGL.Stage monkeypatching ///////////////
@@ -1582,6 +1586,33 @@ NGL.Stage.prototype.removeClashes = function () {
 };
 
 ///////////////////////////// activate data-toggle='protein' ///////////////
+NGL.specialOps._prolink_focuser = function (prolink, id, focus, structure, selection, color, radius, view, label, cartoonScheme, tolerance, keepPrevious) {
+    if (focus === 'residue') {
+        NGL.specialOps.showResidue(id, selection, color, radius, view, label, cartoonScheme, keepPrevious);
+    } else if (focus === 'domain' || focus === 'region' || focus === undefined) {
+        NGL.specialOps.showDomain(id, selection, color, view, keepPrevious);
+    } else if (focus === 'clash') {
+        NGL.specialOps.showClash(id, selection, color, radius, tolerance, view, label, cartoonScheme, keepPrevious);
+    } else if (focus === 'surface') {
+        NGL.specialOps.showSurface(id, selection, view, keepPrevious);
+    } else if ((focus === 'blur') || (focus === 'bfactor')) {
+        if (selection === '*') {selection = undefined} // hack to fix the fact that the editor sets * to default.
+        NGL.specialOps.showBlur(id, selection, color, radius, view, undefined, label, keepPrevious);
+    } else if ((focus.includes('domain-overlay'))) {
+        let partner = focus.match(/domain-overlay.*?([\w\_]+)/)[1]
+        NGL.specialOps.showDomainOverlay(id, partner, selection, color, view, label, keepPrevious);
+    } else if ((focus.includes('overlay'))) {
+        let partner = focus.match(/overlay.*?([\w\_]+)/)[1]
+        NGL.specialOps.showOverlay(id, partner, selection, color, radius, view, label, keepPrevious);
+    } else if (structure !== undefined) { //structure is a string/number argument (e.g. '1UBQ', 1, 'myProteinName')
+        console.log('Please add view-reset if you are changing structure as its too ambiguous otherwise.');
+    } else if (focus === 'orientation') {
+        NGL.specialOps.slowOrient(id, view, selection);
+    } else {
+        throw `ValueError: odd data-focus tag ${focus}`;
+    }
+}
+
 
 NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
     //parse
@@ -1589,6 +1620,16 @@ NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
     if (typeof selection === 'number') {
         selection = selection.toString()
     }
+    // path for multiselection.
+    let i = 1;
+    let altSele = [];
+    while ($(prolink).data('selection-alt'+i) !== undefined) {
+        let f = $(prolink).data('focus-alt'+i) || 'residue'; //residue is the only focus mode that will work as intended...
+        let c = $(prolink).data('color-alt'+i) || NGL.specialOps.colorDefaults[f];
+        altSele.push([f, $(prolink).data('selection-alt'+i), c]);
+        i++;
+    }
+    //
     var color = $(prolink).data('color'); //optional settings in methods
     var radius = $(prolink).data('radius');
     var tolerance = $(prolink).data('tolerance');
@@ -1618,37 +1659,22 @@ NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
         if (view === 'auto') { //special view case.
             stage.getComponentsByType('structure').map(protein => protein.addRepresentation("cartoon", {smoothSheet: true}));
             stage.autoView(2000);
-        } else if (view === 'reset') { //special view case.
+        } else if ((view === 'reset') || (view === 'default')) { //special view case.
             // FLAG REFACTOR
             NGL.specialOps._run_loadFx(stage.getComponentByType('structure'), myData.proteins[myData.currentIndex].loadFx);
-        } else if ((!!view) && (view !== 'auto') && (typeof view === "string") && (view.match(/^\w+$/) !== null)) { //not auto but different custom fx.
+        } else if ((!!view) && (typeof view === "string") && (view.match(/^\w+$/) !== null)) { //not auto but different custom fx.
             if (typeof window[view] === 'function') {
                 // FLAG REFACTOR
                 window[view](stage.getComponentByType('structure'));
             }
         } else if ((!!view) && (!selection)) {  //view, no selection.
             NGL.specialOps.slowOrient(id, view);
-        } else if (focus === 'residue') {
-            NGL.specialOps.showResidue(id, selection, color, radius, view, label, cartoonScheme);
-        } else if (focus === 'domain' || focus === 'region' || focus === undefined) {
-            NGL.specialOps.showDomain(id, selection, color, view);
-        } else if (focus === 'clash') {
-            NGL.specialOps.showClash(id, selection, color, radius, tolerance, view, label, cartoonScheme);
-        } else if (focus === 'surface') {
-            NGL.specialOps.showSurface(id, selection, view);
-        } else if ((focus === 'blur') || (focus === 'bfactor')) {
-            NGL.specialOps.showBlur(id, selection, color, radius, view, undefined, label);
-        } else if ((focus.includes('domain-overlay'))) {
-            let partner = focus.match(/domain-overlay.*?([\w\_]+)/)[1]
-            NGL.specialOps.showDomainOverlay(id, partner, selection, color, view, label);
-        } else if ((focus.includes('overlay'))) {
-            let partner = focus.match(/overlay.*?([\w\_]+)/)[1]
-            NGL.specialOps.showOverlay(id, partner, selection, color, radius, view, label);
-        } else if (structure !== undefined) { //structure is a string/number argument (e.g. '1UBQ', 1, 'myProteinName')
-            console.log('Please add view-reset if you are changing structure as its too ambiguous otherwise.');
         } else {
-            throw 'ValueError: odd data-focus tag.'
+            NGL.specialOps._prolink_focuser(prolink, id, focus, structure, selection, color, radius, view, label, cartoonScheme, tolerance, false);
+            altSele.forEach(([focusAlt, seleAlt, colorAlt]) =>
+                NGL.specialOps._prolink_focuser(prolink, id, focusAlt, structure, seleAlt, colorAlt, radius, false, label, cartoonScheme, tolerance, true));
         }
+
         // hetero flag is a hack.
         if (!!hetero) {
             stage.getComponentsByType('structure').map(protein => protein.addRepresentation("licorice", {
