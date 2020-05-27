@@ -1501,7 +1501,7 @@ NGL.specialOps.multiLoader = function (id, proteins, backgroundColor, startIndex
         img.css('cursor', 'pointer');
         NGL.specialOps.showTitle(id, 'Click to interact with the protein structure.');
         $('#viewport_menu_popover').click(() => NGL.specialOps.load(startIndex));
-        $('#viewport').prepend(`<div style="position:absolute; bottom:2rem; left:2rem; z-index:1001" id="img_label"><i class="far fa-mouse-pointer"></i> Click to intereact</div>`);
+        $('#' + id).prepend(`<div style="position:absolute; bottom:2rem; left:2rem; z-index:1001" id="img_label"><i class="far fa-mouse-pointer"></i> Click to intereact</div>`);
         img.click(() => {
             NGL.specialOps.load(startIndex);
             $('#img_label').detach();
