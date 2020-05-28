@@ -94,11 +94,20 @@ window.interactive_changer = (event, noRun) => {
     code = 'data-focus="' + mode + '"';
     // add extra residues
     $('#altResidues').children().each((i, v) => {
-        let s = $(`#markup_selection${i+1}`).val();
+        sel_el = $(`#markup_selection${i+1}`);
+        let s = sel_el.val();
         let c = $(`#markup_color${i+1}`).val();
-        if (!! s) {
+        let f = $(`#markup_focus${i+1}`).val();
+        let structure = NGL.getStage().getComponentByType('structure').structure;
+        if ((!! s) && (structure.getView(new NGL.Selection(s)).atomCount !== 0)) {
             attributes +=` data-selection-alt${i+1}=${s}`;
+            attributes +=` data-focus-alt${i+1}=${f}`;
             if (!! c) {attributes +=` data-color-alt${i+1}=${c}`}
+            sel_el.addClass('is-valid');
+            sel_el.removeClass('is-invalid');
+        } else {
+            sel_el.addClass('is-invalid');
+            sel_el.removeClass('is-valid');
         }
     });
     // create and run
@@ -299,21 +308,26 @@ $('#selection_modal').on('shown.bs.modal', () => {
 window.addAltResidue = () => {
     let n = $('#altResidues').children().length;
     $('#addResidue').before(`<div class="row mb-2">
-<div class="input-group col-6">
+<div class="input-group col-12 col-lg-4">
           <div class="input-group-prepend">
             <span class="input-group-text" id="markup_selection${n}_addon">Extra selection Nº${n}</span>
           </div>
             <input type="text" class="form-control" placeholder="for example 1-10:A" id="markup_selection${n}" aria-describedby="markup_selection${n}_addon">
             </div>
-            <div class="input-group col-6">
+            <div class="input-group col-12 col-lg-4">
           <div class="input-group-prepend">
             <span class="input-group-text" id="markup_color${n}_addon">Extra color Nº${n}</span>
           </div>
             <input type="text" class="form-control" placeholder="for example teal" id="markup_color${n}" aria-describedby="markup_color${n}_addon">
             </div>
-</div>`);
+            <div class="input-group col-12 col-lg-4">
+            <select class="custom-select" id="markup_focus${n}">
+              <option value="domain" selected>Domain</option>
+              <option value="residue">Residue</option>
+            </select>
+</div></div>`);
     $('#markup_color'+n).colorpicker();
-    $(`#markup_selection${n},#markup_color${n}`).on('keyup change input', interactive_changer);
+    $(`#markup_selection${n},#markup_color${n},#markup_focus${n}`).on('keyup change input', interactive_changer);
 };
 
 $('#addResidue').click(addAltResidue);

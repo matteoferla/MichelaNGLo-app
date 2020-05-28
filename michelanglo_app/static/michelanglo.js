@@ -116,7 +116,7 @@ NGL.specialOps.showDomain = function (id, selection, color, view, keepPrevious) 
     myData.current_cartoonScheme = schemeId;
     let prop = {color: schemeId, smoothSheet: true};
     // determine span
-    if (keepPrevious) {
+    if (keepPrevious && !! selection) {
         prop['sele'] = selection;
     }
     proteins.map(protein => protein.addRepresentation("cartoon", prop));
