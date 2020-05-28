@@ -132,7 +132,7 @@ window.interactive_changer = (event, noRun) => {
 // call manually not in modal mode.
 window.interactive_builder = () => {
     //buttons.
-    $('#markup_color').colorpicker();
+    $('#markup_color').colorpicker({format: 'hex'});
     // make it more clear what is clicked!
     $('#markup_view_toggle label').click(function () {
         $('#markup_view_toggle label').each(function () {
@@ -333,7 +333,7 @@ window.addAltResidue = () => {
               <option value="residue">Residue</option>
             </select>
 </div></div>`);
-    $('#markup_color'+n).colorpicker();
+    $('#markup_color'+n).colorpicker({format: 'hex'});
     $(`#markup_selection${n},#markup_color${n},#markup_focus${n}`).on('keyup change input', interactive_changer);
 };
 
