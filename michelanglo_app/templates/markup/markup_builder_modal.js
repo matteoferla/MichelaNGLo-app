@@ -20,7 +20,8 @@ $('#markup_modal').on('hide.bs.modal', function (e) {
 
 // update on change (see interactive_builder)
 window.interactive_changer = (event, noRun) => {
-    if (NGL.getStage().getComponentByType('structure') === undefined) {
+    try {
+        if (NGL.getStage().getComponentByType('structure') === undefined) {
         console.log('async issue!');
         setTimeout(window.interactive_changer, 500, event, noRun);
         return 0;
@@ -120,6 +121,12 @@ window.interactive_changer = (event, noRun) => {
         NGL.specialOps.prolink(spanCode);
     }
     $('#differing_view').hide(); // Unfortunate side-effect is that the orientation is reset.
+    }
+    catch (e) {
+        console.log(e);
+    }
+
+
 };
 
 // call manually not in modal mode.
