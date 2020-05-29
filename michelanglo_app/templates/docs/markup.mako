@@ -143,9 +143,41 @@
                 Do note that "previous" makes sense only if the new model loaded is a variant of the old one, otherwise it may behave oddly, therefore make sure to set <code>data-cartoonScheme</code> for those cases.
             </td>
         </tr>
+        <tr>
+            <td><code>data-selection-alt1</code><br/>(or higher number)</td>
+            <td>—</td>
+            <td>optionally <code>data-focus-alt1='residue'</code> and <code>data-color-alt1='red'</code></td>
+            <td>This command adds an additionally selection without removing the previous —see <a href="#stacking">"stacking" paragraph</a>.
+            </td>
+        </tr>
+        <tr>
+            <td><code>data-focus-alt1</code><br/>(or higher number)</td>
+            <td><code>'residue'</code></td>
+            <td><code>data-selection-alt1='12:A'</code>. Optionally <code>data-color-alt1='red'</code></td>
+            <td>This command adds an additionally selection without removing the previous —see <a href="#stacking">"stacking" paragraph</a>.
+                The GUI only accepts residue | domain, but in reality other "focus" commands are accepted.
+            </td>
+        </tr>
+        <tr>
+            <td><code>data-color-alt1</code><br/>(or higher number)</td>
+            <td><code>'green'</code></td>
+            <td><code>data-selection-alt1='12:A'</code> and optionally <code>data-focus-alt1='domain'</code></td>
+            <td>This command adds an additionally selection without removing the previous —see <a href="#stacking">"stacking" paragraph</a>.
+            </td>
+        </tr>
         </tbody>
     </table>
 
+    <h4 id="stacking">Stacking of representations</h4>
+    <p>The residue-focused selection keeps the domain-focused selection, because in the narration of a protein generally
+    one speaks of the domain and then goes into detail about residues, therefore it is handy to keep the previous representation.
+    For this logic, the reverse is not true.</p>
+    <p>A different case happens with the alternative representations (<code>-alt1</code>, <code>-alt2</code> etc.).
+    With these the previous representation is not blanked.
+        Consequently highlighting a domain as an additional representation will <b>not</b> remove the previous ones.
+        Therefore, one must give a domain-focused selection as the main selection and residue-focuses
+        as a secondary selection, else the previous domain will stay and new domain-focuses selections will stack on top.
+    </p>
     <h4>$('..').protein()</h4>
     <p>When the dom loads the links are automatically enabled, however, if new links are added dynamically you have to activate them using <code>$(...).protein()</code>, for example <code>$('[data-toggle="protein"]').protein();</code></p>
 

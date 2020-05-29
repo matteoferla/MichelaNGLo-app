@@ -47,6 +47,7 @@ window.prolinks = {
                     addAltResidue();
                     $('#markup_selection'+i).val(pro.data('selection-alt'+i));
                     $('#markup_color'+i).val(pro.data('color-alt'+i) || '');
+                    $('#markup_focus'+i).val(pro.data('focus-alt'+i) || 'residue');
                     i++;
                 }
                 if (pro.data('selection-alt'))
