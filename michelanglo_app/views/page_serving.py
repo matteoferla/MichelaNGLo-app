@@ -27,7 +27,20 @@ def redirect_view(request):
     :return:
     """
     pagename = Doi.reroute(request, request.matchdict['id'])
-    return get_userdata(request, pagename)
+    if pagename is not None:
+        return get_userdata(request, pagename)
+    else:
+        request.response.status_int = 400
+        response_settings = {'project': 'Michelanglo', 'user': request.user,
+                             'page': pagename,
+                             'custom_messages': json.dumps(custom_messages),
+                             'meta_title': 'Michelaɴɢʟo: sculpting protein views on webpages without coding.',
+                             'meta_description': 'Convert PyMOL files, upload PDB files or submit PDB codes and ' + \
+                                                 'create a webpage to edit, share or implement standalone on your site',
+                             'meta_image': '/static/tim_barrel.png',
+                             'meta_url': 'https://michelanglo.sgc.ox.ac.uk/'
+                             }
+        return render_to_response("../templates/404.mako", response_settings, request)
 
 def get_userdata(request, pagename):
     log.info(f'{User.get_username(request)} is looking at a page {pagename}')

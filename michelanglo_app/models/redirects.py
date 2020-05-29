@@ -22,7 +22,7 @@ class Doi(Base):
     def reroute(cls, request, short):
         #get the DB version...
         self = request.dbsession.query(cls).filter(cls.short == short.lower()).first()
-        if self:
+        if self is not None:
             return self.long
         else:
             return None

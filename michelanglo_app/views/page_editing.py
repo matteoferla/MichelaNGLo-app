@@ -80,6 +80,11 @@ def edit(request):
             if 'description' in request.params:
                 page.settings['descr_mdowned'] = page.sanitise_HTML(markdown.markdown(request.params['description']))
                 page.settings['description'] = request.params['description']
+            if 'data_other' in request.params:
+                text = request.params['data_other']
+                text = text.replace('<', '').replace('&lt;', '').replace('>', '').replace('&gt;', '')
+                text = ' '.join(re.findall('data-[\w\-\_]+\="[^"]*?"', text))
+                page.settings['data_other'] = text
         page.settings['confidential'] = is_js_true(request.params['confidential'])
         if page.privacy == '' or page.privacy is None:
             page.privacy = 'private'

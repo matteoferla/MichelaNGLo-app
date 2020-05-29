@@ -49,6 +49,9 @@
                         <span data-toggle="tooltip" data-trigger="hover"  title="Create links that control the protein view (prolinks)">
                             <%include file="../markup/markup_builder_btn.mako"/>
                         </span>
+                       <span data-toggle="tooltip" data-trigger="hover"  title="Alter initial view">
+                           <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#initial_modal" id="initial_btn"><i class="far fa-wrench"></i> Alter loading view</button>
+                       </span>
                        <span data-toggle="tooltip" data-trigger="hover"  title="Create point mutations in this structure &mdash;mutant structure will appear as a different model (see fa-load in documentation)">
                             <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#mutate_modal" id="mutate_modal_btn"><i class="far fa-biohazard"></i> Make mutations</button>
                        </span>

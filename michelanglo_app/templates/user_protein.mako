@@ -127,6 +127,7 @@
 <%include file='edit_modal/implement_modal.mako'/>
 <%include file='edit_modal/combine_modal.mako'/>
 <%include file='edit_modal/mutate_modal.mako'/>
+<%include file='edit_modal/initial_modal.mako'/>
     %if firsttime:
         <%include file='results/wrong.mako'/>
     %endif

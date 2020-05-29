@@ -10,7 +10,7 @@
       </div>
         <div class="modal-body">
             <div class="row">
-          <div class="col-12 col-md-8">
+          <div class="col-12 col-md-8" id="markup_formParent">
               <p>This tool allows you to create custom anchor elements that control the protein. See <a href="/docs/markup">documentation</a> for more.</p>
             <%include file="markup_builder_content.mako"/>
 

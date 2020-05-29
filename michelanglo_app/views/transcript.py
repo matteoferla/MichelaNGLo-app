@@ -5,7 +5,8 @@ from michelanglo_protein import global_settings, ProteinCore
 from .common_methods import is_malformed
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
-
+import logging
+log = logging.getLogger(__name__)
 
 @view_config(route_name='venus_transcript', renderer='json')
 def venus_transcript(request):
@@ -15,11 +16,16 @@ def venus_transcript(request):
     malformed = is_malformed(request, 'enst', 'mutation')
     if malformed:
         return {'status': malformed}
-    data = get_transcript(request)
-    if 'redirect' in request.params:
-        return HTTPFound(location=f'/venus?gene={data["uniprot"]}&species=9606&mutation={data["mutation"]}')
-    else:
-        return data
+    try:
+        data = get_transcript(request)
+        if 'redirect' in request.params:
+            return HTTPFound(location=f'/venus?gene={data["uniprot"]}&species=9606&mutation={data["mutation"]}')
+        else:
+            return data
+    except Exception as err:
+        msg = f'{err.__class__.__name__}: {err}'
+        log.warning(msg)
+        return {'error': msg, 'status': 'error'}
 
 
 def get_transcript(request):
@@ -48,15 +54,16 @@ class ENSTMapper:
     def __init__(self, enst: str):
         self.enst = re.sub(r'\.\d+', '', enst)  # version does not matter.
         # create self.info:Dict
-        self.ENST2info()
+        self.info = self.ENST2info()
         self.ensp = self.info['protein_stable_id']
         self.uniprot = self.info['xref']
 
     def ENST2info(self) -> Dict:
         for entry in csv.DictReader(global_settings.open('ensembl-uniprot'), delimiter='\t'):
             if entry['transcript_stable_id'] == self.enst:
-                self.info = entry
                 return entry
+        else:
+            raise ValueError(f'Cannot find {self.enst}')
 
     def is_full_match(self) -> bool:
         """
