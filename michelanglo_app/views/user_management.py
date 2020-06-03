@@ -219,7 +219,7 @@ def permission(request, page, mode='edit', key_label='encryption_key'):
     user = request.user
     if page is None:
         request.response.status_int = 404
-        log.warning(f'{User.get_username(request)} requested a missing page {page.identifier}')
+        log.warning(f'{User.get_username(request)} requested a missing page ({request.host_url}).')
         return {'status': 'page not found'}
     elif not page.existant: #but used to exist.
         request.response.status_int = 410
