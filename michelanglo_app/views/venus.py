@@ -222,7 +222,7 @@ class Venus:
                 return {'status': 'terminated', 'error': 'No crystal structures or models available.',
                         'has_structure': False,
                         'msg': 'Structrual analyses cannot be performed.'}
-        except NotImplementedError as err:  # Exception
+        except Exception as err:  # Exception
             msg = f'Structural analysis failed {err} {type(err).__name__}.'
             log.warning(msg)
             return {'status': 'error', 'msg': msg}
