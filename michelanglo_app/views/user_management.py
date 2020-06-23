@@ -61,6 +61,11 @@ class UserView:
             self.password = sanitise_text(self.request.params['password']).strip()
         else:
             self.password = ''
+        # double security
+        if 'code' in request.params and request.params['code'] == os.environ['SECRETCODE']:
+            self.code_verified = True
+        else:
+            self.code_verified = False
 
     @view_config(renderer="json")
     def respond(self):
@@ -92,7 +97,7 @@ class UserView:
                 self.forgot()
             else:
                 pass
-        elif self.action in ('promote', 'kill', 'reset'):
+        elif self.action in ('promote', 'kill', 'reset', 'email'):
             if self.requestor and self.requestor.role == 'admin':  ##only admins!
                 if self.username is None:
                     return is_malformed(self.request, 'username')
@@ -107,6 +112,11 @@ class UserView:
                     self.targetuser.set_password('password')
                     self.request.dbsession.add(self.targetuser)
                     return {'status': 'reset'}
+                elif self.action == 'email' and self.code_verified:
+                    return {'status': 'email', 'name': self.targetuser.name, 'email': self.targetuser.email}
+                else:
+                    self.request.response.status = 400
+                    return {'status': 'malformed'}
             else:
                 self.request.response.status = 403
                 return {'status': 'access denied'}
