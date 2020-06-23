@@ -82,6 +82,8 @@
 </%block>
 
 <%block name='modals'>
+    ### This adds #structureless_modal
+    <%include file="venus_no_structure.mako"/>
 </%block>
 
 <%block name='script'>

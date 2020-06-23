@@ -237,10 +237,16 @@ class Venus {
         //step 3
         this.setStatus('Running step 3/4', 'working');
         return this.analyse('structural').done(msg => {
-            if (msg.error) {
+            if (msg.has_structure === false) {
+                $('#structureless_modal').modal('show');
+                this.setStatus('No structure.', 'halt');
+                this.fallbackAnalyse();
+            }
+            else if (msg.error) {
                 this.setStatus('Failure at step 3/4', 'crash');
                 ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
                 this.fallbackAnalyse();
+
             } else {
                 this.structural = msg.structural;
                 this.analyseddG();
@@ -434,6 +440,9 @@ class Venus {
             break;
           case 'crash':
             s.html(`<div class="alert alert-danger w-100"><i class="far fa-skull-crossbones"></i> ${label}</div>`);
+            break;
+          case 'halt':
+            s.html(`<div class="alert alert-info w-100"><i class="far fa-hand-paper"></i> ${label}</div>`);
             break;
         case 'done':
             s.html(`<div class="alert alert-success w-100"><i class="fas fa-check"></i> ${label}</div>`);

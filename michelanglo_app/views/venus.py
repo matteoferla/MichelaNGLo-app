@@ -209,19 +209,23 @@ class Venus:
         protein = system_storage[self.handle]
         if hasattr(protein, 'structural') and protein.structural is not None:
             return {'structural': jsonable(protein.structural),
+                    'has_structure': True,
                     'status': 'success'}
         try:
             protein.analyse_structure()
             if protein.structural:
                 return {'structural': jsonable(protein.structural),
+                        'has_structure': True,
                         'status': 'success'}
             else:
                 log.info('No structural data available')
                 return {'status': 'terminated', 'error': 'No crystal structures or models available.',
+                        'has_structure': False,
                         'msg': 'Structrual analyses cannot be performed.'}
         except NotImplementedError as err:  # Exception
-            log.warning(f'Structural analysis failed {err} {type(err).__name__}.')
-            return {'status': 'error'}
+            msg = f'Structural analysis failed {err} {type(err).__name__}.'
+            log.warning(msg)
+            return {'status': 'error', 'msg': msg}
 
     ### Step 4
     def ddG_step(self):
