@@ -74,7 +74,7 @@
                                 Revert to a previous edit
                               </button>
                               <div class="dropdown-menu" aria-labelledby="revision_button" id="revision_menu">
-                                  %for i, rev in reversed(enumerate(revisions)):
+                                  %for i, rev in reversed(list(enumerate(revisions))):
                                       <a class="dropdown-item" href="#" onclick="loadPastVersion(${i})">${rev['time']} &mdash;${rev['user']}</a>
                                   %endfor
                               </div>
