@@ -69,6 +69,7 @@ class Venus {
         this.energetical = null;
         this.energetical_gnomAD = null;
         delete window.myData;
+        model_id.innerHTML = 'N/A';
         if (window.myData !== undefined) {
             delete window.myData;
             NGL.getStage().removeAllComponents();
@@ -125,7 +126,7 @@ class Venus {
                 'VENUS analyses missense mutations only. One mutation at the time. The mutation needs to be in the format A123E or Ala123Glu, with or without "p." prefix. Case insensitive.', 'bg-warning');
             $('#venus_calc').removeAttr('disabled');
             return 0;}
-        this.setStatus('Running step 1/4', 'working');
+        this.setStatus('Running step 1/5', 'working');
         return venus.analyse('protein')
             .fail(xhr => {
                 this.setStatus('Failure at step 1/4', 'crash');
@@ -165,7 +166,7 @@ class Venus {
     //step 2
     analyseMutation() {
         //step 2
-        this.setStatus('Running step 2/4', 'working');
+        this.setStatus('Running step 2/5', 'working');
         return this.analyse('mutation').done(msg => {
             if (msg.error) {
                 this.setStatus('Failure at step 2/4', 'crash');
@@ -235,15 +236,18 @@ class Venus {
     //step 3
     analyseStructural() {
         //step 3
-        this.setStatus('Running step 3/4', 'working');
-        return this.analyse('structural').done(msg => {
-            if (msg.has_structure === false) {
+        this.setStatus('Running step 3/5', 'working');
+        return this.analyse('structural').done(msg => this.parseStructuralResponse.call(this, msg));
+    }
+
+    parseStructuralResponse(msg) {
+        if (msg.has_structure === false) {
                 $('#structureless_modal').modal('show');
                 this.setStatus('No structure.', 'halt');
                 this.fallbackAnalyse();
             }
             else if (msg.error) {
-                this.setStatus('Failure at step 3/4', 'crash');
+                this.setStatus('Failure at step 3/5', 'crash');
                 ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
                 this.fallbackAnalyse();
 
@@ -257,7 +261,6 @@ class Venus {
             // pros.protein();
             // pros.click(event => this.showMutant.call(this) );
             // hack them to always show the mutants.
-        })
     }
 
     //step 4
@@ -429,6 +432,38 @@ class Venus {
         $('#structureOption').append('<li>No structures available</li>');
 
 
+    }
+
+    //custom pdb
+    analyseCustomFile(pdb, name, params) {
+        this.setStatus('Re-running step 3/5 with custom file', 'working');
+        $.post({
+            url: "venus_analyse", data: {
+                uniprot: uniprotValue,
+                species: taxidValue,
+                step: 'customfile',
+                mutation: this.mutation,
+                pdb: pdb,
+                filename: name,
+                params: params
+            }
+        }).fail(ops.addErrorToast)
+          .done(msg => this.parseStructuralResponse.call(this, msg));
+    }
+
+    analyseCustomMike(uuid, params) {
+        this.setStatus('Re-running step 3/5 with custom file', 'working');
+        $.post({
+            url: "venus_analyse", data: {
+                uniprot: uniprotValue,
+                species: taxidValue,
+                step: 'custommike',
+                mutation: this.mutation,
+                pdb: uuid,
+                params: params
+            }
+        }).fail(ops.addErrorToast)
+          .done(msg => this.parseStructuralResponse.call(this, msg));
     }
 
     //progress bar.
@@ -727,9 +762,11 @@ class Venus {
                                                               history: this.structural.history}])
                         .then(protein => NGL.specialOps.showResidue('viewport', this.position+':A'));
         UniprotFV.enpower();
+        model_id.innerHTML = this.structural.code;
         if (this.structural.chain_definitions !== undefined) {
             const chainAs = this.structural.chain_definitions.filter(c => c.chain === 'A');
             const chainA = (chainAs.length > 0) ? chainAs[0] : this.structural.chain_definitions[0];
+            // D3, added at the enpower step is a bit slow at loading.
             ft.addModel(chainA.x, chainA.y, venus.protein.sequence.length);
         }
 
@@ -918,5 +955,23 @@ $('#showMutant').click(event => {
     venus.alwaysShowMutant = $(event.target).prop('checked');
     }
 );
+
+$('#change_model').click(async event => {
+    // get params
+    const params = Array.from(upload_params.files).map(async f => await f.text());
+    //
+    if (upload_pdb.files.length !== 0) {
+        // file route
+        const f = upload_pdb.files[0];
+        const pdb = await f.text();
+        const name = f.name;
+        window.venus.analyseCustomFile(pdb, name, params);
+    } else if (changeByPage.value.trim() !== '') {
+        window.venus.analyseCustomMike(changeByPage.value.trim(), params);
+    }
+    else {
+        ops.addToast('errorate','Invalid','Nothing provided.','bg-warning');
+        throw 'Nothing given!';}
+});
 
 //</%text>

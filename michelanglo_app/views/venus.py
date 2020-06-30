@@ -7,15 +7,17 @@ __description___ = """
 
 from .uniprot_data import *
 #ProteinCore organism human uniprot2pdb
-from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore
+from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structure
 
 from ..models import User ##needed solely for log.
-from .common_methods import is_malformed
+from .common_methods import is_malformed, notify_admin
 from . import custom_messages
 
+from typing import Optional, Any
 import random
 from pyramid.view import view_config, view_defaults
 from pyramid.renderers import render_to_response
+import pyramid.httpexceptions as exc
 
 
 import json, os, logging
@@ -26,17 +28,12 @@ pprint = PrettyPrinter().pprint
 ### This is a weird way to solve the status 206 issue.
 from .buffer import system_storage
 
-def jsonable(self):
-    def deobjectify(x):
-        if isinstance(x, dict):
-            return {k: deobjectify(x[k]) for k in x}
-        elif isinstance(x, list) or isinstance(x, set):
-            return [deobjectify(v) for v in x]
-        elif isinstance(x, int) or isinstance(x, float):
-            return x
-        else:
-            return str(x) # really ought to deal with falseys.
-    return {a: deobjectify(getattr(self, a, '')) for a in self.__dict__}
+######################
+
+class VenusException(Exception):
+    pass
+
+
 
 ############################### Analyse the mutation
 @view_defaults(route_name='venus')
@@ -44,7 +41,8 @@ class Venus:
 
     def __init__(self, request):
         self.request = request
-
+        self.reply = {'status': 'success'} # filled by the steps and kept even if an error is raised.
+        # status=error, error=single-word, msg=long
 
     @property
     def handle(self):
@@ -97,73 +95,117 @@ class Venus:
         Species is taxid. Human is 9606.
 
         :param request:
-        :return:
+        :return: self.reply
         """
         ### check valid
-        malformed = is_malformed(self.request, 'uniprot', 'species', 'mutation')
+        try:
+            self.assert_malformed('uniprot', 'species', 'mutation')
+            if 'step' not in self.request.params:
+                step = None
+            else:
+                step = self.request.params['step']
+            return self.do_step(step)
+        except VenusException as err:
+            log.info(err)
+            return self.reply
+        except Exception as err:
+            if self.reply['status'] != 'error':
+                # this is a new one.
+                self.reply['status'] = 'error'
+                self.reply['error'] = 'analysis'
+                self.reply['msg'] = str(err)
+            log.warning(f'Venus error {err.__class__.__name__}: {err}')
+            notify_admin(f'Venus error {err.__class__.__name__}: {err}')
+            return self.reply
+
+    def has(self, key: Optional[str]=None) -> bool:
+        # checks whether the protein object has a filled value (not the reply!)
+        if self.handle not in system_storage: # this is already done
+            return False
+        elif key is None:
+            return True
+        elif not hasattr(system_storage[self.handle], key):
+            return False
+        elif getattr(system_storage[self.handle], key) is None:
+            return False
+        else:
+            return True
+
+    @property
+    def steps(self):
+        return {'protein': self.protein_step,
+                'mutation': self.mutation_step,
+                'structural': self.structural_step,
+                'ddG': self.ddG_step,
+                'ddG_gnomad': self.ddG_gnomad_step}
+
+    def assert_malformed(self, *args):
+        malformed = is_malformed(self.request, *args)
         if malformed:
-            return {'status': malformed}
-        if 'step' not in self.request.params:
+            self.reply['status'] = 'error'
+            self.reply['error']= 'malformed request'
+            self.reply['msg']= malformed
+            raise ValueError(f'Malformed error ({malformed}) by {User.get_username(self.request)}')
+        else:
+            return
+
+    def do_step(self, step):
+        # a likely API call
+        if step is None:
             log.info(f'Full analysis requested by {User.get_username(self.request)}')
-            return {**self.protein_step(),
-                    **self.mutation_step(),
-                    **self.structural_step(),
-                    **self.ddG_step(),
-                    **self.ddG_gnomad_step()}
-        if self.request.params['step'] == 'protein':
-            return self.protein_step()
-        elif self.request.params['step'] == 'mutation':
-            return self.mutation_step()
-        elif self.request.params['step'] == 'structural':
-            return self.structural_step()
-        elif self.request.params['step'] == 'ddG':
-            return self.ddG_step()
-        elif self.request.params['step'] == 'ddG_gnomad':
-            return self.ddG_gnomad_step()
-        elif self.request.params['step'] == 'fv':
+            map(lambda f: f(), self.steps)  #run all steps
+            return self.reply
+        # ajax
+        elif step in self.steps.keys():
+            # these have replies that stack
+            self.steps[step]()
+            return self.reply
+        elif step == 'fv':
             ## this is the same as get_uniprot but does not redundantly redownload the data.
-            if self.handle not in system_storage:
+            if not self.has():
                 self.protein_step()
             protein = system_storage[self.handle]
             return render_to_response("../templates/results/features.js.mako",
                                       {'protein': protein, 'featureView': '#fv', 'include_pdb': False}, self.request)
-        elif self.request.params['step'] == 'extra':
-            malformed = is_malformed(self.request, 'extra', 'algorithm')
-            if malformed:
-                return {'status': malformed}
+        elif step == 'extra':
+            self.assert_malformed('extra', 'algorithm')
             return self.extra_step(mutation=self.request.params['extra'], algorithm=self.request.params['algorithm'])
-        elif self.request.params['step'] == 'phosphorylate':
+        elif step== 'phosphorylate':
             return self.phospho_step()
+        elif step == 'custommike':
+            self.assert_malformed('uuid')
+            return self.change_to_mike(self.request.params['uuid'])
+        elif step == 'customfile':
+            self.assert_malformed('pdb', 'filename')
+            return self.change_to_file(self.request.params['pdb'], self.request.params['filename'])
         else:
             self.request.response.status = 422
             return {'status': 'error', 'error': 'Unknown step'}
 
     ### STEP 1
     def protein_step(self):
-        log.info(f'Step 1 analysis requested by {User.get_username(self.request)}')
-        uniprot = self.request.params['uniprot']
-        taxid = self.request.params['species']
-        mutation_text = self.request.params['mutation']
-        ## Get analysis from memory if possible.
-        handle = uniprot + mutation_text
-        # if handle in system_storage:
-        #     protein = system_storage[handle]
-        #     return {'protein': jsonable(protein), 'status': 'success'}
-        ## Do analysis
-        mutation = Mutation(mutation_text)
-        protein = ProteinAnalyser(uniprot=uniprot, taxid=taxid)
-        try:
+        if self.has(): # this is already done (very unlikely/
+            protein = system_storage[self.handle]
+        else:
+            log.info(f'Step 1 analysis requested by {User.get_username(self.request)}')
+            uniprot = self.request.params['uniprot']
+            taxid = self.request.params['species']
+            mutation_text = self.request.params['mutation']
+            ## Do analysis
+            mutation = Mutation(mutation_text)
+            protein = ProteinAnalyser(uniprot=uniprot, taxid=taxid)
             protein.load()
-        except FutureWarning:
-            log.error(f'There was no pickle for uniprot {uniprot} taxid {taxid}. TREMBL code via API?')
-            # protein.__dict__ = ProteinGatherer(uniprot=uniprot, taxid=taxid).get_uniprot().__dict__
-        protein.mutation = mutation
+            protein.mutation = mutation
+        # assess
         if not protein.check_mutation():
             log.info('protein mutation discrepancy error')
-            return {'error': 'mutation', 'msg': protein.mutation_discrepancy(), 'status': 'error'}
+            discrepancy = protein.mutation_discrepancy()
+            self.reply = {'error': 'mutation', 'msg': discrepancy, 'status': 'error'}
+            raise VenusException(discrepancy)
         else:
-            system_storage[handle] = protein
-            return {'protein': jsonable(protein), 'status': 'success'}
+            system_storage[self.handle] = protein
+            self.reply['protein'] = self.jsonable(protein)
+            self.reply['status'] = 'success'
 
     ### STEP 2
     def mutation_step(self):
@@ -172,64 +214,62 @@ class Venus:
         """
         log.info(f'Step 2 analysis requested by {User.get_username(self.request)}')
         ## has the previous step been done?
-        if self.handle not in system_storage:
-            status = self.protein_step()
-            if 'error' in status:
-                return status
+        if not self.has():
+            self.protein_step()
         # if protein.mutation has already run??
         # no shortcut useful.
         protein = system_storage[self.handle]
         protein.predict_effect()
         featpos = protein.get_features_at_position(protein.mutation.residue_index)
         featnear = protein.get_features_near_position(protein.mutation.residue_index)
-        return {'mutation': {**jsonable(protein.mutation),
+        self.reply['mutation'] = {**self.jsonable(protein.mutation),
                              'features_at_mutation': featpos,
                              'features_near_mutation': featnear,
                              'position_as_protein_percent': round(
                                  protein.mutation.residue_index / len(protein) * 100),
-                             'gnomAD_near_mutation': protein.get_gnomAD_near_position()},
-                'status': 'success'}
+                             'gnomAD_near_mutation': protein.get_gnomAD_near_position()}
+        self.reply['status'] = 'success'
 
-    ### STEP 3
-    def structural_step(self):
+        ### STEP 3
+    def structural_step(self, structure=None):
         """
         runs protein.analyse_structure()
         """
         log.info(f'Step 3 analysis requested by {User.get_username(self.request)}')
-        if self.handle not in system_storage:
-            status = self.protein_step()
-            if 'error' in status:
-                return status
-            status = self.mutation_step()
-            if 'error' in status:
-                return status
-            status = self.structural_step()
-            if 'error' in status:
-                return status
-        protein = system_storage[self.handle]
-        if hasattr(protein, 'structural') and protein.structural is not None:
-            return {'structural': jsonable(protein.structural),
-                    'has_structure': True,
-                    'status': 'success'}
-        try:
-            protein.analyse_structure()
-            if protein.structural:
-                return {'structural': jsonable(protein.structural),
-                        'has_structure': True,
-                        'status': 'success'}
-            else:
-                log.info('No structural data available')
-                return {'status': 'terminated', 'error': 'No crystal structures or models available.',
-                        'has_structure': False,
-                        'msg': 'Structrual analyses cannot be performed.'}
-        except Exception as err:  # Exception
-            msg = f'Structural analysis failed {err} {type(err).__name__}.'
-            log.warning(msg)
-            return {'status': 'error', 'msg': msg}
+        # previous done?
+        if not self.has():
+            self.mutation_step()
+        elif self.has('structural'):
+            protein = system_storage[self.handle]
+        else:
+            protein = system_storage[self.handle]
+            protein.analyse_structure(structure)
+        if protein.structural:
+            self.reply['structural'] = self.jsonable(protein.structural)
+            self.reply['has_structure'] = True
+            self.reply['status'] = 'success'
+        else:
+            log.info('No structural data available')
+            self.reply['status'] = 'terminated'
+            self.reply['error'] = 'No crystal structures or models available.'
+            self.reply['msg'] = 'Structrual analyses cannot be performed.'
+            self.reply['has_structure']=False
+            raise VenusException(self.reply['msg'])
 
     ### Step 4
     def ddG_step(self):
         log.info(f'Step 4 analysis requested by {User.get_username(self.request)}')
+        # previous done?
+        if not self.has():
+            self.structural_step()
+        elif self.has('energetics'):
+            protein = system_storage[self.handle]
+            analysis = protein.energetics
+        else:
+            protein = system_storage[self.handle]
+            analysis = protein.analyse_FF()
+
+
         if self.handle not in system_storage:
             status = self.protein_step()
             if 'error' in status:
@@ -243,10 +283,10 @@ class Venus:
         else:
             analysis = protein.analyse_FF()
         if 'error' in analysis:
-            self.log_if_error('extra_step', analysis)
-            return {'status': 'error', 'error': 'pyrosetta step', 'msg': analysis['error']}
+            self.log_if_error('pyrosetta step', analysis)
         else:
-            return {'ddG': analysis}  # {ddG: float, scores: Dict[str, float], native:str, mutant:str, rmsd:int}
+            self.reply['ddG'] = analysis
+            # {ddG: float, scores: Dict[str, float], native:str, mutant:str, rmsd:int}
 
     ### Step 5
     def ddG_gnomad_step(self):
@@ -263,18 +303,18 @@ class Venus:
             analysis = protein.energetics_gnomAD
         else:
             analysis = protein.analyse_gnomad_FF()
-        if 'error' in analysis:
+        if 'error' in analysis: # it is a failure.
             self.log_if_error('ddG_gnomad_step', analysis)
-            return {'status': 'error', 'error': 'pyrosetta step', 'msg': analysis['error']}
+            self.reply['status']='error'
+            self.reply['error']='pyrosetta step'
+            self.reply['msg']=analysis['error']
         else:
-            return {'gnomAD_ddG': analysis}
+            self.reply['gnomAD_ddG'] = analysis
 
     ### STEP EXTRA
     def extra_step(self, mutation, algorithm):
-        if self.handle not in system_storage:
-            status = self.ddG_step()
-            if 'error' in status:
-                return status
+        if self.has():
+            self.ddG_step()
         protein = system_storage[self.handle]
         log.info(f'Extra analysis ({algorithm}) requested by {User.get_username(self.request)}')
         response = protein.analyse_other_FF(mutation=mutation, algorithm=algorithm, spit_process=True)
@@ -283,10 +323,8 @@ class Venus:
 
     ### STEP EXTRA2
     def phospho_step(self):
-        if self.handle not in system_storage:
-            status = self.ddG_step()
-            if 'error' in status:
-                return status
+        if self.has():
+            self.ddG_step()
         protein = system_storage[self.handle]
         log.info(f'Phosphorylation requested by {User.get_username(self.request)}')
         coordinates = protein.phosphorylate_FF(spit_process=True)
@@ -299,12 +337,76 @@ class Venus:
         self.log_if_error('phospho_step', response)
         return response
 
+    ### CHANGE STEP
+    def change_to_file(self, block, name):
+        if self.has():
+            self.mutation_step()
+        protein = system_storage[self.handle]
+        protein.structural = None
+        title, ext = os.path.splitext(name)
+        structure = Structure(title, 'Custom', 0, 9999, title,
+                              type='custom',chain="A",offset=0, coordinates=block)
+        structure.chain_definitions = [{'chain': "A",
+                                       'uniprot': "XXX",
+                                       'x': 0,
+                                       'y': 9999,
+                                       'offset': 0,
+                                       'range': f'0-9999',
+                                       'name': title,
+                                       'description': title}]
+        self.structural_step(structure=structure)
+
+    ### CHANGE STEP
+    def change_to_mike(self, uuid):
+        raise NotImplementedError
+        if self.has():
+            self.mutation_step()
+        protein = system_storage[self.handle]
+        protein.structural = None
+        # page = Page.select(request, request.params['page'])
+        # verdict = permission(request, page, 'edit', key_label='encryption_key')
+        # if verdict['status'] != 'OK':
+        #     return verdict
+        # permission(request, page, mode='view')
+        structure = Structure(title, 'Custom', 0, 9999, title,
+                              type='custom', chain="A", offset=0, coordinates=block)
+        structure.chain_definitions = [{'chain': "A",
+                                        'uniprot': "XXX",
+                                        'x': 0,
+                                        'y': 9999,
+                                        'offset': 0,
+                                        'range': f'0-9999',
+                                        'name': title,
+                                        'description': title}]
+        return self.structural_step(self, structure=structure)
+
     ### Other
-    def log_if_error(self, operation,response):
+    def log_if_error(self, operation, response):
         if isinstance(response, dict):
             if 'error' in response and 'msg' in response:
-                log.warning(f'Error during {operation}: {response["error"]} ({response["msg"]})')
+                msg = f'Error during {operation}: {response["error"]} ({response["msg"]})'
             elif 'error' in response:
-                log.warning(f'Error during {operation}: {response["error"]}')
+                msg = f'Error during {operation}: {response["error"]}'
+            else:
+                return None # not an error.
+            self.reply['status'] = 'error'
+            self.reply['error'] = response['error']
+            self.reply['msg'] = msg
+            raise VenusException(msg)
+        else:
+            raise ValueError('This response is not an error!')
+
+    def jsonable(self, obj: Any):
+        def deobjectify(x):
+            if isinstance(x, dict):
+                return {k: deobjectify(x[k]) for k in x}
+            elif isinstance(x, list) or isinstance(x, set):
+                return [deobjectify(v) for v in x]
+            elif isinstance(x, int) or isinstance(x, float):
+                return x
+            else:
+                return str(x)  # really ought to deal with falseys.
+
+        return {a: deobjectify(getattr(obj, a, '')) for a in obj.__dict__}
 
 

@@ -34,9 +34,13 @@ def notify_admin(msg):
     :param msg:
     :return:
     """
+    if 'SLACK_WEBHOOK' not in os.environ:
+        log.critical(f'SLACK_WEBHOOK is absent! Cannot send message {msg}')
+        return
     # sanitise.
     msg = unicodedata.normalize('NFKD',msg).encode('ascii','ignore').decode('ascii')
     msg = re.sub('[^\w\s\-.,;?!@#()\[\]]','', msg)
+
     r = requests.post(url=os.environ['SLACK_WEBHOOK'],
                       headers={'Content-type': 'application/json'},
                       data=f"{{'text': '{msg}'}}")
@@ -47,12 +51,12 @@ def notify_admin(msg):
         return False
 
 
-def is_malformed(request, *args):
+def is_malformed(request, *args) -> Union[None, str]:
     """
     Verify that the request.params is valid. returns None if it is valid. Else returns why.
     :param request:
     :param args:
-    :return:
+    :return: msg
     """
     missing = [k for k in args if k not in request.params and f'{k}[]' not in request.params]
     if missing:

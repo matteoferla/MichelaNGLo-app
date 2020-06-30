@@ -35,46 +35,30 @@
 
             ##### first block: Structure
 
-        <div class="card mb-4 shadow-sm">
-            <div class="card-header"><h5 class="card-title">
-                <i class="far fa-cubes"></i> Structure
-            </h5><h6 class="card-subtitle mb-2 text-muted">
-                Override the automatic structure choice. UNDER CONSTRUCTION
-            </h6></div>
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header"><h5 class="card-title">
+                    <i class="far fa-cubes"></i> Structure
+                </h5><h6 class="card-subtitle mb-2 text-muted">
+                    Override the automatic structure choice
+                </h6></div>
 
 
+                <div class="card-body">
+                    ###################### arrow ###################################
 
-            <div class="card-body">
-                ###################### arrow ###################################
-                <div class="arrow-right"></div>
-                <div class="arrow-right2"></div>
-                ###################### end of arrow ###################################
+                    <div class="arrow-right"></div>
+                    <div class="arrow-right2"></div>
+                    ###################### end of arrow ###################################
 
-                <p><i>Current model:</i> <span id="model_id">N/A</span></p>
-<% valid_extensions = ['pdb']
-    %>
-
-                <div class="input-group" data-toggle="tooltip" title="Upload your coordinate file in in ${', '.join(valid_extensions)} format (will be converted to pdb).">
-                              <div class="input-group-prepend">
-                                <span class="input-group-text" id="upload_addon_pdb">Upload file</span>
-                              </div>
-                              <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="upload_pdb" aria-describedby="upload_addon_pdb" accept="${', '.join(['.'+str(e) for e in valid_extensions])}">
-                                <label class="custom-file-label" for="upload_pdb">Choose file</label>
-                              </div>
-                            </div>
-                            <div class="invalid-feedback" id="error_upload_pdb">Please upload a valid pdb/mmCIF file.</div>
-
-
-
-
-
-
-
-                Upload PDB file / Get model from UUID
-
+                    <div class="d-flex justify-content-between">
+                        <div><i>Current model:</i> <span id="model_id">N/A</span></div>
+                        <button type="button" class="btn btn-outline-primary"
+                                data-toggle="modal" data-target="#change_modal"
+                        ><i class="far fa-upload"></i> Change
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
 
             ##### second block: Feature
 
@@ -192,6 +176,78 @@
             </div>
             <div class="modal-body">
                 ERROR
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="change_modal" tabindex="-1" role="dialog" aria-labelledby="change_title"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="change_title">Change structure</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Change the structure loaded.</p>
+                <% valid_extensions = ['pdb']
+                %>
+
+                <div class="p-2 border rounded">
+                    Note that the structure provided is assumed to be numbered in line with the Uniprot entry
+                    and that the protein of interest is chain A.
+                    For possible structures, please see <a href="/name">the structure by name page</a>.
+                    <div class="input-group mb-3" data-toggle="tooltip"
+                         title="Upload your coordinate file in in ${', '.join(valid_extensions)} format (will be converted to pdb).">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="upload_addon_pdb">Upload file</span>
+                        </div>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="upload_pdb"
+                                   aria-describedby="upload_addon_pdb"
+                                   accept="${', '.join(['.'+str(e) for e in valid_extensions])}">
+                            <label class="custom-file-label" for="upload_pdb">Choose PDB file</label>
+                        </div>
+                    </div>
+                    <div class="invalid-feedback" id="error_upload_pdb">Please upload a valid pdb/mmCIF file.</div>
+
+
+                    <p class="text-center">or</p>
+
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="changeByPage_label">Michelaɴɢʟo page</span>
+                        </div>
+                        <input type="text" class="form-control" placeholder="URL" aria-label="URL"
+                               aria-describedby="changeByPage_label" id="changeByPage">
+                    </div>
+
+                </div>
+                <p class="mt-3">The energy calculations are done with Pyrosetta.
+                    If there is a ligand it may be stripped because no topology is known for it.
+                    Consequently, if a Rosetta params file is optionally uploaded, the ligand will be kept.
+                    (viz. <a href="https://direvo.mutanalyst.com/params" target="_blank">online parameterisation tool <i class="far fa-external-link"></i></a>)
+                    </p>
+                <div class="input-group mb-3" data-toggle="tooltip"
+                         title="Optionally upload params files for more accurate models.">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="upload_addon_params">Upload file</span>
+                        </div>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="upload_params"
+                                   aria-describedby="upload_addon_params"
+                                   accept="params"
+                                    multiple>
+                            <label class="custom-file-label" for="upload_pdb">Choose Params file</label>
+                        </div>
+                    </div>
+                <button type="button" class="btn btn-primary w-100" id="change_model"><i class="far fa-chart-network"></i> Analyse</button>
+
+
             </div>
         </div>
     </div>
