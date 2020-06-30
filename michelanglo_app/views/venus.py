@@ -169,15 +169,19 @@ class Venus:
                                       {'protein': protein, 'featureView': '#fv', 'include_pdb': False}, self.request)
         elif step == 'extra':
             self.assert_malformed('extra', 'algorithm')
-            return self.extra_step(mutation=self.request.params['extra'], algorithm=self.request.params['algorithm'])
+            self.extra_step(mutation=self.request.params['extra'], algorithm=self.request.params['algorithm'])
+            return self.reply
         elif step== 'phosphorylate':
-            return self.phospho_step()
+            self.phospho_step()
+            return self.reply
         elif step == 'custommike':
             self.assert_malformed('uuid')
-            return self.change_to_mike(self.request.params['uuid'])
+            self.change_to_mike(self.request.params['uuid'])
+            return self.reply
         elif step == 'customfile':
             self.assert_malformed('pdb', 'filename')
-            return self.change_to_file(self.request.params['pdb'], self.request.params['filename'])
+            self.change_to_file(self.request.params['pdb'], self.request.params['filename'])
+            return self.reply
         else:
             self.request.response.status = 422
             return {'status': 'error', 'error': 'Unknown step'}
@@ -205,7 +209,6 @@ class Venus:
         else:
             system_storage[self.handle] = protein
             self.reply['protein'] = self.jsonable(protein)
-            self.reply['status'] = 'success'
 
     ### STEP 2
     def mutation_step(self):
@@ -228,7 +231,6 @@ class Venus:
                              'position_as_protein_percent': round(
                                  protein.mutation.residue_index / len(protein) * 100),
                              'gnomAD_near_mutation': protein.get_gnomAD_near_position()}
-        self.reply['status'] = 'success'
 
         ### STEP 3
     def structural_step(self, structure=None):
@@ -247,7 +249,6 @@ class Venus:
         if protein.structural:
             self.reply['structural'] = self.jsonable(protein.structural)
             self.reply['has_structure'] = True
-            self.reply['status'] = 'success'
         else:
             log.info('No structural data available')
             self.reply['status'] = 'terminated'
@@ -317,9 +318,8 @@ class Venus:
             self.ddG_step()
         protein = system_storage[self.handle]
         log.info(f'Extra analysis ({algorithm}) requested by {User.get_username(self.request)}')
-        response = protein.analyse_other_FF(mutation=mutation, algorithm=algorithm, spit_process=True)
-        self.log_if_error('extra_step', response)
-        return response
+        self.reply = protein.analyse_other_FF(mutation=mutation, algorithm=algorithm, spit_process=True)
+        self.log_if_error('extra_step')
 
     ### STEP EXTRA2
     def phospho_step(self):
@@ -329,13 +329,12 @@ class Venus:
         log.info(f'Phosphorylation requested by {User.get_username(self.request)}')
         coordinates = protein.phosphorylate_FF(spit_process=True)
         if isinstance(coordinates, str):
-            response = {'coordinates': coordinates}
+            self.reply = {'coordinates': coordinates}
         elif isinstance(coordinates, dict):
-            response = coordinates # it is an error msg!
+            self.reply = coordinates # it is an error msg!
         else:
-            response = {'status': 'error', 'error': 'Unknown', 'msg': 'No coordinates returned'}
-        self.log_if_error('phospho_step', response)
-        return response
+            self.reply = {'status': 'error', 'error': 'Unknown', 'msg': 'No coordinates returned'}
+        self.log_if_error('phospho_step')
 
     ### CHANGE STEP
     def change_to_file(self, block, name):
@@ -343,18 +342,13 @@ class Venus:
             self.mutation_step()
         protein = system_storage[self.handle]
         protein.structural = None
+        protein.energetics = None
         title, ext = os.path.splitext(name)
         structure = Structure(title, 'Custom', 0, 9999, title,
                               type='custom',chain="A",offset=0, coordinates=block)
-        structure.chain_definitions = [{'chain': "A",
-                                       'uniprot': "XXX",
-                                       'x': 0,
-                                       'y': 9999,
-                                       'offset': 0,
-                                       'range': f'0-9999',
-                                       'name': title,
-                                       'description': title}]
+        structure.is_satisfactory(protein.mutation.residue_index)
         self.structural_step(structure=structure)
+        return self.reply
 
     ### CHANGE STEP
     def change_to_mike(self, uuid):
@@ -381,7 +375,9 @@ class Venus:
         return self.structural_step(self, structure=structure)
 
     ### Other
-    def log_if_error(self, operation, response):
+    def log_if_error(self, operation, response=None):
+        if response is None:
+            response = self.reply
         if isinstance(response, dict):
             if 'error' in response and 'msg' in response:
                 msg = f'Error during {operation}: {response["error"]} ({response["msg"]})'
@@ -394,7 +390,7 @@ class Venus:
             self.reply['msg'] = msg
             raise VenusException(msg)
         else:
-            raise ValueError('This response is not an error!')
+            raise ValueError('This response is not an dict?!?')
 
     def jsonable(self, obj: Any):
         def deobjectify(x):

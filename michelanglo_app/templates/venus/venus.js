@@ -753,22 +753,32 @@ class Venus {
     }
 
     loadStructure () {
-        NGL.specialOps.multiLoader('viewport', [{ name: "wt",
-                                                              type: "data",
-                                                              value: this.structural.coordinates,
-                                                              ext: 'pdb',
-                                                              chain: 'A',
-                                                              chain_definitions: this.structural.chain_definitions,
-                                                              history: this.structural.history}])
-                        .then(protein => NGL.specialOps.showResidue('viewport', this.position+':A'));
-        UniprotFV.enpower();
-        model_id.innerHTML = this.structural.code;
-        if (this.structural.chain_definitions !== undefined) {
-            const chainAs = this.structural.chain_definitions.filter(c => c.chain === 'A');
-            const chainA = (chainAs.length > 0) ? chainAs[0] : this.structural.chain_definitions[0];
-            // D3, added at the enpower step is a bit slow at loading.
-            ft.addModel(chainA.x, chainA.y, venus.protein.sequence.length);
+        if (NGL.getStage('viewport') !== undefined) { //this is a rerun... resetting
+            myData.proteins = [];
+            myData.currentIndices = [-1];
         }
+        NGL.specialOps.multiLoader('viewport', [{ name: "wt",
+                                                          type: "data",
+                                                          value: this.structural.coordinates,
+                                                          ext: 'pdb',
+                                                          chain: 'A',
+                                                          chain_definitions: this.structural.chain_definitions,
+                                                          history: this.structural.history}])
+                    .then(protein => NGL.specialOps.showResidue('viewport', this.position+':A'));
+        // When run locally and with an already analysed case, D3 is outrun...
+        const enpower = () => {
+            UniprotFV.enpower();
+            model_id.innerHTML = this.structural.code;
+            if (this.structural.chain_definitions !== undefined) {
+                const chainAs = this.structural.chain_definitions.filter(c => c.chain === 'A');
+                const chainA = (chainAs.length > 0) ? chainAs[0] : this.structural.chain_definitions[0];
+                // D3, added at the enpower step (??) is a bit slow at loading.
+                ft.addModel(chainA.x, chainA.y, venus.protein.sequence.length);
+            }
+        };
+        if (window.ft !== undefined) {setTimeout(enpower, 1000)}
+        else {enpower()}
+
 
 
         this.updateStructureOption();
@@ -972,6 +982,7 @@ $('#change_model').click(async event => {
     else {
         ops.addToast('errorate','Invalid','Nothing provided.','bg-warning');
         throw 'Nothing given!';}
+    $(change_modal).modal('hide');
 });
 
 //</%text>

@@ -222,8 +222,8 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="changeByPage_label">Michelaɴɢʟo page</span>
                         </div>
-                        <input type="text" class="form-control" placeholder="URL" aria-label="URL"
-                               aria-describedby="changeByPage_label" id="changeByPage">
+                        <input type="text" class="form-control" placeholder="URL (DISABLED - SECUIRTY RISK)" aria-label="URL"
+                               aria-describedby="changeByPage_label" id="changeByPage" disabled>
                     </div>
 
                 </div>
