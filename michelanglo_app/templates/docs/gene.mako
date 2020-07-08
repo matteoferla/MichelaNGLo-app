@@ -35,7 +35,7 @@ Which bound macromolecule or small molecule is up to you, but if in doubt, check
     <a href="https://zhanglab.ccmb.med.umich.edu/I-TASSER/" target="_blank">I-TASSER <i class="far fa-external-link"></i></a> is tool that consistently wins a model predicting challenge (CASP), but is slow (2-3 days).
     <a href="http://www.sbg.bio.ic.ac.uk/phyre2/html/page.cgi?id=index" target="_blank">Phyre2 <i class="far fa-external-link"></i></a> is a lot quicker and also recently they have released a set of over 1,000 computed structures.
     <a href="http://evfold.org/evfold-web/evfold.do" target="_blank">EVFold <i class="far fa-external-link"></i></a> is best for totally unknown structures, because it uses covariance to predict what should be close to what. Namely, Normally parts of a structures are threaded (the residues on the template are simply replace) or are computed <i>ab initio</i> using forcefield calculations.
-    The latter is wholly imprecise, but the accuracy is increased by using the assumption that residues that change together are likely close.
+    About the latter, totally unknown genes are wholly imprecise, but the accuracy is increased by using the assumption that residues that change together are likely close.
     Do note that if you are opting for a model, keep track of what the closest template is and what is the root mean square deviation (low single digit numbers is best) and make it clear with other users that you are using a model.
 </p>
 

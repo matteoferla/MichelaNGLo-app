@@ -28,8 +28,10 @@ def redirect_view(request):
     """
     pagename = Doi.reroute(request, request.matchdict['id'])
     if pagename is not None:
+        log.info(f'{User.get_username(request)} is looking at a r-page {request.matchdict["id"]} ({pagename})')
         return get_userdata(request, pagename)
     else:
+        log.info(f'{User.get_username(request)} is looking at a r-page {request.matchdict["id"]} that does not exist.')
         request.response.status_int = 400
         response_settings = {'project': 'Michelanglo', 'user': request.user,
                              'page': pagename,
@@ -247,36 +249,41 @@ def thumbnail(request):
     response.encode_content(encoding='identity') #gzip is pointless on png
     return response
 
-@view_config(route_name='save_pdb', renderer='string')
+@view_config(route_name='save_pdb', renderer='json')
 def save_pdb(request):
     malformed = is_malformed(request, 'uuid', 'index')
     if malformed:
         return {'status': malformed}
-    if not request.params['index'].isdigit():
+    if isinstance(request.params['index'], str) and request.params['index'] != '-1' and not request.params['index'].isdigit():
         request.response.status = 400
-        return {'status': 'index must be number'}
+        return {'status': 'index must be number', 'error': f"{request.params['index']} ({type(request.params['index'])}) is not a digit"}
     page = Page.select(request, request.params['uuid'])
     index = int(request.params['index'])
     verdict = permission(request, page, key_label='key', mode='view')
-    if verdict['status'] == 'OK':
+    if verdict['status'] != 'OK':
+        return verdict
+    else:
         settings = page.load().settings
         protein = json.loads(settings['proteinJSON'])
-        if index > len(protein):
+        if index == -1:
+            return {'status': 'number of structures', 'number': len(protein), 'definitions': protein}
+        elif index > len(protein):
             request.response.status = 400
             return {'status': f'index exceeds {len(protein)}'}
-        p = protein[index]
-        pdb = settings['pdb']
-        if p['type'] == 'rcsb': #rcsb PDB code
-            return HTTPFound(location=f"https://files.rcsb.org/download/{p['value']}.cif")
-        elif p['type'] == 'url': #external file
-            return HTTPFound(location=p['value'])
-        elif isinstance(pdb, str):
-            log.warning(f'{page} has a pre-beta PDB!??')
-            return pdb
         else:
-            return pdb[0][1] #pdb is
-    else:
-        return verdict
+            p = protein[index]
+            pdb = settings['pdb']
+            if p['type'] == 'rcsb': #rcsb PDB code
+                return HTTPFound(location=f"https://files.rcsb.org/download/{p['value']}.cif")
+            elif p['type'] == 'url': #external file
+                return HTTPFound(location=p['value'])
+            elif isinstance(pdb, str):
+                log.warning(f'{page} has a pre-beta PDB!??')
+                request.override_renderer = 'string'
+                return pdb
+            else:
+                request.override_renderer = 'string'
+                return pdb[0][1] #pdb is
 
 
 

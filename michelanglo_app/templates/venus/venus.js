@@ -81,6 +81,8 @@ class Venus {
         $('result_title').html('<i class="far fa-dna fa-spin"></i> Loading');
         $('results_status').html('ERROR');
         $('#fv').html('');
+        $('#changeByPage_selector').html('<option name="changeByPage" value="0" selected>Select page first</option>');
+        $('#changeByPage_selector').attr('disabled','disabled');
     }
 
     //###################  Steps
@@ -437,6 +439,7 @@ class Venus {
     //custom pdb
     analyseCustomFile(pdb, name, params) {
         this.setStatus('Re-running step 3/5 with custom file', 'working');
+        const extension = name.split('.').pop();
         $.post({
             url: "venus_analyse", data: {
                 uniprot: uniprotValue,
@@ -445,25 +448,35 @@ class Venus {
                 mutation: this.mutation,
                 pdb: pdb,
                 filename: name,
+                format: extension,
                 params: params
             }
         }).fail(ops.addErrorToast)
           .done(msg => this.parseStructuralResponse.call(this, msg));
     }
 
-    analyseCustomMike(uuid, params) {
-        this.setStatus('Re-running step 3/5 with custom file', 'working');
+    fetchMike(uuid, params) {
         $.post({
-            url: "venus_analyse", data: {
-                uniprot: uniprotValue,
-                species: taxidValue,
-                step: 'custommike',
-                mutation: this.mutation,
-                pdb: uuid,
-                params: params
+            url: "save_pdb", data: {
+                uuid: uuid,
+                index: -1
             }
         }).fail(ops.addErrorToast)
-          .done(msg => this.parseStructuralResponse.call(this, msg));
+          .done(msg => {
+              if (msg.number === undefined) {ops.addToast('mike_error',
+                                                          'Page info retrieval error',
+                                                            msg.status,
+                                                            'bg-warning')}
+              else {this.addMikeOptions(msg.definitions)}
+
+          });
+    }
+
+    addMikeOptions(definitions) {
+        changeByPage_selector.removeAttribute("disabled");
+        //$('#changeByPage_selector').html('');
+        const namer = v => v.name === undefined ? v.value : v.name;
+        changeByPage_selector.innerHTML = definitions.map((v, i) => `<option name="changeByPage" value="${namer(v)}">${i+1}. ${namer(v)} (${v.type})</option>`).join('\n');
     }
 
     //progress bar.
@@ -524,7 +537,8 @@ class Venus {
             const parent = $('#'+id).parents('li');
             const pros = parent.find('.prolink');
             pros.protein();
-            pros.click(event => venus.showMutant.call(venus) );
+            // theres a listener/signal that I do not remember its name
+            pros.click(event => {venus.showMutant.call(venus); venus.showLigands.call(venus);} );
             parent.find('.venus-entry-up').click(event => venus.moveEntry.call(venus, id, 'up'));
             parent.find('.venus-entry-down').click(event => venus.moveEntry.call(venus, id, 'down'));
             parent.find('.venus-entry-kill').click(event => venus.killEntry.call(venus, id));
@@ -534,16 +548,11 @@ class Venus {
     }
 
     moveEntry(id, direction) {
-        console.log('move!!');
         // documentation also determines the order.
         const n = this.entry_order.indexOf(id);
         if (n === -1) return null; //silent error.
         let offset = direction === 'up' ? -1 : 1;
-        console.log(offset);
         let d = this.entry_order.splice(n, 1)[0];
-        console.log(id);
-        console.log(d);
-        console.log(n);
         this.entry_order.splice(n + offset, 0, d);
         // get the existing element, break it up, destroy it and remake it.
         const el = $('#'+id);
@@ -557,7 +566,6 @@ class Venus {
         }
 
     killEntry(id) {
-        console.log('die!!');
         const el = $('#'+id).parents('li').hide(this.animation_speed);
         setTimeout(()=> el.detach(), this.animation_speed);
     }
@@ -731,12 +739,22 @@ class Venus {
 
     showMutant() {
         if (this.alwaysShowMutant) {
-            console.log(venus.alwaysShowMutant, this.alwaysShowMutant);
             const showMut = (sele) => {
                 const prot = NGL.getStage().getComponentByType('structure');
                 if (prot !== undefined) prot.addRepresentation("hyperball", sele);
             };
             setTimeout((sele) => showMut(sele), 100, {sele: this.position + ':A', color: this.mutaColor});
+        }
+    }
+
+    showLigands() {
+        if (this.alwaysShowLigands) {
+            const showLig = (sele) => {
+                const prot = NGL.getStage().getComponentByType('structure');
+                if (prot !== undefined) prot.addRepresentation("licorice", { multipleBond: "symmetric",
+                                                                             sele: 'not (polymer or water)'});
+            };
+            setTimeout(() => showLig(), 100);
         }
     }
 
@@ -776,7 +794,7 @@ class Venus {
                 ft.addModel(chainA.x, chainA.y, venus.protein.sequence.length);
             }
         };
-        if (window.ft !== undefined) {setTimeout(enpower, 1000)}
+        if (window.ft === undefined) {setTimeout(enpower, 1000)}
         else {enpower()}
 
 
@@ -862,7 +880,6 @@ class Venus {
         .done(function (msg) {
                 ops.addToast('jobcompletion','Conversion complete','The data has been converted successfully.','bg-success');
                 ops.addToast('redirect','Conversion complete','Redirecting you to page '+msg.page,'bg-info');
-                console.log(msg);
                 window.location.href = "/data/"+msg.page;
         })
         .fail(ops.addErrorToast);
@@ -963,12 +980,26 @@ $('#report-btn').click(event => {
 
 $('#showMutant').click(event => {
     venus.alwaysShowMutant = $(event.target).prop('checked');
+    venus.showMutant();
     }
 );
 
+$('#showLigands').click(event => {
+    venus.alwaysShowLigands = $(event.target).prop('checked');
+    venus.showLigands();
+    }
+);
+
+$('#changeByPage_fetch').click(event => {
+    const uuid = changeByPage.value.trim().split('/').pop();
+    if (uuid === '') {$('#changeByPage').addClass('is-invalid'); return null}
+    else {$('#changeByPage').removeClass('is-invalid');}
+    window.venus.fetchMike(uuid);
+});
+
 $('#change_model').click(async event => {
     // get params
-    const params = Array.from(upload_params.files).map(async f => await f.text());
+    const params = await Promise.all(Array.from(upload_params.files).map(f => f.text()));
     //
     if (upload_pdb.files.length !== 0) {
         // file route
@@ -976,8 +1007,19 @@ $('#change_model').click(async event => {
         const pdb = await f.text();
         const name = f.name;
         window.venus.analyseCustomFile(pdb, name, params);
-    } else if (changeByPage.value.trim() !== '') {
-        window.venus.analyseCustomMike(changeByPage.value.trim(), params);
+    } else if (! changeByPage_selector.hasAttribute('disabled')) {
+        const index = changeByPage_selector.selectedIndex;
+        const name = changeByPage_selector.options[index].value;
+        $.post({
+                url: "save_pdb", data: {
+                    uuid: changeByPage.value,
+                    index: index
+                }}).fail(ops.addErrorToast)
+            .done(pdb => {
+                const format =  pdb.includes('_atom_site.Cartn_x') ? 'cif' : 'pdb';
+                window.venus.analyseCustomFile(pdb, name+'.'+format, params)
+            }
+            );
     }
     else {
         ops.addToast('errorate','Invalid','Nothing provided.','bg-warning');

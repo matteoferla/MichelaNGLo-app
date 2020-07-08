@@ -9,11 +9,12 @@ from .uniprot_data import *
 #ProteinCore organism human uniprot2pdb
 from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structure
 
-from ..models import User ##needed solely for log.
-from .common_methods import is_malformed, notify_admin
+from ..models import User, Page ##needed solely for log.
+from .common_methods import is_malformed, notify_admin, get_pdb_block_from_request
+from .user_management import permission
 from . import custom_messages
 
-from typing import Optional, Any
+from typing import Optional, Any, List
 import random
 from pyramid.view import view_config, view_defaults
 from pyramid.renderers import render_to_response
@@ -174,13 +175,11 @@ class Venus:
         elif step== 'phosphorylate':
             self.phospho_step()
             return self.reply
-        elif step == 'custommike':
-            self.assert_malformed('uuid')
-            self.change_to_mike(self.request.params['uuid'])
-            return self.reply
         elif step == 'customfile':
             self.assert_malformed('pdb', 'filename')
-            self.change_to_file(self.request.params['pdb'], self.request.params['filename'])
+            pdb = get_pdb_block_from_request(self.request)
+            params = self.save_params()
+            self.change_to_file(pdb, self.request.params['filename'], params)
             return self.reply
         else:
             self.request.response.status = 422
@@ -337,12 +336,14 @@ class Venus:
         self.log_if_error('phospho_step')
 
     ### CHANGE STEP
-    def change_to_file(self, block, name):
+    def change_to_file(self, block, name, params: List[str] = ()):
+        # params is either None or a list of topology files
         if self.has():
             self.mutation_step()
         protein = system_storage[self.handle]
         protein.structural = None
         protein.energetics = None
+        protein.rosetta_params_filenames = params
         title, ext = os.path.splitext(name)
         structure = Structure(title, 'Custom', 0, 9999, title,
                               type='custom',chain="A",offset=0, coordinates=block)
@@ -350,29 +351,28 @@ class Venus:
         self.structural_step(structure=structure)
         return self.reply
 
-    ### CHANGE STEP
-    def change_to_mike(self, uuid):
-        raise NotImplementedError
-        if self.has():
-            self.mutation_step()
-        protein = system_storage[self.handle]
-        protein.structural = None
-        # page = Page.select(request, request.params['page'])
-        # verdict = permission(request, page, 'edit', key_label='encryption_key')
-        # if verdict['status'] != 'OK':
-        #     return verdict
-        # permission(request, page, mode='view')
-        structure = Structure(title, 'Custom', 0, 9999, title,
-                              type='custom', chain="A", offset=0, coordinates=block)
-        structure.chain_definitions = [{'chain': "A",
-                                        'uniprot': "XXX",
-                                        'x': 0,
-                                        'y': 9999,
-                                        'offset': 0,
-                                        'range': f'0-9999',
-                                        'name': title,
-                                        'description': title}]
-        return self.structural_step(self, structure=structure)
+    def save_params(self) -> List[str]:
+        """
+        Confusingly, by params I mean Rosetta topology files
+        saves params : str to params as filenames
+        """
+        if 'params' in self.request.params:
+            params = self.request.params['params']
+        elif 'params[]' in self.request.params:
+            params = self.request.params.getall('params')
+        else:
+            params = []
+        temp_folder = os.path.join('michelanglo_app', 'temp')
+        if not os.path.exists(temp_folder):
+            os.mkdir(temp_folder)
+        files = []
+        for param in params: # it should be paramses
+            n = len(os.listdir(temp_folder))
+            file = os.path.join(temp_folder, f'{n:0>3}.params')
+            with open(file, 'w') as w:
+                w.write(param)
+            files.append(file)
+        return files
 
     ### Other
     def log_if_error(self, operation, response=None):

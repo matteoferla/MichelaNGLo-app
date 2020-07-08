@@ -10,7 +10,7 @@
                         <button type="button" class="btn btn-outline-warning" id="new_analysis">
                             <i class="far fa-undo  fa-lg"></i> Analyse another
                         </button>
-                        <button class="btn btn-outline-secondary" type="button" id="feedback-btn" data-toggle="modal"
+                        <button class="btn btn-outline-success" type="button" id="feedback-btn" data-toggle="modal"
                                 data-target="#modal_feedback">
                             <i class="far fa-star"></i> Feedback
                         </button>
@@ -128,12 +128,21 @@
 
                     <div>
                         <hr/>
-                        ############ toggle
+                        <div class="row">
+                            <div class="col-12 col-lg-6">
+                                ############ toggle
 
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" class="custom-control-input" id="showMutant">
-                            <label class="custom-control-label" for="showMutant">Always show mutant</label>
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="showMutant">
+                                        <label class="custom-control-label" for="showMutant">Always show mutant</label>
+                                    </div>
+                            </div>
+                            <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="showLigands">
+                                        <label class="custom-control-label" for="showLigands">Always show ligands</label>
+                                    </div>
                         </div>
+
                         ######################
                             <h3>Structure</h3>
                         <ul id="structureOption"><!--filled dynamically by venus.updateStructure()--></ul>
@@ -218,12 +227,23 @@
 
                     <p class="text-center">or</p>
 
-                    <div class="input-group mb-3">
+                    <div class="input-group">
                         <div class="input-group-prepend">
                             <span class="input-group-text" id="changeByPage_label">Michelaɴɢʟo page</span>
                         </div>
-                        <input type="text" class="form-control" placeholder="URL (DISABLED - SECUIRTY RISK)" aria-label="URL"
-                               aria-describedby="changeByPage_label" id="changeByPage" disabled>
+                        <input type="text" class="form-control" placeholder="URL" aria-label="URL"
+                               aria-describedby="changeByPage_label" id="changeByPage">
+                        <div class="input-group-append">
+                            <button class="btn btn-success" type="button" id="changeByPage_fetch"><i class="far fa-cloud-download"></i></button>
+                          </div>
+                    </div>
+                    <div class="input-group mb-3">
+                      <div class="input-group-prepend">
+                        <label class="input-group-text" for="changeByPage_selector">Select structure</label>
+                      </div>
+                      <select class="custom-select" id="changeByPage_selector" disabled>
+                        <option name="changeByPage" value="0" selected>Select page first</option>
+                      </select>
                     </div>
 
                 </div>
@@ -240,7 +260,7 @@
                         <div class="custom-file">
                             <input type="file" class="custom-file-input" id="upload_params"
                                    aria-describedby="upload_addon_params"
-                                   accept="params"
+                                   accept=".params"
                                     multiple>
                             <label class="custom-file-label" for="upload_pdb">Choose Params file</label>
                         </div>

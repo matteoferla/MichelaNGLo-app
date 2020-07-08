@@ -293,7 +293,6 @@ def get_pdb_block(source):
     """
     ##
     if isinstance(source, str):
-        print('heree!!')
         text = source
         return get_pdb_block_from_str(text).replace('`','').replace('\\','').replace('$','')
     elif isinstance(source, Request):
