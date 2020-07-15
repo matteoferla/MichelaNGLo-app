@@ -156,6 +156,16 @@
                   <label class="custom-control-label" for="model">Model warning</label>
                 </div>
                 <hr/>
+                <p>Multiple structures can be downloaded after loading the page. If your first view is an overlay disable this feature:</p>
+                <div class="custom-control custom-switch">
+                  <input type="checkbox" class="custom-control-input user-editable-state" id="asyncPDB"
+                         %if async_pdb:
+                            checked
+                         %endif
+                            >
+                  <label class="custom-control-label" for="asyncPDB">Load structures beyond the first asynchronously</label>
+                </div>
+                <hr/>
                 <%include file="page_users.mako"/>
                 <hr/>
                 <%include file="edit_security.mako"/>

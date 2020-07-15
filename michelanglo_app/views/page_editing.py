@@ -142,6 +142,8 @@ def edit(request):
         if 'refresh_image' in request.params:
             if os.path.exists(page.thumb_path):
                 os.remove(page.thumb_path)
+        if 'async_pdb' in request.params: # the PDBs are loaded asynchronously
+            page.settings['async_pdb'] = is_js_true(request.params['async_pdb'])
         # save
         page.edited = True
         page.title = page.settings['title']

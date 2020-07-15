@@ -41,6 +41,7 @@ def includeme(config):
     config.add_route('get_pages', '/get_pages')
     config.add_route('admin', '/admin')
     config.add_route('vote', '/vote')
+    config.add_route('async_pdb', '/async_pdb')
     config.add_route('venus', '/venus')
     config.add_route('venus_random', '/venus_random')
     config.add_route('venus_analyse', '/venus_analyse')

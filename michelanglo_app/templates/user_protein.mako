@@ -173,6 +173,10 @@ $(document).ready(function () {
 	    else {$('#viewport').parent().parent().css('top', 0);}
 	});
 
+    // fetch the pdbs
+    let asyncPDBs = ${str(async_pdbnames)|n};
+    let pagename = "${page}";
+    asyncPDBs.forEach(name => $.get('/async_pdb', {identifier: pagename, name: name}).then(msg => window[name] = msg));
 
     %if not no_user:
         ###user mode is on.

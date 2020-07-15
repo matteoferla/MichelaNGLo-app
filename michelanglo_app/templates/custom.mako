@@ -194,7 +194,7 @@ $('#submit').click(function () {
     $('.invalid-feedback').hide();
 
     data = new FormData();
-    if (demo_obj) {data.append('demo_file',demo_obj);}
+    if (demo_obj) {data.append('demo_filename',demo_obj);}
     else { data.append( 'file', valid_value('#upload'));}
     var centroid = $("input[name='centroid']:checked").val();
     data.append('centroid',centroid);

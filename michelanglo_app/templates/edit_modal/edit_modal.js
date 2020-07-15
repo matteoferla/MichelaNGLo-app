@@ -136,7 +136,8 @@ $('#edit_submit').click(function () {
             'encryption_key': $('#encryption_key').val(),
             'public': (public.nodeName == "SELECT") ? public.value : public.checked,
             'confidential': $('#confidential').prop('checked'),
-            'model': $('#model').prop('checked')
+            'model': $('#model').prop('checked'),
+            'async_pdb': $('#asyncPDB').prop('checked')
         };
     if (window.initial_prolink !== undefined) {data['data_other'] = window.initial_prolink}
     $.ajax({

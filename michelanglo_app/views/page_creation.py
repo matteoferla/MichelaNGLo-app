@@ -125,6 +125,7 @@ def convert_pse(request):
                     'validation': True,
                     'stick_format': request.params['stick_format'],
                     'save': True,
+                    'async_pdb': False, # overlay!
                     'backgroundcolor': 'white',
                     'location_viewport': 'left',
                     'columns_viewport': 9,
@@ -198,7 +199,7 @@ def convert_pse(request):
 @view_config(route_name='convert_mesh', renderer="../templates/custom.result.mako")
 def convert_mesh(request):
     log.info(f'Mesh conversion requested by {User.get_username(request)}')
-    if 'demo_file' in request.params:
+    if 'demo_filename' in request.params:
         filename = demo_file(request)  # prevention against attacks
         fh = open(filename)
     else:
@@ -238,6 +239,7 @@ def convert_pdb(request):
     if not request.user or request.user.role not in ('admin', 'friend'):
         data_other = clean_data_other(data_other)
     settings = {'data_other': data_other,
+                'async_pdb': True,
                 'page': pagename, 'editable': True, 'descriptors': {},
                 'backgroundcolor': 'white', 'validation': None, 'js': None, 'pdb': [], 'loadfun': ''}
     extension = 'pdb'

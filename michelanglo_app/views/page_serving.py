@@ -13,6 +13,7 @@ log = logging.getLogger(__name__)
 
 from . import custom_messages, votes
 from .common_methods import is_malformed, is_js_true
+from .buffer import system_storage
 
 @view_config(route_name='userdata', renderer="../templates/user_protein.mako")
 def userdata_view(request):
@@ -74,6 +75,8 @@ def get_userdata(request, pagename):
     else:
         ## yay! you are not a terrorist!
         settings = page.settings
+        if settings['page'] != page.identifier:
+            log.error(f"This should not have happened: loading {page.identifier} gave {settings['page']}")
         settings['public'] = page.privacy  # Legacy fix.
         if page.encrypted:
             settings['encryption_key'] = request.params['key']   ### For the Mako!
@@ -166,7 +169,6 @@ def get_userdata(request, pagename):
                 r['time'] = str(r['time'])  #patch. please delete me soon.
             return render_to_response("json", settings, request)
         else:
-
             settings['meta_title'] = 'Michelaɴɢʟo user-created page: ' + settings['title']
             settings['meta_description'] = settings['description'][:150]
             settings['meta_image'] = f'https://michelanglo.sgc.ox.ac.uk/thumb/{page.identifier}'
@@ -183,8 +185,48 @@ def get_userdata(request, pagename):
                 settings['descr_mdowned'] = re.sub('^\<h2\>(.*?)\<\/h2\>', '', settings['descr_mdowned'])
             else:
                 settings['descr_header'] = ''
+            # asynchronous PDB loading. Bad if first page has an overlay.
+            settings['async_pdbnames'] = []
+            if 'async_pdb' in settings and settings['async_pdb'] and len(settings['pdb']) > 1:
+                for name, block in settings['pdb'][1:]:
+                    print(settings['page']+name)
+                    system_storage[settings['page']+name] = block
+                    settings['async_pdbnames'].append(name)
+                settings['pdb'] = [settings['pdb'][0]]
+            else:
+                settings['async_pdb'] = False
             # return
             return settings   ## renders via the "../templates/user_protein.mako"
+
+
+
+@view_config(route_name='async_pdb', renderer="string")
+def async_pdb(request):
+    """
+    This is not redundant with save. This is meant to be a quick async loading.
+    """
+    malformed = is_malformed(request, 'identifier', 'name')
+    if malformed:
+        request.response.status_int = 400
+        return ''
+    identifier = request.params['identifier']
+    name = request.params['name']
+    if identifier+name in system_storage: # it did not expired.
+        block = system_storage[identifier + name]
+        del system_storage[identifier + name]
+        return block
+    else:
+        get_userdata(request, identifier)
+        if identifier + name in system_storage: #this should not happend!
+            log.critical(f'{User.get_username(request)} is looking at a page whose cache was deleted (Impossible)')
+            block = system_storage[identifier + name]
+            del system_storage[identifier + name]
+            return block
+        else: # nope. It is wrong.
+            log.info(f'{User.get_username(request)} requested an incorrect pdb {identifier} + {name}')
+            request.response.status_int = 404
+            return ''
+
 
 @view_config(route_name='monitor', renderer="../templates/monitor.mako")
 def monitor(request):
