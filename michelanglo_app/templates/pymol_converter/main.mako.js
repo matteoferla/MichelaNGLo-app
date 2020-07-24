@@ -142,6 +142,7 @@ $('#submit').click(function () {
     else {throw 'Impossible mode';}
     //finish adding data.
     data.append( 'uniform_non_carbon',$('#uniform_non_carbon').is(':checked'));
+    data.append( 'combine_objects',$('#combine_objects').is(':checked'));
     data.append('stick_format', $("input[name='sticks']:checked").val());
     // ajax to convert_pse
     //{pdb: pdb, uniform_non_carbon: uniform_non_carbon, pymol_output: pymol_output, indent: indent, cdn: cdn}

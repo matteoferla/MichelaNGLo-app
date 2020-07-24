@@ -64,6 +64,9 @@ downloads='''These are links to the stand-alone page whose address can used for 
 
 pdb_string="Basically, if you are using a PSE based on a RCSB PDB structure, don't tick this, but give the PDB code. Otherwise, tick this. For more info, press the question mark."
 
+
+combine_objects="In PyMOL and NGL different objects can be present in the same scene, but in most cases they ought to be combined."
+
 #### for markup builder
 
 

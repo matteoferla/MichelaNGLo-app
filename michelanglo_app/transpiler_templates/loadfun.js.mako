@@ -1,4 +1,4 @@
-function loadfun (protein) {
+function ${funname} (protein) {
     var stage=NGL.getStage('${viewport}'); //alter if not using multiLoader.
 
     //define colors

@@ -110,7 +110,7 @@ def convert_pse(request):
     log.info('Conversion of PyMol requested.')
     request.session['status'] = make_msg('Checking data', 'The data has been received and is being checked')
     try:
-        malformed = is_malformed(request, 'uniform_non_carbon', 'stick_format')
+        malformed = is_malformed(request, 'uniform_non_carbon', 'stick_format', 'combine_objects')
         if malformed:
             return {'status': malformed}
         if 'demo_filename' not in request.params and 'file' not in request.params:
@@ -124,8 +124,9 @@ def convert_pse(request):
                     'verbose': False,
                     'validation': True,
                     'stick_format': request.params['stick_format'],
+                    'combine_objects': is_js_true(request.params['combine_objects']),
                     'save': True,
-                    'async_pdb': False, # overlay!
+                    'async_pdb': is_js_true(request.params['combine_objects']), # async pdb will mess up overlays!
                     'backgroundcolor': 'white',
                     'location_viewport': 'left',
                     'columns_viewport': 9,
@@ -150,38 +151,58 @@ def convert_pse(request):
         log.debug('About to call the transpiler!')
         log.debug(filename)
         trans = PyMolTranspiler(job=User.get_username(request)).transpile(file=filename, **settings)
-        ### finish up
+        ### save the PDB data?
         if mode == 'demo' or not is_js_true(request.params['pdb']):
-            ## pdb_string checkbox is true means that it adds the coordinates in the JS and not pdb code is given
-            with open(os.path.join(trans.tmp, os.path.split(filename)[1].replace('.pse', '.pdb'))) as fh:
-                trans.raw_pdb = fh.read()
+            trans.pdb = None # yes save it.
         else:
-            trans.pdb = request.params['pdb']
+            trans.pdb = request.params['pdb'] # PDB code to use
         request.session['file'] = filename
         # deal with user permissions.
         code = 1
         request.session['status'] = make_msg('Permissions', 'Finalising user permissions')
         pagename = get_uuid(request)
         # create output
-        settings['pdb'] = []
-        request.session['status'] = make_msg('Load function', 'Making load function')
-        settings['loadfun'] = trans.get_loadfun_js(tag_wrapped=True, **settings)
+        settings['title'] = 'User submitted structure (from PyMOL file)'
         settings['descriptors'] = trans.description
-        if trans.raw_pdb:
-            settings['proteinJSON'] = '[{"type": "data", "value": "pdb", "isVariable": true, "loadFx": "loadfun"}]'
-            settings['pdb'] = [
-                ('pdb', '\n'.join(trans.ss) + '\n' + trans.raw_pdb)]  # note that this used to be a string,
+        # save proteinJSON
+        protein_info = []
+        settings['pdb'] = []
+        if not trans.pdb: # PDB not provided.
+            for name in trans.pdbblocks:
+                settings['pdb'].append((name, trans.pdbblocks[name]))
+                protein_info.append({"type": "data", "value": name, "isVariable": True, "loadFx": f"load{name}"})
         elif len(trans.pdb) == 4:
             settings['descriptors']['ref'] = get_references(trans.pdb)
-            settings['proteinJSON'] = json.dumps([{"type": "rcsb",
-                                                   "value": trans.pdb,
-                                                   "loadFx": "loadfun",
-                                                   'history': 'from PyMOL',
-                                                   "chain_definitions": get_chain_definitions(request)
-                                                   }])
+            for name in trans.pdbblocks:
+                protein_info.append({"type": "rcsb",
+                           "value": trans.pdb,
+                           "loadFx": f"load{name}",
+                           'history': 'from PyMOL',
+                           "chain_definitions": get_chain_definitions(request)
+                           })
+                # there should be only one!
         else:
-            settings['proteinJSON'] = '[{{"type": "url", "value": "{0}", "loadFx": "loadfun"}}]'.format(trans.pdb)
-        settings['title'] = 'User submitted structure (from PyMOL file)'
+            protein_info = [{"type": "url", "value": trans.pdb, "loadFx": "loadfun"}]
+        ## load fun
+        request.session['status'] = make_msg('Load function', 'Making load function')
+        # load fun should not be a string....
+        settings['loadfun'] = '\n\n' + '\n\n'.join(trans.loadfuns.values()) + '\n\n'
+        if len(trans.pdbblocks) == 1:  # settings['combine_objects'] == True is a single model
+            pass
+        else:
+            first = list(trans.pdbblocks.keys())[0]
+            middle = ''
+            for name in trans.loadfuns:
+                if name == first:
+                    continue
+                middle += f'''
+                        protein.stage.loadFile(new Blob([window['{name}'], {{type: 'text/plain'}}]),
+                                                {{ext: 'pdb', firstModelOnly: true}})
+                                     .then(window['load{name}']);
+                        '''
+            settings['loadfun'] += 'function loadfun (protein) { window["load' + first + '"](protein);' + middle + '}'
+            protein_info[0]['loadFx'] = 'loadfun'
+        settings['proteinJSON'] = json.dumps(protein_info)
         commit_submission(request, settings, pagename)
         # save sharable page data
         request.session['status'] = make_msg('Saving', 'Storing data for retrieval.')

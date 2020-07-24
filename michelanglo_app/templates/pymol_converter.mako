@@ -82,7 +82,7 @@
                         <div class="col-xl-3 col-lg-3 col-md-6 mb-4">
                             ${checkbox(info.attr.uniform_non_carbon, "Uniform non carbons", "uniform_non_carbon", append=None, is_checked=True)}
                         </div>
-                        <div class="col-xl-6 col-lg-6 col-md-8 mb-4" >
+                        <div class="col-xl-5 col-lg-6 col-md-8 mb-4" >
                             <div class="input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text" id="input_mode-addon">Sticks as </span>
@@ -103,6 +103,10 @@
                                 </div>
                             </div>
                         </div><!--sticks-->
+
+                        <div class="col-xl-3 col-lg-3 col-md-6 mb-4">
+                            ${checkbox(info.attr.combine_objects, "Combined objects", "combine_objects", append='<div class="btn btn-outline-info" data-toggle="modal" data-target="#combine_modal" >?</div>', justify_right=True, is_checked=True)}
+                        </div>
                     </div>
 
                 </form>
@@ -223,6 +227,39 @@
               </div></div>
           </div>
 
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" tabindex="-1" role="dialog" id="combine_modal">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Combining objects</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <p>In PyMOL and NGL different objects can be present in the same scene, but often this is not beneficial.</p>
+          <p>In PyMOL, the objects are things listed in the right hand side panel.</p>
+            <h6>Different protein</h6>
+          <p>In most cases these are not meant to be separate,
+              but are simply different interacting parts that were imported separately.
+              Namely, they could have been combined with <code>create combo, protein_x or protein_y</code>.<br/>
+              In Michelanglo, if multiple components (objects) are present,
+              it is not possible to select a specific one and hydrogen bonding will not occur been the components,
+              therefore collapsing them into a single component is recommended.</p>
+          <h6>Overlays and ensembles</h6>
+          <p>The only case when this is not acceptable is when you have overlayed protein structures or a NMR ensemble.
+          If this is the case please disable this.</p>
+          <h6>Multistate</h6>
+          Michelanglo will discard all the states/models beyond the first. PyMOL does not show all states at once by default.
+          If you want to keep and show at one all the states, please use the split_states(obj) command.
+          However, this may result in something that is too complicated for most users to follow, so we strongly advice against it.
+          If you want to show trajectories, to toggle between states or something else please contact the admin for a custom JS solution.
       </div>
     </div>
   </div>
