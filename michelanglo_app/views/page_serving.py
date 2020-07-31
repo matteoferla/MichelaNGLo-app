@@ -29,10 +29,10 @@ def redirect_view(request):
     """
     pagename = Doi.reroute(request, request.matchdict['id'])
     if pagename is not None:
-        log.info(f'{User.get_username(request)} is looking at a r-page {request.matchdict["id"]} ({pagename})')
+        log.info(f'{User.get_username(request)} is looking at a r-page "{request.matchdict["id"]}" ({pagename})')
         return get_userdata(request, pagename)
     else:
-        log.info(f'{User.get_username(request)} is looking at a r-page {request.matchdict["id"]} that does not exist.')
+        log.info(f'{User.get_username(request)} is looking at a r-page "{request.matchdict["id"]}" that does not exist.')
         request.response.status_int = 400
         response_settings = {'project': 'Michelanglo', 'user': request.user,
                              'page': pagename,
@@ -218,7 +218,7 @@ def async_pdb(request):
     else:
         get_userdata(request, identifier)
         if identifier + name in system_storage: #this should not happend!
-            log.critical(f'{User.get_username(request)} is looking at a page whose cache was deleted (Impossible)')
+            log.warning(f'{User.get_username(request)} is looking at a page whose cache was deleted (Impossible)')
             block = system_storage[identifier + name]
             del system_storage[identifier + name]
             return block
