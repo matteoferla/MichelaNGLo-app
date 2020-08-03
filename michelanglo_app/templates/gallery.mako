@@ -11,7 +11,7 @@
 
 <%block name="main">
     <%
-        from michelanglo_app.models import Publication
+        from michelanglo_app.models import Publication, Doi
 
         def publication(page):
             pub = request.dbsession.query(Publication).filter_by(identifier=page.identifier).first()
@@ -23,10 +23,12 @@
         from datetime import datetime, timedelta
         unedited_time = datetime.now() - timedelta(days=20)
         untouched_time = datetime.now() - timedelta(days=300)
+
+        shorts = {}
     %>
 
     <%def name='card(page)'>
-        <div class="card hypercard mb-4" onclick="window.location='/data/${page.identifier}'">
+        <div class="card hypercard mb-4" data-uuid="${page.identifier}">
               <img src="/thumb/${page.identifier}" class="card-img-top p-4" alt="thumbnail of ${page.title}">
               <div class="card-body">
                 <h5 class="card-title">${page.title}</h5>
@@ -48,7 +50,9 @@
                     %if page.encrypted:
                         <i class="far fa-key" data-toggle="tooltip" title="This page has been encrypted."></i>
                     %endif
-                    %if not page.edited and page.timestamp < unedited_time:
+                    %if page.privacy != 'private':
+                        &nbsp;
+                    %elif not page.edited and page.timestamp < unedited_time:
                         <i class="far fa-alarm-clock" data-toggle="tooltip" title="This page is going to be deleted in ${(page.timestamp - datetime.now()) + timedelta(days=30)} unless edited."></i>
                     %elif page.edited and page.timestamp < untouched_time:
                         <i class="far fa-alarm-clock" data-toggle="tooltip" title="This page is going to be deleted in ${(page.timestamp - datetime.now()) + timedelta(days=365)} unless opened."></i>
@@ -106,4 +110,17 @@
                 <hr/>
             %endif
         %endfor
+</%block>
+
+<%block name="script">
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.hypercard').click(event => {
+                if (event.target.tagName !== 'A') {
+                    identifier = $(event.target).parents('.hypercard').data('uuid');
+                    window.location='/data/'+identifier;
+                }
+            });
+        });
+    </script>
 </%block>
