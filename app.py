@@ -15,4 +15,6 @@ else:
 
 setup_logging(configfile)
 app = get_app(configfile, 'main', options={'SQL_URL': os.environ['SQL_URL']}) #pyramid.router.Router
-serve(app, host='0.0.0.0', port=8088, threads=50)
+
+if __name__ == '__main__':
+    serve(app, host='0.0.0.0', port=8088, threads=50)
