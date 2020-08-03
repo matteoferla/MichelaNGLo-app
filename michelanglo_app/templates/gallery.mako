@@ -24,11 +24,17 @@
         unedited_time = datetime.now() - timedelta(days=20)
         untouched_time = datetime.now() - timedelta(days=300)
 
-        shorts = {}
+        shorts = {d.long: d.short for d in request.dbsession.query(Doi).all()}
     %>
 
     <%def name='card(page)'>
-        <div class="card hypercard mb-4" data-uuid="${page.identifier}">
+        <div class="card hypercard mb-4"
+              %if page.identifier in shorts:
+                  data-uuid="r/${shorts[page.identifier]}"
+              %else:
+                  data-uuid="data/${page.identifier}"
+              %endif
+              >
               <img src="/thumb/${page.identifier}" class="card-img-top p-4" alt="thumbnail of ${page.title}">
               <div class="card-body">
                 <h5 class="card-title">${page.title}</h5>
@@ -43,7 +49,11 @@
                   %endif
               </div>
                 <div class="card-footer">
-                          <small class="text-muted"><span class="text-muted">ID:</span> ${page.identifier}</small>
+                    %if page.identifier in shorts:
+                        <small class="text-muted"><span class="text-muted">short ID:</span> ${shorts[page.identifier]}</small>
+                    %else:
+                        <small class="text-muted"><span class="text-muted">ID:</span> ${page.identifier}</small>
+                    %endif
                     %if page.protected:
                         <i class="far fa-lock"  data-toggle="tooltip" title="This page cannot be deleted."></i>
                     %endif
@@ -118,7 +128,7 @@
             $('.hypercard').click(event => {
                 if (event.target.tagName !== 'A') {
                     identifier = $(event.target).parents('.hypercard').data('uuid');
-                    window.location='/data/'+identifier;
+                    window.location=identifier;
                 }
             });
         });
