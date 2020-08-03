@@ -15,7 +15,11 @@
 % if user and user.role == 'admin':
     <%
         icon = {'basic': 'user', 'friend': 'user-tie', 'guest': 'user-secret', 'admin': 'user-crown', 'new': 'user-astronaut', 'hacker': 'user-ninja', 'trashcan': 'dumpster'}
-        log = ''.join(reversed(open('michelanglo_app.log','r').readlines()[-200:])) #for some ducked up reason, templates are in root.
+        log = ''.join(reversed(open('michelanglo_app.log','r').readlines()[-500:])) #for some ducked up reason, templates are in root.
+
+        from michelanglo_app.models import Doi
+
+        shortened = [(d.long, d.short) for d in request.dbsession.query(Doi).all()]
 
     %>
     <h3>Users</h3>
@@ -34,6 +38,13 @@
                 </span> ${u.name} </a></li>
             %endfor
         </ul>
+    <h3>Redirects</h3>
+        <div class="row">
+            % for long, short in shortened:
+                <div class="col-2"><a class="btn btn-outline-info" href="data/${long}">${short}</a> </div>
+            % endfor
+        </div>
+        <p></p>
     <h3>Command station</h3>
         <div class="row border rounded w-100 p-2 m-2">
                 <div class="col-lg-3">
