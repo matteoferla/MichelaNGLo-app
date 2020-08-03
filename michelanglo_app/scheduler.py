@@ -73,7 +73,11 @@ def kill_task(days_delete_unedited, days_delete_untouched):
             page.delete()
         untouched_time = datetime.now() - timedelta(days=int(days_delete_untouched))
         for page in sesh.query(Page).filter(and_(Page.existant == True, Page.timestamp < untouched_time)):
-            if page.protected or sesh.query(Doi).filter(Doi.long == page.identifier).first() is not None:
+            if page.protected:
+                continue
+            elif sesh.query(Doi).filter(Doi.long == page.identifier).first() is not None:
+                continue
+            elif page.privacy != 'private':
                 continue
             log.info(f'Deleting abbandonned page {page.identifier} ({page.timestamp})')
             try:
