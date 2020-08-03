@@ -1,6 +1,6 @@
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
-from ..models import Page, User, Doi
+from ..models import Page, User, Doi, Publication
 import os
 
 import logging
@@ -165,6 +165,12 @@ def set_ajax(request):
             request.dbsession.add(redirect)
             log.info(f'{User.get_username(request)} made shorter page {longname} as {shortname}.')
             return {'status': 'success', 'long': longname, 'short': shortname}
+        elif request.params['item'] == 'publication':
+            malformed = is_malformed(request, 'identifier', 'url')
+            # options include ('identifier', 'url', 'authors', 'year', 'title', 'journal', 'issue')
+            if malformed:
+                return {'status': malformed}
+            publication = Publication.from_request(request)
         else:
             return {'status': 'unknown cmd'}
 
@@ -172,7 +178,7 @@ def set_ajax(request):
 
 @view_config(route_name='vote', renderer='json')
 def vote(request):
-    malformed = is_malformed(request, 'topic','direction')
+    malformed = is_malformed(request, 'topic', 'direction')
     if malformed:
         return {'status': malformed}
     topic = request.params['topic'][:100]

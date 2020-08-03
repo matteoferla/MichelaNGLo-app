@@ -4,3 +4,6 @@ psql DBNAME USERNAME
 \d+ redirects
 SELECT * from redirects;
 \q
+
+
+	

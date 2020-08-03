@@ -9,6 +9,7 @@ import zope.sqlalchemy
 from .pages import Page  # flake8: noqa
 from .user import User  # flake8: noqa
 from .redirects import Doi
+from .publication import Publication
 
 # run configure_mappers after defining all of the models to ensure
 # all relationships can be setup

@@ -8,10 +8,7 @@ from sqlalchemy import (
 from .meta import Base
 
 class Doi(Base):
-    """ The SQLAlchemy declarative model class for a User object.
-    Contains `visited_pages` and `owned_pages` DB entries and the `.visited` and `.owned` attributes,
-    which have the methods .get() .set(pagenames) .delete(pagename) .add(pagename), which work on pagenames/uuids
-    while the method .select(request) is the same as get but interacts with the DB Page table...
+    """ The SQLAlchemy declarative model class for a r-page object.
     """
     __tablename__ = 'redirects'
     id = Column(Integer, primary_key=True)
