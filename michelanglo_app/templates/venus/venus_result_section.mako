@@ -272,3 +272,33 @@
         </div>
     </div>
 </div>
+
+<div class="modal" tabindex="-1" role="dialog" id="createMikeModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>A VENUS page is created anew on request. A Michelanglo page is stored and can be edited.
+            To make a page that best suits your needs please consider the following:</p>
+          <ul>
+              <li>The initial view will be the current view. Please choose the desired model and orientation (<a href="#" data-dismiss="modal">close this modal</a>).</li>
+              <li>The feature viewer will be in the modal that appears when the button at the bottom of the description is pressed.</li>
+              <li>The blocks will be present in the description. Please rearrange and/or delete to suit (<a href="#" data-dismiss="modal">close this modal</a>).</li>
+          </ul>
+          <p>The following models can be included (please note about 20% of users visiting a page are on a mobile device and each structure is several megabytes).</p>
+          <div id="modelOptions">
+
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="createMike"><i class="far fa-hand-holding-magic"></i> Create</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1382,6 +1382,7 @@ NGL.specialOps.load = function (option, noLoadFun, id) {
     NGL.specialOps.postInitialise();
     // determine what option is.
     id = id || myData.ids[0];
+    delete window.myData.partner;
     if (myData.currentIndices[id] !== undefined) {
         myData.currentIndex = myData.currentIndices[id];
     }

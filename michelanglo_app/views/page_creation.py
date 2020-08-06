@@ -329,64 +329,58 @@ def create_venus(request):
     request params: uniprot, species, mutation, text, code, wt_block (=pdb block), mut_block (=pdb block), block, definitions, history
     """
     # Get data.
-    malformed = is_malformed(request, 'uniprot', 'species', 'mutation', 'text', 'code', 'definitions')
+    malformed = is_malformed(request, 'proteindata')
     if malformed:
         return {'status': malformed}
     log.info(f'VENUS page creation requested by {User.get_username(request)}')
     pagename = get_uuid(request)
-    uniprot = request.params['uniprot']
-    mutation = request.params['mutation']
-    code = request.params['code']
-    text = request.params['text']
-    definitions = get_chain_definitions(request)
-    history = get_history(request)
-    # List[tuple[selection, label]]
-    defstr = [(f":{d['chain']}", str(d['name'])) for d in definitions]
-    # deal with PDB blocks.
-    if 'block' in request.params:
-        block = request.params['block'].replace('`','').replace('\\','').replace('$','')
-        pdbblocks = [['wt', block]]
-        pj = [{'type': 'data',
-               'value': 'wt',
-               'name': 'wt',
-               'isVariable': 'true',
-               'chain_definitions': definitions,
-               'history': history}]
-    elif 'wt_block'  in request.params and 'mut_block'  in request.params:
-        wt_block = request.params['wt_block'].replace('`','').replace('\\','').replace('$','')
-        mut_block = request.params['mut_block'].replace('`','').replace('\\','').replace('$','')
-        pdbblocks = [['wt', wt_block], ['mutant', mut_block]]
-        pj = [{'type': 'data',
-               'value': 'wt',
-               'name': 'wt',
-               'isVariable': 'true',
-               'chain_definitions': definitions,
-               'history': history},
-              {'type': 'data',
-               'value': 'mutant',
-               'name': 'mutant',
-               'isVariable': 'true',
-               'chain_definitions': definitions,
-               'history': history}
-              ]
+    try:
+        data = json.loads(request.params['proteindata'])
+        # writing out the content for human sanity & error catching.
+        uniprot = data['uniprot']
+        species = data['species']
+        mutation = data['mutation']
+        code = data['code']
+        text = data['text']
+        proteins = data['protein']
+        prolink = data['prolink']
+    except Exception as error:
+        request.response.status = 422
+        msg = f'VENUS data error. {type(error).__name__}: {error}'
+        log.warning(msg)
+        return {'status': msg}
+
+    #pdbblocks = [(p['value']) for p in proteins] to do split out for asycn loading!
+    # add prolinks for models
+    topper = f'This page contains the following models:\n\n'
+    topper += ''.join([f'* <span class="prolink" data-load={i}>{p["name"]}</span>\n' for i, p in enumerate(proteins)])
+    is_within = lambda n: any([p['name'] == n for p in proteins])
+    if is_within('wt') and is_within('mutant'):
+        topper +=f'''* <span class="prolink" 
+                    data-target="#viewport" 
+                    data-toggle="protein" 
+                    data-load="wt" 
+                    data-focus="overlay mutant" 
+                    data-selection="{mutation[1:-1]}:A">
+                    Overlay of wild-type and mutant</span>'''
+    body = topper +'\n\n' + text
     # Prepare response.
-    settings = {##'data_other': data_other,
-                'title': f'VENUS generated page for {uniprot} {mutation}',
+    settings = {'data_other': ' '.join([f'data-{k}="{v}"' if type(v) in (str, list) else f'data-{k}={v}' for k, v in prolink.items()]),
+                'title': f'VENUS generated page for {uniprot} ({species}) {mutation}',
                 'page': pagename,
                 'editable': True,
                 'descriptors': {'ref': get_references(code),
-                                'text': text,
-                                'peptide': defstr},
+                                'text': body},
                 'backgroundcolor': 'white',
                 'validation': None,
                 'js': 'external',
                 'model': True if 'https://swissmodel.expasy.org' in code else False,
-                'pdb': pdbblocks,
+                'pdb': [],
                 'loadfun': '',
                 'columns_viewport': 5,
                 'columns_text': 7,
                 'location_viewport': 'right',
-                'proteinJSON': json.dumps(pj)
+                'proteinJSON': json.dumps(proteins)
     }
 
     ## Special JS to always show mutation
