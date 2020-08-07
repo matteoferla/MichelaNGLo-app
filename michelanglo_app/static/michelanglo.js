@@ -98,6 +98,32 @@ NGL.specialOps.slowOrient = function (id, view, selection) {
     }
 };
 
+NGL.specialOps.enableClickToShow = function(id) {
+    if (window.myData.clicks === undefined) {window.myData.clicks = {}}
+    if (window.myData.clicks[id] === undefined) {window.myData.clicks[id] = {residues: new Set(), representation: undefined};}
+    if (window.myData.clicks[id].active === undefined) {
+        window.myData.clicks[id].active = true;
+        NGL.getStage(id).signals.clicked.add(pickingProxy => {
+        // for testing: NGL.getStage().compList[0].structure.getAtomProxy(50)
+        if (pickingProxy && (pickingProxy.atom || pickingProxy.bond )){
+            const atom = pickingProxy.atom || pickingProxy.closestBondAtom;
+            const name = atom.qualifiedName().match(/(\d+\:\w)\..{1,5}/)[1]; //"[PRO]1114:A.C"
+            // Check if clicked atom is in array
+            if (myData.clicks[id].residues.has(name)) {
+                myData.clicks[id].residues.delete(name);
+            } else {
+                myData.clicks[id].residues.add(name);
+            }
+            if (myData.clicks[id].representation !== undefined) pickingProxy.component.removeRepresentation(myData.clicks[id].representation);
+            const seleName = Array.from(myData.clicks[id].residues).join(' or ');
+            myData.clicks[id].representation = pickingProxy.component.addRepresentation("hyperball", { sele: seleName})
+            NGL.specialOps.showTitle('viewport','Clicked: '+name);
+            }
+    });
+    }
+
+};
+
 NGL.specialOps.showDomain = function (id, selection, color, view, keepPrevious) {
     if (NGL.debug) {
         console.log('Show domain ' + selection)
@@ -1376,7 +1402,7 @@ NGL.specialOps._run_loadFx = function (protein, fx) {
 };
 
 NGL.specialOps.load = function (option, noLoadFun, id) {
-    console.log(JSON.stringify([option, noLoadFun, id]));
+
     //id is last due to legacy issues with pages with custom code!
     // super extreme case. No multiLoad has been called to initialise the scene. This a last ditch attempt.
     NGL.specialOps.postInitialise();
@@ -1514,6 +1540,7 @@ NGL.specialOps.multiLoader = function (id, proteins, backgroundColor, startIndex
     The multiLoader calls the load function with an index of startIndex or zero.
     Do note that the function load returns a pr
      */
+    console.log('starting multiloader');
     startIndex = startIndex || 0;
     if (NGL.Debug) {
         console.log('starting multiloader');
@@ -1812,8 +1839,9 @@ $.prototype.viewport = function () {
     } else {
         data = [];
     }
-    var promise = NGL.specialOps.multiLoader($(this).attr('id'), data, backgroundcolor);
     const id = $(this).attr('id');
+    var promise = NGL.specialOps.multiLoader(id, data, backgroundcolor);
+    promise.then(() => NGL.specialOps.enableClickToShow(id));
     if ($(this).data('focus') || $(this).data('view')) {
         if ($(this).has('img').length !== 0) {
             $(this).children('img').on("click", e => setTimeout(() => NGL.specialOps.prolink(this), 500));
@@ -1822,23 +1850,6 @@ $.prototype.viewport = function () {
             var prolink = this;
             promise.then(function () {
                     NGL.specialOps.prolink(prolink);
-                    NGL.getStage(id).signals.clicked.add(pickingProxy => {
-                        // for testing: NGL.getStage().compList[0].structure.getAtomProxy(50)
-                        if (pickingProxy && (pickingProxy.atom || pickingProxy.bond )){
-                            const atom = pickingProxy.atom || pickingProxy.closestBondAtom;
-                            const name = atom.qualifiedName().match(/(\d+\:\w)\..{1,5}/)[1]; //"[PRO]1114:A.C"
-                            // Check if clicked atom is in array
-                            if (myData.clicks[id].residues.has(name)) {
-                                myData.clicks[id].residues.delete(name);
-                            } else {
-                                myData.clicks[id].residues.add(name);
-                            }
-                            if (myData.clicks[id].representation !== undefined) pickingProxy.component.removeRepresentation(myData.clicks[id].representation);
-                            const seleName = Array.from(myData.clicks[id].residues).join(' or ');
-                            myData.clicks[id].representation = pickingProxy.component.addRepresentation("hyperball", { sele: seleName})
-                            NGL.specialOps.showTitle('viewport','Clicked: '+name);
-                            }
-                    });
                 }
             )
         }
