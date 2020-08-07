@@ -1535,10 +1535,12 @@ NGL.specialOps.multiLoader = function (id, proteins, backgroundColor, startIndex
             id: id,
             ids: [id],
             backgroundColor: 'white',
-            backgroundColors: {}
+            backgroundColors: {},
+            clicks: {}
         };
         window.myData.currentIndices[id] = -1;
         window.myData.backgroundColors[id] = backgroundColor || 'white';
+        window.myData.clicks[id] = {residues: new Set(), representation: undefined};
     }
     var img = $('#' + id + ' img');
     if (img.length) {
@@ -1568,11 +1570,13 @@ NGL.specialOps.postInitialise = function (defaultId) {
             id: defaultId,
             ids: [defaultId],
             backgroundColor: 'white',
-            backgroundColors: {}
+            backgroundColors: {},
+            clicks: {}
         };
 
         window.myData.currentIndices[defaultId] = -1;
         window.myData.backgroundColors[defaultId] = 'white';
+        window.myData.clicks[defaultId] = {residues: new Set(), representation: undefined};
         NGL.specialOps._preventScroll(defaultId);
     }
 };
@@ -1809,6 +1813,7 @@ $.prototype.viewport = function () {
         data = [];
     }
     var promise = NGL.specialOps.multiLoader($(this).attr('id'), data, backgroundcolor);
+    const id = $(this).attr('id');
     if ($(this).data('focus') || $(this).data('view')) {
         if ($(this).has('img').length !== 0) {
             $(this).children('img').on("click", e => setTimeout(() => NGL.specialOps.prolink(this), 500));
@@ -1816,7 +1821,24 @@ $.prototype.viewport = function () {
         } else {
             var prolink = this;
             promise.then(function () {
-                    NGL.specialOps.prolink(prolink)
+                    NGL.specialOps.prolink(prolink);
+                    NGL.getStage(id).signals.clicked.add(pickingProxy => {
+                        // for testing: NGL.getStage().compList[0].structure.getAtomProxy(50)
+                        if (pickingProxy && (pickingProxy.atom || pickingProxy.bond )){
+                            const atom = pickingProxy.atom || pickingProxy.closestBondAtom;
+                            const name = atom.qualifiedName().match(/(\d+\:\w)\..{1,5}/)[1]; //"[PRO]1114:A.C"
+                            // Check if clicked atom is in array
+                            if (myData.clicks[id].residues.has(name)) {
+                                myData.clicks[id].residues.delete(name);
+                            } else {
+                                myData.clicks[id].residues.add(name);
+                            }
+                            if (myData.clicks[id].representation !== undefined) pickingProxy.component.removeRepresentation(myData.clicks[id].representation);
+                            const seleName = Array.from(myData.clicks[id].residues).join(' or ');
+                            myData.clicks[id].representation = pickingProxy.component.addRepresentation("hyperball", { sele: seleName})
+                            NGL.specialOps.showTitle('viewport','Clicked: '+name);
+                            }
+                    });
                 }
             )
         }
