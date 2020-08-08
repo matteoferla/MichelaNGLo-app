@@ -835,7 +835,8 @@ class Venus {
             chain_definitions: this.structural.chain_definitions,
             history: this.structural.history
         }])
-            .then(protein => NGL.specialOps.showResidue('viewport', this.position + ':A'));
+            .then(protein => {NGL.specialOps.showResidue('viewport', this.position + ':A');
+            NGL.specialOps.enableClickToShow('viewport');} );
         // When run locally and with an already analysed case, D3 is outrun...
         const enpower = () => {
             UniprotFV.enpower();
