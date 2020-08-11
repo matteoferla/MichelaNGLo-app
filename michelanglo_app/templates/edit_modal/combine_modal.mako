@@ -29,8 +29,8 @@
                 </p>
                 %if user:
                     <%
-                        owned = user.owned.select(request)
-                        visited = user.visited.select(request)
+                        owned = user.owned.select(request.dbsession)
+                        visited = user.visited.select(request.dbsession)
                     %>
                         <ul class="list-group">
                             <li class="list-group-item list-group-item-dark">

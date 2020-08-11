@@ -9,6 +9,8 @@ from sqlalchemy import (
 from .meta import Base
 from .pages import Page
 
+from typing import List
+
 class Pagegroup:
     ### see User
     pages = property(lambda self: getattr(self.user, self.groupname) if getattr(self.user, self.groupname) is not None else '',
@@ -28,7 +30,10 @@ class Pagegroup:
     def set(self, pagenames):
         self.pages = ' '.join(pagenames)
 
-    def get(self):
+    def get(self) -> List[str]:
+        """
+        Returns a list of string, while select returns list of page objects (without loading them)
+        """
         if self.group == 'visited':
             if self.user.visited_pages is None:
                 return []
@@ -40,9 +45,9 @@ class Pagegroup:
             else:
                 return self.user.owned_pages.split()
 
-    def select(self, request):
+    def select(self, session) -> List[Page]:
         pagenames = self.get()
-        pages = Page.select_list(request, pagenames)
+        pages = Page.select_list(session, pagenames)
         self.set([p.identifier for p in pages])
         return pages
 
@@ -51,7 +56,7 @@ class User(Base):
     """ The SQLAlchemy declarative model class for a User object.
     Contains `visited_pages` and `owned_pages` DB entries and the `.visited` and `.owned` attributes,
     which have the methods .get() .set(pagenames) .delete(pagename) .add(pagename), which work on pagenames/uuids
-    while the method .select(request) is the same as get but interacts with the DB Page table...
+    while the method .select(request.dbsession) is the same as get but interacts with the DB Page table...
     """
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)

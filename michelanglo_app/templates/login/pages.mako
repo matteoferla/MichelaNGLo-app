@@ -11,8 +11,8 @@
         <p><a href="/personal">Click here to go to personal gallery.</a></p>
 
         <%
-            owned = user.owned.select(request)
-            visited = user.visited.select(request)
+            owned = user.owned.select(request.dbsession)
+            visited = user.visited.select(request.dbsession)
             from datetime import datetime, timedelta
             unedited_time = datetime.now() - timedelta(days=20)
             untouched_time = datetime.now() - timedelta(days=300)

@@ -47,7 +47,7 @@ def redirect_view(request):
 
 def get_userdata(request, pagename):
     log.info(f'{User.get_username(request)} is looking at a page {pagename}')
-    page = Page.select(request, pagename)
+    page = Page.select(request.dbsession, pagename)
     verdict = permission(request, page, 'view', key_label='key')
     if 'mode' in request.params and request.params['mode'] == 'json':
         json_mode = True
@@ -231,7 +231,7 @@ def async_pdb(request):
 @view_config(route_name='monitor', renderer="../templates/monitor.mako")
 def monitor(request):
     pagename = request.matchdict['id']
-    page = Page.select(request, pagename)
+    page = Page.select(request.dbsession, pagename)
     response_settings = {'project': 'Michelanglo', 'user': request.user,
                          'page': pagename,
                          'custom_messages': json.dumps(custom_messages),
@@ -273,7 +273,7 @@ def monitor(request):
 @view_config(route_name='userthumb')
 def thumbnail(request):
     pagename = request.matchdict['id']
-    page = Page.select(request, pagename)
+    page = Page.select(request.dbsession, pagename)
     verdict = permission(request, page, 'view', key_label='key')
     if verdict['status'] != 'OK' or not page.existant:
         request.response.status = 200 # we would block facebook and twitter otherwise as they redirect.
@@ -299,7 +299,7 @@ def save_pdb(request):
     if isinstance(request.params['index'], str) and request.params['index'] != '-1' and not request.params['index'].isdigit():
         request.response.status = 400
         return {'status': 'index must be number', 'error': f"{request.params['index']} ({type(request.params['index'])}) is not a digit"}
-    page = Page.select(request, request.params['uuid'])
+    page = Page.select(request.dbsession, request.params['uuid'])
     index = int(request.params['index'])
     verdict = permission(request, page, key_label='key', mode='view')
     if verdict['status'] != 'OK':

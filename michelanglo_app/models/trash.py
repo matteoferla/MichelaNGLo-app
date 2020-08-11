@@ -249,7 +249,7 @@ class old_Page:
 
     def select_owned_pages(self, request):
         pagenames = self.get_owned_pages
-        pages = Page.select_list(request, pagenames)
+        pages = self.select_list(request, pagenames)
 
     def select_visited_pages(self, request):
         pages = self.get_visited_pages

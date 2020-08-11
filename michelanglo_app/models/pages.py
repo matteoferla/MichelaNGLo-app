@@ -70,6 +70,30 @@ class Page(Base):
             self.key = None
         self.settings = {}
 
+    @property
+    def age(self) -> int:
+        """
+        Age is an integer (days) since last viewed!
+        """
+        return (datetime.datetime.now() - self.timestamp).days
+
+    @property
+    def safe_age(self):
+        """
+        Age since last viewed is for deletion. Some pages should not be deleted. so return a nan.
+        """
+        # how long until deletion
+        if not self.existant:
+            return float('nan')
+        elif self.protected:
+            return float('nan')
+        elif self.privacy != 'private':
+            return float('nan')
+        elif self.edited:
+            return self.age
+        else:
+            return self.age
+
     def fill_defaults(self, settings=None):
         if settings is None:
             settings = self.settings
@@ -103,6 +127,8 @@ class Page(Base):
         else:
             raise FileNotFoundError(f'File {self.identifier} ought to exist?')
         self.fill_defaults()
+        # it was accessed.
+        self.timestamp = datetime.datetime.utcnow()
         return self
 
     def save(self, settings=None):
@@ -226,13 +252,13 @@ class Page(Base):
         return str(self.identifier)
 
     @classmethod
-    def select(cls, request, identifier):
+    def select(cls, session, identifier):
         #get the DB version...
-        self = request.dbsession.query(cls).filter(cls.identifier == identifier).first()
+        self = session.query(cls).filter(cls.identifier == identifier).first()
         return self
 
     @classmethod
-    def select_list(cls, request, pages):
+    def select_list(cls, session, pages):
         """returns the list of existing pages as Page objects from the db"""
-        query = request.dbsession.query(cls).filter(cls.identifier.in_(pages)).all()
+        query = session.query(cls).filter(cls.identifier.in_(pages)).all()
         return [page for page in query if page.existant]

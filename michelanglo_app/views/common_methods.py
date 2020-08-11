@@ -51,6 +51,21 @@ def notify_admin(msg):
         return False
 
 
+
+import smtplib
+from email.mime.text import MIMEText
+
+def email(text, recipient, subject='[Michelanglo] Notification'):
+    smtp = smtplib.SMTP()
+    smtp.connect('localhost')
+    msg = MIMEText(text)
+    msg['Subject'] = subject
+    msg['From'] = os.environ["SERVER_EMAIL"]
+    msg['To'] = recipient
+    msg.add_header('reply-to', os.environ["ADMIN_EMAIL"])
+    smtp.send_message(msg)
+    smtp.quit()
+
 def is_malformed(request, *args) -> Union[None, str]:
     """
     Verify that the request.params is valid. returns None if it is valid. Else returns why.

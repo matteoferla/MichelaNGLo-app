@@ -41,7 +41,7 @@ def edit(request):
     if malformed:
         return {'status': malformed}
     # get ready
-    page = Page.select(request, request.params['page'])
+    page = Page.select(request.dbsession, request.params['page'])
     verdict = permission(request, page, 'edit', key_label='encryption_key')
     if verdict['status'] != 'OK':
         return verdict
@@ -156,8 +156,8 @@ def combined(request):
     malformed = is_malformed(request, 'target_page','donor_page','task','name')
     if malformed:
         return {'status': malformed}
-    target_page = Page.select(request, request.params['target_page'])
-    donor_page = Page.select(request, request.params['donor_page'])
+    target_page = Page.select(request.dbsession, request.params['target_page'])
+    donor_page = Page.select(request.dbsession, request.params['donor_page'])
     log.info(f'{User.get_username(request)} is requesting to merge page {donor_page} to {target_page}')
     task = Page(request.params['task'])
     target_verdict = permission(request, target_page, 'edit', key_label='target_encryption_key')
@@ -233,7 +233,7 @@ def delete(request):
     malformed = is_malformed(request, 'page')
     if malformed:
         return {'status': malformed}
-    page = Page.select(request, request.params['page'])
+    page = Page.select(request.dbsession, request.params['page'])
     log.info(f'{User.get_username(request)} is requesting to delete page {page}')
     verdict = permission(request, page, 'del', key_label='encryption_key')
     if verdict['status'] != 'OK':
@@ -255,7 +255,7 @@ def mutate(request):
     malformed = is_malformed(request, 'page','model','chain','mutations', 'name')
     if malformed:
         return {'status': malformed}
-    page = Page.select(request, request.params['page'])
+    page = Page.select(request.dbsession, request.params['page'])
     log.info(f'{User.get_username(request)} is making mutants page {page}')
     user = request.user
     verdict = permission(request, page, 'del', key_label='encryption_key')
@@ -354,7 +354,7 @@ def copy(request):
     if malformed:
         return {'status': malformed}
     # get ready
-    ref = Page.select(request, request.params['page'])
+    ref = Page.select(request.dbsession, request.params['page'])
     if ref.encrypted:
         return {'status': 'Cannot copy an encrypted page due to strong security concerns, even with editing rights and the key.'}
     verdict = permission(request, ref, 'view', key_label='encryption_key')

@@ -78,7 +78,7 @@ def my_view(request):
         return reply
     elif page == 'personal':
         if user:
-            reply['pages'] = user.owned.select(request)
+            reply['pages'] = user.owned.select(request.dbsession)
             reply['sottotitolo'] = 'Here are links to pages edited by you'
         else:
             return render_to_response("../templates/registration_virtues.mako", reply, request)

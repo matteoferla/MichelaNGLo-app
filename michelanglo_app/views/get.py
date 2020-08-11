@@ -46,7 +46,7 @@ def get_ajax(request):
     ####### get the implementation code.
     elif request.params['item'] == 'implement':
         ## should non editors be able to see this? I assume that if they get the page uuid right they should.
-        page = Page.select(request, request.params['page'])
+        page = Page.select(request.dbsession, request.params['page'])
         if not page:
             return render_to_response("../templates/part_error.mako", {'error': '404'}, request)
         elif not page.existant:
@@ -88,8 +88,8 @@ def get_pages(request):
         else:
             data['all'] = 'RESTRICTED'
         to_list = lambda x: [p.identifier for p in x]  ## crap name. converts the objects to names only.
-        data['owned'] = to_list(user.owned.select(request))
-        data['visited'] = to_list(user.visited.select(request))
+        data['owned'] = to_list(user.owned.select(request.dbsession))
+        data['visited'] = to_list(user.visited.select(request.dbsession))
     data['public'] = to_list(request.dbsession.query(Page).filter(Page.privacy != 'private').all())
     return data
 
@@ -137,7 +137,7 @@ def set_ajax(request):
         elif request.params['item'] == 'protection':
             pagename = request.params['page']
             log.info(f'{User.get_username(request)} changed the monitoring of page {pagename}.')
-            page = Page.select(request, pagename)
+            page = Page.select(request.dbsession, pagename)
             if not page.protected:
                 # to do change to scheduler.
                 os.system(f'node michelanglo_app/monitor.js {pagename} &')
@@ -146,7 +146,7 @@ def set_ajax(request):
         elif request.params['item'] == 'deprotection':
             pagename = request.params['page']
             log.info(f'{User.get_username(request)} changed the monitoring of page {pagename}.')
-            page = Page.select(request, pagename)
+            page = Page.select(request.dbsession, pagename)
             page.protected = False
             for file in os.listdir('michelanglo_app/user-data-monitor'):
                 if file.find(pagename) == 0:
@@ -158,7 +158,7 @@ def set_ajax(request):
                 return {'status': malformed}
             longname = request.params['long']
             shortname = request.params['short']
-            long = Page.select(request, longname)
+            long = Page.select(request.dbsession, longname)
             if request.dbsession.query(Doi).filter(Doi.short == shortname).first() is not None:
                 return {'status': f'{shortname} taken already.'}
             redirect = Doi(long=longname, short=shortname)

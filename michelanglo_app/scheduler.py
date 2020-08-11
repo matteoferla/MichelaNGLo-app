@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql.expression import and_
 import transaction
 from apscheduler.schedulers.background import BackgroundScheduler
-from .views.common_methods import notify_admin
+from .views.common_methods import notify_admin, email
 from michelanglo_transpiler import GlobalPyMOL
 
 from datetime import datetime, timedelta
@@ -25,10 +25,12 @@ def includeme(config):
     scheduler = BackgroundScheduler()
 
     #### PERIODIC TASKS ####################################################
-    scheduler.add_job(kill_task, 'interval', days=1, args=[settings['scheduler.days_delete_unedited'],
-                                                           settings['scheduler.days_delete_untouched']])
+    # temporarily off!! TODO reactivate on Thurday
+    # scheduler.add_job(kill_task, 'interval', days=1, args=[settings['scheduler.days_delete_unedited'],
+    #                                                        settings['scheduler.days_delete_untouched']])
     scheduler.add_job(monitor_task, 'interval', days=30)
     scheduler.add_job(daily_task, 'interval', days=1)
+    scheduler.add_job(spam_task, 'interval', days=7, args=[settings['scheduler.days_delete_unedited']])
     scheduler.add_job(unjam_task, 'interval', hours=1)
     scheduler.add_job(clear_buffer_task, 'interval', hours=6)
     #### START UP TASKS ####################################################
@@ -56,30 +58,56 @@ def daily_task():
     sesh.commit()
     # PDB?
 
-
-def spam_task(days_delete_unedited, days_delete_untouched):
-    notify_admin(f'{days_delete_unedited} and {days_delete_untouched}')
-
-
-def kill_task(days_delete_unedited, days_delete_untouched):
+def spam_task(days_delete_untouched: int):
+    forewarn_time = 14
     sesh = get_session()
     with transaction.manager:
-        unedited_time = datetime.now() - timedelta(days=int(days_delete_unedited))
+        for user in sesh.query(User):
+            delitura = [page for page in user.owned.select(sesh) if page.edited and (page.safe_age + forewarn_time) > days_delete_untouched]
+            if not delitura:
+                continue  # nothing in peril
+            elif '@' not in user.email:
+                continue # do not contact
+            else:
+                docs = 'https://michelanglo.sgc.ox.ac.uk/docs/users'
+                dtexts = [f'* https://michelanglo.sgc.ox.ac.uk/data/{page.identifier} — {page.title} ({page.age} days since last visit)' for page in delitura]
+                text = f'Dear user {user.name},\n'
+                text = f'There are {len(delitura)} Michelanglo pages edited by you which have not been visited in a while '+\
+                       f'and the deletion policy of Michelanglo is that '+\
+                       f'any page with no visits since {days_delete_untouched} are deleted (as stated in {docs}).\n'+\
+                       f'Consequently the following edited unprotected private pages are scheduled for deletion, unless visited:'+\
+                       '\n'.join(dtexts)+'\n'+\
+                       f'To delete unwanted pages normally, press the edit pencil and then the red delete button at the bottom of the modal.'+\
+                       f'Thank you,\nMatteo (Michelanglo admin)'
+                try:
+                    email(text, user.email, 'Michelanglo page expiry notice')
+                    msg = f'{user.name} ({user.email}) was notified of {len(delitura)} pages expiring.'
+                    notify_admin(msg)
+                    log.info(msg)
+                except Exception as error:
+                    msg = f'Failed at emailing {user.name} ({user.email}) about {len(delitura)} pages expiring because of {type(error).__name__} {str(error)}.'
+                    notify_admin(msg)
+                    log.warning(msg)
+
+def kill_task(days_delete_unedited: int, days_delete_untouched: int):
+    sesh = get_session()
+    with transaction.manager:
         n = 0
         for page in sesh.query(Page).filter(
-                and_(Page.existant == True, Page.edited == False, Page.timestamp < unedited_time)):
+                and_(Page.existant == True,
+                     Page.edited == False,
+                     Page.age > days_delete_unedited)):
             log.info(f'Deleting unedited page {page.identifier} by {page}')
             n += 1
             page.delete()
-        untouched_time = datetime.now() - timedelta(days=int(days_delete_untouched))
-        for page in sesh.query(Page).filter(and_(Page.existant == True, Page.timestamp < untouched_time)):
-            if page.protected:
+        for page in sesh.query(Page).filter(and_(Page.existant == True,
+                                                 Page.protected == False,
+                                                 Page.privacy == 'private',
+                                                 Page.age > days_delete_untouched)):
+            if sesh.query(Doi).filter(Doi.long == page.identifier).first() is not None:
+                notify_admin(f'{page.identifier} is untouched but has a doi.')
                 continue
-            elif sesh.query(Doi).filter(Doi.long == page.identifier).first() is not None:
-                continue
-            elif page.privacy != 'private':
-                continue
-            log.info(f'Deleting abbandonned page {page.identifier} ({page.timestamp})')
+            log.info(f'Deleting abandoned page {page.identifier} ({page.timestamp})')
             try:
                 page.delete()
             except FileNotFoundError:
