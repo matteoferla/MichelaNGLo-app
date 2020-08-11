@@ -211,7 +211,7 @@ class Venus {
 
                 this.createLocation();
 
-                this.createEntry('domdet', 'Domain detail', 'To Do figure out how to mine what the domain does. See notes "domain_function".');
+                //this.createEntry('domdet', 'Domain detail', 'To Do figure out how to mine what the domain does. See notes "domain_function".');
 
                 //gnomAD
                 if (this.mutational.gnomAD_near_mutation.length) {
