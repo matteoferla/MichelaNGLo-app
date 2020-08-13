@@ -6,10 +6,10 @@
             <%include file="../layout_components/vertical_menu_buttons.mako" args='tour=False'/>
 </%block>
 <%block name="title">
-            &mdash; VENUS
+            &mdash; VENUS (Multiple)
 </%block>
 <%block name="subtitle">
-    Assessing the effect of amino acid variants have on structure
+    Assessing the effect of amino acid variants have on structure together
 </%block>
 
 <%block name="alert">
@@ -17,25 +17,9 @@
 </%block>
 
 <%block name="main">
-        <p>A tool to help in the discovery of why a given mutation is pathogenic (see <a href="/docs/venus">documentation</a>).</p>
+        <p>Gateway to the analysis of multiple variants via <a href="/venus">VENUS</a>.</p>
 
     <%include file="venus_input.mako"/>
-            #################### ALERTS
-    <div class="alert alert-warning alert-dismissible fade show my-3" role="alert">
-  This page is still being built, therefore some features may not work. Do feel free to contact me (Matteo) for any queries: I always welcome feedback be it on purpose or not. (<i class="far fa-comments"></i> button on the top right).
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-    <div class="alert alert-info  alert-dismissible fade show" role="alert">
-        This is for academic use only and not intended to be used commercially. Conclusions drawn are suggestions and not diagnostic.
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-
-
-
 </%block>
 
 <%block name='after_main'>
@@ -56,7 +40,7 @@
         <%include file="../results/uniprot_modal.js"/>
         ### this controls venus specific stuff.
         <%include file="venus_class.js"/>
-        <%include file="venus.js"/>
+        <%include file="venus_multiple.js"/>
     });
     ####include file="../markup/markup_builder_modal.js"/>
     window.interactive_builder = () => undefined; //burn the call.
