@@ -116,8 +116,10 @@ NGL.specialOps.enableClickToShow = function(id) {
             }
             if (myData.clicks[id].representation !== undefined) pickingProxy.component.removeRepresentation(myData.clicks[id].representation);
             const seleName = Array.from(myData.clicks[id].residues).join(' or ');
+            if (myData.clicks[id].residues.size !== 0) {
             myData.clicks[id].representation = pickingProxy.component.addRepresentation("hyperball", { sele: seleName})
             NGL.specialOps.showTitle('viewport','Clicked: '+name);
+            }
             }
     });
     }

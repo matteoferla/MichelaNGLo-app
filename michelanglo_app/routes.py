@@ -43,6 +43,8 @@ def includeme(config):
     config.add_route('vote', '/vote')
     config.add_route('async_pdb', '/async_pdb')
     config.add_route('venus', '/venus')
+    config.add_route('venus_multiple', '/venus_multiple')
+    config.add_route('venus_multianalyse', '/venus_multianalyse')
     config.add_route('venus_random', '/venus_random')
     config.add_route('venus_analyse', '/venus_analyse')
     config.add_route('venus_create', '/venus_create')

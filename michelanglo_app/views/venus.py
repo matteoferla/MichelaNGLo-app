@@ -14,7 +14,7 @@ from .common_methods import is_malformed, notify_admin, get_pdb_block_from_reque
 from .user_management import permission
 from . import custom_messages
 
-from typing import Optional, Any, List
+from typing import Optional, Any, List, Union
 import random
 from pyramid.view import view_config, view_defaults
 from pyramid.renderers import render_to_response
@@ -23,8 +23,8 @@ import pyramid.httpexceptions as exc
 
 import json, os, logging
 log = logging.getLogger(__name__)
-from pprint import PrettyPrinter
-pprint = PrettyPrinter().pprint
+# from pprint import PrettyPrinter
+# pprint = PrettyPrinter().pprint
 
 ### This is a weird way to solve the status 206 issue.
 from .buffer import system_storage
@@ -34,16 +34,74 @@ from .buffer import system_storage
 class VenusException(Exception):
     pass
 
+generic_data = {'project': 'VENUS',
+            #'user': None,
+            'bootstrap': 4,
+            'current_page': 'venus',
+            'custom_messages': json.dumps(custom_messages),
+            'meta_title': 'Michelaɴɢʟo: sculpting protein views on webpages without coding.',
+            'meta_description': 'Convert PyMOL files, upload PDB files or submit PDB codes and ' + \
+                                'create a webpage to edit, share or implement standalone on your site',
+            'meta_image': '/static/tim_barrel.png',
+            'meta_url': 'https://michelanglo.sgc.ox.ac.uk/'
+            }
 
 
-############################### Analyse the mutation
-@view_defaults(route_name='venus')
-class Venus:
+class VenusBase:
+    """
+    Methods common to both venus and multivenus...
+    """
 
     def __init__(self, request):
         self.request = request
         self.reply = {'status': 'success'} # filled by the steps and kept even if an error is raised.
         # status=error, error=single-word, msg=long
+
+    def assert_malformed(self, *args):
+        malformed = is_malformed(self.request, *args)
+        if malformed:
+            self.reply['status'] = 'error'
+            self.reply['error']= 'malformed request'
+            self.reply['msg']= malformed
+            raise ValueError(f'Malformed error ({malformed}) by {User.get_username(self.request)}')
+        else:
+            return
+
+    ### Other
+    def log_if_error(self, operation, response=None):
+        if response is None:
+            response = self.reply
+        if isinstance(response, dict):
+            if 'error' in response and 'msg' in response:
+                msg = f'Error during {operation}: {response["error"]} ({response["msg"]})'
+            elif 'error' in response:
+                msg = f'Error during {operation}: {response["error"]}'
+            else:
+                return None # not an error.
+            self.reply['status'] = 'error'
+            self.reply['error'] = response['error']
+            self.reply['msg'] = msg
+            raise VenusException(msg)
+        else:
+            raise ValueError('This response is not an dict?!?')
+
+    def jsonable(self, obj: Any):
+        def deobjectify(x):
+            if isinstance(x, dict):
+                return {k: deobjectify(x[k]) for k in x}
+            elif isinstance(x, list) or isinstance(x, set):
+                return [deobjectify(v) for v in x]
+            elif isinstance(x, int) or isinstance(x, float):
+                return x
+            else:
+                return str(x)  # really ought to deal with falseys.
+
+        return {a: deobjectify(getattr(obj, a, '')) for a in obj.__dict__}
+
+
+############################### Analyse the mutation
+@view_defaults(route_name='venus')
+class Venus(VenusBase):
 
     @property
     def handle(self):
@@ -52,17 +110,7 @@ class Venus:
     ############################### server main page
     @view_config(renderer="../templates/venus/venus_main.mako")
     def main_view(self):
-        return {'project': 'VENUS',
-                'user': self.request.user,
-                'bootstrap': 4,
-                'current_page': 'venus',
-                'custom_messages': json.dumps(custom_messages),
-                'meta_title': 'Michelaɴɢʟo: sculpting protein views on webpages without coding.',
-                'meta_description': 'Convert PyMOL files, upload PDB files or submit PDB codes and ' + \
-                                    'create a webpage to edit, share or implement standalone on your site',
-                'meta_image': '/static/tim_barrel.png',
-                'meta_url': 'https://michelanglo.sgc.ox.ac.uk/'
-                }
+        return {'user': self.request.user, 'mutation_mode': 'main', **generic_data}
 
     ############################### Give a random view that will give a protein
     @view_config(route_name='venus_random', renderer="json")
@@ -140,16 +188,6 @@ class Venus:
                 'ddG': self.ddG_step,
                 'ddG_gnomad': self.ddG_gnomad_step}
 
-    def assert_malformed(self, *args):
-        malformed = is_malformed(self.request, *args)
-        if malformed:
-            self.reply['status'] = 'error'
-            self.reply['error']= 'malformed request'
-            self.reply['msg']= malformed
-            raise ValueError(f'Malformed error ({malformed}) by {User.get_username(self.request)}')
-        else:
-            return
-
     def do_step(self, step):
         # a likely API call
         if step is None:
@@ -187,6 +225,9 @@ class Venus:
 
     ### STEP 1
     def protein_step(self):
+        """
+        Check mutations are valid
+        """
         if self.has(): # this is already done (very unlikely/
             protein = system_storage[self.handle]
         else:
@@ -374,35 +415,94 @@ class Venus:
             files.append(file)
         return files
 
-    ### Other
-    def log_if_error(self, operation, response=None):
-        if response is None:
-            response = self.reply
-        if isinstance(response, dict):
-            if 'error' in response and 'msg' in response:
-                msg = f'Error during {operation}: {response["error"]} ({response["msg"]})'
-            elif 'error' in response:
-                msg = f'Error during {operation}: {response["error"]}'
-            else:
-                return None # not an error.
-            self.reply['status'] = 'error'
-            self.reply['error'] = response['error']
-            self.reply['msg'] = msg
-            raise VenusException(msg)
+
+########################################################################################################################
+
+@view_config(route_name='venus_multiple', renderer="../templates/venus/venus_multiple.mako")
+def venus_multiple_view(request):
+    return {'user': request.user, 'mutation_mode': 'multi', **generic_data}
+
+@view_defaults(route_name='venus_multianalyse')
+class MultiVenus(VenusBase):
+
+    def __init__(self, request):
+        super().__init__(request) #self.request and self.reply
+        # whereas Venus is Stateful (stores data), Venus_multi is restful (does not store data)
+        self.protein = None
+        self.uniprot = None
+        self.taxid = None
+        self.mutations = None
+        self.structure = None
+
+    @view_config(renderer="json")
+    def analyse(self):
+        log.info(f'Multivenus requested by {User.get_username(self.request)}')
+        try:
+            self.assert_malformed('uniprot', 'species', 'mutations')
+            self.uniprot = self.request.params['uniprot']
+            self.taxid = self.request.params['species']
+            self.mutations = self.request.params['mutations'].split()
+            self.protein = self.load_protein() # ProteinAnalyser
+            self.structure = self.load_structure() #Union[Structure, None]
+            self.check_mutations()
+            self.find_best() # does nothing.
+        except VenusException:
+            pass
+        return self.reply
+
+    def load_protein(self) -> ProteinAnalyser:
+        protein = ProteinAnalyser(uniprot=self.uniprot, taxid=self.taxid)
+        protein.load()
+        self.reply['protein'] = self.jsonable(protein)
+        return protein
+
+    def load_structure(self) -> Union[Structure, None]:
+        if 'pdbblock' in self.request.params:
+            pdbblock = self.request.params['pdbblock']
+            raise NotImplementedError
+            structure = Structure(title, 'Custom', 0, 9999, title,
+                                  type='custom', chain="A", offset=0, coordinates=pdbblock)
+            structure.is_satisfactory(protein.mutation.residue_index)
+            return structure
         else:
-            raise ValueError('This response is not an dict?!?')
+            return None
 
-    def jsonable(self, obj: Any):
-        def deobjectify(x):
-            if isinstance(x, dict):
-                return {k: deobjectify(x[k]) for k in x}
-            elif isinstance(x, list) or isinstance(x, set):
-                return [deobjectify(v) for v in x]
-            elif isinstance(x, int) or isinstance(x, float):
-                return x
-            else:
-                return str(x)  # really ought to deal with falseys.
+    def check_mutations(self):
+        discrepancies = {mutation: self.check_mutation(mutation) for mutation in self.mutations}
+        discrepancies = {mutation: discrepancy for mutation, discrepancy in discrepancies.items() if discrepancy is not None}
+        if len(discrepancies) != 0:
+            discrepancy = '\n'.join([f'{mutation}: {discrepancies[mutation]}.' for mutation in discrepancies])
+            self.reply = {'error': 'mutation', 'msg': discrepancy, 'status': 'error'}
+            raise VenusException(discrepancy)
 
-        return {a: deobjectify(getattr(obj, a, '')) for a in obj.__dict__}
+    def check_mutation(self, mutation: str) -> Union[str, None]:
+        ## Do analysis
+        self.protein.mutation = Mutation(mutation)
+        # assess
+        if not self.protein.check_mutation():
+            log.info('protein mutation discrepancy error')
+            discrepancy = self.protein.mutation_discrepancy()
+            return discrepancy
+        else:
+            return None
+
+    def find_best(self):
+        pass
+        # self.protein.analyse_structure(self.structure)
+        # get_best_model...
+        # for l in (self.pdbs, self.swissmodel):
+        #     if l:
+        #         good = []
+        #         for model in l:  # model is a structure object.
+        #             if model.includes(self.mutation.residue_index):
+        #                 good.append(model)
+        #         if good:
+        #             good.sort(key=lambda x: x.resolution)
+        #             return good[0]
+        #         else:  # no models with mutation.
+        #             pass
+        #     else:  # no models in group
+        #         pass
+        # return None
 
 
