@@ -4,7 +4,7 @@
 from pyramid.view import view_config
 from pyramid.security import remember
 import os, pickle, uuid
-from ..models import User, Page
+from michelanglo_app.models import User, Page
 
 import logging
 log = logging.getLogger(__name__)

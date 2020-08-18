@@ -34,7 +34,7 @@
         <div class="col-6 mb-4 pl-4">
 
             ##### first block: Structure
-
+            %if mutation_mode == 'main':
             <div class="card mb-4 shadow-sm">
                 <div class="card-header"><h5 class="card-title">
                     <i class="far fa-cubes"></i> Structure
@@ -59,6 +59,7 @@
                     </div>
                 </div>
             </div>
+            %endif
 
             ##### second block: Feature
 
@@ -90,6 +91,35 @@
                     ##                         </div>
                       </div>
             </div>
+
+
+
+            #### Links to individual mutations
+            %if mutation_mode == 'multi':
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header"><h5 class="card-title">
+                    <i class="far fa-ballot"></i> Mutations
+                </h5><h6 class="card-subtitle mb-2 text-muted">
+                </h6></div>
+
+
+                <div class="card-body">
+                    ###################### arrow ###################################
+
+                    <div class="arrow-right"></div>
+                    <div class="arrow-right2"></div>
+                    ###################### end of arrow ###################################
+
+                    <p ></p>
+                    <ul class="list-group list-group-flush" id="result_mutation_list">
+
+                    </ul>
+                </div>
+            </div>
+            %endif
+
+
+
             ##### third block: Mutation results
 
             <div class="card shadow-sm">

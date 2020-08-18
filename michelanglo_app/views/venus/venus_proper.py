@@ -1,102 +1,32 @@
-__description___ = """
+from __future__ import annotations
+# venus parts common to regular venus and multiple mutant version.
 
-"""
 
-###########
-# venus_create is in page_creation.py
-
-from .uniprot_data import *
-#ProteinCore organism human uniprot2pdb
+from ..uniprot_data import *
+# ProteinCore organism human uniprot2pdb
 from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structure
 
-from ..models import User, Page ##needed solely for log.
-from .common_methods import is_malformed, notify_admin, get_pdb_block_from_request
-from .user_management import permission
-from . import custom_messages
+from ...models import User, Page  ##needed solely for log.
+from ..common_methods import is_malformed, notify_admin, get_pdb_block_from_request
+from ..user_management import permission
+from .. import custom_messages
 
-from typing import Optional, Any, List, Union
+from typing import Optional, Any, List, Union, Tuple, Dict
 import random
 from pyramid.view import view_config, view_defaults
 from pyramid.renderers import render_to_response
 import pyramid.httpexceptions as exc
 
+import json, os, logging, operator
 
-import json, os, logging
 log = logging.getLogger(__name__)
 # from pprint import PrettyPrinter
 # pprint = PrettyPrinter().pprint
 
 ### This is a weird way to solve the status 206 issue.
-from .buffer import system_storage
+from michelanglo_app.views.buffer import system_storage
 
-######################
-
-class VenusException(Exception):
-    pass
-
-generic_data = {'project': 'VENUS',
-            #'user': None,
-            'bootstrap': 4,
-            'current_page': 'venus',
-            'custom_messages': json.dumps(custom_messages),
-            'meta_title': 'Michelaɴɢʟo: sculpting protein views on webpages without coding.',
-            'meta_description': 'Convert PyMOL files, upload PDB files or submit PDB codes and ' + \
-                                'create a webpage to edit, share or implement standalone on your site',
-            'meta_image': '/static/tim_barrel.png',
-            'meta_url': 'https://michelanglo.sgc.ox.ac.uk/'
-            }
-
-
-class VenusBase:
-    """
-    Methods common to both venus and multivenus...
-    """
-
-    def __init__(self, request):
-        self.request = request
-        self.reply = {'status': 'success'} # filled by the steps and kept even if an error is raised.
-        # status=error, error=single-word, msg=long
-
-    def assert_malformed(self, *args):
-        malformed = is_malformed(self.request, *args)
-        if malformed:
-            self.reply['status'] = 'error'
-            self.reply['error']= 'malformed request'
-            self.reply['msg']= malformed
-            raise ValueError(f'Malformed error ({malformed}) by {User.get_username(self.request)}')
-        else:
-            return
-
-    ### Other
-    def log_if_error(self, operation, response=None):
-        if response is None:
-            response = self.reply
-        if isinstance(response, dict):
-            if 'error' in response and 'msg' in response:
-                msg = f'Error during {operation}: {response["error"]} ({response["msg"]})'
-            elif 'error' in response:
-                msg = f'Error during {operation}: {response["error"]}'
-            else:
-                return None # not an error.
-            self.reply['status'] = 'error'
-            self.reply['error'] = response['error']
-            self.reply['msg'] = msg
-            raise VenusException(msg)
-        else:
-            raise ValueError('This response is not an dict?!?')
-
-    def jsonable(self, obj: Any):
-        def deobjectify(x):
-            if isinstance(x, dict):
-                return {k: deobjectify(x[k]) for k in x}
-            elif isinstance(x, list) or isinstance(x, set):
-                return [deobjectify(v) for v in x]
-            elif isinstance(x, int) or isinstance(x, float):
-                return x
-            else:
-                return str(x)  # really ought to deal with falseys.
-
-        return {a: deobjectify(getattr(obj, a, '')) for a in obj.__dict__}
+from .venus_base import VenusException, VenusBase
 
 
 ############################### Analyse the mutation
@@ -108,9 +38,9 @@ class Venus(VenusBase):
         return self.request.params['uniprot'] + self.request.params['mutation']
 
     ############################### server main page
-    @view_config(renderer="../templates/venus/venus_main.mako")
+    @view_config(renderer="../../templates/venus/venus_main.mako")
     def main_view(self):
-        return {'user': self.request.user, 'mutation_mode': 'main', **generic_data}
+        return {'user': self.request.user, 'mutation_mode': 'main', **self.generic_data}
 
     ############################### Give a random view that will give a protein
     @view_config(route_name='venus_random', renderer="json")
@@ -167,9 +97,9 @@ class Venus(VenusBase):
             notify_admin(f'Venus error {err.__class__.__name__}: {err}')
             return self.reply
 
-    def has(self, key: Optional[str]=None) -> bool:
+    def has(self, key: Optional[str] = None) -> bool:
         # checks whether the protein object has a filled value (not the reply!)
-        if self.handle not in system_storage: # this is already done
+        if self.handle not in system_storage:  # this is already done
             return False
         elif key is None:
             return True
@@ -192,7 +122,7 @@ class Venus(VenusBase):
         # a likely API call
         if step is None:
             log.info(f'Full analysis requested by {User.get_username(self.request)}')
-            map(lambda f: f(), self.steps)  #run all steps
+            map(lambda f: f(), self.steps)  # run all steps
             return self.reply
         # ajax
         elif step in self.steps.keys():
@@ -210,7 +140,7 @@ class Venus(VenusBase):
             self.assert_malformed('extra', 'algorithm')
             self.extra_step(mutation=self.request.params['extra'], algorithm=self.request.params['algorithm'])
             return self.reply
-        elif step== 'phosphorylate':
+        elif step == 'phosphorylate':
             self.phospho_step()
             return self.reply
         elif step == 'customfile':
@@ -228,7 +158,7 @@ class Venus(VenusBase):
         """
         Check mutations are valid
         """
-        if self.has(): # this is already done (very unlikely/
+        if self.has():  # this is already done (very unlikely/
             protein = system_storage[self.handle]
         else:
             log.info(f'Step 1 analysis requested by {User.get_username(self.request)}')
@@ -266,13 +196,14 @@ class Venus(VenusBase):
         featpos = protein.get_features_at_position(protein.mutation.residue_index)
         featnear = protein.get_features_near_position(protein.mutation.residue_index)
         self.reply['mutation'] = {**self.jsonable(protein.mutation),
-                             'features_at_mutation': featpos,
-                             'features_near_mutation': featnear,
-                             'position_as_protein_percent': round(
-                                 protein.mutation.residue_index / len(protein) * 100),
-                             'gnomAD_near_mutation': protein.get_gnomAD_near_position()}
+                                  'features_at_mutation': featpos,
+                                  'features_near_mutation': featnear,
+                                  'position_as_protein_percent': round(
+                                      protein.mutation.residue_index / len(protein) * 100),
+                                  'gnomAD_near_mutation': protein.get_gnomAD_near_position()}
 
         ### STEP 3
+
     def structural_step(self, structure=None):
         """
         runs protein.analyse_structure()
@@ -294,7 +225,7 @@ class Venus(VenusBase):
             self.reply['status'] = 'terminated'
             self.reply['error'] = 'No crystal structures or models available.'
             self.reply['msg'] = 'Structrual analyses cannot be performed.'
-            self.reply['has_structure']=False
+            self.reply['has_structure'] = False
             raise VenusException(self.reply['msg'])
 
     ### Step 4
@@ -309,7 +240,6 @@ class Venus(VenusBase):
         else:
             protein = system_storage[self.handle]
             analysis = protein.analyse_FF()
-
 
         if self.handle not in system_storage:
             status = self.protein_step()
@@ -344,11 +274,11 @@ class Venus(VenusBase):
             analysis = protein.energetics_gnomAD
         else:
             analysis = protein.analyse_gnomad_FF()
-        if 'error' in analysis: # it is a failure.
+        if 'error' in analysis:  # it is a failure.
             self.log_if_error('ddG_gnomad_step', analysis)
-            self.reply['status']='error'
-            self.reply['error']='pyrosetta step'
-            self.reply['msg']=analysis['error']
+            self.reply['status'] = 'error'
+            self.reply['error'] = 'pyrosetta step'
+            self.reply['msg'] = analysis['error']
         else:
             self.reply['gnomAD_ddG'] = analysis
 
@@ -371,7 +301,7 @@ class Venus(VenusBase):
         if isinstance(coordinates, str):
             self.reply = {'coordinates': coordinates}
         elif isinstance(coordinates, dict):
-            self.reply = coordinates # it is an error msg!
+            self.reply = coordinates  # it is an error msg!
         else:
             self.reply = {'status': 'error', 'error': 'Unknown', 'msg': 'No coordinates returned'}
         self.log_if_error('phospho_step')
@@ -387,7 +317,7 @@ class Venus(VenusBase):
         protein.rosetta_params_filenames = params
         title, ext = os.path.splitext(name)
         structure = Structure(title, 'Custom', 0, 9999, title,
-                              type='custom',chain="A",offset=0, coordinates=block)
+                              type='custom', chain="A", offset=0, coordinates=block)
         structure.is_satisfactory(protein.mutation.residue_index)
         self.structural_step(structure=structure)
         return self.reply
@@ -407,102 +337,10 @@ class Venus(VenusBase):
         if not os.path.exists(temp_folder):
             os.mkdir(temp_folder)
         files = []
-        for param in params: # it should be paramses
+        for param in params:  # it should be paramses
             n = len(os.listdir(temp_folder))
             file = os.path.join(temp_folder, f'{n:0>3}.params')
             with open(file, 'w') as w:
                 w.write(param)
             files.append(file)
         return files
-
-
-########################################################################################################################
-
-@view_config(route_name='venus_multiple', renderer="../templates/venus/venus_multiple.mako")
-def venus_multiple_view(request):
-    return {'user': request.user, 'mutation_mode': 'multi', **generic_data}
-
-@view_defaults(route_name='venus_multianalyse')
-class MultiVenus(VenusBase):
-
-    def __init__(self, request):
-        super().__init__(request) #self.request and self.reply
-        # whereas Venus is Stateful (stores data), Venus_multi is restful (does not store data)
-        self.protein = None
-        self.uniprot = None
-        self.taxid = None
-        self.mutations = None
-        self.structure = None
-
-    @view_config(renderer="json")
-    def analyse(self):
-        log.info(f'Multivenus requested by {User.get_username(self.request)}')
-        try:
-            self.assert_malformed('uniprot', 'species', 'mutations')
-            self.uniprot = self.request.params['uniprot']
-            self.taxid = self.request.params['species']
-            self.mutations = self.request.params['mutations'].split()
-            self.protein = self.load_protein() # ProteinAnalyser
-            self.structure = self.load_structure() #Union[Structure, None]
-            self.check_mutations()
-            self.find_best() # does nothing.
-        except VenusException:
-            pass
-        return self.reply
-
-    def load_protein(self) -> ProteinAnalyser:
-        protein = ProteinAnalyser(uniprot=self.uniprot, taxid=self.taxid)
-        protein.load()
-        self.reply['protein'] = self.jsonable(protein)
-        return protein
-
-    def load_structure(self) -> Union[Structure, None]:
-        if 'pdbblock' in self.request.params:
-            pdbblock = self.request.params['pdbblock']
-            raise NotImplementedError
-            structure = Structure(title, 'Custom', 0, 9999, title,
-                                  type='custom', chain="A", offset=0, coordinates=pdbblock)
-            structure.is_satisfactory(protein.mutation.residue_index)
-            return structure
-        else:
-            return None
-
-    def check_mutations(self):
-        discrepancies = {mutation: self.check_mutation(mutation) for mutation in self.mutations}
-        discrepancies = {mutation: discrepancy for mutation, discrepancy in discrepancies.items() if discrepancy is not None}
-        if len(discrepancies) != 0:
-            discrepancy = '\n'.join([f'{mutation}: {discrepancies[mutation]}.' for mutation in discrepancies])
-            self.reply = {'error': 'mutation', 'msg': discrepancy, 'status': 'error'}
-            raise VenusException(discrepancy)
-
-    def check_mutation(self, mutation: str) -> Union[str, None]:
-        ## Do analysis
-        self.protein.mutation = Mutation(mutation)
-        # assess
-        if not self.protein.check_mutation():
-            log.info('protein mutation discrepancy error')
-            discrepancy = self.protein.mutation_discrepancy()
-            return discrepancy
-        else:
-            return None
-
-    def find_best(self):
-        pass
-        # self.protein.analyse_structure(self.structure)
-        # get_best_model...
-        # for l in (self.pdbs, self.swissmodel):
-        #     if l:
-        #         good = []
-        #         for model in l:  # model is a structure object.
-        #             if model.includes(self.mutation.residue_index):
-        #                 good.append(model)
-        #         if good:
-        #             good.sort(key=lambda x: x.resolution)
-        #             return good[0]
-        #         else:  # no models with mutation.
-        #             pass
-        #     else:  # no models in group
-        #         pass
-        # return None
-
-
