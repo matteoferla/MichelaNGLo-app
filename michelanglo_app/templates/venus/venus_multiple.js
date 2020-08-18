@@ -20,6 +20,7 @@ class MultiVenus {
     // a new mv instance is made each time analyse is clicked.
     constructor() {
         this.protein = null; // to be filled with obj from ajax
+        this.last_clicked_prolink = null; //to be filled by clicking.
         this.uniprot = window.uniprotValue;
         this.taxid = window.taxidValue;
         // assess variants.
@@ -27,7 +28,6 @@ class MultiVenus {
         if (Object.values(mv).every(v => v)) {
             // all valid mutations.
             this.mutations = Object.keys(mv);
-
         } else { //invalid mutation
             Object.keys(mv).filter(k => ! mv[k]).map(k => {
             ops.addToast('dodgymutant'+k, '<i class="far fa-alien-monster"></i> Invalid mutation format for '+k,
@@ -58,13 +58,8 @@ class MultiVenus {
                     $('#results').show(500);
                     this.protein = msg.protein;
                     this.choices = msg.choices;
-                    const results = Object.keys(this.choices).map(k => {
-                        const name = k.length === 6 ? `PDB:${k}` : `SWISSMODEL:${k}`;
-                        const valids = this.choices[k].join(', ');
-                        return `<li class="list-group-item">${name}: ${valids}</li>`;
-                    }).join('\n');
-                    $('#results_mutalist').html(results);
-                    ;
+                    this.addMutationsList();
+                    this.addModelList();
 
 
                     // //venus analyse is
@@ -148,24 +143,60 @@ class MultiVenus {
     }
 
     addMutationsList () {
-        const listing = $('#result_mutation_list');
-        this.mutations.map(mutation => `<li class="list-group-item">
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <b>${mutation}</b>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <span class="prolink" data-target="viewport"
-                                                        data-focus="residue" data-selection="${mutation.slice(1,-1)}">show wt</span>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <a href="/venus">analyse in VENUS</a>
-                                                </div>
-                                            </div>
-                                        </li>`)
-
-
+        const inners = this.mutations.map(mutation => `<li class="list-group-item">
+                                                            <div class="row">
+                                                                <div class="col-md-4">
+                                                                    <b>${mutation}</b>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <span class="prolink" data-target="viewport"
+                                                                        data-focus="residue" data-selection="${mutation.slice(1,-1)}">show wt</span>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <a href="/venus?uniprot=${this.uniprot}&species=${this.taxid}&mutation=${mutation}" target="_blank">analyse in VENUS</a>
+                                                                </div>
+                                                            </div>
+                                                        </li>`);
+        $('#result_mutation_list').html(inners.join('\n'));
+        $('#result_mutation_list .prolink').protein();
 }
+
+    addModelList () {
+        const inners = Object.keys(this.choices).map(k => {
+                        const valids = this.choices[k].join(', ');
+                        let selections = this.mutations.map(mutation => mutation.slice(1,-1)).join(' or ');
+                        let model, name;
+                        if (k.length === 6) {
+                            name = `PDB:${k}`;
+                            const chain = k.slice(-1,);
+                            model = k.slice(0,-2);
+                            selections = `(${selections}) and :${chain}`;
+                        } else {
+                            name = `SWISSMODEL:${k}`;
+                            model = k;
+
+                        }
+                        return `<button type="button" class="list-group-item list-group-item-action"
+                                    data-target="viewport"
+                                    data-focus="residue" data-selection="${selections}"
+                                    data-load="${model}"
+                                >
+                                    ${name}: ${valids}
+                                </button>`;
+                    });
+        $('#results_mutalist').html(inners.join('\n'));
+        $('#results_mutalist button').click(event => {
+            $('#results_mutalist .active').removeClass('active');
+            $(event.target).addClass('active');
+            NGL.specialOps.prolink(event.target);
+            window.multivenus.last_clicked_prolink = event.target;
+        }).first().click();
+        setTimeout(() => {
+            NGL.specialOps._preventScroll('viewport');
+            NGL.specialOps.enableClickToShow('viewport');
+        }, 1000);
+
+    }
 }
 
 
@@ -191,5 +222,27 @@ vbtn.click(e => {
         if (e !== 'invalid mutation') throw e;
     }
 
+});
+
+$(window).scroll(() => {
+    const card = $('#vieport_side');
+    let currentY = $(window).scrollTop();
+    let windowH = $(window).innerHeight();
+    let cardH = card.height();
+    let offsetY = card.offset().top - parseInt(card.css('top')) - 4;
+    const rcard = $('#results_card');
+    let maxY = rcard.offset().top + rcard.height();
+    //console.log(`currentY ${currentY}, windowH ${windowH}, cardH ${cardH}, offsetY ${offsetY}, maxY ${maxY}`)
+    let position = 0;
+    // the top is getting cut off:
+    if ((currentY > offsetY) && (currentY + windowH > offsetY + cardH)) {
+        // new position, without cutting off the bottom.
+        position = cardH > windowH ? currentY - offsetY - (cardH - windowH) : currentY - offsetY;
+        if (cardH + currentY > maxY) {
+            return 0; //no change. i.e. position = card.css('top')
+        }
+    }
+    card.css('top', position);
+    //console.log(`scrolltop: ${currentY} win height ${windowY} off: ${offsetY} card top: ${card.offset().top}`);
 });
 //</%text>

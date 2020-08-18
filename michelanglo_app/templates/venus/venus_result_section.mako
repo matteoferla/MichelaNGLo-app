@@ -155,7 +155,7 @@
                 <div class="card-body">
                     <div id="viewport" style="width:100%; height: 0; padding-bottom: 70%;">
                     </div>
-
+                    %if mutation_mode == 'main':
                     <div>
                         <hr/>
                         <div class="row">
@@ -177,6 +177,7 @@
                             <h3>Structure</h3>
                         <ul id="structureOption"><!--filled dynamically by venus.updateStructure()--></ul>
                     </div>
+                    %endif
                 </div>
             </div>
         </div>

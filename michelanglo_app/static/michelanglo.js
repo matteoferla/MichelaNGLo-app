@@ -99,6 +99,7 @@ NGL.specialOps.slowOrient = function (id, view, selection) {
 };
 
 NGL.specialOps.enableClickToShow = function(id) {
+    // this allows users to see what residues they clicked.
     if (window.myData.clicks === undefined) {window.myData.clicks = {}}
     if (window.myData.clicks[id] === undefined) {window.myData.clicks[id] = {residues: new Set(), representation: undefined};}
     if (window.myData.clicks[id].active === undefined) {
