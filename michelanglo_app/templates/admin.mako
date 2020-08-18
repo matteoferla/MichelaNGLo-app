@@ -41,7 +41,7 @@
     <h3>Redirects</h3>
         <div class="row">
             % for long, short in shortened:
-                <div class="col-2"><a class="btn btn-outline-info" href="data/${long}">${short}</a> </div>
+                <div class="col-1"><a class="btn btn-outline-info" href="data/${long}">${short}</a> </div>
             % endfor
         </div>
         <p></p>

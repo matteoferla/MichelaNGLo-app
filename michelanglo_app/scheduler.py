@@ -26,11 +26,11 @@ def includeme(config):
 
     #### PERIODIC TASKS ####################################################
     # temporarily off!! TODO reactivate on Thurday
-    # scheduler.add_job(kill_task, 'interval', days=1, args=[settings['scheduler.days_delete_unedited'],
-    #                                                        settings['scheduler.days_delete_untouched']])
+    scheduler.add_job(kill_task, 'interval', days=1, args=[int(settings['scheduler.days_delete_unedited']),
+                                                           int(settings['scheduler.days_delete_untouched'])])
     scheduler.add_job(monitor_task, 'interval', days=30)
     scheduler.add_job(daily_task, 'interval', days=1)
-    scheduler.add_job(spam_task, 'interval', days=7, args=[settings['scheduler.days_delete_unedited']])
+    scheduler.add_job(spam_task, 'interval', days=7, args=[int(settings['scheduler.days_delete_unedited'])])
     scheduler.add_job(unjam_task, 'interval', hours=1)
     scheduler.add_job(clear_buffer_task, 'interval', hours=6)
     #### START UP TASKS ####################################################
@@ -63,7 +63,7 @@ def spam_task(days_delete_untouched: int):
     sesh = get_session()
     with transaction.manager:
         for user in sesh.query(User):
-            delitura = [page for page in user.owned.select(sesh) if page.edited and (page.safe_age + forewarn_time) > days_delete_untouched]
+            delitura = [page for page in user.owned.select(sesh) if page.edited and (page.safe_age + forewarn_time) > int(days_delete_untouched)]
             if not delitura:
                 continue  # nothing in peril
             elif '@' not in user.email:
