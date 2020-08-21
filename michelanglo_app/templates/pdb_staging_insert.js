@@ -27,7 +27,10 @@ $('#create').click(async function (event) {
 window.getCoordinates = async () => {
     let pdb = '';
     let extension = 'pdb';
-    if ((window.mode === undefined) || (window.mode === 'code')) { pdb = window.pdbCode}
+    if ((window.mode === undefined) || (window.mode === 'code')) {
+        pdb = window.pdbCode || myData.proteins[myData.currentIndex]['value'];
+        // window.pdbCode for name or pdb view. mydata for venus_multiple
+    }
     else if (window.mode === 'renumbered') { pdb = window.pdbString}
     else if (window.mode === 'file') {
         // this is really stupid, but the FileList remembers what happened before (autofill) in FireFox! so this is easier.

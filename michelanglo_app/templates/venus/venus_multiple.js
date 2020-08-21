@@ -29,11 +29,11 @@ class MultiVenus {
             // all valid mutations.
             this.mutations = Object.keys(mv);
         } else { //invalid mutation
-            Object.keys(mv).filter(k => ! mv[k]).map(k => {
-            ops.addToast('dodgymutant'+k, '<i class="far fa-alien-monster"></i> Invalid mutation format for '+k,
-                'VENUS analyses protein mutations only. The mutation needs to be in the format A123E or Ala123Glu, with or without "p." prefix. Case insensitive.', 'bg-warning');
-            $('#venus_calc').removeAttr('disabled');
-        });
+            Object.keys(mv).filter(k => !mv[k]).map(k => {
+                ops.addToast('dodgymutant' + k, '<i class="far fa-alien-monster"></i> Invalid mutation format for ' + k,
+                    'VENUS analyses protein mutations only. The mutation needs to be in the format A123E or Ala123Glu, with or without "p." prefix. Case insensitive.', 'bg-warning');
+                $('#venus_calc').removeAttr('disabled');
+            });
             throw('invalid mutation');
         }
 
@@ -84,18 +84,6 @@ class MultiVenus {
                     // }));
 
 
-
-
-
-
-
-
-
-
-
-
-
-
                     // let linktext = `<i>this search (browser)</i>: <code>https://venus.sgc.ox.ac.uk/?uniprot=${uniprotValue}&species=${taxidValue}&mutation=${this.mutation}</code><br/>`;
                     // linktext += `<i>this search (API)</i>: <code>https://venus.sgc.ox.ac.uk/venus_analyse?uniprot=${uniprotValue}&species=${taxidValue}&mutation=${this.mutation}</code>`;
                     // this.createEntry('link', 'Links', linktext);
@@ -113,7 +101,7 @@ class MultiVenus {
 
     //step 0 copied from venus class then modded.
     getMutationsValidity() { // get a obj of key=mut & value=bool
-        let mutations = window.mutation.value.replace('p.','').split(/[^\w*]/).filter(m => m.length !== 0);
+        let mutations = window.mutation.value.replace('p.', '').split(/[^\w*]/).filter(m => m.length !== 0);
         //check the mutation is valid
         //this is a copy paste of the fun from pdb_staging_insert.js
         const aa = {
@@ -123,28 +111,28 @@ class MultiVenus {
             'ALA': 'A', 'VAL': 'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M'
         };
         return Object.fromEntries(mutations.map(
-                                                mutation => {
-                                                    let parts = mutation.match(/^(\D{1,3})(\d+)(\D{1,3})$/);
-                                                    // ["G10W", "G", "10", "W", index: 0, input: "G10W", groups: undefined]
-                                                    const getMutation = (p) => p.splice(1, 3).join('');
-                                                    if (parts === null) return [mutation, false];
-                                                    // deal with three letter code.
-                                                    if (aa[parts[1]] !== undefined) {
-                                                        parts[1] = aa[parts[1]];
-                                                    }
-                                                    if (!'ACDEFGHIKLMNPQRSTVWYX'.includes(parts[1])) return [getMutation(parts), false];
-                                                    if (aa[parts[3]] !== undefined) {
-                                                        parts[3] = aa[parts[3]]
-                                                    }
-                                                    if (!'ACDEFGHIKLMNPQRSTVWYX'.includes(parts[1])) return [getMutation(parts), false];
-                                                    // it's good
-                                                    return [getMutation(parts), true];
-                                                })
-                );
+            mutation => {
+                let parts = mutation.match(/^(\D{1,3})(\d+)(\D{1,3})$/);
+                // ["G10W", "G", "10", "W", index: 0, input: "G10W", groups: undefined]
+                const getMutation = (p) => p.splice(1, 3).join('');
+                if (parts === null) return [mutation, false];
+                // deal with three letter code.
+                if (aa[parts[1]] !== undefined) {
+                    parts[1] = aa[parts[1]];
+                }
+                if (!'ACDEFGHIKLMNPQRSTVWYX'.includes(parts[1])) return [getMutation(parts), false];
+                if (aa[parts[3]] !== undefined) {
+                    parts[3] = aa[parts[3]]
+                }
+                if (!'ACDEFGHIKLMNPQRSTVWYX'.includes(parts[1])) return [getMutation(parts), false];
+                // it's good
+                return [getMutation(parts), true];
+            })
+        );
 
     }
 
-    addMutationsList () {
+    addMutationsList() {
         const inners = this.mutations.map(mutation => `<li class="list-group-item">
                                                             <div class="row">
                                                                 <div class="col-md-4">
@@ -152,7 +140,7 @@ class MultiVenus {
                                                                 </div>
                                                                 <div class="col-md-4">
                                                                     <span class="prolink" data-target="viewport"
-                                                                        data-focus="residue" data-selection="${mutation.slice(1,-1)}">show wt</span>
+                                                                        data-focus="residue" data-selection="${mutation.slice(1, -1)}">show wt</span>
                                                                 </div>
                                                                 <div class="col-md-4">
                                                                     <a href="/venus?uniprot=${this.uniprot}&species=${this.taxid}&mutation=${mutation}" target="_blank">analyse in VENUS</a>
@@ -161,24 +149,27 @@ class MultiVenus {
                                                         </li>`);
         $('#result_mutation_list').html(inners.join('\n'));
         $('#result_mutation_list .prolink').protein();
-}
+    }
 
-    addModelList () {
+    addModelList() {
         const inners = Object.keys(this.choices).map(k => {
-                        const valids = this.choices[k].join(', ');
-                        let selections = this.mutations.map(mutation => mutation.slice(1,-1)).join(' or ');
-                        let model, name, chain;
-                        if (k.length === 6) {
-                            name = `PDB:${k}`;
-                            chain = k.slice(-1,);
-                            model = k.slice(0,-2);
-                            selections = `(${selections}) and :${chain}`;
-                        } else {
-                            name = `SWISSMODEL:${k}`;
-                            model = k;
-                            chain = 'A';
-                        }
-                        return `<button type="button" class="list-group-item list-group-item-action"
+            const valids = this.choices[k].join(', ') || 'none';
+            let selections = this.mutations.map(mutation => mutation.slice(1, -1)).join(' or ');
+            if (this.choices[k].length === 0) {
+                selections = 'ligand'; // not really a valid option!
+            }
+            let model, name, chain;
+            if (k.length === 6) {
+                name = `PDB:${k}`;
+                chain = k.slice(-1,);
+                model = k.slice(0, -2);
+                selections = `(${selections}) and :${chain}`;
+            } else {
+                name = `SWISSMODEL:${k}`;
+                model = k;
+                chain = 'A';
+            }
+            return `<button type="button" class="list-group-item list-group-item-action"
                                     data-target="viewport"
                                     data-focus="residue" data-selection="${selections}"
                                     data-load="${model}"
@@ -186,7 +177,7 @@ class MultiVenus {
                                 >
                                     ${name}: ${valids}
                                 </button>`;
-                    });
+        });
         $('#results_mutalist').html(inners.join('\n'));
         $('#results_mutalist button').click(event => {
             $('#results_mutalist .active').removeClass('active');
@@ -200,17 +191,21 @@ class MultiVenus {
             NGL.specialOps._preventScroll('viewport');
             NGL.specialOps.enableClickToShow('viewport');
         }, 1000);
+        $('#results_card').append(`<div class="p-2">
+<button type="button" class="btn btn-outline-warning w-100" data-toggle="modal" data-target="#createCombo">
+    <i class="far fa-dumpster-fire"></i> Merge structures</button>
+</div>`);
 
     }
 
-    addFeatureViewer () {
-                        $('#fv').html();
-                        eval(this.fvBlock);
-                        d3.selectAll('.axis text').style("font-size", "0.6em");
-                        //new MutantLocation(this.position);
-                        this.mutations.forEach(mutation => ft.addMutation(parseInt(mutation.slice(1,-1))));
-                        UniprotFV.empower();
-                        }
+    addFeatureViewer() {
+        $('#fv').html('');
+        eval(this.fvBlock);
+        d3.selectAll('.axis text').style("font-size", "0.6em");
+        //new MutantLocation(this.position);
+        this.mutations.forEach(mutation => ft.addMutation(parseInt(mutation.slice(1, -1))));
+        UniprotFV.empower();
+    }
 }
 
 

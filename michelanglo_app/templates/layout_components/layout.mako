@@ -307,7 +307,7 @@
 <footer class="footer">
     <div class="container-fluid">
         <div class="row" style="line-height: 1rem;">
-            <div class="col-12 col-lg-5 offset-lg-1 text-muted p-3">
+            <div class="col-12 col-lg-5 offset-lg-1 text-muted px-3 pt-3">
                 <small><a href="https://www.schrodinger.com/" target="_blank">PyMOL <i
                         class="far fa-external-link-square"></i></a> is a trademark of <a href="https://pymol.org/2/"
                                                                                           target="_blank">Schr&ouml;dinger
@@ -315,16 +315,24 @@
                     with PyMOL or Schr&ouml;dinger.
                     <br/>Data is not kept for commercial purposes, see data <a href="/docs/users">policy
                         documentation</a>.</small></div>
-            <div class="d-none d-lg-block col-5 offset-lg-1 p-2">
+            <div class="d-none d-lg-block col-5 offset-lg-1 pt-2">
                 %if offline:
                     University of Oxford &mdash; NIHR: BRC &mdash; SGC
                 %elif not remote:
-                    <img src="/static/ox_full.svg" alt="University of Oxford" class="footer-logo"
-                         onclick="window.location.href = 'http://www.ox.ac.uk/';">&nbsp;&nbsp;&nbsp;
-                    <img src="/static/OxfordBRC-logo-2019.png" alt="BRC" class="footer-logo"
-                         onclick="window.location.href = 'https://oxfordbrc.nihr.ac.uk/';">&nbsp;&nbsp;&nbsp;
-                    <img src="/static/SGC_reverse_trans.png" alt="SGC" class="footer-logo"
+                    <div class="d-flex">
+                        <div class="px-2 flex-fill">
+                            <img src="/static/ox_full.svg" alt="University of Oxford" class="footer-logo"
+                         onclick="window.location.href = 'http://www.ox.ac.uk/';">
+                        </div>
+                        <div class="px-2 flex-fill">
+                            <img src="/static/OxfordBRC-logo-2019.png" alt="BRC" class="footer-logo"
+                         onclick="window.location.href = 'https://oxfordbrc.nihr.ac.uk/';">
+                        </div>
+                        <div class="px-2 flex-fill">
+                            <img src="/static/SGC_reverse_trans.png" alt="SGC" class="footer-logo"
                          onclick="window.location.href = 'https://www.sgc.ox.ac.uk/';">
+                        </div>
+                    </div>
                 %else:
                     <img src="static/ox_full.svg" alt="University of Oxford"
                          class="footer-logo" onclick="window.location.href = 'http://www.ox.ac.uk/';">&nbsp;&nbsp;&nbsp;
