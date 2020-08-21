@@ -19,7 +19,7 @@ mutation.keyup(e => {
 class MultiVenus {
     // a new mv instance is made each time analyse is clicked.
     constructor() {
-        this.protein = null; // to be filled with obj from ajax
+        //this.protein = null; // to be filled with obj from ajax
         this.last_clicked_prolink = null; //to be filled by clicking.
         this.uniprot = window.uniprotValue;
         this.taxid = window.taxidValue;
@@ -56,8 +56,9 @@ class MultiVenus {
                 } else { //status success!
                     $('html, body').animate({scrollTop: $('#results').offset().top}, 2000);
                     $('#results').show(500);
-                    this.protein = msg.protein;
+                    //this.protein = msg.protein;
                     this.choices = msg.choices;
+                    this.addFeatureViewer(msg.fv);
                     this.addMutationsList();
                     this.addModelList();
 
@@ -197,6 +198,14 @@ class MultiVenus {
         }, 1000);
 
     }
+
+    addFeatureViewer (jsBlock) {
+                        eval(jsBlock);
+                        d3.selectAll('.axis text').style("font-size", "0.6em");
+                        //new MutantLocation(this.position);
+                        this.mutations.forEach(mutation => ft.addMutation(parseInt(mutation.slice(1,-1))));
+                        UniprotFV.enpower();
+                        }
 }
 
 

@@ -1,6 +1,7 @@
 ### This section is filled by JS.
 
 <div class="container-fluid" id="results" style="display: none;">
+    %if mutation_mode == 'main':
     <div class="row">
         <!-- Main menu -->
         <div class="offset-3 col-6 mb-4 py-4">
@@ -26,6 +27,7 @@
             </div>
         </div>
     </div>
+    %endif
     <div class="row">
         ######### main results LHS
 
@@ -65,7 +67,7 @@
 
             <div class="card mb-4 shadow-sm">
                 <div class="card-header"><h5 class="card-title">
-                    <i class="far fa-dna"></i> Features
+                    <i class="far fa-map-signs"></i> Features
                 </h5><h6 class="card-subtitle mb-2 text-muted">
                     (Click on a feature to visualise it on the structure)
                 </h6></div>
@@ -121,7 +123,7 @@
 
 
             ##### third block: Mutation results
-
+            %if mutation_mode == 'main':
             <div class="card shadow-sm">
                 <div class="card-header">
                     <h5 class="card-title">
@@ -142,6 +144,28 @@
                     </ul>
                 </div>
             </div>
+            %elif mutation_mode == 'multi':
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="far fa-dna"></i> Models
+                    </h5>
+                    <h6 class="card-subtitle mb-2 text-muted">
+                        Structure options
+                    </h6>
+                </div>
+
+                ###################### lines ###################################
+
+                <div class="card-body p-0" id="results_card">
+                    <div class="arrow-right"></div>
+                    <div class="arrow-right2">
+                    </div>
+                    <ul class="list-group list-group-flush" id="results_mutalist">
+                    </ul>
+                </div>
+            </div>
+            %endif
         </div>
         ######### structure
 

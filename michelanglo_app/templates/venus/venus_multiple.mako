@@ -17,8 +17,7 @@
 </%block>
 
 <%block name="main">
-        <p>Gateway to the analysis of multiple variants via <a href="/venus">VENUS</a>.</p>
-
+        <p>Gateway to the analysis of multiple variants via <a href="/venus">VENUS</a> or to find the best model to show variants.</p>
     <%include file="venus_input.mako"/>
 </%block>
 

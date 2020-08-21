@@ -51,10 +51,6 @@
                             </div>
         </div>
 
-        %if mutation_mode == 'multi':
-            <div class="col-12 col-lg-4">ADD STRUCTURE OPTION  -> pdbblock in request.</div>
-        %endif
-
         <div class="col-12 offset-lg-4 col-lg-4">
             <button type="button" class="btn btn-outline-primary w-100" id="venus_calc" style="display: none;">Analyse</button>
         </div>

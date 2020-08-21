@@ -11,6 +11,7 @@ from ...models import User, Page  ##needed solely for log.
 from michelanglo_app.views.common_methods import is_malformed, notify_admin, get_pdb_block_from_request
 from michelanglo_app.views.user_management import permission
 from michelanglo_app.views import custom_messages
+from mako.template import Template
 
 from typing import Optional, Any, List, Union, Tuple, Dict
 import random
@@ -58,6 +59,7 @@ class MultiVenus(VenusBase):
             self.check_mutations()
             choices = self.sort_models() #Dict[Structure, List[str]]
             self.reply['choices'] = choices
+            self.reply['fv'] = self.make_fv()
         except VenusException as err:
             log.info(err)
         except Exception as err:
@@ -73,7 +75,7 @@ class MultiVenus(VenusBase):
     def load_protein(self) -> ProteinAnalyser:
         protein = ProteinAnalyser(uniprot=self.uniprot, taxid=self.taxid)
         protein.load()
-        self.reply['protein'] = self.jsonable(protein)
+        # self.reply['protein'] = self.jsonable(protein)
         return protein
 
     def load_structure(self) -> Union[Structure, None]:
@@ -119,3 +121,11 @@ class MultiVenus(VenusBase):
         sorter = lambda t: len(t[1]) + (0.1 if len(t[0]) == 6 else 0) # sort by number of mutants covered, plus bonus for PDB
         presence = sorted(presence.items(), key=sorter, reverse=True)  # List[tuple]
         return dict(presence)
+
+    def make_fv(self) -> str:
+        # workpath is app.
+        filename = os.path.join(os.path.dirname(__file__), '..', '..', "templates/results/features.js.mako")
+        template = Template(filename=filename)
+        return template.render(protein=self.protein,
+                                 featureView= '#fv',
+                                 include_pdb=True)
