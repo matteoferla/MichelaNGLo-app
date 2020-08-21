@@ -363,3 +363,41 @@
     </div>
   </div>
 </div>
+
+%if mutation_mode == 'multi':
+    <div class="modal" tabindex="-1" id="createCombo">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="far fa-dumpster-fire"></i> Create collage of structures</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>For the purposes of visualisation only this tool stitched if possible or aligns in a line the various models
+            and structures of a protein
+        to make a model that spans more of the protein. This is not intended for analysis.
+            For more see <a href="https://github.com/matteoferla/protein_fuser">Github repo</a>.</p>
+          <div class="alert alert-danger">
+              ADD BUTTON
+              <br/>
+          ON COMPLETION:
+              <br/>
+          INFO
+              <br/>
+          DOWNLOAD MODEL BUTTON,
+              <br/>
+          LOAD INTO VIEWER BUTTON
+              <br/>
+          CLOSE
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+%endif
