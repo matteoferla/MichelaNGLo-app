@@ -318,7 +318,8 @@
             <div class="d-none d-lg-block col-5 offset-lg-1 pt-2">
                 %if offline:
                     University of Oxford &mdash; NIHR: BRC &mdash; SGC
-                %elif not remote:
+                %else:
+                    ## same as if not remote:
                     <div class="d-flex">
                         <div class="px-2 flex-fill">
                             <img src="/static/ox_full.svg" alt="University of Oxford" class="footer-logo"
@@ -333,13 +334,6 @@
                          onclick="window.location.href = 'https://www.sgc.ox.ac.uk/';">
                         </div>
                     </div>
-                %else:
-                    <img src="static/ox_full.svg" alt="University of Oxford"
-                         class="footer-logo" onclick="window.location.href = 'http://www.ox.ac.uk/';">&nbsp;&nbsp;&nbsp;
-                    <img src="/static/OxfordBRC-logo-2019.png" alt="BRC"
-                         class="footer-logo" onclick="window.location.href = 'https://oxfordbrc.nihr.ac.uk/';">&nbsp;&nbsp;&nbsp;
-                    <img src="/static/SGC_reverse_trans.png" alt="SGC"
-                         class="footer-logo" onclick="window.location.href = 'https://www.sgc.ox.ac.uk/';">
                 %endif
             </div>
             <div class="d-block d-lg-none col-12">
