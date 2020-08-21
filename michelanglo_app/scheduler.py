@@ -92,7 +92,7 @@ def spam_task(days_delete_untouched: int):
                     notify_admin(msg)
                     log.info(msg)
                 except Exception as error:
-                    msg = f'Failed at emailing {user.name} ({user.email}) about {len(delitura)} pages expiring '+\
+                    msg = f'Failed at emailing {user.name} ({user.email}) about {len(delitura)} pages expiring ' + \
                           f'because of {type(error).__name__} {str(error)}.'
                     notify_admin(msg)
                     log.warning(msg)
