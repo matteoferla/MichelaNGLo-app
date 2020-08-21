@@ -8,7 +8,7 @@ window.UniprotFV = {
     // Mike only
     UniprotData: {},
 
-    // called by enpower
+    // called by empower
     //NGL does not accept rgb(173, 216, 230) type colors.
     fixColor: rgb => '#'+rgb.match(/rgb\((\d+)\, (\d+)\, (\d+)\)/)
                             .slice(1,)
@@ -23,12 +23,12 @@ window.UniprotFV = {
                             $('#fv_'+uniprotValue).off();
                             m.off('shown.bs.modal');
                             m.on('shown.bs.modal', e => eval(UniprotFV.UniprotData[uniprotValue]));
-                            setTimeout(UniprotFV.enpower,1000, uniprotValue);
+                            setTimeout(UniprotFV.empower,1000, uniprotValue);
     },
 
     // Mike only via loadFV and Venus
     // extends the viewrer.
-    enpower: uniprotValue => {
+    empower: uniprotValue => {
                                let clickable = $('.domain, .modified');
                                clickable.css('cursor','pointer');
                                // when the squares are clicked the colors change to red. which is not good.

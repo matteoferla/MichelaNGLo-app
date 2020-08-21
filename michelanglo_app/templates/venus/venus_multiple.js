@@ -204,7 +204,7 @@ class MultiVenus {
                         d3.selectAll('.axis text').style("font-size", "0.6em");
                         //new MutantLocation(this.position);
                         this.mutations.forEach(mutation => ft.addMutation(parseInt(mutation.slice(1,-1))));
-                        UniprotFV.enpower();
+                        UniprotFV.empower();
                         }
 }
 
