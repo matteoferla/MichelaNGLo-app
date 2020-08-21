@@ -31,8 +31,13 @@
 </div>
 ############## MAIN BLOCK
 <div class="row">
-        <div class="col-6"><div id="viewport" style="width: 100%; height: 0; padding-bottom: 100%;"></div>
-        </div>
+    <div class="col-6" id="viewportHolder">
+        %if request.path != '/venus_multiple':
+        <div id="viewport" style="width: 100%; height: 0; padding-bottom: 100%;"></div>
+        %else:
+        ## pass
+        %endif
+    </div>
         <div class="col-6">
             <h4>Initial view</h4>
             <%include file="markup/markup_builder_content.mako"/>

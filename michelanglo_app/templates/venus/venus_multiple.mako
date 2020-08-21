@@ -40,6 +40,7 @@
         ### this controls venus specific stuff.
         <%include file="venus_class.js"/>
         <%include file="venus_multiple.js"/>
+        <%include file="../pdb_staging_insert.js"/>
     });
     ####include file="../markup/markup_builder_modal.js"/>
     window.interactive_builder = () => undefined; //burn the call.

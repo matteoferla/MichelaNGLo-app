@@ -27,6 +27,8 @@
             </div>
         </div>
     </div>
+    %elif mutation_mode == 'multi':
+
     %endif
     <div class="row">
         ######### main results LHS
@@ -176,7 +178,7 @@
                 <div class="card-header"><h5 class="card-title">
                     <i class="far fa-cubes"></i> Structure
                 </h5></div>
-                <div class="card-body">
+                <div class="card-body" id="viewportResultsHolder">
                     <div id="viewport" style="width:100%; height: 0; padding-bottom: 70%;">
                     </div>
                     %if mutation_mode == 'main':
@@ -201,6 +203,8 @@
                             <h3>Structure</h3>
                         <ul id="structureOption"><!--filled dynamically by venus.updateStructure()--></ul>
                     </div>
+                    %elif mutation_mode == 'multi':
+                        <button type="button" class="btn btn-outline-info w-100" data-toggle="modal" data-target="#createMikeModal"><i class="far fa-pencil-paintbrush"></i> Create Michela<span style="font-variant: small-caps;">ngl</span>o page</button>
                     %endif
                 </div>
             </div>
@@ -329,26 +333,28 @@
 </div>
 
 <div class="modal" tabindex="-1" role="dialog" id="createMikeModal">
-  <div class="modal-dialog">
+  <div class="modal-dialog ${'modal-xl' if mutation_mode == 'multi' else ''}">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Modal title</h5>
+        <h5 class="modal-title"><i class="far fa-pencil-paintbrush"></i> Create Michela<span style="font-variant: small-caps;">ngl</span>o page</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <p>A VENUS page is created anew on request. A Michelanglo page is stored and can be edited.
-            To make a page that best suits your needs please consider the following:</p>
-          <ul>
-              <li>The initial view will be the current view. Please choose the desired model and orientation (<a href="#" data-dismiss="modal">close this modal</a>).</li>
-              <li>The feature viewer will be in the modal that appears when the button at the bottom of the description is pressed.</li>
-              <li>The blocks will be present in the description. Please rearrange and/or delete to suit (<a href="#" data-dismiss="modal">close this modal</a>).</li>
-          </ul>
-          <p>The following models can be included (please note about 20% of users visiting a page are on a mobile device and each structure is several megabytes).</p>
-          <div id="modelOptions">
-
-          </div>
+          <p>A VENUS page is created anew on request. A Michelanglo page is stored and can be edited.</p>
+          %if mutation_mode == 'main':
+              <p>To make a page that best suits your needs please consider the following:</p>
+              <ul>
+                  <li>The initial view will be the current view. Please choose the desired model and orientation (<a href="#" data-dismiss="modal">close this modal</a>).</li>
+                  <li>The feature viewer will be in the modal that appears when the button at the bottom of the description is pressed.</li>
+                  <li>The blocks will be present in the description. Please rearrange and/or delete to suit (<a href="#" data-dismiss="modal">close this modal</a>).</li>
+              </ul>
+              <p>The following models can be included (please note about 20% of users visiting a page are on a mobile device and each structure is several megabytes).</p>
+              <div id="modelOptions"></div>
+          %elif mutation_mode == 'multi':
+          <%include file="../pdb_staging_insert.mako"/>
+          %endif
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

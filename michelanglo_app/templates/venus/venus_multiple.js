@@ -58,7 +58,8 @@ class MultiVenus {
                     $('#results').show(500);
                     //this.protein = msg.protein;
                     this.choices = msg.choices;
-                    this.addFeatureViewer(msg.fv);
+                    this.fvBlock = msg.fv;
+                    //this.addFeatureViewer() is added on protein load.
                     this.addMutationsList();
                     this.addModelList();
 
@@ -166,21 +167,22 @@ class MultiVenus {
         const inners = Object.keys(this.choices).map(k => {
                         const valids = this.choices[k].join(', ');
                         let selections = this.mutations.map(mutation => mutation.slice(1,-1)).join(' or ');
-                        let model, name;
+                        let model, name, chain;
                         if (k.length === 6) {
                             name = `PDB:${k}`;
-                            const chain = k.slice(-1,);
+                            chain = k.slice(-1,);
                             model = k.slice(0,-2);
                             selections = `(${selections}) and :${chain}`;
                         } else {
                             name = `SWISSMODEL:${k}`;
                             model = k;
-
+                            chain = 'A';
                         }
                         return `<button type="button" class="list-group-item list-group-item-action"
                                     data-target="viewport"
                                     data-focus="residue" data-selection="${selections}"
                                     data-load="${model}"
+                                    data-chain="${chain}"
                                 >
                                     ${name}: ${valids}
                                 </button>`;
@@ -191,6 +193,8 @@ class MultiVenus {
             $(event.target).addClass('active');
             NGL.specialOps.prolink(event.target);
             window.multivenus.last_clicked_prolink = event.target;
+            window.multivenus.addFeatureViewer.call(window.multivenus);
+            myData.currentChain = $(event.target).data('chain'); //nonstandard!
         }).first().click();
         setTimeout(() => {
             NGL.specialOps._preventScroll('viewport');
@@ -199,8 +203,9 @@ class MultiVenus {
 
     }
 
-    addFeatureViewer (jsBlock) {
-                        eval(jsBlock);
+    addFeatureViewer () {
+                        $('#fv').html();
+                        eval(this.fvBlock);
                         d3.selectAll('.axis text').style("font-size", "0.6em");
                         //new MutantLocation(this.position);
                         this.mutations.forEach(mutation => ft.addMutation(parseInt(mutation.slice(1,-1))));
@@ -254,4 +259,17 @@ $(window).scroll(() => {
     card.css('top', position);
     //console.log(`scrolltop: ${currentY} win height ${windowY} off: ${offsetY} card top: ${card.offset().top}`);
 });
+
+$('#createMikeModal').on('show.bs.modal', event => {
+    const viewport = $('#viewport');
+    viewport.detach();
+    $('#viewportHolder').append(viewport);
+});
+
+$('#createMikeModal').on('hide.bs.modal', event => {
+    const viewport = $('#viewport');
+    viewport.detach();
+    $('#viewportResultsHolder').append(viewport);
+});
+
 //</%text>
