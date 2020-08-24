@@ -23,7 +23,7 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">PDB code</span>
                                     </div>
-                                    <input type="text" class="form-control" id="pdb" autocomplete="new-password">
+                                    <input type="text" class="form-control" id="pdb" autocomplete="off">
                                     <div class="invalid-feedback" id="error_pdb">Weird PDB code</div>
                                     <div class="input-group-append">
                                         <button class="btn btn-success" type="button" id="code_load">Fetch</button>

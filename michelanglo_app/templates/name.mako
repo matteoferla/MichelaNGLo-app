@@ -24,7 +24,7 @@
                 <div class="input-group-prepend">
                     <span class="input-group-text">Species</span>
                 </div>
-                <input type="text" class="form-control rounded-right" id="species" autocomplete="new-password" value="human">
+                <input type="text" class="form-control rounded-right" id="species" autocomplete="off" value="human">
                 <div class="invalid-feedback" id="error_species">Unrecognised name</div>
                 <div class="valid-feedback" id="taxid">Error</div>
             </div>
@@ -36,7 +36,7 @@
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">Gene/protein name</span>
                                     </div>
-                                    <input type="text" class="form-control rounded-right" id="gene" autocomplete="new-password">
+                                    <input type="text" class="form-control rounded-right" id="gene" autocomplete="off">
                                     <div class="invalid-feedback" id="error_gene">Unrecognised name</div>
                                     <div class="valid-feedback" id="uniprot">Error</div>
                                 </div>
