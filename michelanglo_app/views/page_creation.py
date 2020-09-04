@@ -238,9 +238,11 @@ def convert_mesh(request):
         origin = request.params['origin'].split(',')
     else:
         origin = None
-    mesh = PyMolTranspiler.convert_mesh(fh, scale, centroid_mode, origin)
-    return {'mesh': mesh}
-
+    try:
+        mesh = PyMolTranspiler.convert_mesh(fh, scale, centroid_mode, origin)
+        return {'mesh': mesh}
+    except Exception as error:
+        return {'status': 'error', 'msg': f'{error.__class__.__name__}: {error}. (Most errors are because the mesh is not triangulated: hover over file input for more).'}
 
 @view_config(route_name='convert_pdb', renderer="json")
 def convert_pdb(request):
