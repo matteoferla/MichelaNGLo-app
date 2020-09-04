@@ -7,6 +7,7 @@ import transaction
 from apscheduler.schedulers.background import BackgroundScheduler
 from .views.common_methods import notify_admin, email
 from michelanglo_transpiler import GlobalPyMOL
+from mako.template import Template
 
 from datetime import datetime, timedelta
 
@@ -15,7 +16,6 @@ from .views.buffer import system_storage
 import logging
 
 log = logging.getLogger('apscheduler')
-
 
 # ==============================  MAIN  ================================================================================
 
@@ -30,7 +30,7 @@ def includeme(config):
                                                                     int(settings['scheduler.days_delete_untouched'])])
     scheduler.add_job(Entasker.monitor_task, 'interval', days=30)
     scheduler.add_job(Entasker.daily_task, 'interval', days=1)
-    scheduler.add_job(Entasker.spam_task, 'interval', days=7, args=[int(settings['scheduler.days_delete_unedited'])])
+    scheduler.add_job(Entasker.spam_task, 'interval', days=30, args=[int(settings['scheduler.days_delete_unedited'])])
     scheduler.add_job(Entasker.unjam_task, 'interval', hours=1)
     scheduler.add_job(Entasker.clear_buffer_task, 'interval', hours=6)
     # =============== START UP TASKS ===============
@@ -62,7 +62,7 @@ class Entasker:
         if taskname in tasks:
             tasks[taskname]()
         else:
-            raise ValueError(f'No idea what task {taskname} is. {task.keys()}')
+            raise ValueError(f'No idea what task {taskname} is. {taskname.keys()}')
 
     @classmethod
     def daily_task(cls):
@@ -76,7 +76,7 @@ class Entasker:
         # PDB?
 
     @classmethod
-    def spam_task(cls, days_delete_untouched: int = 30, forewarn_time: int = 14):
+    def spam_task(cls, days_delete_untouched: int = 365, forewarn_time: int = 20):
         self = cls()
         with transaction.manager:
             for user in self.session.query(User):
@@ -84,10 +84,11 @@ class Entasker:
                             page.edited and (page.safe_age + forewarn_time) > int(days_delete_untouched)]
                 if not delitura:
                     continue  # nothing in peril
-                elif user.email is None:
-                    continue
-                elif '@' not in user.email:
-                    continue  # do not contact
+                elif user.email is None or '@' not in user.email:
+                    # do not contact
+                    msg = f'{user.name} (no email) could not notified of {len(delitura)} pages expiring.'
+                    notify_admin(msg)
+                    log.info(msg)
                 else:
                     docs = 'https://michelanglo.sgc.ox.ac.uk/docs/users'
                     dtexts = [
@@ -97,13 +98,15 @@ class Entasker:
                            f'There are {len(delitura)} Michelanglo pages edited by you ' + \
                            f'which have not been visited in a while and the deletion policy of Michelanglo is that ' + \
                            f'any page with no visits since {days_delete_untouched} are deleted (as stated in {docs}).\n' + \
-                           f'Consequently the following edited unprotected private pages are scheduled for deletion, ' + \
-                           f'unless visited:'+ '\n'.join(dtexts) + '\n' + \
-                           f'To delete unwanted pages normally, press the edit pencil and then ' + \
-                           'the red delete button at the bottom of the modal.' + \
+                           f'Consequently the following edited unprotected private pages are scheduled for deletion within {forewarn_time} days, ' + \
+                           f'unless visited:\n'+ '\n'.join(dtexts) + '\n' + \
+                           f'(To delete unwanted pages normally, press the edit pencil and then ' + \
+                           'the red delete button at the bottom of the modal.)\n' + \
+                           f'(To see what pages are about to expire ' + \
+                           'go to your personal gallery via the menu button and look for a clock icon at the bottom of some cards.)\n' + \
                            f'Thank you,\nMatteo (Michelanglo admin)\n'
                     try:
-                        email(text, user.email, 'Michelanglo page expiry notice')
+                        email(text, user.email, 'Michelanglo page expiry notice') #
                         msg = f'{user.name} ({user.email}) was notified of {len(delitura)} pages expiring.'
                         notify_admin(msg)
                         log.info(msg)
