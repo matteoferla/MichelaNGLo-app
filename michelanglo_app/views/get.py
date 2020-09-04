@@ -6,6 +6,7 @@ import os
 import logging
 log = logging.getLogger(__name__)
 from .common_methods import is_malformed, notify_admin
+from ..scheduler import Entasker
 
 from . import custom_messages, votes
 
@@ -59,6 +60,13 @@ def get_ajax(request):
             pass #
         settings = page.load().settings
         return render_to_response("../templates/results/implement.mako", settings, request)
+    elif request.params['item'] == 'swissmodel':
+        url = request.params['url']
+        if url.find('https://swissmodel.expasy.org/') != 0:
+            request.response.status = 403
+            return {'status': 'Not a swissmodel url'}
+        else:
+            return request.get(url).text()
     else:
         request.response.status = 400
         log_it()
@@ -96,14 +104,17 @@ def get_pages(request):
 @view_config(route_name='set', renderer='json')
 def set_ajax(request):
     """
-    Admin only operations.
+    Admin only operations. In future this may change to ``admin`` (TODO)
+
     :param request: must contain 'item' key.
+
     * item = msg. set a message based on the value of the keys 'title','descr','bg'
     * item = clear_msg. clear msg
     * item = terminate. kills the mother thread. requires the key 'code' containing the same value as the env variable SECRETCODE
     * item = protection. protects page 'page'
     * item = deprotection. guess what this does...
     * item = shorten. 'short' 'long' results in setting up /r/short redirect to /data/long
+
     :return: json ('status' as one key)
     """
     if not request.user or request.user.role != 'admin':
@@ -171,6 +182,18 @@ def set_ajax(request):
             if malformed:
                 return {'status': malformed}
             publication = Publication.from_request(request)
+        elif request.params['item'] == 'task':
+            malformed = is_malformed(request, 'task')
+            if malformed:
+                return {'status': malformed}
+            taskname = request.params['task']
+            try:
+                Entasker.run(taskname)
+                log.info(f'Admin directed task {taskname} completed.')
+                return {'status': 'success'}
+            except Exception as error:
+                log.warning(f'Admin directed task {taskname} failed - {error.__class__.__name__}: {error}')
+                return {'status': 'error', 'msg': f'{error.__class__.__name__}: {error}'}
         else:
             return {'status': 'unknown cmd'}
 

@@ -58,43 +58,12 @@ class MultiVenus {
                     $('#results').show(500);
                     //this.protein = msg.protein;
                     this.choices = msg.choices;
+                    this.urls = msg.urls;
                     this.fvBlock = msg.fv;
                     //this.addFeatureViewer() is added on protein load.
                     this.addMutationsList();
                     this.addModelList();
-
-
-                    // //venus analyse is
-                    // $.post({
-                    //             url: "venus_analyse", data: {
-                    //                 uniprot: uniprotValue,
-                    //                 species: taxidValue,
-                    //                 step: step,
-                    //                 mutation: this.mutation
-                    //             }
-                    //         }).fail(ops.addErrorToast)
-                    //
-                    // venus.analyse('fv') is the same as get_uniprot but utilising the protein data.
-                    // $('#results').show(500, () => this.analyse('fv').done(msg => {
-                    //     eval(msg);
-                    //     d3.selectAll('.axis text').style("font-size", "0.6em");
-                    //     //new MutantLocation(this.position);
-                    //     this.mutations.map(m => parseInt(m.slice(1, -1))).forEach(m => ft.addMutation(m));
-                    //
-                    // }));
-
-
-                    // let linktext = `<i>this search (browser)</i>: <code>https://venus.sgc.ox.ac.uk/?uniprot=${uniprotValue}&species=${taxidValue}&mutation=${this.mutation}</code><br/>`;
-                    // linktext += `<i>this search (API)</i>: <code>https://venus.sgc.ox.ac.uk/venus_analyse?uniprot=${uniprotValue}&species=${taxidValue}&mutation=${this.mutation}</code>`;
-                    // this.createEntry('link', 'Links', linktext);
-                    //
-                    //
-                    // $('html, body').animate({scrollTop: $('#results').offset().top}, 2000);
-                    // $('#result_title').html(`${this.protein.gene_name} ${this.protein._mutation} <small>(${this.protein.recommended_name})</small>`);
-                    // let exttext = this.makeExt('https://www.uniprot.org/uniprot/' + uniprotValue, 'Uniprot:' + uniprotValue) + ' &mdash; ' +
-                    //     this.makeExt('https://www.rcsb.org/pdb/protein/' + this.protein.uniprot, 'PDB:' + uniprotValue) + ' &mdash; ' +
-                    //     this.makeExt('https://gnomAD.broadinstitute.org/gene/' + this.protein.gene_name, 'gnomAD:' + this.protein.gene_name);
-                    // this.createEntry('extlink', 'External links', exttext);
+                    this.loadFirst();
                 }
             });
     }
@@ -143,7 +112,7 @@ class MultiVenus {
                                                                         data-focus="residue" data-selection="${mutation.slice(1, -1)}">show wt</span>
                                                                 </div>
                                                                 <div class="col-md-4">
-                                                                    <a href="/venus?uniprot=${this.uniprot}&species=${this.taxid}&mutation=${mutation}" target="_blank">analyse in VENUS</a>
+                                                                    <a class="btn btn-outline-info" href="/venus?uniprot=${this.uniprot}&species=${this.taxid}&mutation=${mutation}" target="_blank"><i class="far fa-vials"></i> Analyse in VENUS</a>
                                                                 </div>
                                                             </div>
                                                         </li>`);
@@ -174,19 +143,30 @@ class MultiVenus {
                                     data-focus="residue" data-selection="${selections}"
                                     data-load="${model}"
                                     data-chain="${chain}"
+                                    data-name="${k}"
                                 >
                                     ${name}: ${valids}
-                                </button>`;
+                                </button>`; //data-chain and data-name are for this only!!
         });
         $('#results_mutalist').html(inners.join('\n'));
         $('#results_mutalist button').click(event => {
+            const prolink = $(event.target);
             $('#results_mutalist .active').removeClass('active');
-            $(event.target).addClass('active');
+            prolink.addClass('active');
+            if (prolink.data('name').length === 6) {
+                // PDB. pass
+            } else {
+                // swissmodel
+                if (window.myData === undefined) NGL.specialOps.postInitialise('viewport');
+                const name = prolink.data('name'); //same as data-load for swissmodel!
+                const url = window.multivenus.urls[name];
+                window.myData.proteins.push({value: url, type: 'url', name: name});
+            }
             NGL.specialOps.prolink(event.target);
             window.multivenus.last_clicked_prolink = event.target;
             window.multivenus.addFeatureViewer.call(window.multivenus);
-            myData.currentChain = $(event.target).data('chain'); //nonstandard!
-        }).first().click();
+            myData.currentChain = prolink.data('chain'); //nonstandard!
+        })
         setTimeout(() => {
             NGL.specialOps._preventScroll('viewport');
             NGL.specialOps.enableClickToShow('viewport');
@@ -205,6 +185,44 @@ class MultiVenus {
         //new MutantLocation(this.position);
         this.mutations.forEach(mutation => ft.addMutation(parseInt(mutation.slice(1, -1))));
         UniprotFV.empower();
+    }
+
+    loadFirst() {
+        const covered = Object.values(this.choices).reduce((acc, v) => {
+                                                                            v.forEach(vv => acc.add(vv));
+                                                                            return acc
+                                                                        },
+                                                            new Set());
+        let msgs = [];
+        const notInferior = `<b>NB.</b>The lack of a structure spanning a residue does
+                                not necessarily mean that the residue is in a less important region.`;
+        // No matches.
+        if (covered.size === 0) {
+            let mainMsg = `There is no available structure that spans the mutations requested (${this.mutations.join(', ')}).`;
+            ops.addToast('unavailable', 'No applicable structure', mainMsg, 'bg-warning');
+            msgs.push(mainMsg, notInferior);
+            $('#result_mutations_text').html(msgs.join('<br/>'));
+            //nothing loaded.
+            return 0;
+        } else { // some matches.
+            const first =$('#results_mutalist button').first();
+            const firstName = first.data('name');
+            // what does the model cover?
+            const firstUncovered = this.choices[firstName].filter(v => this.mutations.indexOf(v) === -1);
+            if (firstUncovered.length > 0) {
+                msgs.push(`The model loaded, ${firstName}, covers ${this.choices[firstName].join(', ')}, 
+                                    but not ${firstUncovered.join(', ')}.`, notInferior);
+            } else {
+                msgs.push(`The model loaded, ${firstName}, covers ${this.choices[firstName].join(', ')}.`);
+            }
+            // any never covered?
+            if (covered.size !== this.mutations.length) {
+                msgs.push(`The mutation(s) ${this.mutations.filter(v => !covered.has(v)).join(', ')} are not covered by any model.`);
+            }
+            msgs.push('For other models see <a href="#results_card">Models section</a>.');
+            first.click();
+            $('#result_mutations_text').html(msgs.join('<br/>'));
+        }
     }
 }
 

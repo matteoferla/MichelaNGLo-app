@@ -39,13 +39,13 @@
             %endfor
         </ul>
     <h3>Redirects</h3>
-        <div class="row">
+        <div class="row border rounded w-100 p-2 m-2">
             % for long, short in shortened:
-                <div class="col-1"><a class="btn btn-outline-info" href="data/${long}">${short}</a> </div>
+                <div class="col-2"><a class="btn btn-outline-info w-100" href="data/${long}">${short}</a> </div>
             % endfor
         </div>
         <p></p>
-    <h3>Command station</h3>
+    <h3>PSAs</h3>
         <div class="row border rounded w-100 p-2 m-2">
                 <div class="col-lg-3">
                 <div class="input-group">
@@ -81,6 +81,13 @@
                 </div>
 
 
+        </div>
+
+    <h3>Task controls</h3>
+        <div class="row border rounded w-100 p-2 m-2">
+                % for task in ('kill','monitor','daily', 'spam','unjam','clear_buffer'):
+                    <div class="col-2"><a class="btn btn-outline-info" href="set?item=task&task=${task}">${task}</a></div>
+                % endfor
         </div>
     <h3>Reversed request log</h3>
     <div style="height: 70vh; overflow: scroll;">

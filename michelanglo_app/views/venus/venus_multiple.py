@@ -59,6 +59,7 @@ class MultiVenus(VenusBase):
             self.check_mutations()
             choices = self.sort_models() #Dict[Structure, List[str]]
             self.reply['choices'] = choices
+            self.reply['urls'] = self.get_urls()
             self.reply['fv'] = self.make_fv()
         except VenusException as err:
             log.info(err)
@@ -121,6 +122,10 @@ class MultiVenus(VenusBase):
         sorter = lambda t: len(t[1]) + (0.1 if len(t[0]) == 6 else 0) # sort by number of mutants covered, plus bonus for PDB
         presence = sorted(presence.items(), key=sorter, reverse=True)  # List[tuple]
         return dict(presence)
+
+    def get_urls(self) -> Dict[str, str]:
+        return {model.id: model.url for model in self.protein.swissmodel}
+
 
     def make_fv(self) -> str:
         # workpath is app.

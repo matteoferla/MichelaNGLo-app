@@ -65,6 +65,30 @@
             </div>
             %endif
 
+
+            #### Links to individual mutations
+            %if mutation_mode == 'multi':
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header"><h5 class="card-title">
+                    <i class="far fa-ballot"></i> Mutations
+                </h5><h6 class="card-subtitle mb-2 text-muted">
+                    View or analyse a mutation
+                </h6></div>
+
+
+                <div class="card-body px-0">
+                    ###################### arrow ###################################
+                    <div class="arrow-right"></div>
+                    <div class="arrow-right2"></div>
+                    ###################### end of arrow ###################################
+                    <p id="result_mutations_text" class="m-3">No model shown —ERROR</p>
+                    <ul class="list-group list-group-flush" id="result_mutation_list">
+
+                    </ul>
+                </div>
+            </div>
+            %endif
+
             ##### second block: Feature
 
             <div class="card mb-4 shadow-sm">
@@ -75,6 +99,7 @@
                 </h6></div>
 
                 ###################### arrow ###################################
+
 
 
                 <div class="card-body">
@@ -95,32 +120,6 @@
                     ##                         </div>
                       </div>
             </div>
-
-
-
-            #### Links to individual mutations
-            %if mutation_mode == 'multi':
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header"><h5 class="card-title">
-                    <i class="far fa-ballot"></i> Mutations
-                </h5><h6 class="card-subtitle mb-2 text-muted">
-                </h6></div>
-
-
-                <div class="card-body">
-                    ###################### arrow ###################################
-
-                    <div class="arrow-right"></div>
-                    <div class="arrow-right2"></div>
-                    ###################### end of arrow ###################################
-
-                    <p ></p>
-                    <ul class="list-group list-group-flush" id="result_mutation_list">
-
-                    </ul>
-                </div>
-            </div>
-            %endif
 
 
 

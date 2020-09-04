@@ -46,6 +46,7 @@ def my_view(request):
         log.warning(f'Could not match {request.url} for {User.get_username(request)}')
         page = '404'
         request.response.status = 404
+        # the fly on the 404 page is heavy: is this a good thing given that bots are responsible for most 404s??
         # up the log status if its illegal
     elif request.matched_route.name == 'admin' and (not user or (user and user.role != 'admin')):
         log.warning(f'Non admin user ({User.get_username(request)}) attempted to view admin page')
