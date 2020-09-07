@@ -1,12 +1,31 @@
-window.ops={timer: null, i: 0, debug: ${'true' if user and user.role == 'admin' else 'false'}};
+//<%text>
 
-/// okay. this is a bit weird. but what happens is that during template construction the large toast.mako block gets added to the append. The character exacaping is weird. Not sure if needed.
-ops.addToast = function (id, title, body, bg) {
+window.ops={timer: null, i: 0, debug: false};
+
+ops.addToast = function (id, title, body, bg, autohide, delay, subtitle) {
+    /* adds a toast to the toaster! */
         id = id || 'T'+Date.now();
-        $('#'+id).detach(); //duplicate id??!
-        $('#toaster').append(`<%include file="toast.mako" args="toast_id='${id}', toast_title='${title}', toast_body='${body}', toast_bg='${bg}', toast_autohide='true', toast_delay=5000"/>`);
-        $('#'+id).toast('show');
-
+        autohide = autohide || true;
+        delay=delay || 5000;
+        subtitle = subtitle || '';
+        bg = bg || 'bg-info';
+        $('#'+id).detach(); //duplicate id!
+        $('#toaster').append(`<div class="toast ml-auto w-100 ${bg}" 
+                                    style="z-index:9000; pointer-events: auto"
+                                    role="alert" aria-live="assertive" aria-atomic="true"
+                                    id="${id}" data-delay=${delay} data-autohide="${autohide}">
+                                  <div class="toast-header">
+                                    <strong class="mr-auto">${title}</strong>
+                                    <small>${subtitle}</small>
+                                    <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                                      <span aria-hidden="true">&times;</span>
+                                    </button>
+                                  </div>
+                                  <div class="toast-body">
+                                    ${body}
+                                  </div>
+                                </div>`);
+    $('#'+id).toast('show');
     };
 
 ops.addErrorToast = (xhr) => {if (!! xhr.responseJSON) {
@@ -60,3 +79,4 @@ ops.statusCheck = function (data) {
             return 0;
         });
 };
+//</%text>

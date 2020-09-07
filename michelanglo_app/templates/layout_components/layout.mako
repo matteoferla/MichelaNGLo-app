@@ -25,8 +25,7 @@
             ${open('michelanglo_app/static/ThirdParty/bootstrap/dist/css/bootstrap.min.css').read()|n}
         </style>
     % elif bootstrap == 'materials':
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css"
-              rel="stylesheet">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
         <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.7.6/css/mdb.min.css" rel="stylesheet">
     % else:
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
@@ -294,7 +293,7 @@
         </div>
     %endif
 <div id="toasterOuter" class="position-absolute m-0 w-100" style="z-index: 9999;">
-    <div id="toaster" class="m-0 w-100 d-flex flex-column  pl-3"
+    <div id="toaster" class="m-0 w-100 pl-3"
          style="position: fixed;  padding-top: 5em; pointer-events: none"></div>
 </div>
 
@@ -360,9 +359,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
                 integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
                 crossorigin="anonymous"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-                integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-                crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
     %endif
     %if bootstrap == 'materials':
         <script type="text/javascript"
@@ -386,6 +383,12 @@
     % endif
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/3.0.0-beta.3/js/bootstrap-colorpicker.min.js"></script>
+<script type="text/javascript">
+    <%include file="toast.js"/>
+    % if user and user.role == 'admin':
+        window.ops.debug = true;
+    % endif
+</script>
     <%block name="script"/>
     % if not no_user:
         <%include file="../login/user_modal.mako"/>
@@ -402,36 +405,34 @@
         % if not no_user:
             <%include file="../login/user_icon_bar.js"/>
             <%include file="../login/user_modal.js"/>
-            <%include file="toast.js"/>
             %if not user: ## unregistered and new visitor.
-        if (!localStorage.getItem('cookiesAccepted')) {
-                $('#toaster').append(`<%include file="toast.mako" args="toast_id='acceptCookies', toast_title='Cookies', toast_body='This site uses cookies to manage user authentication in order to allow users to keep track of pages users made and to control editing privileges.', toast_bg='bg-info', toast_autohide='false'"/>`);
-                $('#acceptCookies').toast('show');
-                $('#acceptCookies').on('hide.bs.toast', (event) => localStorage.setItem('cookiesAccepted', true));
-            }
-            %endif
-            ${custom_messages|n}.forEach((v, i) => ops.addToast('custom_msg' + i, v.title, v.descr, v.bg));
-
-            $('#chat_send').click((event) => {
-                let msg = $('#chat_message').val();
-                $('#chat_modal').modal('hide');
-                if (msg) {
-                    $.ajax({
-                        url: "/msg",
-                        data: {
-                            'text': msg,
-                            'page': window.location.pathname,
-                            'event': 'chat'
-                        },
-                        method: 'POST'
-                    })
-                            .done((msg) => ops.addToast('userchatgood', 'Send', 'Thank you! The site admin will get back to you shortly.', 'bg-success'))
-                            .fail(ops.addErrorToast)
-                } else {
-                    ops.addToast('emptymessage', 'Empty message', 'Ehhr. Somehow the message is empty.', 'bg-warning')
+            if (!localStorage.getItem('cookiesAccepted')) {
+                    $('#toaster').append(`<%include file="toast.mako" args="toast_id='acceptCookies', toast_title='Cookies', toast_body='This site uses cookies to manage user authentication in order to allow users to keep track of pages users made and to control editing privileges.', toast_bg='bg-info', toast_autohide='false'"/>`);
+                    $('#acceptCookies').toast('show');
+                    $('#acceptCookies').on('hide.bs.toast', (event) => localStorage.setItem('cookiesAccepted', true));
                 }
-            }) //click.
+            %endif
+                ${custom_messages|n}.forEach((v, i) => ops.addToast('custom_msg' + i, v.title, v.descr, v.bg));
 
+                $('#chat_send').click((event) => {
+                    let msg = $('#chat_message').val();
+                    $('#chat_modal').modal('hide');
+                    if (msg) {
+                        $.ajax({
+                            url: "/msg",
+                            data: {
+                                'text': msg,
+                                'page': window.location.pathname,
+                                'event': 'chat'
+                            },
+                            method: 'POST'
+                        })
+                                .done((msg) => ops.addToast('userchatgood', 'Send', 'Thank you! The site admin will get back to you shortly.', 'bg-success'))
+                                .fail(ops.addErrorToast)
+                    } else {
+                        ops.addToast('emptymessage', 'Empty message', 'Ehhr. Somehow the message is empty.', 'bg-warning')
+                    }
+                }) //click.
         % endif
     $(document).on('show.bs.modal', '.modal', function () {
         var zIndex = 1040 + (10 * $('.modal:visible').length);
@@ -472,6 +473,7 @@
 <!--<link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-LRlmVvLKVApDVGuspQFnRQJjkv0P7/YFrw84YYQtmYG4nK8c+M+NlmYDCv0rKWpG" crossorigin="anonymous">-->
 
 <script type="text/javascript">
+    // append last!
     $(document).ready(() => $('head').append(`<link rel="stylesheet" href="/static/ThirdParty/Font-Awesome-Pro/css/all.min.css" crossorigin="anonymous">
     <link rel="stylesheet" href="/static/ThirdParty/bootstrap-tourist/bootstrap-tourist.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/3.0.0-beta.3/css/bootstrap-colorpicker.css">`));
