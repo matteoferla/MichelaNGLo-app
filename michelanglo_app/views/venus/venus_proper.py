@@ -134,7 +134,7 @@ class Venus(VenusBase):
             if not self.has():
                 self.protein_step()
             protein = system_storage[self.handle]
-            return render_to_response("../templates/results/features.js.mako",
+            return render_to_response(os.path.join("..", "..", "templates", "results", "features.js.mako"),
                                       {'protein': protein, 'featureView': '#fv', 'include_pdb': False}, self.request)
         elif step == 'extra':
             self.assert_malformed('extra', 'algorithm')
