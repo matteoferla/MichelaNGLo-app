@@ -181,9 +181,17 @@ $(document).ready(function () {
     %if not no_user:
         ###user mode is on.
         %if freelyeditable and not user:
-            $('#toaster').append(`<%include file="layout_components/toast.mako" args="toast_id='pleaseLogin', toast_title='Page editing', toast_body='This page can be edited by anyone with the link. However, to prevent vandalism you have to be signed in.', toast_bg='bg-info', toast_autohide='false'"/>`);
+            ops.addToast(pleaseLogin,
+                    'Page editing',
+                    'This page can be edited by anyone with the link. However, to prevent vandalism you have to be signed in.',
+                    'bg-info',
+                    false,5000);
             $('#pleaseLogin').toast('show');
         %endif
+        %if encryption_key:
+            window.encryption_key = "${encryption_key}";
+        %endif
+            window.page = "${page}"; // this is the uuid. not the redirect
 
         <%include file="edit_modal/combine.js"/>
         <%include file="edit_modal/mutate_modal.js"/>
