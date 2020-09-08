@@ -59,7 +59,7 @@
         },
         {
            "title": '<i class="far fa-books"></i> More',
-            "text": 'See <a href="/docs">documentation</a> for more information or view <a href="https://www.youtube.com/playlist?list=PLamYj4DQB9j41viManPI2kG8ViPD5IkLV">demo videos</a>.'
+            "text": 'For more information see <a href="/docs">documentation</a>, read <a href="https://doi.org/10.1093/bioinformatics/btaa104">the <i>Bioinformatics</i> paper</a> or view <a href="https://www.youtube.com/playlist?list=PLamYj4DQB9j41viManPI2kG8ViPD5IkLV">demo videos</a>.'
         }
         ]
         #   "title": '<i class="far fa-bolt"></i> NGL powered', "text": 'NGL (<a href="http://nglviewer.org/ngl/api/" target="_blank">nglviewer.org <i class="far fa-external-link"></i></a>) is a JavaScript library that allows the visualisation of protein on the web.'
