@@ -30,7 +30,7 @@ def includeme(config):
                                                                     int(settings['scheduler.days_delete_untouched'])])
     scheduler.add_job(Entasker.monitor_task, 'interval', days=30)
     scheduler.add_job(Entasker.daily_task, 'interval', days=1)
-    scheduler.add_job(Entasker.spam_task, 'interval', days=30, args=[int(settings['scheduler.days_delete_unedited'])])
+    scheduler.add_job(Entasker.spam_task, 'interval', days=365, args=[int(settings['scheduler.days_delete_unedited'])])
     scheduler.add_job(Entasker.unjam_task, 'interval', hours=1)
     scheduler.add_job(Entasker.clear_buffer_task, 'interval', hours=6)
     # =============== START UP TASKS ===============
@@ -82,6 +82,7 @@ class Entasker:
             for user in self.session.query(User):
                 delitura = [page for page in user.owned.select(self.session) if
                             page.edited and (page.safe_age + forewarn_time) > int(days_delete_untouched)]
+                # page.age < int(days_delete_untouched)
                 if not delitura:
                     continue  # nothing in peril
                 elif user.email is None or '@' not in user.email:
