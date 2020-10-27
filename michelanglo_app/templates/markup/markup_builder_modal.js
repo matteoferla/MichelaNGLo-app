@@ -101,9 +101,9 @@ window.interactive_changer = (event, noRun) => {
         let f = $(`#markup_focus${i+1}`).val();
         let structure = NGL.getStage().getComponentByType('structure').structure;
         if ((!! s) && (structure.getView(new NGL.Selection(s)).atomCount !== 0)) {
-            attributes +=` data-selection-alt${i+1}=${s}`;
-            attributes +=` data-focus-alt${i+1}=${f}`;
-            if (!! c) {attributes +=` data-color-alt${i+1}=${c}`}
+            attributes +=` data-selection-alt${i+1}="${s}"`;
+            attributes +=` data-focus-alt${i+1}="${f}"`;
+            if (!! c) {attributes +=` data-color-alt${i+1}="${c}"`}
             sel_el.addClass('is-valid');
             sel_el.removeClass('is-invalid');
         } else {

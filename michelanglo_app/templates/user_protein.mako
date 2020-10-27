@@ -181,7 +181,7 @@ $(document).ready(function () {
     %if not no_user:
         ###user mode is on.
         %if freelyeditable and not user:
-            ops.addToast(pleaseLogin,
+            ops.addToast('pleaseLogin',
                     'Page editing',
                     'This page can be edited by anyone with the link. However, to prevent vandalism you have to be signed in.',
                     'bg-info',
