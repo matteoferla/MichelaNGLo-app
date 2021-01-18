@@ -1,9 +1,11 @@
 from pyramid.view import view_config, notfound_view_config
 from pyramid.renderers import render_to_response
 from pyramid.response import FileResponse
-import os, json
+import os, json, time
 from ..models import User, Page
 from . import custom_messages, valid_extensions
+
+from .buffer import system_storage
 
 import logging
 log = logging.getLogger(__name__)
@@ -43,11 +45,18 @@ def my_view(request):
         bootstrap = 4
     # some special parts...
     if request.matched_route is None:
-        log.warning(f'Could not match {request.url} for {User.get_username(request)}')
+        username = User.get_username(request)
+        log.warning(f'Could not match {request.url} for {username}')
         page = '404'
         request.response.status = 404
-        # the fly on the 404 page is heavy: is this a good thing given that bots are responsible for most 404s??
-        # up the log status if its illegal
+        # delay response by 500 ms.
+        time.sleep(0.5)
+        # no need to co-opt the buffer:
+        # if f'404-{username}' in system_storage:
+        #     system_storage[f'404-{username}'] += 1
+        #     time.sleep(system_storage[f'404-{username}'])  # wait a second or more to reply.
+        # else:
+        #     system_storage[f'404-{username}'] = 0
     elif request.matched_route.name == 'admin' and (not user or (user and user.role != 'admin')):
         log.warning(f'Non admin user ({User.get_username(request)}) attempted to view admin page')
         page = request.matched_route.name
@@ -133,4 +142,7 @@ def favicon_view(request):
 
 @view_config(route_name="robots", renderer='string')
 def robots(request):
+    """
+    All robots welcome. Hacker bots get blocked with 40x status delay.
+    """
     return 'User-Agent: *\nDisallow:\nAllow: /'
