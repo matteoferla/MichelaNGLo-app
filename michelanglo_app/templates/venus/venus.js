@@ -4,10 +4,13 @@
 // .venus-no-mike css classes do not get ported to Michelanglo
 // .venus-plain-mike css classes is ported as text to Michelanglo
 
-window.venus = new Venus();
+//window.venus = new Venus();
 
 
 /////////////////// DOM elements ////////////////////////////////////////////////////
+
+// species and uniprot searches are done by name.js
+// Also URL query is resolved by urlQueriest in name.js
 
 $(window).scroll(() => {
     const card = $('#vieport_side');
@@ -45,21 +48,32 @@ mutation.keyup(e => {
 });
 
 vbtn.click(e => {
-    venus.reset.call(venus);
     if (taxidValue === 'ERROR') {
         $('#error_species').show();
         return 0;
     }
-    if (uniprotValue === 'ERROR') {
+    else if (taxidValue === 'pending') {
+        setTimeout(() => vbtn.click(), 500);
+        return 0;
+    }
+    else if (uniprotValue === 'ERROR') {
         $('#error_gene').show();
         return 0;
     }
-    if (mutation.val().search(/\d+/) === -1) {
+    else if (uniprotValue === 'pending') {
+        setTimeout(() => vbtn.click(), 500);
+        return 0;
+    }
+    else if (mutation.val().search(/\d+/) === -1) {
         $('#error_mutation').show();
         return 0;
     }
-    $(e.target).attr('disabled', 'disabled');
-    venus.analyseProtein();
+    else {
+        window.venus = new Venus();
+        //venus.reset.call(venus);
+        $(e.target).attr('disabled', 'disabled');
+        venus.analyseProtein();
+    }
 });
 
 $('#new_analysis').click(e => venus.reset.call(venus));

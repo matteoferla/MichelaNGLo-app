@@ -45,6 +45,7 @@
 <%block name='modals'>
     ### This adds #structureless_modal
     <%include file="venus_no_structure.mako"/>
+    <%include file="extra_info.mako"/>
 </%block>
 
 <%block name='script'>

@@ -5,6 +5,9 @@
 
 class Venus {
     constructor() {
+        this.prepareDOM();
+        this.uniprot = window.uniprotValue; // name.js code.
+        this.taxid = window.taxidValue;
         this.prolink = ' class="prolink" data-target="#viewport" data-toggle="protein" ';
         this.names = {
             'A': 'Alanine (A/Ala)',
@@ -35,19 +38,21 @@ class Venus {
         };
         this.mutalist = $('#results_mutalist');
         // these will be declared later. these here are for documentation.
-        this.mutation = null;
-        this.position = null;
-        this.protein = null;
-        this.mutational = null;
-        this.structural = null;
-        this.energetical = null;
-        this.energetical_gnomAD = null;
+        this.mutation = undefined;
+        this.position = undefined;
+        this.protein = undefined;
+        this.mutational = undefined;
+        this.structural = undefined;
+        this.energetical = undefined;
+        this.energetical_gnomAD = undefined;
         this.alwaysShowLigands = false;
         this.alwaysShowMutant = $('#showMutant').prop('checked'); //remembered from browser weird habit.
         this.mutaColor = NGL.ColormakerRegistry.addSelectionScheme([['hotpink', '_C'], ["blue", '_N'], ["red", '_O'], ["white", '_H'], ["yellow", '_S'], ["orange", "*"]]);
         this.documentation = {
+            //'conclusion': 'Key features that may be of interest', merged into 'indestr'
             'mut': 'Residue identity, note that because a difference in shape is present it does not mean that the structure cannot accommodate the change',
-            'indestr': 'This is a purely based on the nature of the amino acids without taking into account the position. Despite this, it is a strong predictor.',
+            //'indestr': 'This is a purely based on the nature of the amino acids without taking into account the position. Despite this, it is a strong predictor.',
+            'effect': 'Summary of effect',
             'strcha': 'Model based residue details',
             'ddg': 'Forcefield calculations. A negative value is stabilising, and a value of 1-2 kcal/mol is neutral. A hydrogen bond has about 1-2 kcal/mol. For more see documentation.',
             'location': 'What domains are nearby linearly &mdash;but not necessarily containing the residue',
@@ -65,20 +70,24 @@ class Venus {
     }
 
     reset() {
-        this.protein = null;
-        this.mutation = null;
-        this.structural = null;
-        this.position = null;
-        this.energetical = null;
-        this.energetical_gnomAD = null;
+        this.protein = undefined;
+        this.mutation = undefined;
+        this.structural = undefined;
+        this.position = undefined;
+        this.energetical = undefined;
+        this.energetical_gnomAD = undefined;
+        this.prepareDOM();
+    }
+
+    prepareDOM() {
         delete window.myData;
-        model_id.innerHTML = 'N/A';
+        $('#model_id').innerHTML = 'N/A';
         if (window.myData !== undefined) {
             delete window.myData;
             NGL.getStage().removeAllComponents();
         }
         this.updateStructureOption();
-        this.mutalist.html('');
+        if (this.mutalist !== undefined) this.mutalist.html('');
         $('#results').hide();
         $('#venus_calc').removeAttr('disabled');
         $('result_title').html('<i class="far fa-dna fa-spin"></i> Loading');
@@ -89,12 +98,12 @@ class Venus {
     }
 
     //###################  Steps
-    //Ajax
+    //sends ajax request
     analyse(step) {
         return $.post({
             url: "venus_analyse", data: {
-                uniprot: uniprotValue,
-                species: taxidValue,
+                uniprot: this.uniprot,
+                species: this.taxid,
                 step: step,
                 mutation: this.mutation
             }
@@ -112,7 +121,7 @@ class Venus {
             'ALA': 'A', 'VAL': 'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M'
         };
         let parts = this.mutation.match(/^(\D{1,3})(\d+)(\D{1,3})$/);
-        if (parts === null) return false;
+        if (parts === null) return false; //Not a typo: a failed match returns null not undefined.
         // deal with three letter code.
         if (aa[parts[1]] !== undefined) {
             parts[1] = aa[parts[1]]
@@ -154,9 +163,7 @@ class Venus {
                 } else {
                     this.analyseMutation();
                     this.protein = msg.protein;
-                    let linktext = `<i>this search (browser)</i>: <code>https://venus.sgc.ox.ac.uk/?uniprot=${uniprotValue}&species=${taxidValue}&mutation=${this.mutation}</code><br/>`;
-                    linktext += `<i>this search (API)</i>: <code>https://venus.sgc.ox.ac.uk/venus_analyse?uniprot=${uniprotValue}&species=${taxidValue}&mutation=${this.mutation}</code>`;
-                    this.createEntry('link', 'Links', linktext);
+                    this.createLinks();
 
                     //this.analyse('fv') is the same as get_uniprot but utilising the protein data.
                     $('#results').show(500, () => this.analyse('fv').done(msg => {
@@ -167,10 +174,12 @@ class Venus {
                     }));
                     $('html, body').animate({scrollTop: $('#results').offset().top}, 2000);
                     $('#result_title').html(`${this.protein.gene_name} ${this.protein._mutation} <small>(${this.protein.recommended_name})</small>`);
-                    let exttext = this.makeExt('https://www.uniprot.org/uniprot/' + uniprotValue, 'Uniprot:' + uniprotValue) + ' &mdash; ' +
-                        this.makeExt('https://www.rcsb.org/pdb/protein/' + this.protein.uniprot, 'PDB:' + uniprotValue) + ' &mdash; ' +
+                    let exttext = this.makeExt('https://www.uniprot.org/uniprot/' + this.uniprot, 'Uniprot:' + this.uniprot) + ' &mdash; ' +
+                        this.makeExt('https://www.rcsb.org/pdb/protein/' + this.uniprot, 'PDB:' + this.uniprot) + ' &mdash; ' +
                         this.makeExt('https://gnomAD.broadinstitute.org/gene/' + this.protein.gene_name, 'gnomAD:' + this.protein.gene_name);
                     this.createEntry('extlink', 'External links', exttext);
+                    // alter uniprot links in page (e.g. modals)
+                    $('.uniprotLink').attr('href', 'https://www.uniprot.org/uniprot/' + this.uniprot);
                 }
             });
 
@@ -199,13 +208,8 @@ class Venus {
                                             <p>Differing atoms in  ${this.names[this.mutational.to_residue]} highlighted in red</p></div>
                                         </div>`;
                 this.createEntry('mut', 'Mutation', mutationtext);
-                // apriori
-                let aprioritext = this.mutational.apriori_effect;
-                if (this.mutational.to_residue === '*') {
-                    aprioritext += `<span ${this.prolink} data-focus="domain" data-selection="1-${this.mutational.residue_index}:A">remnant</span>
-                                    and <span ${this.prolink} data-focus="domain" data-selection="${this.mutational.residue_index}-99999:A">lost</span>`
-                }
-                this.createEntry('indestr', 'Effect independent of structure', aprioritext);
+                // apriori for now.
+                this.concludeMutational();
                 //structural card
                 // TO COPYPASTE
 
@@ -249,6 +253,7 @@ class Venus {
     //step 3
     analyseStructural() {
         //step 3
+        // see parseStructuralResponse for main.
         this.setStatus('Running step 3/5', 'working');
         return this.analyse('structural').done(msg => this.parseStructuralResponse.call(this, msg));
     }
@@ -258,15 +263,17 @@ class Venus {
             $('#structureless_modal').modal('show');
             this.setStatus('No structure.', 'halt');
             this.fallbackAnalyse();
+            this.concludeMutational();
         } else if (msg.error) {
             this.setStatus('Failure at step 3/5', 'crash');
             ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
             this.fallbackAnalyse();
-
+            this.concludeMutational();
         } else {
             this.structural = msg.structural;
             this.analyseddG();
             if (!!this.structural.coordinates.length) this.loadStructure();
+            this.concludeMutational();
         }
         // activate all prolinks
         // const pros = $('#results_mutalist .prolink');
@@ -362,6 +369,7 @@ class Venus {
                     });
                 }
                 this.updateStructureOption();
+                this.concludeMutational();
             }
             //{ddG: float, scores: Dict[str, float], native:str, mutant:str, rmsd:int}
         });
@@ -381,6 +389,7 @@ class Venus {
                 //refill
                 this.createLocation();
                 this.activate_data_gnomad();
+                this.concludeMutational();
             }
         });
     }
@@ -394,8 +403,8 @@ class Venus {
         this.setStatus(`Running extra job ${mutation}`, 'working');
         return $.post({
             url: "venus_analyse", data: {
-                uniprot: uniprotValue,
-                species: taxidValue,
+                uniprot: this.uniprot,
+                species: this.taxid,
                 step: 'extra',
                 mutation: this.mutation, //the data is stored serverside for an hour. and this is one part of the hash.
                 extra: mutation,
@@ -470,8 +479,8 @@ class Venus {
         const extension = name.split('.').pop();
         $.post({
             url: "venus_analyse", data: {
-                uniprot: uniprotValue,
-                species: taxidValue,
+                uniprot: this.uniprot,
+                species: this.taxid,
                 step: 'customfile',
                 mutation: this.mutation,
                 pdb: pdb,
@@ -534,7 +543,10 @@ class Venus {
 
     //###################  Entry
     //an 'entry' is a flush li within the card (within these there may be li).
-    createEntry(id, title, text) { //adds or creates the entry.
+    createEntry(id, title, text) {
+        //adds or creates the entry.
+        // namely, the row in Mutation with the line between it.
+        // the location is dictated by `entry_order`, which is generated by `documentation`.
         const el = $('#' + id);
         const n = this.entry_order.indexOf(id);
         // add entry appropriately
@@ -738,6 +750,12 @@ class Venus {
         this.createEntry('location', 'Location', locationtext);
     }
 
+    createLinks() {
+        let linktext = `<i>this search (browser)</i>: <code>https://venus.sgc.ox.ac.uk/?uniprot=${this.uniprot}&species=${this.taxid}&mutation=${this.mutation}</code><br/>`;
+        linktext += `<i>this search (API)</i>: <code>https://venus.sgc.ox.ac.uk/venus_analyse?uniprot=${this.uniprot}&species=${this.taxid}&mutation=${this.mutation}</code>`;
+        this.createEntry('link', 'Links', linktext);
+    }
+
     activate_data_gnomad() { //called by step 5.
         const dg = $('[data-gnomad]');
         dg.off('click'); //Unsure when this would occur.
@@ -823,8 +841,8 @@ class Venus {
 
     loadStructure() {
         if (NGL.getStage('viewport') !== undefined) { //this is a rerun... resetting
-            myData.proteins = [];
-            myData.currentIndices = [-1];
+            window.myData = undefined;
+            NGL.specialOps.postInitialise('viewport');
         }
         NGL.specialOps.multiLoader('viewport', [{
             name: "wt",
@@ -835,23 +853,25 @@ class Venus {
             chain_definitions: this.structural.chain_definitions,
             history: this.structural.history
         }])
-            .then(protein => {NGL.specialOps.showResidue('viewport', this.position + ':A');
-            NGL.specialOps.enableClickToShow('viewport');} );
+            .then(protein => {
+                NGL.specialOps.showResidue('viewport', this.position + ':A');
+                NGL.specialOps.enableClickToShow('viewport');
+            });
         // When run locally and with an already analysed case, D3 is outrun...
         const empower = () => {
-            UniprotFV.empower();
+            UniprotFV.empower(); // set the click events
             model_id.innerHTML = this.structural.code;
             if (this.structural.chain_definitions !== undefined) {
                 const chainAs = this.structural.chain_definitions.filter(c => c.chain === 'A');
                 const chainA = (chainAs.length > 0) ? chainAs[0] : this.structural.chain_definitions[0];
-                // D3, added at the empower step (??) is a bit slow at loading.
-                ft.addModel(chainA.x, chainA.y, venus.protein.sequence.length);
+                // D3 is a bit slow at loading.
+                setTimeout(() => ft.addModel(chainA.x, chainA.y, venus.protein.sequence.length), 500);
             }
         };
         if (window.ft === undefined) {
             setTimeout(empower, 1000)
         } else {
-            empower()
+            empower();
         }
 
 
@@ -860,7 +880,7 @@ class Venus {
         if (this.structural.code.length === 4) {
             strloctext += this.makeExt("https://www.rcsb.org/structure/" + this.structural.code, 'PDB:' + this.structural.code) + '</p>';
         } else {
-            strloctext += this.makeExt("https://swissmodel.expasy.org/repository/uniprot/" + window.uniprotValue, 'SWISSMODEL:' + this.structural.code) + '</p>';
+            strloctext += this.makeExt("https://swissmodel.expasy.org/repository/uniprot/" + this.uniprot, 'SWISSMODEL:' + this.structural.code) + '</p>';
         }
         strloctext += `<p><i>Solvent exposure:</i> ${(this.structural.buried) ? 'buried' : 'surface'} (RSA: ${Math.round(this.structural.RSA * 100) / 100})</p>`;
         strloctext += `<p><i>Secondary structure type:</i> ${this.structural.SS}</p>`;
@@ -884,6 +904,7 @@ class Venus {
 
     updateStructureOption() {
         if (window.myData === undefined) return 0;
+        NGL.getStage('viewport').handleResize(); // asynchronous changes...
         const so = $('#structureOption');
         so.html('');
         myData.proteins.map(({name}) => so.append(`<li><span ${this.prolink} data-load="${name}">${name}</span></li>`));
@@ -904,14 +925,15 @@ class Venus {
         if (window.myData.proteins.filter(({name}) => name === 'mutant').length === 1) {
             so.append(`<li><span ${this.prolink} data-load="wt" data-focus="overlay mutant" data-selection="${this.position}:A">Overlay of wild-type and mutant</span></li>`);
         }
-        so.find('.prolink').each((i, e) => {$(e).protein();
-                                            $(e).click(event => {
-                                                    // is this unbound?
-                                                    venus.showMutant.call(venus);
-                                                    venus.showLigands.call(venus);
-                                                    venus.last_clicked_prolink = event.target;
-                                                });
-                                            });
+        so.find('.prolink').each((i, e) => {
+            $(e).protein();
+            $(e).click(event => {
+                // is this unbound?
+                venus.showMutant.call(venus);
+                venus.showLigands.call(venus);
+                venus.last_clicked_prolink = event.target;
+            });
+        });
 
         if (this.energetical && window.myData.proteins.filter(({name}) => name === 'phosphorylated').length === 0) {
             so.append('<li><button id="phosphorylate-btn" type="button" class="btn btn-outline-secondary btn-sm" onclick="venus.phosphorylate.call(venus)">Make phosphorylated model</button></li>');
@@ -939,25 +961,174 @@ class Venus {
         wantedIndices.pop(myData.currentIndices['viewport']);
         wantedIndices.unshift(myData.currentIndices['viewport']);
         let data = {
-            uniprot: window.uniprotValue, //same as this.protein.uniprot,
-            species: window.taxidValue,
+            uniprot: this.uniprot, // same as this.protein.uniprot or window.UniprotValue
+            species: this.taxid,
             mutation: this.mutation,
             text: text,
             code: this.structural.code, //pdb code. No JS is accepted from user.
             definitions: this.structural.chain_definitions,
             history: this.structural.history,
             prolink: prolink,
-            protein: myData.proteins.filter((v,i) => wantedIndices.includes(i))
+            protein: myData.proteins.filter((v, i) => wantedIndices.includes(i))
         };
         // other end at page_creation.py
-        return $.post({url: "venus_create", data: {'proteindata': JSON.stringify(data)}
-        , dataType: 'json'})
+        return $.post({
+            url: "venus_create", data: {'proteindata': JSON.stringify(data)}
+            , dataType: 'json'
+        })
             .done(function (msg) {
                 ops.addToast('jobcompletion', 'Conversion complete', 'The data has been converted successfully.', 'bg-success');
                 ops.addToast('redirect', 'Conversion complete', 'Redirecting you to page ' + msg.page, 'bg-info');
                 window.location.href = "/data/" + msg.page;
             })
             .fail(ops.addErrorToast);
+    }
+
+    // ------------ Summary conclusions ----------------------------------------
+    // From mutational
+    concludeMutational() {
+        // is it a PTM?
+        const details = {
+            buried: this.structural !== undefined && this.structural.buried,
+            distorted: this.energetical !== undefined && this.energetical.rmsd > 0.2,
+            toNegCharged: this.mutational.to_residue === 'E' || this.mutational.to_residue === 'D',
+        };
+        // assess any salient features
+        let effects = [this.mutational.apriori_effect,
+            this.concludeMutational_nonsense(details),
+            this.concludeMutational_destabilising(details),
+            this.concludeMutational_phospho(details),
+            this.concludeMutational_disulfo(details),
+            this.concludeMutational_ubi(details),]
+            .filter(v => v !== null);
+
+        // ubiquitin
+        // other PTM
+        // disulfide
+        //       'buried_pro',
+        //       'helix_pro',
+        //       'buried_charge',
+        //       'buried_hydrophilic',
+        //       'disallowed_phi',
+        //       'buried_gly',
+        //       'buried_salt
+        //        'alter',
+        //        'destabilizing',
+        const icon = '<span class="fa-li"><i class="far fa-lightbulb-on"></i></span>';
+        const effect = ('<ul  class="fa-ul">' + (effects.map(v => `<li>${icon}${v}</li>`)).join('\n') + '</ul>');
+        this.createEntry('effect', 'Effect', effect);
+    }
+
+    concludeMutational_nonsense({}) {
+        if (this.mutational.to_residue === '*') {
+            return `<span ${this.prolink}
+                        data-focus="domain" 
+                        data-selection="1-${this.mutational.residue_index}:A">
+                        remnant</span>
+                        and <span ${this.prolink} data-focus="domain" 
+                        data-selection="${this.mutational.residue_index}-99999:A">lost</span>`;
+        } else {
+            return null;
+        }
+    };
+
+    concludeMutational_buttonMaker(id, msg) {
+        return `<a href="#${id}" class="text-info" data-toggle="modal" data-target="#${id}">${msg}</a>`;
+    }
+
+    concludeMutational_filter(filterFx) {
+        const isAt = this.mutational
+            .features_at_mutation
+            .filter(filterFx)
+            .length > 0;
+        const isNear = this.mutational
+            .features_near_mutation
+            .filter(filterFx)
+            .length > 0;
+        const opening = isAt ? 'The mutated residue disrupts ' : 'The mutated residue may disrupt a nearby ';
+        return [isAt, isNear, opening];
+    }
+
+    concludeMutational_phospho({buried, distorted, toNegCharged}) {
+        const phosphoFilter = entry => entry.description === 'phosphorylated' || entry.ptm === 'p';
+        const [isAt, isNear, opening] = this.concludeMutational_filter(phosphoFilter);
+        let phosphoeffects = [];
+        if (isAt || isNear) {
+            // buried
+            if (buried) {
+                // cryptic phospho site.
+                phosphoeffects.push(
+                    this.concludeMutational_buttonMaker('modalBuriedPhosphorylation',
+                        'a buried phophosphorylation site'));
+            }
+            if (distorted) {
+                // distorted phospho site.
+                phosphoeffects.push('that is ' +
+                    this.concludeMutational_buttonMaker('modalDistortedPhosphorylation',
+                        'altering the protein'));
+            }
+            //charged
+            if (toNegCharged) {
+                // charged
+                phosphoeffects.push('changing the charge' +
+                    this.concludeMutational_buttonMaker('modalChargedPhosphorylation',
+                        'negatively charged residue'));
+            }
+            // combine phospho
+
+            let phosphoeffect = opening +
+                this.concludeMutational_buttonMaker('modalPhosphorylation',
+                    'a phophosphorylation site');
+            if (phosphoeffects.length > 0) {
+                phosphoeffect += ' — ';
+                phosphoeffect += phosphoeffects.join(', ');
+            }
+            phosphoeffect += '.';
+            return phosphoeffect;
+        } else {
+            return null;
+        }
+    }
+
+    concludeMutational_disulfo({}) {
+        const filter = entry => entry.description === 'disulfide';
+        const [isAt, isNear, opening] = this.concludeMutational_filter(filter);
+        if (isAt || isNear) {
+            return opening +
+                this.concludeMutational_buttonMaker('modalDisulfide',
+                    'a disulfide bond') +
+                '.';
+        } else {
+            return null;
+        }
+    }
+
+    concludeMutational_ubi({}) {
+        const filter = entry => entry.ptm === 'ub' || entry.ptm === 'sm';
+        const [isAt, isNear, opening] = this.concludeMutational_filter(filter);
+        if (isAt || isNear) {
+            return opening +
+                this.concludeMutational_buttonMaker('Ubiquitination',
+                    'a ubiquitination site') +
+                '.';
+        } else {
+            return null;
+        }
+    }
+
+    concludeMutational_destabilising({}) {
+        const destabilising = this.concludeMutational_buttonMaker('modalDestabilisation',
+            'destabilising');
+        if (this.energetical.ddG > 10) {
+            return `the mutation is extremely ${destabilising} and the calculations are likely to be inaccurate
+                    (∆∆G: ~${venus.energetical.ddG.toFixed(0)} kcal/mol)`
+        } else if (this.energetical.ddG > 5) {
+            return `the mutation is strongly ${destabilising} (∆∆G: ${venus.energetical.ddG.toFixed(1)} kcal/mol)`
+        } else if (this.energetical.ddG > 2) {
+            return `the mutation is mildly ${destabilising} (∆∆G: ${venus.energetical.ddG.toFixed(1)} kcal/mol)`
+        } else {
+            return null;
+        }
     }
 }
 

@@ -195,11 +195,11 @@ class Venus(VenusBase):
         protein.predict_effect()
         featpos = protein.get_features_at_position(protein.mutation.residue_index)
         featnear = protein.get_features_near_position(protein.mutation.residue_index)
+        pos_percent = round(protein.mutation.residue_index / len(protein) * 100)
         self.reply['mutation'] = {**self.jsonable(protein.mutation),
                                   'features_at_mutation': featpos,
                                   'features_near_mutation': featnear,
-                                  'position_as_protein_percent': round(
-                                      protein.mutation.residue_index / len(protein) * 100),
+                                  'position_as_protein_percent': pos_percent,
                                   'gnomAD_near_mutation': protein.get_gnomAD_near_position()}
 
         ### STEP 3
