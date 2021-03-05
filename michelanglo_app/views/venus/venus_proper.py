@@ -63,6 +63,10 @@ class Venus(VenusBase):
                 log.error(f'Impossible... pdb.x out of bounds in unicode for gene {uniprot}')
                 continue
 
+    @view_config(route_name='venus_debug', renderer="../../templates/venus/venus_debug.mako")
+    def debug(self):
+        return {'user': self.request.user, 'mutation_mode': 'main', **self.generic_data}
+
     ############################### Analyse
     @view_config(route_name='venus_analyse', renderer="json")
     def analyse(self):

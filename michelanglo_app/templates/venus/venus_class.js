@@ -1108,7 +1108,7 @@ class Venus {
         const [isAt, isNear, opening] = this.concludeMutational_filter(filter);
         if (isAt || isNear) {
             return opening +
-                this.concludeMutational_buttonMaker('Ubiquitination',
+                this.concludeMutational_buttonMaker('modalUbiquitination',
                     'a ubiquitination site') +
                 '.';
         } else {

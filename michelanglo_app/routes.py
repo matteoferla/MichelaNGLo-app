@@ -49,6 +49,7 @@ def includeme(config):
     config.add_route('venus_analyse', '/venus_analyse')
     config.add_route('venus_create', '/venus_create')
     config.add_route('venus_transcript', '/venus_transcript')
+    config.add_route('venus_debug', '/venus_debug')
     config.add_route('extended', '/michelanglo.js')
     config.add_route('extended_menu', '/michelanglo_menu.js')
     config.add_route('userdata', '/data/{id}')
