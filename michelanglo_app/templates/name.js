@@ -278,10 +278,10 @@ const urlQueriest = () => {
     let queryGene = query.get('uniprot') || query.get('gene');
     let queryMutation = query.get('mutation');
     if (!!querySpecies) {
-        species.val(querySpecies);
+        $('#species').val(querySpecies);
     }
     if (!!queryGene) {
-        gene.val(queryGene);
+        $('#gene').val(queryGene);
     }
     if (!!queryMutation) {
         $('#mutation').val(queryMutation);
@@ -321,6 +321,23 @@ if (mutation.val()) {
         window.gene_xhr.then(msg => $('#venus_calc').click());
     }
 }
+
+// random needs not to check taxid and uniprot as they are already provided
+const randomURLQuery = () => {
+    const query = new URLSearchParams(window.location.search);
+    if (query.get('random') !== null) {
+        $.getJSON('/venus_random').then(suggested =>
+            { $('#species').val(suggested.species);
+              window.taxidValue = parseInt(suggested.taxid);
+              $('#gene').val(suggested.name);
+              window.uniprotValue = suggested.uniprot;
+              $('#mutation').val(suggested.mutation);
+              $('#venus_calc').click();
+            }
+        );
+    }
+};
+randomURLQuery();
 
 
 //</%text>
