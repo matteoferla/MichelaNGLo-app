@@ -26,7 +26,7 @@
 </%block>
 
 <%block name='modals'>
-    ### This adds #structureless_modal
+    ### This adds #modalStructureless
     <%include file="venus_no_structure.mako"/>
 </%block>
 

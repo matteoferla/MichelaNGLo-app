@@ -8,6 +8,8 @@
         <a href="https://www.phosphosite.org/homeAction.action" target="_blank">PhosphositePlus</a>
         so a next step could be to see how common these are.
         It may be helpful to also check whether anything is known for paralogues of the protein.
+        Also, if your variant is near a phosphorylated residue, but not one, check the "motif" section to see if a
+        linear motif is predicted and whether it is likely to be affected (this is inexact, but can help).
         <br/>
         Loss of a post-translational modification could mean there is a loss of regulation. For example:
         <ul><li>

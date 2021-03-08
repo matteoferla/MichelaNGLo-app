@@ -260,7 +260,7 @@ class Venus {
 
     parseStructuralResponse(msg) {
         if (msg.has_structure === false) {
-            $('#structureless_modal').modal('show');
+            $('#modalStructureless').modal('show');
             this.setStatus('No structure.', 'halt');
             this.fallbackAnalyse();
             this.concludeMutational();
@@ -1013,7 +1013,6 @@ class Venus {
         //       'buried_gly',
         //       'buried_salt
         //        'alter',
-        //        'destabilizing',
         const icon = '<span class="fa-li"><i class="far fa-lightbulb-on"></i></span>';
         const effect = ('<ul  class="fa-ul">' + (effects.map(v => `<li>${icon}${v}</li>`)).join('\n') + '</ul>');
         this.createEntry('effect', 'Effect', effect);
@@ -1119,7 +1118,9 @@ class Venus {
     concludeMutational_destabilising({}) {
         const destabilising = this.concludeMutational_buttonMaker('modalDestabilisation',
             'destabilising');
-        if (this.energetical.ddG > 10) {
+        if (this.energetical === undefined) {
+            return null;
+        } else if (this.energetical.ddG > 10) {
             return `the mutation is extremely ${destabilising} and the calculations are likely to be inaccurate
                     (∆∆G: ~${venus.energetical.ddG.toFixed(0)} kcal/mol)`
         } else if (this.energetical.ddG > 5) {

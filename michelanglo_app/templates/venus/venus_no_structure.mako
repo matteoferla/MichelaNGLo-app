@@ -1,4 +1,4 @@
-<div class="modal" tabindex="-1" role="dialog" id="structureless_modal">
+<div class="modal" tabindex="-1" role="dialog" id="modalStructureless">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">

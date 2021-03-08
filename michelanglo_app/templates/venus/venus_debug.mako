@@ -23,7 +23,7 @@
         the <code>#effect</code> entry. The methods called by this have a non-standard case with underscore for clarity.</p>
         <div class="list-group">
             <%
-                modals = {'#structureless_modal':'raised when no structure',
+                modals = {'#modalStructureless':'raised when no structure',
                           '#': 'No link added by Venus.prototype.concludeMutational_nonsense',
                           '#modalPhosphorylation': 'Link added by Venus.prototype.concludeMutational_phospho',
                           '#modalBuriedPhosphorylation': 'Link added by Venus.prototype.concludeMutational_phospho',
@@ -49,7 +49,7 @@
 </%block>
 
 <%block name='modals'>
-    ### This adds #structureless_modal
+    ### This adds #modalStructureless
     <%include file="venus_no_structure.mako"/>
     <%include file="extra_info.mako"/>
 </%block>
