@@ -310,7 +310,7 @@
                                                                                           target="_blank">Schr&ouml;dinger
                     , LLC <i class="far fa-external-link-square"></i></a>. The authors are not affiliated or involved
                     with PyMOL or Schr&ouml;dinger.
-                    <br/>Data is not kept for commercial purposes, see data <a href="/docs/users">policy
+                    Data is not kept for commercial purposes, see data <a href="/docs/users">policy
                         documentation</a>.</small></div>
             <div class="d-none d-lg-block col-5 offset-lg-1 pt-2">
                 %if offline:
@@ -327,8 +327,8 @@
                          onclick="window.location.href = 'https://oxfordbrc.nihr.ac.uk/';">
                         </div>
                         <div class="px-2 flex-fill">
-                            <img src="/static/SGC_reverse_trans.png" alt="SGC" class="footer-logo"
-                         onclick="window.location.href = 'https://www.sgc.ox.ac.uk/';">
+                            <img src="/static/cmd_logo.png" alt="CMD" class="footer-logo"
+                         onclick="window.location.href = 'https://www.cmd.ox.ac.uk/';">
                         </div>
                     </div>
                 %endif
@@ -338,7 +338,7 @@
                 &mdash;
                 <a href='https://oxfordbrc.nihr.ac.uk/'>BRC</a>
                 &mdash;
-                <a href='https://www.sgc.ox.ac.uk/'>SGC</a>
+                <a href='https://www.cmd.ox.ac.uk/'>CMD</a>
             </div>
         </div>
 
