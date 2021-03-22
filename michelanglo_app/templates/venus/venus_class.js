@@ -65,6 +65,7 @@ class Venus {
         }
         this.entry_order = Object.keys(this.documentation); //order is changed dynamically.
         this.animation_speed = 1000;
+        this.seq = undefined;
         this.last_clicked_prolink = '';
 
     }
@@ -76,6 +77,7 @@ class Venus {
         this.position = undefined;
         this.energetical = undefined;
         this.energetical_gnomAD = undefined;
+        this.seq = undefined;
         this.prepareDOM();
     }
 
@@ -246,6 +248,9 @@ class Venus {
                     elmtext += '</ul>';
                     this.createEntry('motif', 'Motif', elmtext);
                 }
+
+                // Sequence
+                this.addSequence();
             }
         })
     }
@@ -539,6 +544,136 @@ class Venus {
             default:
                 s.html(label);
         }
+    }
+
+    addSequence() {
+        const card = $('#seqCard');
+        // --- Load -----
+        this.seq = new Sequence(this.protein.sequence);
+        const legend = [];
+        const coverage = new Array(this.protein.sequence.length)
+            .fill(null)
+            .map((v, i) => ({
+                    start: i,
+                    end: i + 1,
+                    color: 'black',
+                    tooltip: `${this.protein.sequence[i]}${i + 1}`,
+                    underscore: false,
+                    onclick: () => NGL.specialOps
+                        .showResidue('viewport',
+                            i + 1,
+                            'turquoise',
+                            2, undefined,
+                            i + 1,
+                            undefined,
+                            true)
+                })
+            );
+        // the width of the sequence is a bit more than 1 em because of the space
+        // so technically * 1.1 hence the 5.5
+        // #seqCard has a padding of 2 px.
+        // .charNumbers is about 2 em.
+        const availSpace = (card.width() - 2) / parseFloat($("body").css("font-size")) - 2;
+        const charsPerLine = Math.floor(availSpace / 5.5) * 10; // em
+        if (charsPerLine <= 0 || card.is(':animated')) {
+            // locally this gets triggered before the DOM finishes the .show of results
+            setTimeout(() => this.addSequence(), 200);
+            return;
+        }
+        this.seq.render('#seqDiv', {charsPerLine: charsPerLine});
+        $('.sequenceHeader').detach(); //title off.
+        // --- Add no-go ---
+        // this would need to be added after structural data.
+        // if (this.structural !== undefined && this.structural.structure !== undefined) {
+        //     const s_min = this.structural.structure.x;
+        //     const s_max = this.structural.structure.y;
+        //     coverage.forEach((v, i) => {
+        //         if (v.start < s_min) {coverage[i].bgcolor = 'grey'}
+        //         else if (v.start > s_max) {coverage[i].bgcolor = 'grey'}
+        //         // else pass
+        //     })
+        // }
+        // --- Add Mut -----
+        coverage[this.mutational.residue_index - 1].bgcolor = 'salmon';
+        coverage[this.mutational.residue_index - 1].tooltip += ' Mutated residue';
+        // --- feats -----
+        // PTMs
+        if (this.protein.features['PSP_modified_residues'] !== undefined) {
+            this.protein.features['PSP_modified_residues'].forEach(v => {
+                //{symbol: "RBMX2", residue_index: 8, from_residue: "K", ptm: "ub", count: 1}
+                coverage[v.residue_index - 1].underscore = true;
+                coverage[v.residue_index - 1].tooltip += ' ' +v.ptm;
+            });
+            // legend later.
+        }
+        if (this.protein.features['modified residue'] !== undefined) {
+            this.protein.features['modified residue'].forEach(v => {
+                //{x: 149, y: 149, description: "Phosphoserine", id: "modifiedresidue_149", type: "modified residue"}
+                coverage[v.x - 1].underscore = true;
+                coverage[v.x - 1].tooltip += ' ' + v.description;
+            });
+            // legend later.
+        }
+        // xlink
+        if (this.protein.features['cross-link'] !== undefined) {
+            this.protein.features['cross-link'].forEach(v => {
+                //{symbol: "RBMX2", residue_index: 8, from_residue: "K", ptm: "ub", count: 1}
+                coverage[v.x - 1].underscore = true;
+                coverage[v.x - 1].tooltip += ' ' +v.description;
+            });
+        }
+        // --- Add gnomad ---
+        // "Variant(id='gnomAD_17_17_rs994011128', x=17, y=17,…, description='Q17H (rs994011128)', homozygous=0)"
+        // gnomAD off for now: too much!
+        this.protein.gnomAD.forEach(v => {
+            let m = v.match(/description=\'\w(\d+).*\'/);
+            if (m === null) return;
+            let [description, x] = m.slice(0, 2);
+            x = parseInt(x);
+            if (x > this.protein.sequence.length) return; // wrong isoform!
+            coverage[x - 1].color = 'gray';
+            coverage[x - 1].tooltip += ' '+description.replace('description=', '');
+        });
+        //legend.push({name: "gnomAD", color: "purple", underscore: false});
+        // --- Add Legend & spans -----
+        // double coverage caused issues.
+        // const dejavu = [];
+        // const coverage2 = coverage.reduce((a, v)=>{
+        //                         if (! dejavu.includes(v.start)) {a.push(v);
+        //                                                      dejavu.push(v.start);
+        //                                                      }
+        //                         return a;},
+        //                 []);
+        this.seq.coverage(coverage);
+        legend.push({name: "Mutated residue", color: "salmon"});
+        legend.push({name: "Post-translationally modified residue", color: 'black', underscore: true});
+        legend.push({name: "gnomAD missense", color: 'gray', underscore: false});
+        this.seq.addLegend(legend);
+        this.hideCard('seqCard');
+    }
+
+    hideCard(id) {
+        const card = $(`#${id}`);
+        card.find('.card-body').hide(500);
+        card.find('.collapse-icon').children().detach();
+        card.find('.collapse-icon').append('<i class="far fa-expand-arrows-alt"></i>');
+        const sub = card.find('.text-muted');
+        sub.text('(Click to expand)');
+        card.find('.card-header')
+            .unbind('click')
+            .click(event => this.showCard(id));
+    }
+
+    showCard(id) {
+        const card = $(`#${id}`);
+        card.find('.card-body').show(500);
+        card.find('.collapse-icon').children().detach();
+        card.find('.collapse-icon').append('<i class="far fa-compress-arrows-alt"></i>');
+        const sub = card.find('.text-muted');
+        sub.text(sub.data('show-text'));
+        card.find('.card-header')
+            .unbind('click')
+            .click(event => this.hideCard(id));
     }
 
     //###################  Entry
@@ -885,7 +1020,7 @@ class Venus {
         strloctext += `<p><i>Solvent exposure:</i> ${(this.structural.buried) ? 'buried' : 'surface'} (RSA: ${Math.round(this.structural.RSA * 100) / 100})</p>`;
         strloctext += `<p><i>Secondary structure type:</i> ${this.structural.SS}</p>`;
         strloctext += `<p><i>Residue resolution:</i> ${(this.structural.has_all_heavy_atoms) ? 'Resolved in crystal' : 'Some heavy atoms unresolved (too dynamic)'}</p>`;
-        if (this.structural.closest_ligand !== undefined && this.structural.closest_ligand.match(/\[.*\]/)  !== null) {
+        if (this.structural.closest_ligand !== undefined && this.structural.closest_ligand.match(/\[.*\]/) !== null) {
             //this.structural.closest_ligand = [GDP]180.O3B:A
             let lig = this.structural.closest_ligand.match(/\[.*\]/)[0].slice(1, -1);
             let ds = lig + ' and ' + this.structural.closest_ligand.match(/\:\w/)[0];

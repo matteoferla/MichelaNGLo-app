@@ -91,12 +91,23 @@
 
             ##### second block: Feature
 
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header"><h5 class="card-title">
-                    <i class="far fa-map-signs"></i> Features
-                </h5><h6 class="card-subtitle mb-2 text-muted">
-                    (Click on a feature to visualise it on the structure)
-                </h6></div>
+            <div class="card mb-4 shadow-sm" id="featCard">
+                <div class="card-header" style="cursor:pointer;">
+                    <div class="row">
+
+                        <div class="col-11">
+                            <h5 class="card-title">
+                                <i class="far fa-map-signs"></i> Features
+                            </h5>
+                            <h6 class="card-subtitle mb-2 text-muted" data-show-text="(Click on a feature to visualise it on the structure)">
+
+                            </h6>
+                        </div>
+                        <div class="col-1 my-auto collapse-icon">
+                            <i class="far fa-expand-arrows"></i>
+                        </div>
+                    </div>
+                </div>
 
                 ###################### arrow ###################################
 
@@ -122,10 +133,39 @@
             </div>
 
 
+            ##### two-point-oneth block: sequence
+            %if mutation_mode == 'main':
+                <div class="card mb-4 shadow-sm" id="seqCard">
+                <div class="card-header" style="cursor:pointer;">
+                    <div class="row">
+                        <div class="col-11">
+                            <h5 class="card-title">
+                                <i class="far fa-bacon"></i> Sequence
+                            </h5>
+                            <h6 class="card-subtitle mb-2 text-muted" data-show-text="(Click on residue to show on protein)">
+                            &nbsp;
+                            </h6>
+                        </div>
+                        <div class="col-1 my-auto collapse-icon">
+                            <i class="far fa-expand-arrows"></i>
+                        </div>
+                    </div>
+                </div>
+
+                ###################### lines ###################################
+
+                <div class="card-body p-0">
+                    <div class="arrow-right"></div>
+                    <div class="arrow-right2">
+                    </div>
+                    <div id="seqDiv" class="p-2"></div>
+                </div>
+            </div>
+            %endif
 
             ##### third block: Mutation results
             %if mutation_mode == 'main':
-            <div class="card shadow-sm">
+            <div class="card mb-4 shadow-sm">
                 <div class="card-header">
                     <h5 class="card-title">
                         <i class="far fa-dna"></i> Mutation
@@ -146,7 +186,7 @@
                 </div>
             </div>
             %elif mutation_mode == 'multi':
-            <div class="card shadow-sm">
+            <div class="card mb-4 shadow-sm">
                 <div class="card-header">
                     <h5 class="card-title">
                         <i class="far fa-dna"></i> Models

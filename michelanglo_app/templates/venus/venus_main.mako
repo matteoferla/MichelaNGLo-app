@@ -66,4 +66,5 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.js"></script>
     ###<script src="https://cdn.rawgit.com/calipho-sib/feature-viewer/v1.0.0/dist/feature-viewer.min.js"></script>
     <script src="/static/ThirdParty/feature-viewer.js" async></script>
+    <script src="https://cdn.jsdelivr.net/gh/calipho-sib/sequence-viewer@0.2.35/dist/sequence-viewer.min.js" async></script>
 </%block>
