@@ -56,9 +56,11 @@ class Venus(VenusBase):
             else:
                 continue
             i = random.randint(pdb.x, pdb.y)
+            # the to_resn cannot be the same as original or *
+            to_resn = random.choice(list(set(Mutation.aa_list) - {'*', protein.sequence[i - 1]}))
             try:
                 return {'name': name, 'uniprot': uniprot, 'taxid': '9606', 'species': 'human',
-                        'mutation': f'p.{protein.sequence[i - 1]}{i}{random.choice(Mutation.aa_list)}'}
+                        'mutation': f'p.{protein.sequence[i - 1]}{i}{to_resn}'}
             except IndexError:
                 log.error(f'Impossible... pdb.x out of bounds in unicode for gene {uniprot}')
                 continue
