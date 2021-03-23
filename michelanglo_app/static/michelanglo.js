@@ -50,6 +50,7 @@ NGL.getStage = function (id) {
             if (NGL.Debug) {
                 console.log('You have not activated the stage yet!');
             }
+            // this = NGL.specialOps
             NGL.specialOps.load(0, false, id);
         } else if (window.stage !== undefined) {
             if (NGL.Debug) {
@@ -109,23 +110,37 @@ NGL.specialOps.enableClickToShow = function(id) {
         if (pickingProxy && (pickingProxy.atom || pickingProxy.bond )){
             const atom = pickingProxy.atom || pickingProxy.closestBondAtom;
             const name = atom.qualifiedName().match(/(\d+\:\w)\..{1,5}/)[1]; //"[PRO]1114:A.C"
-            // Check if clicked atom is in array
-            if (myData.clicks[id].residues.has(name)) {
-                myData.clicks[id].residues.delete(name);
-            } else {
-                myData.clicks[id].residues.add(name);
-            }
-            if (myData.clicks[id].representation !== undefined) pickingProxy.component.removeRepresentation(myData.clicks[id].representation);
-            const seleName = Array.from(myData.clicks[id].residues).join(' or ');
-            if (myData.clicks[id].residues.size !== 0) {
-            myData.clicks[id].representation = pickingProxy.component.addRepresentation("hyperball", { sele: seleName})
-            NGL.specialOps.showTitle('viewport','Clicked: '+name);
-            }
+            const component = pickingProxy.component;
+            // this = NGL.specialOps
+            this.showClickedResidue(id, name, component);
             }
     });
     }
-
 };
+
+NGL.specialOps.showClickedResidue = function(id, name, component, color) {
+    component = component || NGL.getStage(id).compList[0];
+    // Check if clicked atom is in array
+    if (myData.clicks[id].residues.has(name)) {
+        myData.clicks[id].residues.delete(name);
+    } else {
+        myData.clicks[id].residues.add(name);
+    }
+    if (myData.clicks[id].representation !== undefined) {
+        component.removeRepresentation(myData.clicks[id].representation);
+    }
+    const seleName = Array.from(myData.clicks[id].residues).join(' or ');
+    if (myData.clicks[id].residues.size !== 0) {
+        const params = {sele: seleName};
+        if (color !== undefined) {
+            params.color = color;
+        }
+        myData.clicks[id].representation = component.addRepresentation("hyperball", params);
+        this.showTitle(id,'Clicked: '+name);
+        this.slowOrient(id, false, name);
+
+    }
+}
 
 NGL.specialOps.showDomain = function (id, selection, color, view, keepPrevious) {
     if (NGL.debug) {

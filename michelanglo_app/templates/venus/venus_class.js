@@ -559,14 +559,12 @@ class Venus {
                     color: 'black',
                     tooltip: `${this.protein.sequence[i]}${i + 1}`,
                     underscore: false,
-                    onclick: () => NGL.specialOps
-                        .showResidue('viewport',
-                            i + 1,
-                            'turquoise',
-                            2, undefined,
-                            i + 1,
-                            undefined,
-                            true)
+                    onclick: () => NGL.specialOps.showClickedResidue(
+                        'viewport',
+                        `${i}:A`,
+                        undefined,
+                        'turquoise'
+                    )
                 })
             );
         // the width of the sequence is a bit more than 1 em because of the space
@@ -577,7 +575,7 @@ class Venus {
         const charsPerLine = Math.floor(availSpace / 5.5) * 10; // em
         if (charsPerLine <= 0 || card.is(':animated')) {
             // locally this gets triggered before the DOM finishes the .show of results
-            setTimeout(() => this.addSequence(), 200);
+            setTimeout(() => this.addSequence(), 1000);
             return;
         }
         this.seq.render('#seqDiv', {charsPerLine: charsPerLine});
@@ -601,8 +599,9 @@ class Venus {
         if (this.protein.features['PSP_modified_residues'] !== undefined) {
             this.protein.features['PSP_modified_residues'].forEach(v => {
                 //{symbol: "RBMX2", residue_index: 8, from_residue: "K", ptm: "ub", count: 1}
+                if (coverage[v.residue_index - 1] === undefined) return null;
                 coverage[v.residue_index - 1].underscore = true;
-                coverage[v.residue_index - 1].tooltip += ' ' +v.ptm;
+                coverage[v.residue_index - 1].tooltip += ' ' + v.ptm;
             });
             // legend later.
         }
@@ -619,7 +618,7 @@ class Venus {
             this.protein.features['cross-link'].forEach(v => {
                 //{symbol: "RBMX2", residue_index: 8, from_residue: "K", ptm: "ub", count: 1}
                 coverage[v.x - 1].underscore = true;
-                coverage[v.x - 1].tooltip += ' ' +v.description;
+                coverage[v.x - 1].tooltip += ' ' + v.description;
             });
         }
         // --- Add gnomad ---
@@ -632,7 +631,7 @@ class Venus {
             x = parseInt(x);
             if (x > this.protein.sequence.length) return; // wrong isoform!
             coverage[x - 1].color = 'gray';
-            coverage[x - 1].tooltip += ' '+description.replace('description=', '');
+            coverage[x - 1].tooltip += ' ' + description.replace('description=', '');
         });
         //legend.push({name: "gnomAD", color: "purple", underscore: false});
         // --- Add Legend & spans -----
@@ -1042,7 +1041,18 @@ class Venus {
         NGL.getStage('viewport').handleResize(); // asynchronous changes...
         const so = $('#structureOption');
         so.html('');
-        myData.proteins.map(({name}) => so.append(`<li><span ${this.prolink} data-load="${name}">${name}</span></li>`));
+        const nicer = {
+            'model': 'original structure',
+            'wt': 'wild type (energy minimised)',
+            'mutant': `${venus.mutation} (energy minimised)`
+        };
+        const longnamer = (name) => (nicer[name] !== undefined) ? nicer[name] : name;
+        myData.proteins.map(({name}) => so.append(`<li>
+                                                        <span ${this.prolink} data-load="${name}">
+                                                            ${longnamer(name)}
+                                                        </span>
+                                                        <a href="#structureOption" onclick="venus.download('${name}')" ><i class="far fa-download"></i></a>
+                                                    </li>`));
         // special case: mutant structure
         $('#structureOption [data-load="mutant"]').attr('data-focus', 'clash')
             .attr('data-selection', this.position);
@@ -1073,6 +1083,34 @@ class Venus {
         if (this.energetical && window.myData.proteins.filter(({name}) => name === 'phosphorylated').length === 0) {
             so.append('<li><button id="phosphorylate-btn" type="button" class="btn btn-outline-secondary btn-sm" onclick="venus.phosphorylate.call(venus)">Make phosphorylated model</button></li>');
         }
+    }
+
+    download (name) {
+        const element = document.createElement('a');
+        const extension = 'pdb';
+        const entry = myData.proteins.filter(({name: n}) => n === 'wt')[0];
+        if (entry.type === 'url') {
+            element.setAttribute('href', entry.value);
+        }
+        else if (entry.type === 'rcsb') {
+            element.setAttribute('href', `https://files.rcsb.org/download/${entry.value}.pdb`);
+        }
+        else if (entry.type === 'data' && ! entry.isVariable) {
+            const text = entry.value;
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        }
+        else if (entry.type === 'data' && !! entry.isVariable) {
+            const text = window[entry.value];
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        }
+        else {
+            throw 'impossible.'
+        }
+        element.setAttribute('download', `${name}.${extension}`);
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
     }
 
     createPage() {
