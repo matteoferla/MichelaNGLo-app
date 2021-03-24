@@ -12,7 +12,7 @@ from ..user_management import permission
 from .. import custom_messages
 
 from typing import Optional, Any, List, Union, Tuple, Dict
-import random
+import random, traceback, sys
 from pyramid.view import view_config, view_defaults
 from pyramid.renderers import render_to_response
 import pyramid.httpexceptions as exc
@@ -55,10 +55,10 @@ class Venus(VenusBase):
                 pdb = random.choice(protein.swissmodel)
             else:
                 continue
-            i = random.randint(pdb.x, pdb.y)
-            # the to_resn cannot be the same as original or *
-            to_resn = random.choice(list(set(Mutation.aa_list) - {'*', protein.sequence[i - 1]}))
             try:
+                i = random.randint(pdb.x, pdb.y)
+                # the to_resn cannot be the same as original or *
+                to_resn = random.choice(list(set(Mutation.aa_list) - {'*', protein.sequence[i - 1]}))
                 return {'name': name, 'uniprot': uniprot, 'taxid': '9606', 'species': 'human',
                         'mutation': f'p.{protein.sequence[i - 1]}{i}{to_resn}'}
             except IndexError:
@@ -101,6 +101,7 @@ class Venus(VenusBase):
                 self.reply['msg'] = str(err)
             log.warning(f'Venus error {err.__class__.__name__}: {err}')
             notify_admin(f'Venus error {err.__class__.__name__}: {err}')
+            log.debug(traceback.format_exc())
             return self.reply
 
     def has(self, key: Optional[str] = None) -> bool:
@@ -180,7 +181,7 @@ class Venus(VenusBase):
         if not protein.check_mutation():
             log.info('protein mutation discrepancy error')
             discrepancy = protein.mutation_discrepancy()
-            self.reply = {'error': 'mutation', 'msg': discrepancy, 'status': 'error'}
+            self.reply = {**self.reply, 'error': 'mutation', 'msg': discrepancy, 'status': 'error'}
             raise VenusException(discrepancy)
         else:
             system_storage[self.handle] = protein
@@ -212,17 +213,31 @@ class Venus(VenusBase):
 
     def structural_step(self, structure=None):
         """
-        runs protein.analyse_structure()
+        runs protein.analyse_structure() iteratively until it works.
         """
         log.info(f'Step 3 analysis requested by {User.get_username(self.request)}')
         # previous done?
         if not self.has():
             self.mutation_step()
-        elif self.has('structural'):
-            protein = system_storage[self.handle]
-        else:
-            protein = system_storage[self.handle]
-            protein.analyse_structure(structure)
+        protein = system_storage[self.handle]
+        if not self.has('structural'):
+            if structure is not None:
+                protein.analyse_structure(structure)
+            else:
+                try:
+                    protein.analyse_structure()
+                except ConnectionError: # failed to download model
+                    best = protein.get_best_model()
+                    if protein.swissmodel.count(best) != 0:
+                        i = protein.swissmodel.index(best)
+                        self.reply['warnings'].append(f'Swissmodel {best} could not be downloaded')
+                        del protein.swissmodel[i]
+                    elif protein.pdb.count(best) != 0:
+                        i = protein.pdb.index(best)
+                        self.reply['warnings'].append(f'PDB {best} could not be downloaded')
+                        del protein.pdbs[i]
+                    else:
+                        raise ValueError('structure from mystery source')
         if protein.structural:
             self.reply['structural'] = self.jsonable(protein.structural)
             self.reply['has_structure'] = True
@@ -294,7 +309,7 @@ class Venus(VenusBase):
             self.ddG_step()
         protein = system_storage[self.handle]
         log.info(f'Extra analysis ({algorithm}) requested by {User.get_username(self.request)}')
-        self.reply = protein.analyse_other_FF(mutation=mutation, algorithm=algorithm, spit_process=True)
+        self.reply = {**self.reply, **protein.analyse_other_FF(mutation=mutation, algorithm=algorithm, spit_process=True)}
         self.log_if_error('extra_step')
 
     ### STEP EXTRA2
@@ -305,11 +320,11 @@ class Venus(VenusBase):
         log.info(f'Phosphorylation requested by {User.get_username(self.request)}')
         coordinates = protein.phosphorylate_FF(spit_process=True)
         if isinstance(coordinates, str):
-            self.reply = {'coordinates': coordinates}
+            self.reply['coordinates'] = coordinates
         elif isinstance(coordinates, dict):
-            self.reply = coordinates  # it is an error msg!
+            self.reply = {**self.reply, **coordinates}  # it is an error msg!
         else:
-            self.reply = {'status': 'error', 'error': 'Unknown', 'msg': 'No coordinates returned'}
+            self.reply = {**self.reply, 'status': 'error', 'error': 'Unknown', 'msg': 'No coordinates returned'}
         self.log_if_error('phospho_step')
 
     ### CHANGE STEP

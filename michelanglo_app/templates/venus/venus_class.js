@@ -67,6 +67,7 @@ class Venus {
         this.animation_speed = 1000;
         this.seq = undefined;
         this.last_clicked_prolink = '';
+        this.shown_warnings = [];
 
     }
 
@@ -79,6 +80,7 @@ class Venus {
         this.energetical_gnomAD = undefined;
         this.seq = undefined;
         this.prepareDOM();
+        this.shown_warnings = [];
     }
 
     prepareDOM() {
@@ -276,6 +278,7 @@ class Venus {
             this.concludeMutational();
         } else {
             this.structural = msg.structural;
+            this.showWarnings(msg.warnings);
             this.analyseddG();
             if (!!this.structural.coordinates.length) this.loadStructure();
             this.concludeMutational();
@@ -285,6 +288,15 @@ class Venus {
         // pros.protein();
         // pros.click(event => this.showMutant.call(this) );
         // hack them to always show the mutants.
+    }
+
+    showWarnings(warnings) {
+        warnings.forEach(msg => {
+            if (! this.shown_warnings.includes(msg)) {
+                ops.addToast('Warning', msg, 'bg-warning');
+                this.shown_warnings.push(msg);
+            }
+        });
     }
 
     //step 4

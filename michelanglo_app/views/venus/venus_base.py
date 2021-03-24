@@ -50,7 +50,7 @@ class VenusBase:
 
     def __init__(self, request):
         self.request = request
-        self.reply = {'status': 'success'}  # filled by the steps and kept even if an error is raised.
+        self.reply = {'status': 'success', 'warnings': []}  # filled by the steps and kept even if an error is raised.
         # status=error, error=single-word, msg=long
 
     def assert_malformed(self, *args):
