@@ -15,6 +15,7 @@ from typing import Optional, Any, List, Union, Tuple, Dict
 import random, traceback, sys
 from pyramid.view import view_config, view_defaults
 from pyramid.renderers import render_to_response
+from ..common_methods import notify_admin
 import pyramid.httpexceptions as exc
 
 import json, os, logging, operator
@@ -226,19 +227,32 @@ class Venus(VenusBase):
             else:
                 try:
                     protein.analyse_structure()
-                except ConnectionError: # failed to download model
-                    best = protein.get_best_model()
-                    log.info(f'Failed to download model: {best.code}')
-                    if protein.swissmodel.count(best) != 0:
-                        i = protein.swissmodel.index(best)
-                        self.reply['warnings'].append(f'Swissmodel {best} could not be downloaded')
+                except Exception as error: #ConnectionError: # failed to download model
+                    broken_structure = best = protein.get_best_model()
+                    # ---- remove
+                    if protein.swissmodel.count(broken_structure) != 0:
+                        i = protein.swissmodel.index(broken_structure)
                         del protein.swissmodel[i]
-                    elif protein.pdbs.count(best) != 0:
-                        i = protein.pdbs.index(best)
-                        self.reply['warnings'].append(f'PDB {best} could not be downloaded')
+                        source = 'Swissmodel'
+                    elif protein.pdbs.count(broken_structure) != 0:
+                        i = protein.pdbs.index(broken_structure)
                         del protein.pdbs[i]
+                        source = 'RCSB PDB'
                     else:
                         raise ValueError('structure from mystery source')
+                    # ---- logging
+                    if isinstance(error, ConnectionError):
+                        log.info(f'Failed to download with model: {broken_structure.code}')
+                        self.reply['warnings'].append(f'{source} {broken_structure} could not be downloaded')
+                    elif isinstance(error, ValueError):
+                        log.info(f'Missing residue in model: {broken_structure.code}')
+                        self.reply['warnings'].append(f'{source} {broken_structure} lacked the span containing the residue')
+                    else: # this should not happen in step 3.
+                        msg = f'Major issue ({error.__class__.__name__}) with model {broken_structure.code} ({error})'
+                        self.reply['warnings'].append(msg)
+                        log.critical(msg)
+                        notify_admin(msg)
+                    # ---- repeat
                     self.structural_step()
         if protein.structural:
             self.reply['structural'] = self.jsonable(protein.structural)
