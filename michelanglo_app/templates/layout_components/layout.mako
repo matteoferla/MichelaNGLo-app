@@ -421,6 +421,7 @@
 
                 $('#chat_send').click((event) => {
                     let msg = $('#chat_message').val();
+                    $('#chat_message').val('');
                     $('#chat_modal').modal('hide');
                     if (msg) {
                         $.ajax({
