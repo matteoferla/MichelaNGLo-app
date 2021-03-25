@@ -228,16 +228,18 @@ class Venus(VenusBase):
                     protein.analyse_structure()
                 except ConnectionError: # failed to download model
                     best = protein.get_best_model()
+                    log.info(f'Failed to download model: {best.code}')
                     if protein.swissmodel.count(best) != 0:
                         i = protein.swissmodel.index(best)
                         self.reply['warnings'].append(f'Swissmodel {best} could not be downloaded')
                         del protein.swissmodel[i]
-                    elif protein.pdb.count(best) != 0:
-                        i = protein.pdb.index(best)
+                    elif protein.pdbs.count(best) != 0:
+                        i = protein.pdbs.index(best)
                         self.reply['warnings'].append(f'PDB {best} could not be downloaded')
                         del protein.pdbs[i]
                     else:
                         raise ValueError('structure from mystery source')
+                    self.structural_step()
         if protein.structural:
             self.reply['structural'] = self.jsonable(protein.structural)
             self.reply['has_structure'] = True
