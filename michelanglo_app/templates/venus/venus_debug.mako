@@ -43,6 +43,20 @@
                 </button>
             % endfor
         </div>
+    <h1>MCS</h1>
+    <div class="row">
+        %for first, first_aa in enumerate('I V L F C M A G T S W Y P H N D E Q K R'.split()):
+            %for second, second_aa in enumerate('I V L F C M A G T S W Y P H N D E Q K R'.split()):
+                % if first < second:
+                <div class="col-3 border rounded">
+                    <p>${first_aa} to ${second_aa}</p>
+                    <img src="/static/aa/${first_aa}${second_aa}.svg" width="100%;">
+                    <img src="/static/aa/${second_aa}${first_aa}.svg" width="100%;">
+                </div>
+                % endif
+            %endfor
+        %endfor
+    </div>
 </%block>
 
 <%block name='after_main'>
