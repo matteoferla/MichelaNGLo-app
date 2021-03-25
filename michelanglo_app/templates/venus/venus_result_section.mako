@@ -11,10 +11,6 @@
                         <button type="button" class="btn btn-outline-warning" id="new_analysis">
                             <i class="far fa-undo  fa-lg"></i> Analyse another
                         </button>
-                        <button class="btn btn-outline-success" type="button" id="feedback-btn" data-toggle="modal"
-                                data-target="#modal_feedback">
-                            <i class="far fa-star"></i> Feedback
-                        </button>
                         <button class="btn btn-outline-primary" type="button" id="report-btn" data-toggle="modal"
                                 data-target="#report">
                             <i class="far fa-clipboard-list fa-lg"></i> Create a sharable page (Michelaɴɢʟo)
