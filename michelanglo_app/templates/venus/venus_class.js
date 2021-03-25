@@ -293,7 +293,7 @@ class Venus {
     showWarnings(warnings) {
         warnings.forEach(msg => {
             if (! this.shown_warnings.includes(msg)) {
-                ops.addToast('Warning', msg, 'bg-warning');
+                ops.addToast('Warning', 'Unable to use structure', msg, 'bg-warning');
                 this.shown_warnings.push(msg);
             }
         });

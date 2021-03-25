@@ -242,11 +242,13 @@ class Venus(VenusBase):
                         raise ValueError('structure from mystery source')
                     # ---- logging
                     if isinstance(error, ConnectionError):
-                        log.info(f'Failed to download with model: {broken_structure.code}')
-                        self.reply['warnings'].append(f'{source} {broken_structure} could not be downloaded')
+                        msg = f'{source} {broken_structure} could not be downloaded'
+                        log.info(msg)
+                        self.reply['warnings'].append(msg)
                     elif isinstance(error, ValueError):
-                        log.info(f'Missing residue in model: {broken_structure.code}')
-                        self.reply['warnings'].append(f'{source} {broken_structure} lacked the span containing the residue')
+                        msg = f'Residue missing in structure ({source}): {broken_structure.code} ({error})'
+                        log.info(msg)
+                        self.reply['warnings'].append(msg)
                     else: # this should not happen in step 3.
                         msg = f'Major issue ({error.__class__.__name__}) with model {broken_structure.code} ({error})'
                         self.reply['warnings'].append(msg)
