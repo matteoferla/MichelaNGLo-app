@@ -236,7 +236,7 @@ class Venus(VenusBase):
                                                   'Falling back onto stored data.')
                 try:
                     protein.analyse_structure()
-                except () as error: #ConnectionError: # failed to download model  # deubg Exception
+                except Exception as error: #ConnectionError: # failed to download model  # deubg
                     broken_structure = best = protein.get_best_model()
                     # ---- remove
                     if protein.swissmodel.count(broken_structure) != 0:
