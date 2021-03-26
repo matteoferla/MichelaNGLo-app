@@ -225,9 +225,18 @@ class Venus(VenusBase):
             if structure is not None:
                 protein.analyse_structure(structure)
             else:
+                # do not use the stored values of pdbs, but get the swissmodel ones:
+                try:
+                    protein.retrieve_structures_from_swissmodel()
+                except Exception as error:
+                    msg = f'Swissmodel retrieval failed: {error.__class__.__name__}: {error}'
+                    log.critical(msg)
+                    notify_admin(msg)
+                    self.reply['warnings'].append('Retrieval of latest PDB data failed (admin notified). '+
+                                                  'Falling back onto stored data.')
                 try:
                     protein.analyse_structure()
-                except Exception as error: #ConnectionError: # failed to download model
+                except () as error: #ConnectionError: # failed to download model  # deubg Exception
                     broken_structure = best = protein.get_best_model()
                     # ---- remove
                     if protein.swissmodel.count(broken_structure) != 0:
