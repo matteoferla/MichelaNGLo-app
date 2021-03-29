@@ -6,7 +6,9 @@
     </button>
   </div>
   <div class="modal-body">
-      <p>Enter the email you registered and the site admin will email you manually to verify before resetting your password.</p>
+      <p>Enter the email you registered and you will get a new password sent.
+          If you did not set an email, email the site admin so they can manually verify before resetting your password
+          (a quick process).</p>
       <div class="input-group mb-3">
           <div class="input-group-prepend">
             <span class="input-group-text" id="email_label">email address</span>
