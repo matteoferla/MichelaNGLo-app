@@ -133,7 +133,7 @@ NGL.specialOps.showClickedResidue = function(id, name, component, color) {
     if (myData.clicks[id].residues.size !== 0) {
         const params = {sele: seleName};
         if (color !== undefined) {
-            params.color = color;
+            params.colorValue = color;
         }
         myData.clicks[id].representation = component.addRepresentation("hyperball", params);
         this.showTitle(id,'Clicked: '+name);
