@@ -279,16 +279,7 @@ class Venus(VenusBase):
     ### Step 4
     def ddG_step(self):
         log.info(f'Step 4 analysis requested by {User.get_username(self.request)}')
-        # previous done?
-        if not self.has():
-            self.structural_step()
-        elif self.has('energetics'):
-            protein = system_storage[self.handle]
-            analysis = protein.energetics
-        else:
-            protein = system_storage[self.handle]
-            analysis = protein.analyse_FF()
-
+        # ------- get protein
         if self.handle not in system_storage:
             status = self.protein_step()
             if 'error' in status:
@@ -297,6 +288,7 @@ class Venus(VenusBase):
             if 'error' in status:
                 return status
         protein = system_storage[self.handle]
+        # -------- analyse
         if hasattr(protein, 'energetics') and protein.energetics is not None:
             analysis = protein.energetics
         else:
