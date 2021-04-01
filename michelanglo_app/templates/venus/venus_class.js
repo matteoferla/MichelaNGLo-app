@@ -68,6 +68,7 @@ class Venus {
         this.seq = undefined;
         this.last_clicked_prolink = '';
         this.shown_warnings = [];
+        this.timeTaken = null;
 
     }
 
@@ -81,6 +82,7 @@ class Venus {
         this.seq = undefined;
         this.prepareDOM();
         this.shown_warnings = [];
+        this.timeTaken = null;
     }
 
     prepareDOM() {
@@ -111,7 +113,7 @@ class Venus {
                 step: step,
                 mutation: this.mutation
             }
-        }).fail(ops.addErrorToast)
+        }).fail(ops.addErrorToast).then(reply => {this.timeTaken = reply.time_taken; return reply});
     }
 
     //step 0

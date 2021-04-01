@@ -166,6 +166,7 @@ class Venus(VenusBase):
         """
         Check mutations are valid
         """
+        self.start_timer()
         if self.has():  # this is already done (very unlikely/
             protein = system_storage[self.handle]
         else:
@@ -187,12 +188,14 @@ class Venus(VenusBase):
         else:
             system_storage[self.handle] = protein
             self.reply['protein'] = self.jsonable(protein)
+        self.stop_timer()
 
     ### STEP 2
     def mutation_step(self):
         """
         Runs protein.predict_effect()
         """
+        self.start_timer()
         log.info(f'Step 2 analysis requested by {User.get_username(self.request)}')
         ## has the previous step been done?
         if not self.has():
@@ -209,6 +212,7 @@ class Venus(VenusBase):
                                   'features_near_mutation': featnear,
                                   'position_as_protein_percent': pos_percent,
                                   'gnomAD_near_mutation': protein.get_gnomAD_near_position()}
+        self.stop_timer()
 
         ### STEP 3
 
@@ -216,6 +220,7 @@ class Venus(VenusBase):
         """
         runs protein.analyse_structure() iteratively until it works.
         """
+        self.start_timer()
         log.info(f'Step 3 analysis requested by {User.get_username(self.request)}')
         # previous done?
         if not self.has():
@@ -232,11 +237,11 @@ class Venus(VenusBase):
                     msg = f'Swissmodel retrieval failed: {error.__class__.__name__}: {error}'
                     log.critical(msg)
                     notify_admin(msg)
-                    self.reply['warnings'].append('Retrieval of latest PDB data failed (admin notified). '+
+                    self.reply['warnings'].append('Retrieval of latest PDB data failed (admin notified). ' +
                                                   'Falling back onto stored data.')
                 try:
                     protein.analyse_structure()
-                except Exception as error: #ConnectionError: # failed to download model  # deubg
+                except Exception as error:  # ConnectionError: # failed to download model  # deubg
                     broken_structure = best = protein.get_best_model()
                     # ---- remove
                     if protein.swissmodel.count(broken_structure) != 0:
@@ -258,7 +263,7 @@ class Venus(VenusBase):
                         msg = f'Residue missing in structure ({source}): {broken_structure.code} ({error})'
                         log.info(msg)
                         self.reply['warnings'].append(msg)
-                    else: # this should not happen in step 3.
+                    else:  # this should not happen in step 3.
                         msg = f'Major issue ({error.__class__.__name__}) with model {broken_structure.code} ({error})'
                         self.reply['warnings'].append(msg)
                         log.critical(msg)
@@ -275,9 +280,11 @@ class Venus(VenusBase):
             self.reply['msg'] = 'Structrual analyses cannot be performed.'
             self.reply['has_structure'] = False
             raise VenusException(self.reply['msg'])
+        self.stop_timer()
 
     ### Step 4
     def ddG_step(self):
+        self.start_timer()
         log.info(f'Step 4 analysis requested by {User.get_username(self.request)}')
         # ------- get protein
         if self.handle not in system_storage:
@@ -298,6 +305,7 @@ class Venus(VenusBase):
         else:
             self.reply['ddG'] = analysis
             # {ddG: float, scores: Dict[str, float], native:str, mutant:str, rmsd:int}
+        self.stop_timer()
 
     ### Step 5
     def ddG_gnomad_step(self):
@@ -328,7 +336,8 @@ class Venus(VenusBase):
             self.ddG_step()
         protein = system_storage[self.handle]
         log.info(f'Extra analysis ({algorithm}) requested by {User.get_username(self.request)}')
-        self.reply = {**self.reply, **protein.analyse_other_FF(mutation=mutation, algorithm=algorithm, spit_process=True)}
+        self.reply = {**self.reply,
+                      **protein.analyse_other_FF(mutation=mutation, algorithm=algorithm, spit_process=True)}
         self.log_if_error('extra_step')
 
     ### STEP EXTRA2

@@ -17,7 +17,7 @@ from pyramid.view import view_config, view_defaults
 from pyramid.renderers import render_to_response
 import pyramid.httpexceptions as exc
 
-import json, os, logging, operator
+import json, os, logging, operator, time
 
 log = logging.getLogger(__name__)
 # from pprint import PrettyPrinter
@@ -50,8 +50,19 @@ class VenusBase:
 
     def __init__(self, request):
         self.request = request
-        self.reply = {'status': 'success', 'warnings': []}  # filled by the steps and kept even if an error is raised.
+        self.reply = {'status': 'success', 'warnings': [], 'time_taken': 0}  # filled by the steps and kept even if an error is raised.
         # status=error, error=single-word, msg=long
+        self._tick = float('nan')  # required for self.reply['time_taken']
+
+    def start_timer(self):
+        self._tick = time.time()
+
+    def stop_timer(self):
+        assert str(self._tick) != 'nan', 'Timer not started'
+        tock = time.time()
+        tick = self._tick
+        self._tick = float('nan')
+        self.reply['time_taken'] += tock - tick
 
     def assert_malformed(self, *args):
         malformed = is_malformed(self.request, *args)
