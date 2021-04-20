@@ -21,12 +21,14 @@
 
     <%include file="venus_input.mako"/>
             #################### ALERTS
-    <div class="alert alert-warning alert-dismissible fade show my-3" role="alert">
-  This page is still being built, therefore some features may not work. Do feel free to contact me (Matteo) for any queries: I always welcome feedback be it on purpose or not. (<i class="far fa-comments"></i> button on the top right).
+    %if False:
+        <div class="alert alert-warning alert-dismissible fade show my-3" id="construction" role="alert">
+  This page is currently under going some changes, therefore some features may break. Do feel free to contact me (Matteo) for any queries: I always welcome feedback be it on purpose or not. (<i class="far fa-comments"></i> button on the top right).
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
     </div>
+    %endif
     <div class="alert alert-info  alert-dismissible fade show" role="alert">
         This is for academic use only and not intended to be used commercially. Conclusions drawn are suggestions and not diagnostic.
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
