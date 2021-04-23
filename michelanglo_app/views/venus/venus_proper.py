@@ -101,8 +101,9 @@ class Venus(VenusBase):
                 self.reply['error'] = 'analysis'
                 self.reply['msg'] = str(err)
             log.warning(f'Venus error {err.__class__.__name__}: {err}')
-            notify_admin(f'Venus error {err.__class__.__name__}: {err}')
-            log.debug(traceback.format_exc())
+            if 'Malformed error' not in str(err):
+                notify_admin(f'Venus error {err.__class__.__name__}: {err}')
+                log.debug(traceback.format_exc())
             return self.reply
 
     def has(self, key: Optional[str] = None) -> bool:
@@ -120,6 +121,7 @@ class Venus(VenusBase):
 
     @property
     def steps(self):
+        # this is strictly an instance attribute not a class one.
         return {'protein': self.protein_step,
                 'mutation': self.mutation_step,
                 'structural': self.structural_step,
@@ -130,7 +132,8 @@ class Venus(VenusBase):
         # a likely API call
         if step is None:
             log.info(f'Full analysis requested by {User.get_username(self.request)}')
-            map(lambda f: f(), self.steps)  # run all steps
+            # run all steps
+            [fxn() for name, fxn in self.steps.items()]
             return self.reply
         # ajax
         elif step in self.steps.keys():

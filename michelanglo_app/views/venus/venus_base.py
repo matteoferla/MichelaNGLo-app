@@ -53,6 +53,7 @@ class VenusBase:
         self.reply = {'status': 'success', 'warnings': [], 'time_taken': 0}  # filled by the steps and kept even if an error is raised.
         # status=error, error=single-word, msg=long
         self._tick = float('nan')  # required for self.reply['time_taken']
+        self.time_taken = 0.
 
     def start_timer(self):
         self._tick = time.time()
@@ -61,8 +62,9 @@ class VenusBase:
         assert str(self._tick) != 'nan', 'Timer not started'
         tock = time.time()
         tick = self._tick
-        self._tick = float('nan')
-        self.reply['time_taken'] += tock - tick
+        self.time_taken += tock - tick
+        self._tick = time.time()
+        self.reply['time_taken'] += self.time_taken
 
     def assert_malformed(self, *args):
         malformed = is_malformed(self.request, *args)

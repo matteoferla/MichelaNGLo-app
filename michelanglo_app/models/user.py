@@ -99,9 +99,15 @@ class User(Base):
         :param request:
         :return:
         """
+        # registered user
         if request.user:
             return f'{request.user.name} ({request.user.role})'
+        # unregistered
+        ip = '/'.join([request.environ[x] for x in ("REMOTE_ADDR",
+                                                    "HTTP_X_FORWARDED_FOR",
+                                                    "HTTP_CLIENT_IP") if x in request.environ and request.environ[x] != '127.0.0.1'])
+        if ip != '':
+            return ip
         else:
-            return '/'.join([request.environ[x] for x in ("REMOTE_ADDR",
-                                                          "HTTP_X_FORWARDED_FOR",
-                                                          "HTTP_CLIENT_IP") if x in request.environ and request.environ[x] != '127.0.0.1'])
+            return 'localhost'
+
