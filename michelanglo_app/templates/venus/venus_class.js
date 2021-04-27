@@ -1186,7 +1186,8 @@ class Venus {
             this.concludeMutational_destabilising(details),
             this.concludeMutational_phospho(details),
             this.concludeMutational_disulfo(details),
-            this.concludeMutational_ubi(details),]
+            this.concludeMutational_ubi(details),
+            this.concludeDistance(details),]
             .filter(v => v !== null);
 
         // ubiquitin
@@ -1317,6 +1318,16 @@ class Venus {
         } else {
             return null;
         }
+    }
+
+    concludeDistance({}) {
+        if (this.structural.distance_to_closest_ligand < 12) {
+            const name = venus.structural.closest_ligand.match(/\[.*\]/)  !== null ?
+                         venus.structural.closest_ligand.match(/\[(.*)\]/)[1] :
+                         'unknown';
+            return `the mutation is ${this.structural.distance_to_closest_ligand.toPrecision(2)} &Aring; away from the ligand labelled ${name}`;
+        }
+        else {return null;}
     }
 }
 
