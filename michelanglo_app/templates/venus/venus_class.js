@@ -221,13 +221,9 @@ class Venus {
                                             <p>Differing atoms in  ${this.names[this.mutational.to_residue]} highlighted in red</p></div>
                                         </div>`;
                 this.createEntry('mut', 'Mutation', mutationtext);
-                // apriori for now.
-                this.concludeMutational();
+
                 //structural card
-                // TO COPYPASTE
-
                 this.createLocation();
-
                 //this.createEntry('domdet', 'Domain detail', 'To Do figure out how to mine what the domain does. See notes "domain_function".');
 
                 //gnomAD
@@ -242,7 +238,7 @@ class Venus {
                 }
 
                 if (this.mutational.elm.length) {
-                    let elmtext = '<p>Some of the following predicted motifs might be valid:</p>';
+                    let elmtext = `<p>Some of the following predicted motifs might be valid (see ${this.makeExt('http://elm.eu.org/', 'ELM for more')}:</p>`;
                     elmtext += '<ul>';
                     // converts a regex str to a sele str.
                     const reg2sele = (regex, offset) => regex.replace('$', '')
@@ -259,9 +255,10 @@ class Venus {
                     elmtext += '</ul>';
                     this.createEntry('motif', 'Motif', elmtext);
                 }
-
                 // Sequence
                 this.addSequence();
+                // apriori for now.
+                this.concludeMutational();
             }
         })
     }
@@ -596,6 +593,7 @@ class Venus {
         const charsPerLine = Math.floor(availSpace / 5.5) * 10; // em
         if (charsPerLine <= 0 || card.is(':animated')) {
             // locally this gets triggered before the DOM finishes the .show of results
+            // impossible in production
             setTimeout(() => this.addSequence(), 1000);
             return;
         }
@@ -1056,7 +1054,7 @@ class Venus {
         // structural character
         this.createEntry('strcha', 'Structural character', strloctext);
         let omni = this.makeProlink(this.structural.neighbours.map(v => v.resi + ':A').join(' or '), '(all)');
-        let strtext = `<p>Structural neighbourhood ${omni}.</p>`;
+        let strtext = `<p>Structural neighbourhood ${omni}. (see ${this.makeExt('https://gnomad.broadinstitute.org/', 'gnomAD')} and ${this.makeExt('https://www.phosphosite.org', 'PhosphoSitePlus')} for extra information)</p>`;
         const getGnomad = (detail) => detail.replace('gnomAD:', '').split(' ')[0];
         const makeDetail = ({detail}) => (detail.includes('gnomAD:')) ? `<span style='cursor: pointer;' class='underlined' data-gnomad='${JSON.stringify([getGnomad(detail)])}' >${detail}</span>` : detail;
         const makeLabel = v => `${v.resn}${v.resi}`;
