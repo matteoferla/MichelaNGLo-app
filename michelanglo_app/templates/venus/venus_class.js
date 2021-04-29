@@ -61,7 +61,8 @@ class Venus {
             'gnomad': 'gnomAD mutations with 5 residues distance (structure independent)',
             'motif': 'Motifs predicted using the linear motif patterns from the ELM database. The presence of a linear motif does not mean it is valid, in fact the secondary structure is important: in a helix residues 3 along are facing the same direction, in a sheet alternating residues and in a loop it varies. If a motif is a phosphosite and the residue is not phosphorylated it is likely not legitimate.',
             'link': 'Link to this search (will be redone) for browser or programmatic access',
-            'extlink': 'Links to external resources related to this gene'
+            'extlink': 'Links to external resources related to this gene',
+            'references': 'VENUS relies a several sources of external data, so be sure to cite them!'
         }
         this.entry_order = Object.keys(this.documentation); //order is changed dynamically.
         this.animation_speed = 1000;
@@ -180,10 +181,16 @@ class Venus {
                     }));
                     $('html, body').animate({scrollTop: $('#results').offset().top}, 2000);
                     $('#result_title').html(`${this.protein.gene_name} ${this.protein._mutation} <small>(${this.protein.recommended_name})</small>`);
-                    let exttext = this.makeExt('https://www.uniprot.org/uniprot/' + this.uniprot, 'Uniprot:' + this.uniprot) + ' &mdash; ' +
-                        this.makeExt('https://www.rcsb.org/pdb/protein/' + this.uniprot, 'PDB:' + this.uniprot) + ' &mdash; ' +
-                        this.makeExt('https://gnomAD.broadinstitute.org/gene/' + this.protein.gene_name, 'gnomAD:' + this.protein.gene_name);
+                    let extElements = [this.makeBSListExt('https://www.uniprot.org/uniprot/' + this.uniprot, 'Uniprot:' + this.uniprot),
+                        this.makeBSListExt('https://www.rcsb.org/pdb/protein/' + this.uniprot, 'PDB:' + this.uniprot),
+                        this.makeBSListExt('https://gnomAD.broadinstitute.org/gene/' + this.protein.gene_name, 'gnomAD:' + this.protein.gene_name),
+                        this.makeBSListExt('https://www.phosphosite.org/homeAction.action', 'PhosphositePlus'),
+                        this.makeBSListExt('http://elm.eu.org/index.html', 'ELM'),
+                        this.makeBSListExt('https://consurfdb.tau.ac.il/', 'ConsurfDB')];
+                    const exttext = '<div class="list-group list-group-flush">' + extElements.join('') + '</div>';
                     this.createEntry('extlink', 'External links', exttext);
+                    let reftext = '<a href="#referenceModal" class="text-info" data-toggle="modal" data-target="#referenceModal">See suggested papers</a>';
+                    this.createEntry('references', 'References', reftext);
                     // alter uniprot links in page (e.g. modals)
                     $('.uniprotLink').attr('href', 'https://www.uniprot.org/uniprot/' + this.uniprot);
                 }
@@ -835,9 +842,15 @@ class Venus {
         }
     }
 
-    makeExt(url, txt) {
+    makeExt(url, text) {
         //sprintf an external link
-        return `<a href="${url}" target="_blank">${txt} <i class="far fa-external-link-square"></i></a>`
+        return `<a href="${url}" target="_blank">${text} <i class="far fa-external-link-square"></i></a>`
+    }
+
+    makeBSListExt(url, text) {
+        return `<a href="${url}" target="_blank" class="list-group-item list-group-item-action">
+                ${text} <i class="far fa-external-link-square"></i></a>`
+
     }
 
     //###################  other
@@ -1046,7 +1059,11 @@ class Venus {
         let strtext = `<p>Structural neighbourhood ${omni}.</p>`;
         const getGnomad = (detail) => detail.replace('gnomAD:', '').split(' ')[0];
         const makeDetail = ({detail}) => (detail.includes('gnomAD:')) ? `<span style='cursor: pointer;' class='underlined' data-gnomad='${JSON.stringify([getGnomad(detail)])}' >${detail}</span>` : detail;
-        strtext += '<ul>' + this.structural.neighbours.map(v => `<li>${this.makeProlink(v.resi + ":" + v.chain, v.resn + v.resi)} ${makeDetail(v)}</li>`).join('') + '</ul>';
+        const makeLabel = v => `${v.resn}${v.resi}`;
+        const makeLI = v => `<li>${this.makeProlink(v.resi + ":" + v.chain, makeLabel(v))} 
+                             (${v.distance.toFixed(1)} &Aring) ${makeDetail(v)}</li>`;
+        strtext += '<ul>' + this.structural.neighbours.sort((a,b) => a.distance - b.distance)
+                                                      .map(makeLI).join('') + '</ul>';
         this.createEntry('neigh', 'Structural neighbourhood', strtext);
     }
 

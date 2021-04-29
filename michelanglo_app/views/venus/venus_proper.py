@@ -25,7 +25,7 @@ log = logging.getLogger(__name__)
 # pprint = PrettyPrinter().pprint
 
 ### This is a weird way to solve the status 206 issue.
-from michelanglo_app.views.buffer import system_storage
+from ..buffer import system_storage
 
 from .venus_base import VenusException, VenusBase
 
@@ -41,7 +41,9 @@ class Venus(VenusBase):
     ############################### server main page
     @view_config(renderer="../../templates/venus/venus_main.mako")
     def main_view(self):
-        return {'user': self.request.user, 'mutation_mode': 'main', **self.generic_data}
+        return {'user': self.request.user,
+                'mutation_mode': 'main',
+                **self.generic_data}
 
     ############################### Give a random view that will give a protein
     @view_config(route_name='venus_random', renderer="json")

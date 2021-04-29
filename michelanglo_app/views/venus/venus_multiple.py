@@ -8,9 +8,9 @@ from ..uniprot_data import *
 from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structure
 
 from ...models import User, Page  ##needed solely for log.
-from michelanglo_app.views.common_methods import is_malformed, notify_admin, get_pdb_block_from_request
-from michelanglo_app.views.user_management import permission
-from michelanglo_app.views import custom_messages
+from ..common_methods import is_malformed, notify_admin, get_pdb_block_from_request
+from ..user_management import permission
+from ..custom_message import custom_messages
 from mako.template import Template
 
 from typing import Optional, Any, List, Union, Tuple, Dict

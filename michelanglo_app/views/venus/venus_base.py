@@ -6,10 +6,11 @@ from michelanglo_app.views.uniprot_data import *
 # ProteinCore organism human uniprot2pdb
 from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structure
 
-from michelanglo_app.models import User, Page  ##needed solely for log.
-from michelanglo_app.views.common_methods import is_malformed, notify_admin, get_pdb_block_from_request
-from michelanglo_app.views.user_management import permission
-from michelanglo_app.views import custom_messages
+from ...models import User, Page  ##needed solely for log.
+from ..common_methods import is_malformed, notify_admin, get_pdb_block_from_request
+from ..user_management import permission
+from ..custom_message import custom_messages
+from .venus_text import contents as contents
 
 from typing import Optional, Any, List, Union, Tuple, Dict
 import random
@@ -45,7 +46,8 @@ class VenusBase:
                     'meta_description': 'Convert PyMOL files, upload PDB files or submit PDB codes and ' + \
                                         'create a webpage to edit, share or implement standalone on your site',
                     'meta_image': '/static/tim_barrel.png',
-                    'meta_url': 'https://michelanglo.sgc.ox.ac.uk/'
+                    'meta_url': 'https://michelanglo.sgc.ox.ac.uk/',
+                    'contents': contents
                     }
 
     def __init__(self, request):
