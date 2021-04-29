@@ -17,7 +17,9 @@
 </%block>
 
 <%block name="main">
-        <p>A tool to help in the discovery of why a given mutation is pathogenic (see <a href="/docs/venus">documentation</a>). To view multiple mutations at the same time see <a href="/venus_multiple">multiple mutant page</a>.</p>
+        <p>A tool to help in the discovery of why a given mutation is pathogenic (see <a href="/docs/venus">documentation</a>).
+            To view multiple mutations at the same time see <a href="/venus_multiple">multiple mutant page</a>.
+            For a random protein and mutation <a href="/venus?random">click here</a>.</p>
 
     <%include file="venus_input.mako"/>
             #################### ALERTS
