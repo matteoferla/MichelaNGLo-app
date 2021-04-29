@@ -238,7 +238,7 @@ class Venus {
                 }
 
                 if (this.mutational.elm.length) {
-                    let elmtext = `<p>Some of the following predicted motifs might be valid (see ${this.makeExt('http://elm.eu.org/', 'ELM for more')}:</p>`;
+                    let elmtext = `<p>Some of the following predicted motifs might be valid (see ${this.makeExt('http://elm.eu.org/', 'ELM for more')}):</p>`;
                     elmtext += '<ul>';
                     // converts a regex str to a sele str.
                     const reg2sele = (regex, offset) => regex.replace('$', '')
