@@ -167,7 +167,8 @@ ref_inner = ''.join([table_rower('VENUS',
 
 
 ref_description = f'''VENUS draws from a variety of sources without which this tool would not be possible.
-If your mutation has a suggested effect based on one of these resources do check them out directly and remember to cite them! 
+If your mutation has a suggested effect based on one of these resources do check them out directly and remember to cite them!
+(NB. We are not affiliate with the external resources)
 <table class="table">
   <thead>
     <tr>
