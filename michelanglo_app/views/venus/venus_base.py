@@ -2,7 +2,7 @@ from __future__ import annotations
 # venus parts common to regular venus and multiple mutant version.
 
 
-from michelanglo_app.views.uniprot_data import *
+from ..uniprot_data import *
 # ProteinCore organism human uniprot2pdb
 from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structure
 
@@ -25,7 +25,8 @@ log = logging.getLogger(__name__)
 # pprint = PrettyPrinter().pprint
 
 ### This is a weird way to solve the status 206 issue.
-from michelanglo_app.views.buffer import system_storage
+# no longer required??
+from ..buffer import system_storage
 
 
 ######################
