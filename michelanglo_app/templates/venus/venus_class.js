@@ -836,7 +836,7 @@ class Venus {
             }
             return `<span  ${this.prolink} data-color="${dc}"  data-focus="${df}" data-selection="${ds}">${p}</span>`;
         } else {
-            console.log('ERRRROR' + JSON.stringify(v));
+            console.log('ERROR' + JSON.stringify(v));
         }
     }
 
@@ -1032,8 +1032,6 @@ class Venus {
         } else {
             empower();
         }
-
-
         this.updateStructureOption();
         let strloctext = '<p><i>Chosen model:</i> ';
         if (this.structural.code.length === 4) {
@@ -1054,15 +1052,40 @@ class Venus {
         // structural character
         this.createEntry('strcha', 'Structural character', strloctext);
         let omni = this.makeProlink(this.structural.neighbours.map(v => v.resi + ':A').join(' or '), '(all)');
-        let strtext = `<p>Structural neighbourhood ${omni}. (see ${this.makeExt('https://gnomad.broadinstitute.org/', 'gnomAD')} and ${this.makeExt('https://www.phosphosite.org', 'PhosphoSitePlus')} for extra information)</p>`;
-        const getGnomad = (detail) => detail.replace('gnomAD:', '').split(' ')[0];
-        const makeDetail = ({detail}) => (detail.includes('gnomAD:')) ? `<span style='cursor: pointer;' class='underlined' data-gnomad='${JSON.stringify([getGnomad(detail)])}' >${detail}</span>` : detail;
-        const makeLabel = v => `${v.resn}${v.resi}`;
-        const makeLI = v => `<li>${this.makeProlink(v.resi + ":" + v.chain, makeLabel(v))} 
-                             (${v.distance.toFixed(1)} &Aring) ${makeDetail(v)}</li>`;
+        let strtext = `<p>Structural neighbourhood ${omni}. 
+                        (see ${this.makeExt('https://gnomad.broadinstitute.org/', 'gnomAD')} and
+                        ${this.makeExt('https://www.phosphosite.org', 'PhosphoSitePlus')} 
+                        for extra information)</p>`;
         strtext += '<ul>' + this.structural.neighbours.sort((a,b) => a.distance - b.distance)
-                                                      .map(makeLI).join('') + '</ul>';
+                                                      .map(v => this.makeNeighbourLI(v)).join('') + '</ul>';
         this.createEntry('neigh', 'Structural neighbourhood', strtext);
+    }
+
+    makeNeighbourLI(data) {
+        const label = data.resn+data.resi;
+        const selector = data.resi + ":" + data.chain;
+        const prolink = this.makeProlink(selector, label);
+        const distance = `&mdash; ${data.distance.toFixed(1)} &Aring away`;
+        let detail = '';
+        if (data.detail.includes('gnomAD:')) {
+            detail = `&mdash; <span style='cursor: pointer;'
+                            class='underlined'
+                            data-gnomad='${JSON.stringify([data.detail.replace('gnomAD:', '').split(' ')[0]])}'
+                            >${data.detail}</span>`;
+        } else if (data.detail !== undefined && data.detail.length) {
+            detail =  '&mdash; '+ data.detail;
+        }
+        let conservation = '&mdash; no conservation data';
+        if (data.conscore !== undefined) {
+            conservation = `&mdash; <span  title='Consurf normalised homology score: positive = less conserved. negative = conserved' data-toggle='tooltip'>
+                            conservation=${data.conscore.toFixed(1)}
+                            </span>,
+                            <span title='alterative residues in homologous protein: ${data.variety.join('/')}' data-toggle='tooltip'>
+                                alts: ${data.variety.length}
+                            </span>
+                            `;
+        }
+        return `<li>${prolink} ${distance} ${detail} ${conservation}</li>`;
     }
 
     updateStructureOption() {
