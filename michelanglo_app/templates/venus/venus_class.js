@@ -1051,7 +1051,11 @@ class Venus {
         }
         // structural character
         this.createEntry('strcha', 'Structural character', strloctext);
-        let omni = this.makeProlink(this.structural.neighbours.map(v => v.resi + ':A').join(' or '), '(all)');
+        const allSele = this.structural.neighbours.map(v => v.resi + ':A').join(' or ');
+        let omni = `<span ${this.prolink} data-color="bfactor" data-focus="residue" data-selection="${allSele}">
+                    (all, coloured by conservation)</span>`;
+        this.makeProlink(allSele, '(all)');
+
         let strtext = `<p>Structural neighbourhood ${omni}. 
                         (see ${this.makeExt('https://gnomad.broadinstitute.org/', 'gnomAD')} and
                         ${this.makeExt('https://www.phosphosite.org', 'PhosphoSitePlus')} 
@@ -1140,7 +1144,7 @@ class Venus {
     download (name) {
         const element = document.createElement('a');
         const extension = 'pdb';
-        const entry = myData.proteins.filter(({name: n}) => n === 'wt')[0];
+        const entry = myData.proteins.filter(({name: n}) => n === name)[0];
         if (entry.type === 'url') {
             element.setAttribute('href', entry.value);
         }
