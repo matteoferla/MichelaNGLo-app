@@ -343,12 +343,12 @@ class Venus {
                 ddgtext += '<button class="btn btn-outline-info venus-no-mike" data-toggle="modal" data-target="#ddG_extra">More</button>';
                 this.createEntry('ddg', 'Free energy calculation', ddgtext);
                 const liEl = (l, v) => `<li><b>${l}:</b> ${v}</li>`;
-                const innerList = d => '<ul>' + Object.entries(d).map(([k, v]) => liEl(k, v)).join('') + '</ul>';
+                const innerList = d => '<ul>' + Object.entries(d).map(([k, v]) => liEl(k, v.toFixed(1))).join('') + '</ul>';
                 let extraParts = liEl('Scorefunction', this.energetical.score_fxn) +
-                    liEl('ddG', this.energetical.ddG + ' kcal/mol') +
-                    liEl('solvatation term in ddG', this.energetical.dsol + ' kcal/mol') +
+                    liEl('ddG', this.energetical.ddG.toFixed(1) + ' kcal/mol') +
+                    liEl('solvatation term in ddG', this.energetical.dsol.toFixed(1) + ' kcal/mol') +
                     liEl('Scores (meaningless due to only partial energy minimisation)', innerList(this.energetical.scores)) +
-                    liEl('ddG contributed by residue', this.energetical.ddG_residue + ' kcal/mol') +
+                    liEl('ddG contributed by residue', this.energetical.ddG_residue.toFixed(1) + ' kcal/mol') +
                     liEl('Native residue terms', innerList(this.energetical.native_residue_terms)) +
                     liEl('Mutant residue terms', innerList(this.energetical.mutant_residue_terms));
                 $('#ddG_extra .modal-body').html('<p>Detail for ddG score. For meaning, see <a href="/docs/venus" target="_blank">documentation</a>.</p><ul>' + extraParts + '</ul>');
