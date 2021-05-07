@@ -233,8 +233,9 @@
                                         <label class="custom-control-label" for="showLigands">Always show ligands</label>
                                     </div>
                             </div>
-                            <div class="col-4">
-                                <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#conservationModal">Show conservation</button>
+                            <div class="col-4" >
+                                <button type="button" class="btn btn-outline-info" id="#conservationBtn"
+                                        data-toggle="modal" data-target="#conservationModal">Show conservation</button>
                             </div>
                         </div>
 
