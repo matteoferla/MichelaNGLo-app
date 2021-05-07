@@ -220,18 +220,22 @@
                     <div>
                         <hr/>
                         <div class="row">
-                            <div class="col-12 col-lg-6">
+                            <div class="col-4">
                                 ############ toggle
-
                                     <div class="custom-control custom-switch">
                                         <input type="checkbox" class="custom-control-input" id="showMutant">
                                         <label class="custom-control-label" for="showMutant">Always show mutant</label>
                                     </div>
                             </div>
+                            <div class="col-4">
                             <div class="custom-control custom-switch">
                                         <input type="checkbox" class="custom-control-input" id="showLigands">
                                         <label class="custom-control-label" for="showLigands">Always show ligands</label>
                                     </div>
+                            </div>
+                            <div class="col-4">
+                                <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#conservationModal">Show conservation</button>
+                            </div>
                         </div>
 
                         ######################
@@ -394,6 +398,33 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
         <button type="button" class="btn btn-primary" id="createMike"><i class="far fa-hand-holding-magic"></i> Create</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="conservationModal" tabindex="-1" aria-labelledby="conservationModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="conservationModalLabel"><i class="far fa-wind"></i> Conservation</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          Conservation is derived from <a href="https://consurfdb.tau.ac.il/" target="_blank">Consurf-DB</a>. Show conservation:
+          <ul>
+              <li><span class="prolink" data-target="#viewport" data-toggle="protein" data-selection=":A" data-focus="domain" data-color="bfactor">cartoon</span></li>
+              <li><span class="prolink" data-target="#viewport" data-toggle="protein" data-selection=":A" data-focus="residue" data-color="bfactor">all residues</span> (ill-advisable for large protein or on mobile/older machines)</li>
+              <li><span class="prolink" data-target="#viewport" data-toggle="protein" data-focus="blur" data-color="bfactor">a b-factor putty</span></li>
+          </ul>
+
+          NB. Parts of the structure that are not of the polypeptide chain of interest are
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>

@@ -1363,9 +1363,10 @@ class Venus {
     }
 
     concludeDistance({}) {
-        if (this.structural.distance_to_closest_ligand < 12) {
-            const name = venus.structural.closest_ligand.match(/\[.*\]/)  !== null ?
-                         venus.structural.closest_ligand.match(/\[(.*)\]/)[1] :
+        if (this.structural === undefined)  {return null;}
+        else if (this.structural.distance_to_closest_ligand < 12) {
+            const name = this.structural.closest_ligand.match(/\[.*\]/)  !== null ?
+                         this.structural.closest_ligand.match(/\[(.*)\]/)[1] :
                          'unknown';
             return `the mutation is ${this.structural.distance_to_closest_ligand.toPrecision(2)} &Aring; away from the ligand labelled ${name}`;
         }
