@@ -1041,7 +1041,7 @@ class Venus {
         }
         strloctext += `<p><i>Solvent exposure:</i> ${(this.structural.buried) ? 'buried' : 'surface'} (RSA: ${Math.round(this.structural.RSA * 100) / 100})</p>`;
         strloctext += `<p><i>Secondary structure type:</i> ${this.structural.SS}</p>`;
-        strloctext += `<p><i>Residue resolution:</i> ${(this.structural.has_all_heavy_atoms) ? 'Resolved in crystal' : 'Some heavy atoms unresolved (too dynamic)'}</p>`;
+        strloctext += `<p><i>Residue resolution:</i> ${(this.structural.has_all_heavy_atoms) ? 'Resolved in crystal/model' : 'Some heavy atoms unresolved (too dynamic)'}</p>`;
         if (this.structural.closest_ligand !== undefined && this.structural.closest_ligand.match(/\[.*\]/) !== null) {
             //this.structural.closest_ligand = [GDP]180.O3B:A
             let lig = this.structural.closest_ligand.match(/\[.*\]/)[0].slice(1, -1);

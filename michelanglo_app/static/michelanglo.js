@@ -249,12 +249,12 @@ NGL.specialOps.showClash = function (id, selection, color, radius, tolerance, vi
         .map(position => NGL.specialOps.addSpikyball(protein.stage, position)));
 };
 
-NGL.specialOps.showSurface = function (id, selection, view, keepPrevious) {
+NGL.specialOps.showSurface = function (id, selection, view, opacity, keepPrevious) {
     if (NGL.debug) {
         console.log('Show surface ' + selection)
     }
     // Prepare
-    NGL.specialOps.postInitialise(); //worst case schenario prevention.
+    NGL.specialOps.postInitialise(); //worst case scenario prevention.
     selection = selection || "polymer";
     var color = 'electrostatic'; //not changeable for now.
     var proteins = NGL.getStage(id).getComponentsByType('structure');
@@ -263,6 +263,7 @@ NGL.specialOps.showSurface = function (id, selection, view, keepPrevious) {
             sele: selection,
             colorScheme: color,
             colorDomain: [-0.3, 0.3],
+            opacity: opacity || 1,
             surfaceType: "av"
         });
     });
@@ -1696,7 +1697,7 @@ NGL.Stage.prototype.removeClashes = function () {
 };
 
 ///////////////////////////// activate data-toggle='protein' ///////////////
-NGL.specialOps._prolink_focuser = function (prolink, id, focus, structure, selection, color, radius, view, label, cartoonScheme, tolerance, keepPrevious) {
+NGL.specialOps._prolink_focuser = function (prolink, id, focus, structure, selection, color, radius, view, label, cartoonScheme, tolerance, opacity, keepPrevious) {
     if (focus === 'residue') {
         NGL.specialOps.showResidue(id, selection, color, radius, view, label, cartoonScheme, keepPrevious);
     } else if (focus === 'domain' || focus === 'region' || focus === undefined) {
@@ -1704,7 +1705,7 @@ NGL.specialOps._prolink_focuser = function (prolink, id, focus, structure, selec
     } else if (focus === 'clash') {
         NGL.specialOps.showClash(id, selection, color, radius, tolerance, view, label, cartoonScheme, keepPrevious);
     } else if (focus === 'surface') {
-        NGL.specialOps.showSurface(id, selection, view, keepPrevious);
+        NGL.specialOps.showSurface(id, selection, view, opacity, keepPrevious);
     } else if ((focus === 'blur') || (focus === 'bfactor')) {
         if (selection === '*') {
             selection = undefined
@@ -1757,6 +1758,7 @@ NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
     var focus = $(prolink).data('focus'); // residue | domain | clash
     var hetero = $(prolink).data('hetero') || false;
     var label = $(prolink).data('label');
+    var opacity = $(prolink).data('opacity');
     if (label === undefined) {
         label = true
     }
@@ -1782,9 +1784,9 @@ NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
         } else if ((!!view) && (!selection)) {  //view, no selection.
             NGL.specialOps.slowOrient(id, view);
         } else {
-            NGL.specialOps._prolink_focuser(prolink, id, focus, structure, selection, color, radius, view, label, cartoonScheme, tolerance, false);
+            NGL.specialOps._prolink_focuser(prolink, id, focus, structure, selection, color, radius, view, label, cartoonScheme, tolerance, opacity,false);
             altSele.forEach(([focusAlt, seleAlt, colorAlt]) =>
-                NGL.specialOps._prolink_focuser(prolink, id, focusAlt, structure, seleAlt, colorAlt, radius, false, label, cartoonScheme, tolerance, true));
+                NGL.specialOps._prolink_focuser(prolink, id, focusAlt, structure, seleAlt, colorAlt, radius, false, label, cartoonScheme, tolerance, opacity, true));
         }
 
         // hetero flag is a hack.
