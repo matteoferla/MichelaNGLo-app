@@ -1390,6 +1390,30 @@ NGL.specialOps.hardReset = function () {  //when the page is faux-refreshed.
     }
 };
 
+NGL.specialOps.addMembrane = function (stage, radius, color, vectors, opacity) {
+    // stage = NGL.getStage();
+    // NGL.specialOps.addMembrane(stage, 55, 'gold', [[208.85211245, 208.86443969, 282.05174259],
+    //                                           [208.89116754, 208.9411814 , 251.45186085]])
+    // get defaults
+    radius = radius || 30;
+    color = color || 'gold';
+    // undefined vectors assumes it is OPM oriented. (14.3, 14.3 on Z-axis)
+    const top = vectors !== undefined ? new NGL.Vector3(...vectors[0]) : new NGL.Vector3(0,0,14.3);
+    const bottom = vectors !== undefined ? new NGL.Vector3(...vectors[1]) : new NGL.Vector3(0,0,-14.3);
+    opacity = opacity || 0.5;
+    // clear and set
+    stage.removeComponentsbyName('membrane');
+    let shape = new NGL.Shape("shape", { disableImpostor: true, radialSegments: 10 });
+    const col3 = new NGL.Color(color);
+    // adding a thin layer looks rubbish:
+    // const d = top.distanceTo(bottom);
+    // const top_thin = top.clone().lerp(bottom, 30/d);
+    // const bottom_thin = bottom.clone().lerp(top, 30/d);
+    shape.addCylinder(top, bottom, col3, radius, 'membrane');
+    let shapeComp = stage.addComponentFromObject(shape, {name: 'membrane'});
+    shapeComp.addRepresentation("buffer", {opacity: opacity});
+};
+
 NGL.specialOps.removeImg = function (id) {
     id = id || myData.ids[0];
     var img = '#' + id + ' img';
