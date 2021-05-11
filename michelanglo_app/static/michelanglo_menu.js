@@ -89,6 +89,7 @@ let popbody = `
 </div></div>
 <div class="col-lg-6 col-xl-4"><button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#controlguide_modal">Show Mouse Controls</div>
 <div class="col-lg-6 col-xl-4"></div>
+<div class="col-12" id="stageMatrix"></div>
 </div>
 </div>
 `;
@@ -108,7 +109,7 @@ $('#viewport_menu_popover')
            window.viewPopIsOpen=false;
        }
     }).on('shown.bs.popover',function() {
-        $('#popbody').html(popbody); //this seems insane but the HTML gets buggered in Moz otherwise and the position is all wtrong.
+        $('#popbody').html(popbody); //this seems insane but the HTML gets buggered in Moz otherwise and the position is all wrong.
         $('.popover-header:contains("Options")').append(`<button type="button" class="close" onclick="$('#viewport_menu_popover').popover('hide');" aria-label="Close"><span aria-hidden="true">&times;</span></button>`);
         $('#popbody [data-toggle="tooltip"]').tooltip();
         $('#viewport_menu_selector_go').click((e) => {
@@ -121,12 +122,13 @@ $('#viewport_menu_popover')
             $('#viewport_menu_popover').popover('hide');
         }
         );
-
-        $('#viewport_menu_clipNear').change((e) => NGL.getStage().setParameters({'clipNear': parseInt($('#viewport_menu_clipNear').val())}));
-        $('#viewport_menu_clipFar').change((e) => NGL.getStage().setParameters({'clipFar': parseInt($('#viewport_menu_clipFar').val())}));
-        $('#viewport_menu_clipDist').change((e) => NGL.getStage().setParameters({'clipDist': parseInt($('#viewport_menu_clipDist').val())}));
-        $('#viewport_menu_fogNear').change((e) => NGL.getStage().setParameters({'fogNear': parseInt($('#viewport_menu_fogNear').val())}));
-        $('#viewport_menu_fogFar').change((e) => NGL.getStage().setParameters({'fogFar': parseInt($('#viewport_menu_fogFar').val())}));
+        const stage = NGL.getStage();
+        $('#stageMatrix').html(`Current orientation: <code>[${stage.viewerControls.getOrientation().elements.map(v => v.toFixed(1)).join(', ')}]</code>`);
+        $('#viewport_menu_clipNear').change((e) => stage.setParameters({'clipNear': parseInt($('#viewport_menu_clipNear').val())}));
+        $('#viewport_menu_clipFar').change((e) => stage.setParameters({'clipFar': parseInt($('#viewport_menu_clipFar').val())}));
+        $('#viewport_menu_clipDist').change((e) => stage.setParameters({'clipDist': parseInt($('#viewport_menu_clipDist').val())}));
+        $('#viewport_menu_fogNear').change((e) => stage.setParameters({'fogNear': parseInt($('#viewport_menu_fogNear').val())}));
+        $('#viewport_menu_fogFar').change((e) => stage.setParameters({'fogFar': parseInt($('#viewport_menu_fogFar').val())}));
         //$('.popover [type="range"]').on('mousedown', (e) => {$('.transparentable').hide(500); if (window.menu_timeout) {clearTimeout(menu_tineout)}})
          //                       .on('mouseup', (e) => setTimeout((e) => window.menu_timeout = $('.transparentable').show(1000), 3000));
         //worked with ... class='transparentable' style="transition: opacity 0.5s; -webkit-transition: opacity 0.5s;"
