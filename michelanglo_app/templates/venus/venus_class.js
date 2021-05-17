@@ -1082,7 +1082,7 @@ class Venus {
             strloctext += '</p>';
         } else {
             strloctext += this.makeExt("https://swissmodel.expasy.org/repository/uniprot/" + this.uniprot, 'SWISSMODEL:' + this.structural.code);
-            strloctext += ` ${(this.structural.structure.extra.identity *100).toFixed(0)}% identity `;
+            strloctext += ` ${(this.structural.structure.extra.identity).toFixed(0)}% identity `;
             strloctext += `<button type="button" class="btn btn-outline-info venus-no-mike" data-toggle="modal" data-target="#alignment_extra">see alignment</button>`;
             strloctext +='</p>';
             align.find('.modal-body').append(`<p>Template: the sequence of the protein structure used for threading by Swissmodel, 
