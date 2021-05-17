@@ -71,4 +71,5 @@
     ###<script src="https://cdn.rawgit.com/calipho-sib/feature-viewer/v1.0.0/dist/feature-viewer.min.js"></script>
     <script src="/static/ThirdParty/feature-viewer.js" async></script>
     <script src="https://cdn.jsdelivr.net/gh/calipho-sib/sequence-viewer@0.2.35/dist/sequence-viewer.min.js" async></script>
+    <script src="/static/ThirdParty/msa.min.gz.js" async></script>
 </%block>

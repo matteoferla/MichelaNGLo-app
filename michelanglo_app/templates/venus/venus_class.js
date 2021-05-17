@@ -84,6 +84,7 @@ class Venus {
         this.prepareDOM();
         this.shown_warnings = [];
         this.timeTaken = null;
+
     }
 
     prepareDOM() {
@@ -93,8 +94,10 @@ class Venus {
             delete window.myData;
             NGL.getStage().removeAllComponents();
         }
+        $('#viewport').children().filter((i, elem) => elem.nodeName !== 'BUTTON').detach()
         this.updateStructureOption();
         if (this.mutalist !== undefined) this.mutalist.html('');
+        $('#results_mutalist').children().detach();
         $('#results').hide();
         $('#venus_calc').removeAttr('disabled');
         $('result_title').html('<i class="far fa-dna fa-spin"></i> Loading');
@@ -102,6 +105,7 @@ class Venus {
         $('#fv').html('');
         $('#changeByPage_selector').html('<option name="changeByPage" value="0" selected>Select page first</option>');
         $('#changeByPage_selector').attr('disabled', 'disabled');
+        $('#alignment_extra .modal-body').children().detach();
     }
 
     //###################  Steps
@@ -342,16 +346,49 @@ class Venus {
                 }
                 ddgtext += '<button class="btn btn-outline-info venus-no-mike" data-toggle="modal" data-target="#ddG_extra">More</button>';
                 this.createEntry('ddg', 'Free energy calculation', ddgtext);
-                const liEl = (l, v) => `<li><b>${l}:</b> ${v}</li>`;
-                const innerList = d => '<ul>' + Object.entries(d).map(([k, v]) => liEl(k, v.toFixed(1))).join('') + '</ul>';
-                let extraParts = liEl('Scorefunction', this.energetical.score_fxn) +
-                    liEl('ddG', this.energetical.ddG.toFixed(1) + ' kcal/mol') +
-                    liEl('solvatation term in ddG', this.energetical.dsol.toFixed(1) + ' kcal/mol') +
-                    liEl('Scores (meaningless due to only partial energy minimisation)', innerList(this.energetical.scores)) +
-                    liEl('ddG contributed by residue', this.energetical.ddG_residue.toFixed(1) + ' kcal/mol') +
-                    liEl('Native residue terms', innerList(this.energetical.native_residue_terms)) +
-                    liEl('Mutant residue terms', innerList(this.energetical.mutant_residue_terms));
-                $('#ddG_extra .modal-body').html('<p>Detail for ddG score. For meaning, see <a href="/docs/venus" target="_blank">documentation</a>.</p><ul>' + extraParts + '</ul>');
+                // modal
+                // const liEl = (l, v) => `<li><b>${l}:</b> ${v}</li>`;
+                // const innerList = d => '<ul>' + Object.entries(d).map(([k, v]) => liEl(k, v.toFixed(1))).join('') + '</ul>';
+                // let extraParts = liEl('Scorefunction', ) +
+                //     liEl('ddG', this.energetical.ddG.toFixed(1) + ' kcal/mol') +
+                //     liEl('solvatation term in ddG',  + ' kcal/mol') +
+                //     liEl('Scores (meaningless due to only partial energy minimisation)', innerList(this.energetical.scores)) +
+                //     liEl('ddG contributed by residue', this.energetical.ddG_residue.toFixed(1) + ' kcal/mol') +
+                //     liEl('Native residue terms', innerList(this.energetical.native_residue_terms)) +
+                //     liEl('Mutant residue terms', innerList(this.energetical.mutant_residue_terms));
+                let modalText = `<p>Detail for ddG score.
+                                    For meaning, see <a href="/docs/venus" target="_blank">documentation</a>.</p>
+                                    <p><b>Total &Delta;&Delta;G</b>: ${this.energetical.ddG.toFixed(1)} kcal/mol<br/>
+                                    <b>Residue contribution to &Delta;&Delta;G</b>: ${this.energetical.ddG_residue.toFixed(1)} kcal/mol<br/>
+                                    <b>Scorefunction</b>: ${this.energetical.score_fxn}</p>`;
+                modalText += `<table class="table">
+                              <thead>
+                                <tr>
+                                  <th scope="col">Term</th>
+                                  <th scope="col">Meaning</th>
+                                  <th scope="col">Weight</th>
+                                  <th scope="col">Difference</th>
+                                  <th scope="col">Weighted difference</th>
+                                  <th scope="col">Native</th>
+                                  <th scope="col">Mutant</th>
+                                </tr>
+                              </thead>
+                              <tbody>`;
+                const rowHeaderMaker =  term => `<th scope="row">${term}</th>`;
+                const TdMaker = term => `<td>${term}</td>`;
+                const decimalTdMaker = term => `<td>${term.toFixed(1)}</td>`;
+                const rowMaker = term => `<tr>${rowHeaderMaker(term)}
+                                              ${TdMaker(this.energetical.terms[term]['meaning'])}
+                                              ${TdMaker(this.energetical.terms[term]['weight'])}
+                                              ${decimalTdMaker(this.energetical.terms[term]['difference'])}
+                                              ${decimalTdMaker(this.energetical.terms[term]['difference'] * this.energetical.terms[term]['weight'])}
+                                              ${decimalTdMaker(this.energetical.terms[term]['native'])}
+                                              ${decimalTdMaker(this.energetical.terms[term]['mutant'])}
+                                          </tr>`;
+                modalText +=  Object.keys(this.energetical.terms).map(rowMaker).join('');
+                modalText += `</tbody></table>`;
+                $('#ddG_extra .modal-body').html(modalText);
+                // add structures
                 myData.proteins[0].name = 'model'; //need the name.
                 myData.proteins.push({
                     name: "wt",
@@ -1033,11 +1070,29 @@ class Venus {
             empower();
         }
         this.updateStructureOption();
+        const align = $('#alignment_extra');
+        align.unbind('shown.bs.modal');
+        align.modal('hide');
+        if (this.structural.has_conservation) {$('#conservationBtn').show();} else {$('#conservationBtn').hide();}
+        // links
         let strloctext = '<p><i>Chosen model:</i> ';
         if (this.structural.code.length === 4) {
-            strloctext += this.makeExt("https://www.rcsb.org/structure/" + this.structural.code, 'PDB:' + this.structural.code) + '</p>';
+            strloctext += this.makeExt("https://www.rcsb.org/structure/" + this.structural.code, 'PDB:' + this.structural.code);
+            strloctext += ` ${this.structural.structure.resolution} &Aring;`;
+            strloctext += '</p>';
         } else {
-            strloctext += this.makeExt("https://swissmodel.expasy.org/repository/uniprot/" + this.uniprot, 'SWISSMODEL:' + this.structural.code) + '</p>';
+            strloctext += this.makeExt("https://swissmodel.expasy.org/repository/uniprot/" + this.uniprot, 'SWISSMODEL:' + this.structural.code);
+            strloctext += ` ${(this.structural.structure.extra.identity *100).toFixed(0)}% identity `;
+            strloctext += `<button type="button" class="btn btn-outline-info venus-no-mike" data-toggle="modal" data-target="#alignment_extra">see alignment</button>`;
+            strloctext +='</p>';
+            align.find('.modal-body').append(`<p>Template: the sequence of the protein structure used for threading by Swissmodel, 
+                            in this case template(${venus.structural.code.split(' ')[2]})<br/>
+                            Uniprot: the sequence of this protein under investigation 
+                            (${this.protein.gene_name}).</p><div id="msa_viewer" class="p-2"></div>`);
+            const seqs = msa.io.fasta.parse(`>template\n${this.structural.structure.alignment.template}\n`+
+                                         `>uniprot\n${this.structural.structure.alignment.uniprot}\n`);
+            align.on('shown.bs.modal', event => msa({el: align.find('#msa_viewer'), seqs: seqs}).render() );
+
         }
         strloctext += `<p><i>Solvent exposure:</i> ${(this.structural.buried) ? 'buried' : 'surface'} (RSA: ${Math.round(this.structural.RSA * 100) / 100})</p>`;
         strloctext += `<p><i>Secondary structure type:</i> ${this.structural.SS}</p>`;
@@ -1052,9 +1107,15 @@ class Venus {
         // structural character
         this.createEntry('strcha', 'Structural character', strloctext);
         const allSele = this.structural.neighbours.map(v => v.resi + ':A').join(' or ');
-        let omni = `<span ${this.prolink} data-color="bfactor" data-focus="residue" data-selection="${allSele}">
+        let omni;
+        if (this.structural.has_conservation) {
+            omni = `<span ${this.prolink} data-color="bfactor" data-focus="residue" data-selection="${allSele}">
                     (all, coloured by conservation)</span>`;
-        this.makeProlink(allSele, '(all)');
+        } else {
+            omni = `<span ${this.prolink} data-color="turquoise" data-focus="residue" data-selection="${allSele}">
+                    (all)</span>`;
+        }
+        //this.makeProlink(allSele, '(all)');
 
         let strtext = `<p>Structural neighbourhood ${omni}. 
                         (see ${this.makeExt('https://gnomad.broadinstitute.org/', 'gnomAD')} and
@@ -1079,24 +1140,27 @@ class Venus {
         } else if (data.detail !== undefined && data.detail.length) {
             detail =  '&mdash; '+ data.detail;
         }
-        let conservation = '&mdash; no conservation data';
-        if (data.conscore !== undefined) {
-            conservation = `&mdash; <span  title='Consurf normalised homology score: positive = less conserved. negative = conserved' data-toggle='tooltip'>
-                            conservation=${data.conscore.toFixed(1)}
-                            </span>,
-                            <span title='alterative residues in homologous protein: ${data.variety.join('/')}' data-toggle='tooltip'>
-                                alts: ${data.variety.length}
-                            </span>
-                            `;
+        let conservation = ''
+        if (!! this.structural.has_conservation) {
+            conservation = '&mdash; no conservation data';
+            if (data.conscore !== undefined) {
+                conservation = `&mdash; <span  title='Consurf normalised homology score: positive = less conserved. negative = conserved' data-toggle='tooltip'>
+                                conservation=${data.conscore.toFixed(1)}
+                                </span>,
+                                <span title='alterative residues in homologous protein: ${data.variety.join('/')}' data-toggle='tooltip'>
+                                    alts: ${data.variety.length}
+                                </span>
+                                `;
+            }
         }
         return `<li>${prolink} ${distance} ${detail} ${conservation}</li>`;
     }
 
     updateStructureOption() {
-        if (window.myData === undefined) return 0;
-        NGL.getStage('viewport').handleResize(); // asynchronous changes...
         const so = $('#structureOption');
         so.html('');
+        if (window.myData === undefined) return 0;
+        NGL.getStage('viewport').handleResize(); // asynchronous changes...
         const nicer = {
             'model': 'original structure',
             'wt': 'wild type (energy minimised)',

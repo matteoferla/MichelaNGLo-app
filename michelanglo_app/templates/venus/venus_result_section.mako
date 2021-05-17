@@ -234,7 +234,7 @@
                                     </div>
                             </div>
                             <div class="col-4" >
-                                <button type="button" class="btn btn-outline-info" id="#conservationBtn"
+                                <button type="button" class="btn btn-outline-info" id="conservationBtn"
                                         data-toggle="modal" data-target="#conservationModal">Show conservation</button>
                             </div>
                         </div>
@@ -257,7 +257,7 @@
 ################# MODALS
 
 <div class="modal fade" id="ddG_extra" tabindex="-1" role="dialog" aria-labelledby="ddG_extra_title" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog  modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="ddG_extra_title">More ddG details</h5>
@@ -271,6 +271,22 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="alignment_extra" tabindex="-1" role="dialog" aria-labelledby="alignment_extra_title" aria-hidden="true">
+    <div class="modal-dialog  modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="alignment_extra_title">Alignment</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <div class="modal fade" id="gnomad_extra" tabindex="-1" role="dialog" aria-labelledby="gnomad_extra_title"
      aria-hidden="true">
@@ -422,7 +438,7 @@
               <li><span class="prolink" data-target="#viewport" data-toggle="protein" data-focus="blur" data-color="bfactor">a b-factor putty</span></li>
           </ul>
 
-          NB. Parts of the structure that are not of the polypeptide chain of interest are
+          NB. Parts of the structure that are not of the polypeptide chain of interest are in white.
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

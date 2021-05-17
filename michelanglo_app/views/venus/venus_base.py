@@ -105,6 +105,8 @@ class VenusBase:
                 return [deobjectify(v) for v in x]
             elif isinstance(x, int) or isinstance(x, float):
                 return x
+            elif isinstance(x, Structure):
+                return x.to_dict(full=True)
             else:
                 return str(x)  # really ought to deal with falseys.
 
