@@ -29,6 +29,16 @@ log = logging.getLogger(__name__)
 from ..buffer import system_storage
 
 
+# ------------- DEBUG -------------------------------------------
+suppress_errors = True
+
+from michelanglo_protein.analyse import StructureAnalyser
+# do not raise error on missing conservation
+StructureAnalyser.error_on_missing_conservation = not suppress_errors
+
+# ----------------------------------------------------------------
+
+
 ######################
 
 class VenusException(Exception):
@@ -50,6 +60,7 @@ class VenusBase:
                     'meta_url': 'https://michelanglo.sgc.ox.ac.uk/',
                     'contents': contents
                     }
+    suppress_errors = suppress_errors
 
     def __init__(self, request):
         self.request = request
