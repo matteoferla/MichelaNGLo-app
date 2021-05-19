@@ -322,7 +322,8 @@ NGL.specialOps.doubleLoader = function (stage, partner, resolve) {
         } else if (m.type === 'rcsb') {
             p = stage.loadFile('rcsb://' + m.value);
         } else if (m.type === 'url') {
-            p = stage.loadFile(m.value, {ext: 'pdb', firstModelOnly: true});
+            let ext = m.value.replace(/\?.*/, '').replace('.txt', '').split('.').pop();
+            p = stage.loadFile(m.value, {ext: ext, firstModelOnly: true});
         } else {
             throw 'Unknown type ' + m.type
         }
