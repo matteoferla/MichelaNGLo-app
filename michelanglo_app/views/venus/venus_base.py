@@ -30,6 +30,7 @@ from ..buffer import system_storage
 
 
 # ------------- DEBUG -------------------------------------------
+# this should and will probably be brought to the app.py config
 suppress_errors = True
 
 from michelanglo_protein.analyse import StructureAnalyser

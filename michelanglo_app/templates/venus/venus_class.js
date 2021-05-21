@@ -527,6 +527,10 @@ class Venus {
     fallbackAnalyse() {
         //viewport
         let strloctext = '<p>No structure available: you may want to create your own protein model (see <a href="/docs/gene#modelling" target="_blank">documentation</a>)</p>';
+        strloctext += `<button type="button" class="btn btn-outline-primary"
+                                data-toggle="modal" data-target="#change_modal"
+                        ><i class="far fa-upload"></i> Change
+                        </button>`;
         this.createEntry('strcha', 'Structural character', strloctext);
         $('#structureOption').append('<li>No structures available</li>');
 
@@ -1056,7 +1060,7 @@ class Venus {
         // When run locally and with an already analysed case, D3 is outrun...
         const empower = () => {
             UniprotFV.empower(); // set the click events
-            model_id.innerHTML = this.structural.code;
+            $("#model_id").html(this.structural.code);
             if (this.structural.chain_definitions !== undefined) {
                 const chainAs = this.structural.chain_definitions.filter(c => c.chain === 'A');
                 const chainA = (chainAs.length > 0) ? chainAs[0] : this.structural.chain_definitions[0];
@@ -1075,15 +1079,21 @@ class Venus {
         align.modal('hide');
         if (this.structural.has_conservation) {$('#conservationBtn').show();} else {$('#conservationBtn').hide();}
         // links
-        let strloctext = '<p><i>Chosen model:</i> ';
+        const changer = ` <button type="button" class="btn btn-outline-secondary m-2 venus-no-mike"
+                                data-toggle="modal" data-target="#change_modal"
+                        ><i class="far fa-upload"></i> Change
+                        </button> `;
+        let strloctext = '<p><i>Chosen model:</i>';
         if (this.structural.code.length === 4) {
             strloctext += this.makeExt("https://www.rcsb.org/structure/" + this.structural.code, 'PDB:' + this.structural.code);
             strloctext += ` ${this.structural.structure.resolution} &Aring;`;
+            strloctext += changer;
             strloctext += '</p>';
         } else {
             strloctext += this.makeExt("https://swissmodel.expasy.org/repository/uniprot/" + this.uniprot, 'SWISSMODEL:' + this.structural.code);
             strloctext += ` ${(this.structural.structure.extra.identity).toFixed(0)}% identity `;
-            strloctext += `<button type="button" class="btn btn-outline-info venus-no-mike" data-toggle="modal" data-target="#alignment_extra">see alignment</button>`;
+            strloctext += `<button type="button" class="btn btn-outline-info venus-no-mike m-2" data-toggle="modal" data-target="#alignment_extra">see alignment</button>`;
+            strloctext += changer;
             strloctext +='</p>';
             align.find('.modal-body').append(`<p>Template: the sequence of the protein structure used for threading by Swissmodel, 
                             in this case template(${venus.structural.code.split(' ')[2]})<br/>
@@ -1104,8 +1114,35 @@ class Venus {
             let d = Math.round(this.structural.distance_to_closest_ligand) + ' &Aring;'
             strloctext += `<p><i>Closest ligand:</i> <span class="prolink" data-target="viewport" data-color="teal" data-focus="residue" data-selection="${ds}">${lig}</span> (${d})</p>`;
         }
+        // ---anything transplanted?
+        const ulInner =  this.structural
+                             .chain_definitions
+                             .map(definition => {
+                                 // this.prolink has class. Not wanted.
+                                 const prolink = `data-target="#viewport" data-toggle="protein" data-focus="domain" data-selection=":${definition.chain}"`;
+                                 let chain = `<b>Chain ${definition.chain}</b> `;
+                                 if (definition.uniprot === this.protein.uniprot) {
+                                     return `<a href="#viewport"  class="list-group-item list-group-item-action" ${prolink}>${chain}
+                                                Protein of interest 
+                                                (${this.protein.gene_name},
+                                                ${definition.x}&ndash;${definition.y})</a>`;
+                                 }
+                                 let text = chain;
+                                 if (definition.name) {text += definition.name+' ';}
+                                 if (definition.uniprot && definition.uniprot !== 'P00404') {
+                                     // 404 = dumb decision for unknown uniprot...
+                                     text += definition.uniprot+' ';}
+                                 if (! definition.transplanted) {
+                                     return `<a href="#viewport" class="list-group-item list-group-item-action" ${prolink}>${text}</a>`;
+                                 } else {
+                                    return `<a href="#viewport"  class="list-group-item list-group-item-action list-group-item-warning" ${prolink}><i class="far fa-exclamation-triangle" data-toggle="tooltip" title="Chain taken from template (not threaded)"></i> ${text}</a>`;
+                                 }
+                             });
+        strloctext += `<p>Chains:</p><div class="list-group" id="chainDescr">${ulInner.join('')}</div>`;
         // structural character
         this.createEntry('strcha', 'Structural character', strloctext);
+        // unsure why these do not get picked up.
+        $('#chainDescr [href="#viewport"]').protein();
         const allSele = this.structural.neighbours.map(v => v.resi + ':A').join(' or ');
         let omni;
         if (this.structural.has_conservation) {
@@ -1123,6 +1160,7 @@ class Venus {
                         for extra information)</p>`;
         strtext += '<ul>' + this.structural.neighbours.sort((a,b) => a.distance - b.distance)
                                                       .map(v => this.makeNeighbourLI(v)).join('') + '</ul>';
+        // done!
         this.createEntry('neigh', 'Structural neighbourhood', strtext);
     }
 

@@ -32,36 +32,6 @@
 
 
         <div class="col-6 mb-4 pl-4">
-
-            ##### first block: Structure
-            %if mutation_mode == 'main':
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header"><h5 class="card-title">
-                    <i class="far fa-cubes"></i> Structure
-                </h5><h6 class="card-subtitle mb-2 text-muted">
-                    Override the automatic structure choice
-                </h6></div>
-
-
-                <div class="card-body">
-                    ###################### arrow ###################################
-
-                    <div class="arrow-right"></div>
-                    <div class="arrow-right2"></div>
-                    ###################### end of arrow ###################################
-
-                    <div class="d-flex justify-content-between">
-                        <div><i>Current model:</i> <span id="model_id">N/A</span></div>
-                        <button type="button" class="btn btn-outline-primary"
-                                data-toggle="modal" data-target="#change_modal"
-                        ><i class="far fa-upload"></i> Change
-                        </button>
-                    </div>
-                </div>
-            </div>
-            %endif
-
-
             #### Links to individual mutations
             %if mutation_mode == 'multi':
             <div class="card mb-4 shadow-sm">
@@ -220,22 +190,25 @@
                     <div>
                         <hr/>
                         <div class="row">
-                            <div class="col-4">
+                            <div class="col-xl-3 col-6">
                                 ############ toggle
                                     <div class="custom-control custom-switch">
                                         <input type="checkbox" class="custom-control-input" id="showMutant">
                                         <label class="custom-control-label" for="showMutant">Always show mutant</label>
                                     </div>
                             </div>
-                            <div class="col-4">
+                            <div class="col-xl-3 col-6">
                             <div class="custom-control custom-switch">
                                         <input type="checkbox" class="custom-control-input" id="showLigands">
                                         <label class="custom-control-label" for="showLigands">Always show ligands</label>
                                     </div>
                             </div>
-                            <div class="col-4" >
+                            <div class="col-xl-3 col-6" >
                                 <button type="button" class="btn btn-outline-info" id="conservationBtn"
                                         data-toggle="modal" data-target="#conservationModal">Show conservation</button>
+                            </div>
+                            <div class="col-xl-3 col-6" >
+                                <button type="button" class="btn btn-outline-info" onclick="NGL.specialOps.showSurface('viewport', '*', undefined, 0.4, true)">Show surface</button>
                             </div>
                         </div>
 

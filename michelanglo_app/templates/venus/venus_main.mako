@@ -31,7 +31,7 @@
         </button>
     </div>
     %endif
-    <div class="alert alert-info  alert-dismissible fade show" role="alert">
+    <div class="alert alert-info  alert-dismissible fade show mt-5" role="alert">
         This is for academic use only and not intended to be used commercially. Conclusions drawn are suggestions and not diagnostic.
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
           <span aria-hidden="true">&times;</span>
