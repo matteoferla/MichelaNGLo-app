@@ -288,6 +288,7 @@ class Venus {
             this.concludeMutational();
         } else {
             this.structural = msg.structural;
+            this.structural.custom_ddG = {};
             this.showWarnings(msg.warnings);
             this.analyseddG();
             if (!!this.structural.coordinates.length) this.loadStructure();
@@ -344,8 +345,22 @@ class Venus {
                 if (this.energetical.scores.mutate + 3 > this.energetical.scores.mutarelax) {
                     ddgtext += `Results in backbone change (RMSD<sub>CA</sub>: ${Math.round(this.energetical.rmsd * 100) / 100})<br/>`;
                 }
-                ddgtext += '<button class="btn btn-outline-info venus-no-mike" data-toggle="modal" data-target="#ddG_extra">More</button>';
+                ddgtext += '<button class="btn btn-outline-info venus-no-mike" data-toggle="modal" data-target="#ddG_extra"><i class="fas fa-search"></i> More details</button>';
+                ddgtext += '<p>Additionally requested calculations:</p><ul id="extraDDGResults">';
+                Object.entries(this.structural.custom_ddG).forEach(({mutation, data}) => {ddgtext += `<li><b>${mutation}</b>  ${data.toFixed(1)} kcal/mol</li>`});
+                ddgtext += `</ul>
+                <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">Calculate a custom mutation</span>
+                  </div>
+                  <input type="text" class="form-control" placeholder="extra mutation" aria-label="extra mutation" aria-describedby="#extraCalculate"  id="extraWanted">
+                  <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" id="extraCalculate"><i class="far fa-calculator"></i></button>
+                  </div>
+                </div>
+                `;
                 this.createEntry('ddg', 'Free energy calculation', ddgtext);
+
                 // modal
                 // const liEl = (l, v) => `<li><b>${l}:</b> ${v}</li>`;
                 // const innerList = d => '<ul>' + Object.entries(d).map(([k, v]) => liEl(k, v.toFixed(1))).join('') + '</ul>';
@@ -428,6 +443,13 @@ class Venus {
                         }
                     });
                 }
+                // extra
+                $('#extraCalculate').click(event => {
+                    const mutation = $('#extraWanted').val();
+                    window.ops.addToast('calculatin' + mutation, 'Prediction in progress', 'The model requested will appear below the structural viewport when available', 'bg-info');
+                    this.analyse_target(mutation, 'relax');
+                });
+
                 this.updateStructureOption();
                 this.concludeMutational();
             }
@@ -460,6 +482,8 @@ class Venus {
         //     window.ops.addToast('busy', 'Please be patient', 'To prevent overuse, only one at the time', 'bg-warning');
         //     return null;
         // }
+        console.log(mutation);
+        console.log(algorithm);
         this.setStatus(`Running extra job ${mutation}`, 'working');
         return $.post({
             url: "venus_analyse", data: {
@@ -470,7 +494,8 @@ class Venus {
                 extra: mutation,
                 algorithm: algorithm
             }
-        }).fail(ops.addErrorToast).done(msg => {
+        }).fail(ops.addErrorToast)
+          .done(msg => {
             if (msg.error) {
                 this.setStatus('Failure at extra job', 'crash');
                 ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
@@ -490,6 +515,8 @@ class Venus {
                 });
                 ops.addToast(mutation, 'Extra analysis complete', `${mutation} has a ddG of ${parseInt(msg.ddg)} kcal/mol (calculated via local ${algorithm})`, 'bg-success');
                 this.updateStructureOption();
+                this.structural.custom_ddG[mutation] = msg.ddg;
+                $('#extraDDGResults').append(`<li><b>${mutation}</b>  ${msg.ddg.toFixed(1)} kcal/mol</li>`);
             }
         });
     }
@@ -918,14 +945,13 @@ class Venus {
                     }, {destabilising: 0, neutral: 0, stabilising: 0});
                 if (Object.values(effect).reduce((a, v) => a + v, 0) === 0) return '';
                 let variants = gnomads.map(g => `${g} (≈${parseInt(this.energetical_gnomAD[g])} kcal/mol)`).join(', ');
+                const modalAttr = `data-toggle="tooltip" title="${variants}" data-gnomad='${JSON.stringify(gnomads)}'`;
                 return ` <span class="underlined venus-plain-mike" style="cursor: pointer;"
-                                data-toggle="tooltip" title="${variants}"
-                                data-gnomad='${JSON.stringify(gnomads)}'
+                                ${modalAttr}
                                 >(` + Object.entries(effect)
                         .filter(([k, v]) => v !== 0)
                         .map(([k, v]) => `${k}: ${v}`).join(', ')
-                    + ') <i class="far fa-calculator"></i>\n' +
-                    'Mathematics\n</span>';
+                    + ` <i class="far fa-calculator" ${modalAttr}></i></span>)`;
             }
         };
 

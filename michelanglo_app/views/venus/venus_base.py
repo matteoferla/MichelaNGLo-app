@@ -39,7 +39,6 @@ StructureAnalyser.error_on_missing_conservation = not suppress_errors
 
 # ----------------------------------------------------------------
 
-
 ######################
 
 class VenusException(Exception):
