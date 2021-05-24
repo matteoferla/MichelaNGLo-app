@@ -924,7 +924,8 @@ class Venus {
                                 >(` + Object.entries(effect)
                         .filter(([k, v]) => v !== 0)
                         .map(([k, v]) => `${k}: ${v}`).join(', ')
-                    + ')</span>';
+                    + ') <i class="far fa-calculator"></i>\n' +
+                    'Mathematics\n</span>';
             }
         };
 
