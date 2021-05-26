@@ -77,8 +77,7 @@ class Venus {
             'halt': "alert-info",
             'done': "alert-success"
         };
-        this.stepNames = ['zeroth step',
-            'Retrieval of protein info',
+        this.stepNames = ['Retrieval of protein info',
             'Assessment of mutation without structure',
             'Picking and tweaking best model',
             '&Delta;&Delta;G calculation',
@@ -669,7 +668,7 @@ class Venus {
         mode = mode || 'working';
         custom = custom || false;
         let forelabels = {'working': 'Running step', 'crash': 'Failure at step'};
-        let label = `${forelabels[mode]} ${step}/5 (${this.stepNames[step]})`;
+        let label = `${forelabels[mode]} ${step}/5 (${this.stepNames[step-1]})`;
         if (custom) {label += ' (rerunning with custom file) '}
         label += ' &nbsp; ';
         label += this.stepNames.map((val, i) => {
