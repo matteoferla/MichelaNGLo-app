@@ -1018,17 +1018,15 @@ class Venus {
                 if (allTargets.length > 0) {btn = `
 <div class="input-group mb-3">
   <div class="input-group-prepend">
-    <span class="input-group-text">Bulk accurate calculations: </span>
+    <span class="input-group-text">Bulk accurate<br/> calculations: </span>
   </div>
-  <div>
-    <button class="btn btn-outline-info" type="button" id="ddGHeteroGnomADs"
+  <button class="btn btn-outline-info border-right-0 border-left-0 rounded-0" type="button" id="ddGHeteroGnomADs"
     ${heteroTargets.length ? '' : 'disabled'}
-    ><i class="far fa-calculator"></i> All het</button>
-  </div>
+    ><i class="far fa-calculator"></i> All het<br/> (<i class="far fa-adjust"></i>)</button>
   <div class="input-group-append">
     <button class="btn btn-outline-info" type="button"  id="ddGHomoGnomADs"
     ${homoTargets.length ? '' : 'disabled'}
-    ><i class="far fa-calculator"></i> All hom</button>
+    ><i class="far fa-calculator"></i> All hom<br/> (<i class="fas fa-circle"></i>)</button>
   </div>
 </div>`;}
             }
