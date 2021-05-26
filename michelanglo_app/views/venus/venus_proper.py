@@ -221,7 +221,7 @@ class Venus(VenusBase):
 
         ### STEP 3
 
-    def structural_step(self, structure=None):
+    def structural_step(self, structure=None, retrieve=True):
         """
         runs protein.analyse_structure() iteratively until it works.
         """
@@ -236,14 +236,15 @@ class Venus(VenusBase):
                 protein.analyse_structure(structure)
             else:
                 # do not use the stored values of pdbs, but get the swissmodel ones:
-                try:
-                    protein.retrieve_structures_from_swissmodel()
-                except Exception as error:
-                    msg = f'Swissmodel retrieval failed: {error.__class__.__name__}: {error}'
-                    log.critical(msg)
-                    notify_admin(msg)
-                    self.reply['warnings'].append('Retrieval of latest PDB data failed (admin notified). ' +
-                                                  'Falling back onto stored data.')
+                if retrieve:
+                    try:
+                        protein.retrieve_structures_from_swissmodel()
+                    except Exception as error:
+                        msg = f'Swissmodel retrieval failed: {error.__class__.__name__}: {error}'
+                        log.critical(msg)
+                        notify_admin(msg)
+                        self.reply['warnings'].append('Retrieval of latest PDB data failed (admin notified). ' +
+                                                      'Falling back onto stored data.')
                 try:
                     protein.analyse_structure()
                 except Exception as error:
@@ -253,12 +254,10 @@ class Venus(VenusBase):
                     broken_structure = best = protein.get_best_model()
                     # ---- remove
                     if protein.swissmodel.count(broken_structure) != 0:
-                        i = protein.swissmodel.index(broken_structure)
-                        del protein.swissmodel[i]
+                        i = protein.swissmodel.remove(broken_structure)
                         source = 'Swissmodel'
                     elif protein.pdbs.count(broken_structure) != 0:
-                        i = protein.pdbs.index(broken_structure)
-                        del protein.pdbs[i]
+                        i = protein.pdbs.remove(broken_structure)
                         source = 'RCSB PDB'
                     else:
                         raise ValueError('structure from mystery source')
@@ -277,7 +276,7 @@ class Venus(VenusBase):
                         log.critical(msg)
                         notify_admin(msg)
                     # ---- repeat
-                    self.structural_step()
+                    self.structural_step(retrieve=False)
         if protein.structural:
             self.reply['structural'] = self.jsonable(protein.structural)
             self.reply['has_structure'] = True
