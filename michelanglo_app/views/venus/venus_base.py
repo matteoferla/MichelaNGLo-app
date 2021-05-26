@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from ..uniprot_data import *
 # ProteinCore organism human uniprot2pdb
-from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structure
+from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structure, Variant
 
 from ...models import User, Page  ##needed solely for log.
 from ..common_methods import is_malformed, notify_admin, get_pdb_block_from_request
@@ -118,6 +118,8 @@ class VenusBase:
                 return x
             elif isinstance(x, Structure):
                 return x.to_dict(full=True)
+            elif isinstance(x, Variant):
+                return x.to_dict()
             else:
                 return str(x)  # really ought to deal with falseys.
 
