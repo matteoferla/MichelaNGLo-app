@@ -1003,11 +1003,39 @@ class Venus {
         dg.click(event => {
             $('#gnomad_extra').modal('show');
             const el = $(event.target);
+
+
+            let btn = '';
+            let homoTargets;
+            let heteroTargets;
+            if (this.energetical_gnomAD !== undefined) {
+                const allTargets = el.data('gnomad')
+                              .filter(mutation => {if (this.energetical_gnomAD[mutation] === undefined) return false;
+                                                   else return this.energetical_gnomAD[mutation] >= this.energetical.ddG;
+                                                    });
+                homoTargets = allTargets.filter(mutation => venus.get_gnomAD_details(mutation).homozygous > 0);
+                heteroTargets = allTargets.filter(mutation => venus.get_gnomAD_details(mutation).homozygous === 0);
+                if (allTargets.length > 0) {btn = `
+<div class="input-group mb-3">
+  <div class="input-group-prepend">
+    <span class="input-group-text">Bulk accurate calculations: </span>
+  </div>
+  <div>
+    <button class="btn btn-outline-info" type="button" id="ddGHeteroGnomADs"
+    ${heteroTargets.length ? '' : 'disabled'}
+    ><i class="far fa-calculator"></i> All het</button>
+  </div>
+  <div class="input-group-append">
+    <button class="btn btn-outline-info" type="button"  id="ddGHomoGnomADs"
+    ${homoTargets.length ? '' : 'disabled'}
+    ><i class="far fa-calculator"></i> All hom</button>
+  </div>
+</div>`;}
+            }
             let content = `<p>Mutations within feature present in the population (gnomAD).<br/>
 NB. that the free energy calculations are very crude for expediency (target repacking only) and 
 the gnomAD variants may include pathogenic variants (hence the suggestion to check gnomAD for a particular mutation)<br/>
-</p>
-<btn class="btn btn-outline-info" id="ddGgnomADs"><i class="far fa-calculator"></i> Perform an accurate calculation of all gnomAD homozygous variants that may be more deleterious than the variant of interest</btn>
+</p>${btn}
 `;
             content += '<ul class="fa-ul">';
             const addLi = mutation => {
@@ -1037,17 +1065,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             content += '</ul>';
             $('#gnomad_extra .modal-body').html(content);
             const pros = $('#gnomad_extra [data-toggle="protein"]');
-            $('#ddGgnomADs').click(event => {
-                if (this.energetical_gnomAD === undefined) {
-                window.ops.addToast('patient', 'Please be patient', 'Please wait for preliminary results to finish.', 'bg-warning');
-                return;
-                }
-                $('#ddGgnomADs').detach();
-                const targets = el.data('gnomad')
-                                  .filter(mutation => {if (this.energetical_gnomAD[mutation] === undefined) return false;
-                                                       else if (this.energetical_gnomAD[mutation] < this.energetical.ddG) return false;
-                                                       else return venus.get_gnomAD_details(mutation).homozygous <= 0;
-                                                        });
+            const bulker = (targets) => {
                 if (targets.length < 10) {
                     window.ops.addToast('patient', 'Please be patient', 'Results will be shown in Free energy calculation section.', 'bg-info');
                     targets.forEach(mutation => this.analyse_target(mutation, 'relax'));
@@ -1055,8 +1073,16 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                 else {
                     window.ops.addToast('patient', 'Too many variants', 'Unfortunately, there are too many variants. Please select a smaller feature', 'bg-info');
                 }
-
-
+            };
+            $('#ddGHomoGnomADs').click(event => {
+                $('#ddGHomoGnomADs').prop('disabled', true);
+                $('#ddGHomoGnomADs').off('click'); // prop disabled true isn't working
+                bulker(homoTargets);
+            });
+            $('#ddGHeteroGnomADs').click(event => {
+                $('#ddGHeteroGnomADs').prop('disabled', true);
+                $('#ddGHeteroGnomADs').off('click');
+                bulker(heteroTargets);
             });
             pros.each((i, e) => $(e).protein());
             pros.click(event => $('#gnomad_extra').modal('hide'));
@@ -1267,13 +1293,19 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         const label = data.resn+data.resi;
         const selector = data.resi + ":" + data.chain;
         const prolink = this.makeProlink(selector, label);
-        const distance = `&mdash; ${data.distance.toFixed(1)} &Aring away`;
+        const distance = `&mdash; ${data.distance.toFixed(1)} &Aring; away`;
         let detail = '';
         if (data.detail.includes('gnomAD:')) {
+            const mutation = data.detail.replace('gnomAD:', '').split(' ')[0];
+            const deets = this.get_gnomAD_details(mutation);
+            const homozygous = deets.homozygous;
+            const icon = homozygous === 0 ? 'far fa-adjust' : 'fas fa-circle';
             detail = `&mdash; <span style='cursor: pointer;'
                             class='underlined'
-                            data-gnomad='${JSON.stringify([data.detail.replace('gnomAD:', '').split(' ')[0]])}'
-                            >${data.detail}</span>`;
+                            data-gnomad='${JSON.stringify([mutation])}'
+                            >${data.detail}
+                            </span>
+                            <i class="far ${icon}" data-toggle="tooltip" title="${homozygous} homozygous cases"></i>`;
         } else if (data.detail !== undefined && data.detail.length) {
             detail =  '&mdash; '+ data.detail;
         }
