@@ -1007,7 +1007,7 @@ class Venus {
 NB. that the free energy calculations are very crude for expediency (target repacking only) and 
 the gnomAD variants may include pathogenic variants (hence the suggestion to check gnomAD for a particular mutation)<br/>
 </p>
-<btn class="btn btn-outline-info" id="ddGgnomADs"><i class="far fa-calculator"></i> Perform an accurate calculation of all gnomAD variants that may be more deterious than the variant of interest</btn>
+<btn class="btn btn-outline-info" id="ddGgnomADs"><i class="far fa-calculator"></i> Perform an accurate calculation of all gnomAD homozygous variants that may be more deleterious than the variant of interest</btn>
 `;
             content += '<ul class="fa-ul">';
             const addLi = mutation => {
@@ -1046,7 +1046,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                 const targets = el.data('gnomad')
                                   .filter(mutation => {if (this.energetical_gnomAD[mutation] === undefined) return false;
                                                        else if (this.energetical_gnomAD[mutation] < this.energetical.ddG) return false;
-                                                       else {return true;}
+                                                       else return venus.get_gnomAD_details(mutation).homozygous <= 0;
                                                         });
                 if (targets.length < 10) {
                     window.ops.addToast('patient', 'Please be patient', 'Results will be shown in Free energy calculation section.', 'bg-info');
