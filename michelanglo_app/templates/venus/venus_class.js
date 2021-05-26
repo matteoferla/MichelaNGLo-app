@@ -1182,7 +1182,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             strloctext += '</p>';
         } else if (this.structural.structure.type === 'swissmodel') {
             // warnings
-            const qmean = this.structural.structure.extra.qmean4_z_score;
+            const qmean = this.structural.structure.extra.qmean.qmean4_z_score;
             const identity = this.structural.structure.extra.identity;
             if ((identity < 20) && (qmean < -2.)) {
                 strloctext += `<div class="alert alert-danger" role="alert"><i class="far fa-exclamation-triangle"></i> Warning: 
