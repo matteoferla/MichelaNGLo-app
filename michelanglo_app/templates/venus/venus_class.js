@@ -347,7 +347,15 @@ class Venus {
                 }
                 ddgtext += '<button class="btn btn-outline-info venus-no-mike" data-toggle="modal" data-target="#ddG_extra"><i class="fas fa-search"></i> More details</button>';
                 ddgtext += '<p>Additionally requested calculations:</p><ul id="extraDDGResults">';
-                Object.entries(this.structural.custom_ddG).forEach(({mutation, data}) => {ddgtext += `<li><b>${mutation}</b>  ${data.toFixed(1)} kcal/mol</li>`});
+                Object.entries(this.structural.custom_ddG)
+                      .forEach(({mutation, data}) => {
+                          const color = data > this.energetical.ddG ? 'text-warning' : 'text-secondary';
+                          ddgtext += `<li><b>${this.makeProlink(mutation.slice(1, -1), mutation)}</b>
+                                        <span class="${color}">
+                                        ${data.toFixed(1)} kcal/mol
+                                        </span>
+                                        </li>`
+                      });
                 ddgtext += `</ul>
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
@@ -449,7 +457,6 @@ class Venus {
                     window.ops.addToast('calculatin' + mutation, 'Prediction in progress', 'The model requested will appear below the structural viewport when available', 'bg-info');
                     this.analyse_target(mutation, 'relax');
                 });
-
                 this.updateStructureOption();
                 this.concludeMutational();
             }
@@ -496,29 +503,35 @@ class Venus {
             }
         }).fail(ops.addErrorToast)
           .done(msg => {
-            if (msg.error) {
-                this.setStatus('Failure at extra job', 'crash');
-                ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
-            } else {
-                this.setStatus('All tasks complete', 'done');
-                myData.proteins.push({
-                    name: mutation,
-                    type: "data",
-                    value: msg.coordinates,
-                    ext: 'pdb',
-                    chain: 'A',
-                    chain_definitions: this.structural.chain_definitions,
-                    history: {
-                        code: this.structural.history.code,
-                        changes: algorithm + ' ' + msg.ddg
-                    }
-                });
-                ops.addToast(mutation, 'Extra analysis complete', `${mutation} has a ddG of ${parseInt(msg.ddg)} kcal/mol (calculated via local ${algorithm})`, 'bg-success');
-                this.updateStructureOption();
-                this.structural.custom_ddG[mutation] = msg.ddg;
-                $('#extraDDGResults').append(`<li><b>${mutation}</b>  ${msg.ddg.toFixed(1)} kcal/mol</li>`);
-            }
-        });
+              if (msg.error) {
+                  this.setStatus('Failure at extra job', 'crash');
+                  ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
+              } else {
+                  this.setStatus('All tasks complete', 'done');
+                  myData.proteins.push({
+                      name: mutation,
+                      type: "data",
+                      value: msg.coordinates,
+                      ext: 'pdb',
+                      chain: 'A',
+                      chain_definitions: this.structural.chain_definitions,
+                      history: {
+                          code: this.structural.history.code,
+                          changes: algorithm + ' ' + msg.ddg
+                      }
+                  });
+                  ops.addToast(mutation, 'Extra analysis complete', `${mutation} has a ddG of ${parseInt(msg.ddg)} kcal/mol (calculated via local ${algorithm})`, 'bg-success');
+                  this.updateStructureOption();
+                  const ddg = msg.ddg;
+                  this.structural.custom_ddG[mutation] = ddg;
+                  const color = ddg > this.energetical.ddG ? 'text-warning' : 'text-secondary';
+                  $('#extraDDGResults').append(`<li><b>${this.makeProlink(mutation.slice(1, -1), mutation)}</b>
+                                        <span class="${color}">
+                                        ${ddg.toFixed(1)} kcal/mol
+                                        </span>
+                                        </li>`);
+              }
+          });
     }
 
     //step phospho
@@ -711,8 +724,9 @@ class Venus {
         // --- Add gnomad ---
         // "Variant(id='gnomAD_17_17_rs994011128', x=17, y=17,…, description='Q17H (rs994011128)', homozygous=0)"
         // gnomAD off for now: too much!
+        // get_gnomAD_details(mutation) gets only one...
         this.protein.gnomAD.forEach(v => {
-            let m = v.match(/description=\'\w(\d+).*\'/);
+            let m = v.description.match(/\w(\d+)\w /);
             if (m === null) return;
             let [description, x] = m.slice(0, 2);
             x = parseInt(x);
@@ -989,7 +1003,12 @@ class Venus {
         dg.click(event => {
             $('#gnomad_extra').modal('show');
             const el = $(event.target);
-            let content = '<p>Mutations within feature present in the healthy population (gnomAD). Note that the free energy calculations are very crude for expediency (local repacking only).</p>';
+            let content = `<p>Mutations within feature present in the population (gnomAD).<br/>
+NB. that the free energy calculations are very crude for expediency (target repacking only) and 
+the gnomAD variants may include pathogenic variants (hence the suggestion to check gnomAD for a particular mutation)<br/>
+</p>
+<btn class="btn btn-outline-info" id="ddGgnomADs"><i class="far fa-calculator"></i> Perform an accurate calculation of all gnomAD variants that may be more deterious than the variant of interest</btn>
+`;
             content += '<ul class="fa-ul">';
             const addLi = mutation => {
                 let detail = this.get_gnomAD_details(mutation);
@@ -1018,13 +1037,34 @@ class Venus {
             content += '</ul>';
             $('#gnomad_extra .modal-body').html(content);
             const pros = $('#gnomad_extra [data-toggle="protein"]');
+            $('#ddGgnomADs').click(event => {
+                if (this.energetical_gnomAD === undefined) {
+                window.ops.addToast('patient', 'Please be patient', 'Please wait for preliminary results to finish.', 'bg-warning');
+                return;
+                }
+                $('#ddGgnomADs').detach();
+                const targets = el.data('gnomad')
+                                  .filter(mutation => {if (this.energetical_gnomAD[mutation] === undefined) return false;
+                                                       else if (this.energetical_gnomAD[mutation] < this.energetical.ddG) return false;
+                                                       else {return true;}
+                                                        });
+                if (targets.length < 10) {
+                    window.ops.addToast('patient', 'Please be patient', 'Results will be shown in Free energy calculation section.', 'bg-info');
+                    targets.forEach(mutation => this.analyse_target(mutation, 'relax'));
+                }
+                else {
+                    window.ops.addToast('patient', 'Too many variants', 'Unfortunately, there are too many variants. Please select a smaller feature', 'bg-info');
+                }
+
+
+            });
             pros.each((i, e) => $(e).protein());
             pros.click(event => $('#gnomad_extra').modal('hide'));
             $('#gnomad_extra .modal-hider').click(event => {
                 $('#gnomad_extra').modal('hide');
                 const mutation = $(event.target).data('mutation');
                 const algorithm = $(event.target).data('algorithm');
-                window.ops.addToast('calculatin' + mutation, 'Prediction in progress', 'The model requested will appear below the structural viewport when available', 'bg-info');
+                window.ops.addToast('calculating ' + mutation, 'Prediction in progress', 'The model requested will appear below the structural viewport when available', 'bg-info');
                 this.analyse_target(mutation, algorithm);
             });
 
@@ -1056,14 +1096,13 @@ class Venus {
 
     get_gnomAD_details(mutation) {
         // mutation is str "A23Q" returns { id: "gnomAD_114_114_rs1163968308", x: 114, y: 114, impact: "MODERATE", description: "V114L (rs1163968308)", homozygous: 0 }
-        //Oh dear. Python Variant object (gnomad) is saved as string.
-        return Object.fromEntries(this.protein.gnomAD.filter(v => v.includes(mutation))[0]
-            .replace(/Variant\((.*)\)/, '$1')
-            .replace(/\'/g, '')
-            .split(',')
-            .map(v => v.split('='))
-            .map(([k, v]) => [k.trim(), isNaN(parseInt(v)) ? v : parseInt(v)])
-        );
+        return this.protein.gnomAD.filter(v => v.description.includes(mutation))[0];
+            //Python Variant object (gnomad) wass saved as string --> corrected.
+            // .replace(/Variant\((.*)\)/, '$1')
+            // .replace(/\'/g, '')
+            // .split(',')
+            // .map(v => v.split('='))
+            // .map(([k, v]) => [k.trim(), isNaN(parseInt(v)) ? v : parseInt(v)])
     }
 
     loadStructure() {
@@ -1110,13 +1149,41 @@ class Venus {
                                 data-toggle="modal" data-target="#change_modal"
                         ><i class="far fa-upload"></i> Change
                         </button> `;
-        let strloctext = '<p><i>Chosen model:</i>';
-        if (this.structural.code.length === 4) {
+        let strloctext = '';
+        if (this.structural.structure.type === 'rcsb') {
+            strloctext += '<p><i>Chosen model:</i> ';
             strloctext += this.makeExt("https://www.rcsb.org/structure/" + this.structural.code, 'PDB:' + this.structural.code);
             strloctext += ` ${this.structural.structure.resolution} &Aring;`;
             strloctext += changer;
             strloctext += '</p>';
-        } else {
+        } else if (this.structural.structure.type === 'swissmodel') {
+            // warnings
+            const qmean = this.structural.structure.extra.qmean4_z_score;
+            const identity = this.structural.structure.extra.identity;
+            if ((identity < 20) && (qmean < -2.)) {
+                strloctext += `<div class="alert alert-danger" role="alert"><i class="far fa-exclamation-triangle"></i> Warning: 
+                                    The identity to the template is low, ${identity}%,
+                                    and the ${this.makeExt("https://swissmodel.expasy.org/docs/help#qmean", "Z-scored Qmean")}
+                                     is more than two sigma worse than the average native protein ${qmean}
+                                    </div>`;
+            } else if (identity < 20) {
+                strloctext += `<div class="alert alert-warning" role="alert"><i class="far fa-exclamation-triangle"></i> Warning: 
+                                    The identity to the template is low, ${identity}%,
+                                    but the ${this.makeExt("https://swissmodel.expasy.org/docs/help#qmean", "Z-scored Qmean")}, ${qmean}, is reasonable.
+                                    </div>`;
+            } else if (qmean < -2.) {
+                strloctext += `<div class="alert alert-warning" role="alert"><i class="far fa-exclamation-triangle"></i> Warning: 
+                                    The ${this.makeExt("https://swissmodel.expasy.org/docs/help#qmean", "Z-scored Qmean")}
+                                     is more than two sigma worse than the average native protein ${qmean}.
+                                    </div>`;
+            }
+            else if (this.structural.structure.extra.identity <= 50) {
+                strloctext += `<div class="alert alert-secondary" role="alert"><i class="far fa-exclamation-triangle"></i> Caution: The identity to the template is moderately low.</div>`;
+            }
+
+            //
+
+            strloctext += '<p><i>Chosen model:</i> ';
             strloctext += this.makeExt("https://swissmodel.expasy.org/repository/uniprot/" + this.uniprot, 'SWISSMODEL:' + this.structural.code);
             strloctext += ` ${(this.structural.structure.extra.identity).toFixed(0)}% identity `;
             strloctext += `<button type="button" class="btn btn-outline-info venus-no-mike m-2" data-toggle="modal" data-target="#alignment_extra">see alignment</button>`;
@@ -1129,7 +1196,11 @@ class Venus {
             const seqs = msa.io.fasta.parse(`>template\n${this.structural.structure.alignment.template}\n`+
                                          `>uniprot\n${this.structural.structure.alignment.uniprot}\n`);
             align.on('shown.bs.modal', event => msa({el: align.find('#msa_viewer'), seqs: seqs}).render() );
-
+        } else {
+            strloctext += '<p><i>Chosen model:</i> ';
+            strloctext += `User submitted file (orginal filename: ${this.structural.structure.id})`;
+            strloctext += changer;
+            strloctext += '</p>';
         }
         strloctext += `<p><i>Solvent exposure:</i> ${(this.structural.buried) ? 'buried' : 'surface'} (RSA: ${Math.round(this.structural.RSA * 100) / 100})</p>`;
         strloctext += `<p><i>Secondary structure type:</i> ${this.structural.SS}</p>`;
@@ -1187,6 +1258,7 @@ class Venus {
                         for extra information)</p>`;
         strtext += '<ul>' + this.structural.neighbours.sort((a,b) => a.distance - b.distance)
                                                       .map(v => this.makeNeighbourLI(v)).join('') + '</ul>';
+        // this.structural.neighbours.filter(v => v.detail.includes('gnomAD:')).map(v => v.detail.replace('gnomAD:', '').split(' ')[0])
         // done!
         this.createEntry('neigh', 'Structural neighbourhood', strtext);
     }
@@ -1205,7 +1277,7 @@ class Venus {
         } else if (data.detail !== undefined && data.detail.length) {
             detail =  '&mdash; '+ data.detail;
         }
-        let conservation = ''
+        let conservation = '';
         if (!! this.structural.has_conservation) {
             conservation = '&mdash; no conservation data';
             if (data.conscore !== undefined) {
