@@ -63,13 +63,33 @@ class Venus {
             'link': 'Link to this search (will be redone) for browser or programmatic access',
             'extlink': 'Links to external resources related to this gene',
             'references': 'VENUS relies a several sources of external data, so be sure to cite them!'
-        }
+        };
+        this.StatusModeIcons = {
+            'working': "far fa-dna fa-spin",
+            'crash': "far fa-skull-crossbones",
+            'halt': "far fa-skull-crossbones",
+            'done': "fas fa-check"
+        };
+
+        this.StatusModeColors = {
+            'working': "alert-warning",
+            'crash': "alert-danger",
+            'halt': "alert-info",
+            'done': "alert-success"
+        };
+        this.stepNames = ['zeroth step',
+            'Retrieval of protein info',
+            'Assessment of mutation without structure',
+            'Picking and tweaking best model',
+            '&Delta;&Delta;G calculation',
+            'Quick gnomAD scoring'];
         this.entry_order = Object.keys(this.documentation); //order is changed dynamically.
         this.animation_speed = 1000;
         this.seq = undefined;
         this.last_clicked_prolink = '';
         this.shown_warnings = [];
         this.timeTaken = null;
+        this.debug = window.venusDebug;
 
     }
 
@@ -116,9 +136,13 @@ class Venus {
                 uniprot: this.uniprot,
                 species: this.taxid,
                 step: step,
-                mutation: this.mutation
+                mutation: this.mutation,
+                debug: this.debug,
             }
-        }).fail(ops.addErrorToast).then(reply => {this.timeTaken = reply.time_taken; return reply});
+        }).fail(ops.addErrorToast).then(reply => {
+            this.timeTaken = reply.time_taken;
+            return reply
+        });
     }
 
     //step 0
@@ -158,10 +182,10 @@ class Venus {
             $('#venus_calc').removeAttr('disabled');
             return 0;
         }
-        this.setStatus('Running step 1/5', 'working');
+        this.setStepStatus(1);
         return venus.analyse('protein')
             .fail(xhr => {
-                this.setStatus('Failure at step 1/4', 'crash');
+                this.setStepStatus(1, 'crash');
                 $('#venus_calc').removeAttr('disabled');
                 ops.addErrorToast(xhr)
             })
@@ -205,10 +229,10 @@ class Venus {
     //step 2
     analyseMutation() {
         //step 2
-        this.setStatus('Running step 2/5', 'working');
+        this.setStepStatus(1);
         return this.analyse('mutation').done(msg => {
             if (msg.error) {
-                this.setStatus('Failure at step 2/4', 'crash');
+                this.setStepStatus(2, 'crash');
                 ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
             } else {
                 $('#results').show();
@@ -271,7 +295,7 @@ class Venus {
     analyseStructural() {
         //step 3
         // see parseStructuralResponse for main.
-        this.setStatus('Running step 3/5', 'working');
+        this.setStepStatus(3);
         return this.analyse('structural').done(msg => this.parseStructuralResponse.call(this, msg));
     }
 
@@ -282,7 +306,7 @@ class Venus {
             this.fallbackAnalyse();
             this.concludeMutational();
         } else if (msg.error) {
-            this.setStatus('Failure at step 3/5', 'crash');
+            this.setStepStatus(3, 'crash');
             ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
             this.fallbackAnalyse();
             this.concludeMutational();
@@ -303,7 +327,7 @@ class Venus {
 
     showWarnings(warnings) {
         warnings.forEach(msg => {
-            if (! this.shown_warnings.includes(msg)) {
+            if (!this.shown_warnings.includes(msg)) {
                 ops.addToast('Warning', 'Unable to use structure', msg, 'bg-warning');
                 this.shown_warnings.push(msg);
             }
@@ -313,10 +337,10 @@ class Venus {
     //step 4
     analyseddG() {
         //step 4
-        this.setStatus('Running step 4/5', 'working');
+        this.setStepStatus(4);
         return this.analyse('ddG').done(msg => {
             if (msg.error) {
-                this.setStatus('Failure at step 4/5', 'crash');
+                this.setStepStatus(4, 'crash');
                 ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
             } else {
                 this.analyseddG_gnomad();
@@ -348,14 +372,14 @@ class Venus {
                 ddgtext += '<button class="btn btn-outline-info venus-no-mike" data-toggle="modal" data-target="#ddG_extra"><i class="fas fa-search"></i> More details</button>';
                 ddgtext += '<p>Additionally requested calculations:</p><ul id="extraDDGResults">';
                 Object.entries(this.structural.custom_ddG)
-                      .forEach(({mutation, data}) => {
-                          const color = data > this.energetical.ddG ? 'text-warning' : 'text-secondary';
-                          ddgtext += `<li><b>${this.makeProlink(mutation.slice(1, -1), mutation)}</b>
+                    .forEach(({mutation, data}) => {
+                        const color = data > this.energetical.ddG ? 'text-warning' : 'text-secondary';
+                        ddgtext += `<li><b>${this.makeProlink(mutation.slice(1, -1), mutation)}</b>
                                         <span class="${color}">
                                         ${data.toFixed(1)} kcal/mol
                                         </span>
                                         </li>`
-                      });
+                    });
                 ddgtext += `</ul>
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
@@ -397,7 +421,7 @@ class Venus {
                                 </tr>
                               </thead>
                               <tbody>`;
-                const rowHeaderMaker =  term => `<th scope="row">${term}</th>`;
+                const rowHeaderMaker = term => `<th scope="row">${term}</th>`;
                 const TdMaker = term => `<td>${term}</td>`;
                 const decimalTdMaker = term => `<td>${term.toFixed(1)}</td>`;
                 const rowMaker = term => `<tr>${rowHeaderMaker(term)}
@@ -408,7 +432,7 @@ class Venus {
                                               ${decimalTdMaker(this.energetical.terms[term]['native'])}
                                               ${decimalTdMaker(this.energetical.terms[term]['mutant'])}
                                           </tr>`;
-                modalText +=  Object.keys(this.energetical.terms).map(rowMaker).join('');
+                modalText += Object.keys(this.energetical.terms).map(rowMaker).join('');
                 modalText += `</tbody></table>`;
                 $('#ddG_extra .modal-body').html(modalText);
                 // add structures
@@ -467,10 +491,10 @@ class Venus {
     //step 5
     analyseddG_gnomad() {
         //step 5
-        this.setStatus('Running step 5/5', 'working');
+        this.setStepStatus(5);
         return this.analyse('ddG_gnomad').done(msg => {
             if (msg.error) {
-                this.setStatus('Failure at step 5/5', 'crash');
+                this.setStepStatus(5, 'crash');
                 ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
             } else {
                 this.setStatus('All tasks complete', 'done');
@@ -499,39 +523,40 @@ class Venus {
                 step: 'extra',
                 mutation: this.mutation, //the data is stored serverside for an hour. and this is one part of the hash.
                 extra: mutation,
-                algorithm: algorithm
+                algorithm: algorithm,
+                debug: this.debug
             }
         }).fail(ops.addErrorToast)
-          .done(msg => {
-              if (msg.error) {
-                  this.setStatus('Failure at extra job', 'crash');
-                  ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
-              } else {
-                  this.setStatus('All tasks complete', 'done');
-                  myData.proteins.push({
-                      name: mutation,
-                      type: "data",
-                      value: msg.coordinates,
-                      ext: 'pdb',
-                      chain: 'A',
-                      chain_definitions: this.structural.chain_definitions,
-                      history: {
-                          code: this.structural.history.code,
-                          changes: algorithm + ' ' + msg.ddg
-                      }
-                  });
-                  ops.addToast(mutation, 'Extra analysis complete', `${mutation} has a ddG of ${parseInt(msg.ddg)} kcal/mol (calculated via local ${algorithm})`, 'bg-success');
-                  this.updateStructureOption();
-                  const ddg = msg.ddg;
-                  this.structural.custom_ddG[mutation] = ddg;
-                  const color = ddg > this.energetical.ddG ? 'text-warning' : 'text-secondary';
-                  $('#extraDDGResults').append(`<li><b>${this.makeProlink(mutation.slice(1, -1), mutation)}</b>
+            .done(msg => {
+                if (msg.error) {
+                    this.setStatus('Failure at extra job', 'crash');
+                    ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
+                } else {
+                    this.setStatus('All tasks complete', 'done');
+                    myData.proteins.push({
+                        name: mutation,
+                        type: "data",
+                        value: msg.coordinates,
+                        ext: 'pdb',
+                        chain: 'A',
+                        chain_definitions: this.structural.chain_definitions,
+                        history: {
+                            code: this.structural.history.code,
+                            changes: algorithm + ' ' + msg.ddg
+                        }
+                    });
+                    ops.addToast(mutation, 'Extra analysis complete', `${mutation} has a ddG of ${parseInt(msg.ddg)} kcal/mol (calculated via local ${algorithm})`, 'bg-success');
+                    this.updateStructureOption();
+                    const ddg = msg.ddg;
+                    this.structural.custom_ddG[mutation] = ddg;
+                    const color = ddg > this.energetical.ddG ? 'text-warning' : 'text-secondary';
+                    $('#extraDDGResults').append(`<li><b>${this.makeProlink(mutation.slice(1, -1), mutation)}</b>
                                         <span class="${color}">
                                         ${ddg.toFixed(1)} kcal/mol
                                         </span>
                                         </li>`);
-              }
-          });
+                }
+            });
     }
 
     //step phospho
@@ -579,7 +604,7 @@ class Venus {
 
     //custom pdb
     analyseCustomFile(pdb, name, params) {
-        this.setStatus('Re-running step 3/5 with custom file', 'working');
+        this.setStepStatus(3, 'working', true);
         const extension = name.split('.').pop();
         $.post({
             url: "venus_analyse", data: {
@@ -590,7 +615,8 @@ class Venus {
                 pdb: pdb,
                 filename: name,
                 format: extension,
-                params: params
+                params: params,
+                debug: this.debug
             }
         }).fail(ops.addErrorToast)
             .done(msg => this.parseStructuralResponse.call(this, msg));
@@ -625,24 +651,35 @@ class Venus {
 
     //progress bar.
     setStatus(label, mode) { //working, crash, done
+        mode = mode || 'working';
         const s = $('#results_status');
-        switch (mode) {
-            case 'working':
-                s.html(`<div class="alert alert-warning w-100"><i class="far fa-dna fa-spin"></i> ${label}</div>`);
-                break;
-            case 'crash':
-                s.html(`<div class="alert alert-danger w-100"><i class="far fa-skull-crossbones"></i> ${label}</div>`);
-                break;
-            case 'halt':
-                s.html(`<div class="alert alert-info w-100"><i class="far fa-hand-paper"></i> ${label}</div>`);
-                break;
-            case 'done':
-                s.html(`<div class="alert alert-success w-100"><i class="fas fa-check"></i> ${label}</div>`);
-                setTimeout(() => s.hide(), this.animation_speed);
-                break;
-            default:
-                s.html(label);
+        if (this.StatusModeColors[mode] === undefined) {
+            s.html(label);
+            return;
         }
+        s.html(`<div class="alert ${this.StatusModeColors[mode]} w-100">
+                <i class="${this.StatusModeIcons[mode]}"></i> 
+                ${label}</div>`);
+        s.find('[data-toggle="tooltip"]').tooltip();
+        if (mode === 'done') setTimeout(() => s.hide(), this.animation_speed);
+    }
+
+
+    setStepStatus(step, mode, custom) {
+        mode = mode || 'working';
+        custom = custom || false;
+        let forelabels = {'working': 'Running step', 'crash': 'Failure at step'};
+        let label = `${forelabels[mode]} ${step}/5 (${this.stepNames[step]})`;
+        if (custom) {label += ' (rerunning with custom file) '}
+        label += ' &nbsp; ';
+        label += this.stepNames.map((val, i) => {
+                                                                if (i < step - 1) {return `<i class="far fa-check-square" data-toggle="tooltip" title="${val}"></i>`;}
+                                                                else if (mode === 'crash') {return `<i class="far fa-times-square" data-toggle="tooltip" title="${val}"></i>`;}
+                                                                else if (i === step - 1) {return `<i class="far fa-plus-square" data-toggle="tooltip" title="${val}"></i>`;}
+                                                                else {return `<i class="far fa-square" data-toggle="tooltip" title="${val}"></i>`;}
+                                                                }).join('');
+
+        this.setStatus(label, mode);
     }
 
     addSequence() {
@@ -776,8 +813,8 @@ class Venus {
             .click(event => this.hideCard(id));
     }
 
-    //###################  Entry
-    //an 'entry' is a flush li within the card (within these there may be li).
+//###################  Entry
+//an 'entry' is a flush li within the card (within these there may be li).
     createEntry(id, title, text) {
         //adds or creates the entry.
         // namely, the row in Mutation with the line between it.
@@ -859,8 +896,8 @@ class Venus {
         setTimeout(() => el.detach(), this.animation_speed);
     }
 
-    //###################  sprintf
-    //make methods output text
+//###################  sprintf
+//make methods output text
     makeEntry(id, title, text) {
         if (this.documentation[id] !== undefined) {
             //pass
@@ -933,7 +970,7 @@ class Venus {
 
     }
 
-    //###################  other
+//###################  other
     createLocation() {
         //Features
         let locationtext = `<p>The mutation is ${this.mutational.position_as_protein_percent}% along the protein.</p>`;
@@ -1010,12 +1047,14 @@ class Venus {
             let heteroTargets;
             if (this.energetical_gnomAD !== undefined) {
                 const allTargets = el.data('gnomad')
-                              .filter(mutation => {if (this.energetical_gnomAD[mutation] === undefined) return false;
-                                                   else return this.energetical_gnomAD[mutation] >= this.energetical.ddG;
-                                                    });
+                    .filter(mutation => {
+                        if (this.energetical_gnomAD[mutation] === undefined) return false;
+                        else return this.energetical_gnomAD[mutation] >= this.energetical.ddG;
+                    });
                 homoTargets = allTargets.filter(mutation => venus.get_gnomAD_details(mutation).homozygous > 0);
                 heteroTargets = allTargets.filter(mutation => venus.get_gnomAD_details(mutation).homozygous === 0);
-                if (allTargets.length > 0) {btn = `
+                if (allTargets.length > 0) {
+                    btn = `
 <div class="input-group mb-3">
   <div class="input-group-prepend">
     <span class="input-group-text">Bulk accurate<br/> calculations: </span>
@@ -1028,7 +1067,8 @@ class Venus {
     ${homoTargets.length ? '' : 'disabled'}
     ><i class="far fa-calculator"></i> All hom<br/> (<i class="fas fa-circle"></i>)</button>
   </div>
-</div>`;}
+</div>`;
+                }
             }
             let content = `<p>Mutations within feature present in the population (gnomAD).<br/>
 NB. that the free energy calculations are very crude for expediency (target repacking only) and 
@@ -1067,8 +1107,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                 if (targets.length < 10) {
                     window.ops.addToast('patient', 'Please be patient', 'Results will be shown in Free energy calculation section.', 'bg-info');
                     targets.forEach(mutation => this.analyse_target(mutation, 'relax'));
-                }
-                else {
+                } else {
                     window.ops.addToast('patient', 'Too many variants', 'Unfortunately, there are too many variants. Please select a smaller feature', 'bg-info');
                 }
             };
@@ -1121,12 +1160,12 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
     get_gnomAD_details(mutation) {
         // mutation is str "A23Q" returns { id: "gnomAD_114_114_rs1163968308", x: 114, y: 114, impact: "MODERATE", description: "V114L (rs1163968308)", homozygous: 0 }
         return this.protein.gnomAD.filter(v => v.description.includes(mutation))[0];
-            //Python Variant object (gnomad) wass saved as string --> corrected.
-            // .replace(/Variant\((.*)\)/, '$1')
-            // .replace(/\'/g, '')
-            // .split(',')
-            // .map(v => v.split('='))
-            // .map(([k, v]) => [k.trim(), isNaN(parseInt(v)) ? v : parseInt(v)])
+        //Python Variant object (gnomad) wass saved as string --> corrected.
+        // .replace(/Variant\((.*)\)/, '$1')
+        // .replace(/\'/g, '')
+        // .split(',')
+        // .map(v => v.split('='))
+        // .map(([k, v]) => [k.trim(), isNaN(parseInt(v)) ? v : parseInt(v)])
     }
 
     loadStructure() {
@@ -1167,7 +1206,11 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         const align = $('#alignment_extra');
         align.unbind('shown.bs.modal');
         align.modal('hide');
-        if (this.structural.has_conservation) {$('#conservationBtn').show();} else {$('#conservationBtn').hide();}
+        if (this.structural.has_conservation) {
+            $('#conservationBtn').show();
+        } else {
+            $('#conservationBtn').hide();
+        }
         // links
         const changer = ` <button type="button" class="btn btn-outline-secondary m-2 venus-no-mike"
                                 data-toggle="modal" data-target="#change_modal"
@@ -1185,23 +1228,22 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             const qmean = this.structural.structure.extra.qmean.qmean4_z_score;
             const identity = this.structural.structure.extra.identity;
             if ((identity < 20) && (qmean < -2.)) {
-                strloctext += `<div class="alert alert-danger" role="alert"><i class="far fa-exclamation-triangle"></i> Warning: 
+                strloctext += `<div class="alert alert-danger" role="alert"><i class="far fa-exclamation-triangle"></i> Warning:
                                     The identity to the template is low, ${identity}%,
                                     and the ${this.makeExt("https://swissmodel.expasy.org/docs/help#qmean", "Z-scored Qmean")}
                                      is more than two sigma worse than the average native protein ${qmean}
                                     </div>`;
             } else if (identity < 20) {
-                strloctext += `<div class="alert alert-warning" role="alert"><i class="far fa-exclamation-triangle"></i> Warning: 
+                strloctext += `<div class="alert alert-warning" role="alert"><i class="far fa-exclamation-triangle"></i> Warning:
                                     The identity to the template is low, ${identity}%,
                                     but the ${this.makeExt("https://swissmodel.expasy.org/docs/help#qmean", "Z-scored Qmean")}, ${qmean}, is reasonable.
                                     </div>`;
             } else if (qmean < -2.) {
-                strloctext += `<div class="alert alert-warning" role="alert"><i class="far fa-exclamation-triangle"></i> Warning: 
+                strloctext += `<div class="alert alert-warning" role="alert"><i class="far fa-exclamation-triangle"></i> Warning:
                                     The ${this.makeExt("https://swissmodel.expasy.org/docs/help#qmean", "Z-scored Qmean")}
                                      is more than two sigma worse than the average native protein ${qmean}.
                                     </div>`;
-            }
-            else if (this.structural.structure.extra.identity <= 50) {
+            } else if (this.structural.structure.extra.identity <= 50) {
                 strloctext += `<div class="alert alert-secondary" role="alert"><i class="far fa-exclamation-triangle"></i> Caution: The identity to the template is moderately low.</div>`;
             }
 
@@ -1212,14 +1254,14 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             strloctext += ` ${(this.structural.structure.extra.identity).toFixed(0)}% identity `;
             strloctext += `<button type="button" class="btn btn-outline-info venus-no-mike m-2" data-toggle="modal" data-target="#alignment_extra">see alignment</button>`;
             strloctext += changer;
-            strloctext +='</p>';
-            align.find('.modal-body').append(`<p>Template: the sequence of the protein structure used for threading by Swissmodel, 
+            strloctext += '</p>';
+            align.find('.modal-body').append(`<p>Template: the sequence of the protein structure used for threading by Swissmodel,
                             in this case template(${venus.structural.code.split(' ')[2]})<br/>
                             Uniprot: the sequence of this protein under investigation 
                             (${this.protein.gene_name}).</p><div id="msa_viewer" class="p-2"></div>`);
-            const seqs = msa.io.fasta.parse(`>template\n${this.structural.structure.alignment.template}\n`+
-                                         `>uniprot\n${this.structural.structure.alignment.uniprot}\n`);
-            align.on('shown.bs.modal', event => msa({el: align.find('#msa_viewer'), seqs: seqs}).render() );
+            const seqs = msa.io.fasta.parse(`>template\n${this.structural.structure.alignment.template}\n` +
+                `>uniprot\n${this.structural.structure.alignment.uniprot}\n`);
+            align.on('shown.bs.modal', event => msa({el: align.find('#msa_viewer'), seqs: seqs}).render());
         } else {
             strloctext += '<p><i>Chosen model:</i> ';
             strloctext += `User submitted file (orginal filename: ${this.structural.structure.id})`;
@@ -1237,29 +1279,32 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             strloctext += `<p><i>Closest ligand:</i> <span class="prolink" data-target="viewport" data-color="teal" data-focus="residue" data-selection="${ds}">${lig}</span> (${d})</p>`;
         }
         // ---anything transplanted?
-        const ulInner =  this.structural
-                             .chain_definitions
-                             .map(definition => {
-                                 // this.prolink has class. Not wanted.
-                                 const prolink = `data-target="#viewport" data-toggle="protein" data-focus="domain" data-selection=":${definition.chain}"`;
-                                 let chain = `<b>Chain ${definition.chain}</b> `;
-                                 if (definition.uniprot === this.protein.uniprot) {
-                                     return `<a href="#viewport"  class="list-group-item list-group-item-action" ${prolink}>${chain}
+        const ulInner = this.structural
+            .chain_definitions
+            .map(definition => {
+                // this.prolink has class. Not wanted.
+                const prolink = `data-target="#viewport" data-toggle="protein" data-focus="domain" data-selection=":${definition.chain}"`;
+                let chain = `<b>Chain ${definition.chain}</b> `;
+                if (definition.uniprot === this.protein.uniprot) {
+                    return `<a href="#viewport"  class="list-group-item list-group-item-action" ${prolink}>${chain}
                                                 Protein of interest 
                                                 (${this.protein.gene_name},
                                                 ${definition.x}&ndash;${definition.y})</a>`;
-                                 }
-                                 let text = chain;
-                                 if (definition.name) {text += definition.name+' ';}
-                                 if (definition.uniprot && definition.uniprot !== 'P00404') {
-                                     // 404 = dumb decision for unknown uniprot...
-                                     text += definition.uniprot+' ';}
-                                 if (! definition.transplanted) {
-                                     return `<a href="#viewport" class="list-group-item list-group-item-action" ${prolink}>${text}</a>`;
-                                 } else {
-                                    return `<a href="#viewport"  class="list-group-item list-group-item-action list-group-item-warning" ${prolink}><i class="far fa-exclamation-triangle" data-toggle="tooltip" title="Chain taken from template (not threaded)"></i> ${text}</a>`;
-                                 }
-                             });
+                }
+                let text = chain;
+                if (definition.name) {
+                    text += definition.name + ' ';
+                }
+                if (definition.uniprot && definition.uniprot !== 'P00404') {
+                    // 404 = dumb decision for unknown uniprot...
+                    text += definition.uniprot + ' ';
+                }
+                if (!definition.transplanted) {
+                    return `<a href="#viewport" class="list-group-item list-group-item-action" ${prolink}>${text}</a>`;
+                } else {
+                    return `<a href="#viewport"  class="list-group-item list-group-item-action list-group-item-warning" ${prolink}><i class="far fa-exclamation-triangle" data-toggle="tooltip" title="Chain taken from template (not threaded)"></i> ${text}</a>`;
+                }
+            });
         strloctext += `<p>Chains:</p><div class="list-group" id="chainDescr">${ulInner.join('')}</div>`;
         // structural character
         this.createEntry('strcha', 'Structural character', strloctext);
@@ -1276,19 +1321,19 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         }
         //this.makeProlink(allSele, '(all)');
 
-        let strtext = `<p>Structural neighbourhood ${omni}. 
+        let strtext = `<p>Structural neighbourhood ${omni}.
                         (see ${this.makeExt('https://gnomad.broadinstitute.org/', 'gnomAD')} and
                         ${this.makeExt('https://www.phosphosite.org', 'PhosphoSitePlus')} 
                         for extra information)</p>`;
-        strtext += '<ul>' + this.structural.neighbours.sort((a,b) => a.distance - b.distance)
-                                                      .map(v => this.makeNeighbourLI(v)).join('') + '</ul>';
+        strtext += '<ul>' + this.structural.neighbours.sort((a, b) => a.distance - b.distance)
+            .map(v => this.makeNeighbourLI(v)).join('') + '</ul>';
         // this.structural.neighbours.filter(v => v.detail.includes('gnomAD:')).map(v => v.detail.replace('gnomAD:', '').split(' ')[0])
         // done!
         this.createEntry('neigh', 'Structural neighbourhood', strtext);
     }
 
     makeNeighbourLI(data) {
-        const label = data.resn+data.resi;
+        const label = data.resn + data.resi;
         const selector = data.resi + ":" + data.chain;
         const prolink = this.makeProlink(selector, label);
         const distance = `&mdash; ${data.distance.toFixed(1)} &Aring; away`;
@@ -1305,10 +1350,10 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                             </span>
                             <i class="far ${icon}" data-toggle="tooltip" title="${homozygous} homozygous cases"></i>`;
         } else if (data.detail !== undefined && data.detail.length) {
-            detail =  '&mdash; '+ data.detail;
+            detail = '&mdash; ' + data.detail;
         }
         let conservation = '';
-        if (!! this.structural.has_conservation) {
+        if (!!this.structural.has_conservation) {
             conservation = '&mdash; no conservation data';
             if (data.conscore !== undefined) {
                 conservation = `&mdash; <span  title='Consurf normalised homology score: positive = less conserved. negative = conserved' data-toggle='tooltip'>
@@ -1372,25 +1417,21 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         }
     }
 
-    download (name) {
+    download(name) {
         const element = document.createElement('a');
         const extension = 'pdb';
         const entry = myData.proteins.filter(({name: n}) => n === name)[0];
         if (entry.type === 'url') {
             element.setAttribute('href', entry.value);
-        }
-        else if (entry.type === 'rcsb') {
+        } else if (entry.type === 'rcsb') {
             element.setAttribute('href', `https://files.rcsb.org/download/${entry.value}.pdb`);
-        }
-        else if (entry.type === 'data' && ! entry.isVariable) {
+        } else if (entry.type === 'data' && !entry.isVariable) {
             const text = entry.value;
             element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-        }
-        else if (entry.type === 'data' && !! entry.isVariable) {
+        } else if (entry.type === 'data' && !!entry.isVariable) {
             const text = window[entry.value];
             element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-        }
-        else {
+        } else {
             throw 'impossible.'
         }
         element.setAttribute('download', `${name}.${extension}`);
@@ -1444,8 +1485,8 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             .fail(ops.addErrorToast);
     }
 
-    // ------------ Summary conclusions ----------------------------------------
-    // From mutational
+// ------------ Summary conclusions ----------------------------------------
+// From mutational
     concludeMutational() {
         // is it a PTM?
         const details = {
@@ -1490,7 +1531,8 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         } else {
             return null;
         }
-    };
+    }
+    ;
 
     concludeMutational_buttonMaker(id, msg) {
         return `<a href="#${id}" class="text-info" data-toggle="modal" data-target="#${id}">${msg}</a>`;
@@ -1594,14 +1636,16 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
     }
 
     concludeDistance({}) {
-        if (this.structural === undefined)  {return null;}
-        else if (this.structural.distance_to_closest_ligand < 12) {
-            const name = this.structural.closest_ligand.match(/\[.*\]/)  !== null ?
-                         this.structural.closest_ligand.match(/\[(.*)\]/)[1] :
-                         'unknown';
+        if (this.structural === undefined) {
+            return null;
+        } else if (this.structural.distance_to_closest_ligand < 12) {
+            const name = this.structural.closest_ligand.match(/\[.*\]/) !== null ?
+                this.structural.closest_ligand.match(/\[(.*)\]/)[1] :
+                'unknown';
             return `the mutation is ${this.structural.distance_to_closest_ligand.toPrecision(2)} &Aring; away from the ligand labelled ${name}`;
+        } else {
+            return null;
         }
-        else {return null;}
     }
 }
 

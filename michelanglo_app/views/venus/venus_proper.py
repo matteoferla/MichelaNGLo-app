@@ -240,7 +240,9 @@ class Venus(VenusBase):
                     try:
                         protein.retrieve_structures_from_swissmodel()
                     except Exception as error:
-                        msg = f'Swissmodel retrieval failed: {error.__class__.__name__}: {error}'
+                        if not self.suppress_errors:
+                            raise error
+                        msg = f'Swissmodel retrieval step failed: {error.__class__.__name__}: {error}'
                         log.critical(msg)
                         notify_admin(msg)
                         self.reply['warnings'].append('Retrieval of latest PDB data failed (admin notified). ' +

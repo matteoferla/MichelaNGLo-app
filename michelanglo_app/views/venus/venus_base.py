@@ -68,6 +68,9 @@ class VenusBase:
         # status=error, error=single-word, msg=long
         self._tick = float('nan')  # required for self.reply['time_taken']
         self.time_taken = 0.
+        if 'debug' in self.request.params and self.request.params['debug']:
+            self.suppress_errors = False
+            log.info('Debug mode requested!')
 
     def start_timer(self):
         self._tick = time.time()

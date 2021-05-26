@@ -277,6 +277,10 @@ const urlQueriest = () => {
     let querySpecies = query.get('species');
     let queryGene = query.get('uniprot') || query.get('gene');
     let queryMutation = query.get('mutation');
+    let venusDebug = query.get('debug');
+    if (!!venusDebug) {
+        window.venusDebug = true;
+    }
     if (!!querySpecies) {
         $('#species').val(querySpecies);
     }
