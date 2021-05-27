@@ -89,7 +89,7 @@ class Venus {
         this.shown_warnings = [];
         this.timeTaken = null;
         this.debug = window.venusDebug;
-
+        if (this.debug) {NGL.setDebug(true);}
     }
 
     reset() {
@@ -1293,6 +1293,9 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                 let text = chain;
                 if (definition.name) {
                     text += definition.name + ' ';
+                }
+                else if (definition.description) {  // name is the official name, description is crap from submitter
+                    text += definition.description + ' ';
                 }
                 if (definition.uniprot && definition.uniprot !== 'P00404') {
                     // 404 = dumb decision for unknown uniprot...
