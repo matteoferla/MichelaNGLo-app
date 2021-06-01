@@ -103,7 +103,6 @@ class Venus {
         this.prepareDOM();
         this.shown_warnings = [];
         this.timeTaken = null;
-
     }
 
     prepareDOM() {
@@ -119,7 +118,8 @@ class Venus {
         $('#results_mutalist').children().detach();
         $('#results').hide();
         $('#venus_calc').removeAttr('disabled');
-        $('result_title').html('<i class="far fa-dna fa-spin"></i> Loading');
+        $('#results_status').show();
+        $('#result_title').html('<i class="far fa-dna fa-spin"></i> Loading');
         $('results_status').html('ERROR');
         $('#fv').html('');
         $('#changeByPage_selector').html('<option name="changeByPage" value="0" selected>Select page first</option>');
