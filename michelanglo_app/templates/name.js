@@ -231,8 +231,8 @@ window.load_pdb = pdb => {
             chain_definitions: [{
                 chain: 'A',
                 uniprot: pdb.match(/uniprot\/(.*?)\.pdb/)[1],
-                x: pdb.match(/range\=(\d+)/)[1],
-                y: pdb.match(/range\=\d+\-(\d+)/)[1],
+                x: pdb.match(/range\=/) ? pdb.match(/range\=(\d+)/)[1] : pdb.match(/from\=(\d+)/)[1],
+                y: pdb.match(/range\=/) ? pdb.match(/range\=\d+\-(\d+)/)[1] : pdb.match(/to\=(\d+)/)[1],
                 name: $('#gene').val(),
                 offset: 0
             }
