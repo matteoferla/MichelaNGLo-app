@@ -670,15 +670,19 @@ class Venus {
         let forelabels = {'working': 'Running step', 'crash': 'Failure at step'};
         let label = `${forelabels[mode]} ${step}/5 (${this.stepNames[step-1]})`;
         if (custom) {label += ' (rerunning with custom file) '}
-        label += ' &nbsp; ';
-        label += this.stepNames.map((val, i) => {
+        let boxes = ' &nbsp; ';
+        boxes += this.stepNames.map((val, i) => {
                                                                 if (i < step - 1) {return `<i class="far fa-check-square" data-toggle="tooltip" title="${val}"></i>`;}
                                                                 else if (mode === 'crash') {return `<i class="far fa-times-square" data-toggle="tooltip" title="${val}"></i>`;}
                                                                 else if (i === step - 1) {return `<i class="far fa-plus-square" data-toggle="tooltip" title="${val}"></i>`;}
                                                                 else {return `<i class="far fa-square" data-toggle="tooltip" title="${val}"></i>`;}
                                                                 }).join('');
 
-        this.setStatus(label, mode);
+        this.setStatus(label + boxes, mode);
+        if (mode === 'working') {
+         window.ops.addToast('step'+step, 'Starting step', label, 'bg-primary');
+        }
+
     }
 
     addSequence() {
@@ -1187,20 +1191,20 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             });
         // When run locally and with an already analysed case, D3 is outrun...
         const empower = () => {
-            UniprotFV.empower(); // set the click events
-            $("#model_id").html(this.structural.code);
-            if (this.structural.chain_definitions !== undefined) {
-                const chainAs = this.structural.chain_definitions.filter(c => c.chain === 'A');
-                const chainA = (chainAs.length > 0) ? chainAs[0] : this.structural.chain_definitions[0];
-                // D3 is a bit slow at loading.
-                setTimeout(() => ft.addModel(chainA.x, chainA.y, venus.protein.sequence.length), 500);
+            if (window.ft === undefined) {
+                setTimeout(empower, 500)
+            } else {
+                UniprotFV.empower(); // set the click events
+                $("#model_id").html(this.structural.code);
+                if (this.structural.chain_definitions !== undefined) {
+                    const chainAs = this.structural.chain_definitions.filter(c => c.chain === 'A');
+                    const chainA = (chainAs.length > 0) ? chainAs[0] : this.structural.chain_definitions[0];
+                    // D3 is a bit slow at loading.
+                    setTimeout(() => ft.addModel(chainA.x, chainA.y, venus.protein.sequence.length), 500);
+                }
             }
         };
-        if (window.ft === undefined) {
-            setTimeout(empower, 1000)
-        } else {
-            empower();
-        }
+        empower()
         this.updateStructureOption();
         const align = $('#alignment_extra');
         align.unbind('shown.bs.modal');
