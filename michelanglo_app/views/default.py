@@ -143,10 +143,12 @@ class DefaultViews:
 
 # -------
 # this view does not work in DefaultViews
+from pyramid.exceptions import URLDecodeError
+from pyramid.view import exception_view_config
 
+@exception_view_config(context=URLDecodeError, renderer="../templates/404.mako")
 @notfound_view_config(renderer="../templates/404.mako")
 def fourzerofour(request):
-    print(3)
     username = User.get_username(request)
     log.warning(f'Could not match {request.url} for {username}')
     request.response.status = 404
