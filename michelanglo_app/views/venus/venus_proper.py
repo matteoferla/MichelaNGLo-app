@@ -181,7 +181,15 @@ class Venus(VenusBase):
             mutation_text = self.request.params['mutation']
             ## Do analysis
             mutation = Mutation(mutation_text)
-            protein = ProteinAnalyser(uniprot=uniprot, taxid=taxid)
+            if self.request.user and self.request.user.role == 'admin':
+                # debug option basically not open to all as cycle = 1_000 could be an issue...
+                rosetta_keys = ['scorefxn_name', 'radius', 'cycles', 'use_pymol_for_neighbours']
+                rosetta_settings = {k: self.request.params[k] for k in rosetta_keys if k in self.request.params}
+            else:
+                rosetta_settings = {}
+            protein = ProteinAnalyser(uniprot=uniprot,
+                                      taxid=taxid,
+                                      **rosetta_settings)
             protein.load()
             protein.mutation = mutation
         # assess
