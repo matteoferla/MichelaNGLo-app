@@ -167,7 +167,7 @@ NGL.specialOps.showDomain = function (id, selection, color, view, keepPrevious) 
     NGL.specialOps.slowOrient(id, view, selection);
 };
 
-NGL.specialOps.showResidue = function (id, selection, color, radius, view, label, cartoonScheme, keepPrevious) { //'chainid'
+NGL.specialOps.showResidue = function (id, selection, color, radius, view, label, cartoonScheme, keepPrevious, lighterColor) { //'chainid'
     if (NGL.debug) {
         console.log('Show residues ' + selection)
     }
@@ -211,17 +211,14 @@ NGL.specialOps.showResidue = function (id, selection, color, radius, view, label
         if (!keepPrevious) {
             NGL.getStage(id).removeClashes();
         }
-        var schemeId = NGL.ColormakerRegistry.addSelectionScheme([
-            [color, '_C'], ["blue", '_N'], ["red", '_O'], ["white", '_H'], ["yellow", '_S'], ["orange", "*"] //this is such a weird way of doing it.
-        ]);
         const expanded = NGL.specialOps.expandSelection(protein, selection, radius);
-        protein.addRepresentation("licorice", {sele: expanded});
-        protein.addRepresentation("hyperball", {sele: selection.toString(), color: schemeId});
+        protein.addRepresentation("licorice", {sele: expanded, colorValue: lighterColor});
+        protein.addRepresentation("hyperball", {sele: selection.toString(), colorValue: color});
         protein.addRepresentation("contact", {
             masterModelIndex: 0,
             weakHydrogenBond: true,
             maxHbondDonPlaneAngle: 35,
-            sele: expanded
+            sele: expanded,
         });
         if (!!label) {
             protein.addRepresentation('label', {
@@ -239,7 +236,7 @@ NGL.specialOps.showResidue = function (id, selection, color, radius, view, label
 };
 
 NGL.specialOps.showClash = function (id, selection, color, radius, tolerance, view, label, cartoonScheme, keepPrevious) {
-    // This find and shows clashes at a given seletion. it calls getClash to find them and then addSpikyball to add them.
+    // This find and shows clashes at a given selection. it calls getClash to find them and then addSpikyball to add them.
     // Prepare
     NGL.specialOps.postInitialise(); //worst case schenario prevention.
     radius = radius || 4;
@@ -367,12 +364,16 @@ NGL.specialOps.showOverlay = function (id, partner, selection, color, radius, vi
     const stage = NGL.getStage(id);
     stage.removeClashes();
 
-    const commonChange = (protein, scheme) => {
+    const commonChange = (protein, color) => {
         protein.removeAllRepresentations();
-        protein.addRepresentation("cartoon", {color: scheme, sele: '*'});
-        protein.addRepresentation("hyperball", {color: scheme, sele: selection});
+        protein.addRepresentation("cartoon", {colorValue: color, sele: '*'});
+        protein.addRepresentation("hyperball", {colorValue: color, sele: selection});
         const expanded = NGL.specialOps.expandSelection(protein, selection, radius);
-        protein.addRepresentation("licorice", {sele: expanded});
+        const lighterColor = '#' + NGL.Colormaker.prototype.colorToArray(color)
+                                        .map(v => Math.min(parseInt(v * 1.50 * 255), 255)
+                                                      .toString(16))
+                                        .join('');
+        protein.addRepresentation("licorice", {sele: expanded, colorValue: lighterColor});
         protein.addRepresentation("contact", {
             masterModelIndex: 0,
             weakHydrogenBond: true,
@@ -382,12 +383,10 @@ NGL.specialOps.showOverlay = function (id, partner, selection, color, radius, vi
     };
 
     const wildtypeChange = (wtProtein) => {
-        let wtScheme = NGL.specialOps.schemeMaker(wtColor);
-        commonChange(wtProtein, wtScheme);
+        commonChange(wtProtein, wtColor);
     };
     const mutChange = (mutProtein) => {
-        let mutScheme = NGL.specialOps.schemeMaker(mutColor);
-        commonChange(mutProtein, mutScheme);
+        commonChange(mutProtein, mutColor);
         NGL.specialOps.getClash(mutProtein, selection)
             .map(position => NGL.specialOps.addSpikyball(mutProtein.stage, position));
     };
