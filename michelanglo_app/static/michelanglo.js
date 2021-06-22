@@ -370,7 +370,7 @@ NGL.specialOps.showOverlay = function (id, partner, selection, color, radius, vi
         protein.addRepresentation("hyperball", {colorValue: color, sele: selection});
         const expanded = NGL.specialOps.expandSelection(protein, selection, radius);
         const lighterColor = '#' + NGL.Colormaker.prototype.colorToArray(color)
-                                        .map(v => Math.min(parseInt(v * 1.50 * 255), 255)
+                                        .map(v => Math.min(parseInt(v * 2. * 255), 255)
                                                       .toString(16))
                                         .join('');
         protein.addRepresentation("licorice", {sele: expanded, colorValue: lighterColor});
