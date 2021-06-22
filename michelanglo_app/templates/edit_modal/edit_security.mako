@@ -23,7 +23,7 @@
           </div>
       </div>
 
-                <input type="password" class="form-control" aria-label="encryption key" id="encryption_key" autocomplete="off"
+                <input type="password" class="form-control" aria-label="encryption key" id="encryption_key_input" autocomplete="off"
             %if encrypted:
                 value="${encryption_key}"
             %else:

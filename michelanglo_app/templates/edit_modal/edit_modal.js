@@ -99,7 +99,7 @@ $('#edit_submit').click(function () {
     try {
     ops.addToast('informare','Data submission','Your request is being processed','bg-info');
     if ($('#encryption').prop('checked')) {
-        if (! $('#encryption_key').val) {return 0}
+        if (! $('#encryption_key_input').val) {return 0}
     }
     if ($('#collapse_prolinks').prop('checked')) {prolinks.expandProlinks()}
     // convert description to markdown.
@@ -133,7 +133,7 @@ $('#edit_submit').click(function () {
             'backgroundcolor': $('[role="NGL"]').data('backgroundcolor'),
             'new_editors': JSON.stringify(new_editors),
             'encryption': $('#encryption').prop('checked'),
-            'encryption_key': $('#encryption_key').val(),
+            'encryption_key': $('#encryption_key_input').val(),
             'public': (public.nodeName == "SELECT") ? public.value : public.checked,
             'confidential': $('#confidential').prop('checked'),
             'model': $('#model').prop('checked'),
