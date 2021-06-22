@@ -371,8 +371,9 @@ NGL.specialOps.showOverlay = function (id, partner, selection, color, radius, vi
         const expanded = NGL.specialOps.expandSelection(protein, selection, radius);
         const lighterColor = '#' + NGL.Colormaker.prototype.colorToArray(color)
                                         .map(v => Math.min(parseInt(v * 2. * 255), 255)
-                                                      .toString(16))
+                                                      .toString(16).padStart(2, '0'))
                                         .join('');
+        console.log(lighterColor);
         protein.addRepresentation("licorice", {sele: expanded, colorValue: lighterColor});
         protein.addRepresentation("contact", {
             masterModelIndex: 0,
