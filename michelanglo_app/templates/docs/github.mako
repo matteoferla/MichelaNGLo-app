@@ -32,7 +32,7 @@
                 <li><a href="https://github.com/matteoferla/MichelaNGLo-protein-module">Protein module</a></li>
                 <li><a href="https://github.com/matteoferla/MichelaNGLo-transpiler">Transpiler</a></li>
             </ul>
-            <img src="/images/mike%20layout-03.png" style="width: 100%;"/>
+            <img src="/images/mike%20layout-03.png" style="width: 100%;" alt="layout"/>
 
             <p>Of note is the page <a href="https://github.com/matteoferla/MichelaNGLo-app/blob/master/git_docs/deploy.md">deploy.md</a>
             which details how to deploy a local copy of Michelaɴɢʟo.

@@ -242,9 +242,9 @@ class Venus {
                                             ${this.names[this.mutational.from_residue]} at position ${this.mutational.residue_index}</span> is mutated to
                                       <span ${this.prolink} data-focus="clash" data-load="mutant" data-selection="${this.mutational.residue_index}:A">${this.names[this.mutational.to_residue]}</span>
                                       <div class="row">
-                                            <div class="col-6"><img src="/static/aa/${this.mutational.from_residue}${this.mutational.to_residue}.svg" width="100%">
+                                            <div class="col-6"><img src="/static/aa/${this.mutational.from_residue}${this.mutational.to_residue}.svg" width="100%" alt="change">
                                             <p>Differing atoms in  ${this.names[this.mutational.from_residue]} highlighted in red</p></div>
-                                            <div class="col-6"><img src="/static/aa/${this.mutational.to_residue}${this.mutational.from_residue}.svg" width="100%">
+                                            <div class="col-6"><img src="/static/aa/${this.mutational.to_residue}${this.mutational.from_residue}.svg" width="100%" alt="change">
                                             <p>Differing atoms in  ${this.names[this.mutational.to_residue]} highlighted in red</p></div>
                                         </div>`;
                 this.createEntry('mut', 'Mutation', mutationtext);
@@ -259,7 +259,7 @@ class Venus {
                     let gnomADtext = `<p>Structure independent, sequence proximity (see structural neighbour for 3D) ${omni}.</p>`;
                     gnomADtext += '<ul>';
                     const gMut = (v) => v[4].toUpperCase().split(' ')[0];
-                    gnomADtext += this.mutational.gnomAD_near_mutation.map(v => `<li>${this.makeProlink(v)}: (${v[3].toLowerCase()}, <i class="far fa-flask-potion" data-gnomad='${JSON.stringify([gMut(v)])}' style="cursor: pointer;"></i>)</li>`).join('');
+                    gnomADtext += this.mutational.gnomAD_near_mutation.map(v => `<li>${this.makeProlink(v)}: (${v[3].toLowerCase()}, <i class="far fa-flask-potion venus-no-mike" data-gnomad='${JSON.stringify([gMut(v)])}' style="cursor: pointer;"></i>)</li>`).join('');
                     gnomADtext += '</ul>';
                     this.createEntry('gnomad', 'gnomAD', gnomADtext);
                 }
@@ -1454,7 +1454,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         results.find('.venus-no-mike').detach();
         results.find('.venus-plain-mike').each((i, el) => $(el).html(`<span>${$(el).text()}</span>`));
         results.find('#results_mutalist').append(`<li class="list-group-item">${$('#structureOption').html()}</li>`);
-        let text = results.html();
+        let text = results.html().replaceAll(/\n\s+/g,'\n');
         // get the view data
         let prolink = $(this.last_clicked_prolink).data() || {};
         if (this.alwaysShowMutant) {

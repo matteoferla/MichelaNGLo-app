@@ -34,7 +34,7 @@
             <div class="card-body">
                 <div id="viewport" role="NGL" data-proteins='${proteinJSON|h}' data-backgroundcolor="${backgroundcolor}" ${data_other|n}>
                     %if image:
-                        <img src="${image}" class="w-100"/>
+                        <img src="${image}" class="w-100" alt="user image"/>
                     %endif
                 </div>
             </div>

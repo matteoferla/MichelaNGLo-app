@@ -50,8 +50,8 @@
                 % if first < second:
                 <div class="col-3 border rounded">
                     <p>${first_aa} to ${second_aa}</p>
-                    <img src="/static/aa/${first_aa}${second_aa}.svg" width="100%;">
-                    <img src="/static/aa/${second_aa}${first_aa}.svg" width="100%;">
+                    <img src="/static/aa/${first_aa}${second_aa}.svg" width="100%;" alt="${first_aa}${second_aa}">
+                    <img src="/static/aa/${second_aa}${first_aa}.svg" width="100%;" alt="${second_aa}${first_aa}">
                 </div>
                 % endif
             %endfor

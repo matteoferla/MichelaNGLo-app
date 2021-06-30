@@ -21,7 +21,7 @@
         <h4>Free energy of folding</h4>
         <p>
             <div class="w-25 float-right p-3">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Folding_funnel_schematic.svg/1024px-Folding_funnel_schematic.svg.png" alt="wiki" class="w-100">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Folding_funnel_schematic.svg/1024px-Folding_funnel_schematic.svg.png" alt="wiki folding tunnel" class="w-100">
         <i>Protein folding funnel (figure credit: Wikipedia)</i>
     </div>
             Protein folding is largely entropy driven. In fact, were a protein to fold by exploring all possible

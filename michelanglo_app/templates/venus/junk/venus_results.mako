@@ -104,9 +104,9 @@
                             <span ${prolink|n} data-focus="residue" data-selection="${protein.mutation.residue_index}:CURRENTCHAIN">
                                 ${protein.mutation.long_name(protein.mutation.from_residue)} at position ${protein.mutation.residue_index}</span> is mutated to ${protein.mutation.long_name(protein.mutation.to_residue)}
                           <div class="row">
-                                <div class="col-6"><img src="/static/aa/${protein.mutation.from_residue}${protein.mutation.to_residue}.svg" width="100%">
+                                <div class="col-6"><img src="/static/aa/${protein.mutation.from_residue}${protein.mutation.to_residue}.svg" width="100%" alt="change">
                                 <p>Differing atoms in ${protein.mutation.long_name(protein.mutation.from_residue)} highlighted in red</p></div>
-                                <div class="col-6"><img src="/static/aa/${protein.mutation.to_residue}${protein.mutation.from_residue}.svg" width="100%">
+                                <div class="col-6"><img src="/static/aa/${protein.mutation.to_residue}${protein.mutation.from_residue}.svg" width="100%" alt="change">
                                 <p>Differing atoms in ${protein.mutation.long_name(protein.mutation.to_residue)} highlighted in red</p></div>
                             </div>
                       ${line_aft()}

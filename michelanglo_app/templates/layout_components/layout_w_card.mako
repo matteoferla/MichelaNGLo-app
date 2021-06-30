@@ -14,7 +14,7 @@
                 <div class="card-header">
                     <div class="d-flex flex-md-row flex-column justify-content-between">
                         <div class="mr-2 d-none d-md-block">
-                            <img src="/static/NGL.png" style="height: 6em;">
+                            <img src="/static/NGL.png" style="height: 6em;" alt="NGL">
                         </div>
                         <div class="float-left">
                         <h1 class="card-title">

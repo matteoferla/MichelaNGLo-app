@@ -1,8 +1,10 @@
-<div class="float-right d-flex flex-row">
-    #### filled by JS in layout.mako
-    <span id="user" class="my-2 mr-3"></span>
-<div class="d-flex flex-column" style="width: 42px;">
-    <button class="btn btn-outline-secondary my-1 d-none d-lg-block" type="button"
+<div class="float-right">
+    <div class="pointlessly-required-div">
+        <div class="d-flex flex-row">
+        #### filled by JS in layout.mako
+    <div id="user" class="my-1 mr-3"></div>
+    ### Twice because mobile.
+     <button class="btn btn-outline-secondary m-1 d-none d-lg-block" type="button" style="width: 42px;"
             title="Menu"
             id="menu"
             data-container="body"
@@ -34,15 +36,25 @@
                             </div>
                          '>
         <i class="far fa-bars"></i></button>
-    <button class="btn btn-outline-secondary my-1 d-lg-none d-block" type="button" data-toggle="modal" data-target="#menu_modal">
+     <button class="btn btn-outline-secondary m-1 d-lg-none d-block" type="button" style="width: 42px;" data-toggle="modal" data-target="#menu_modal">
         <i class="far fa-bars"></i></button>
-    <button class="btn btn-outline-secondary my-1" type="button" data-toggle="modal" data-target="#chat_modal" id="chat_modal_btn">
+    </div>
+        #### two icon row closed
+        <div class="d-flex flex-row float-right">
+        <button class="btn btn-outline-secondary m-1" type="button" style="width: 42px;" id="accessibility_btn">
+        <i class="far fa-eye-slash"></i>
+    </button>
+        <button class="btn btn-outline-secondary m-1" type="button" style="width: 42px;" data-toggle="modal" data-target="#chat_modal" id="chat_modal_btn">
         <i class="far fa-comments"></i>
     </button>
+    </div>
+        #### two icon row closed
+    </div>
+    ### inner closed
 </div>
-</div>
-#### title toggling is in layout.mako
-<%include file="chat.mako"/>
+### icon block closed
+
+
 
 
 <div class="modal" tabindex="-1" role="dialog" id="menu_modal">

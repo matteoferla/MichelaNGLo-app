@@ -3,7 +3,7 @@
     <div class="col-12 col-md-12">
         <div id="viewport" role="NGL" data-proteins='${proteinJSON}' data-backgroundcolor="${backgroundcolor}">
             % if image:
-        <img src="images/clickmap.jpg" alt="clickmap" width='100%' style='cursor: pointer'>
+        <img src="images/clickmap.jpg" alt="clickmap" width='100%' style='cursor: pointer' alt="clickmap">
             % endif
         </div></div>
     <div class="col-12 col-md-2">
