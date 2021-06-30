@@ -478,6 +478,8 @@
                                                     accessibilityElement.sheet.cssRules.length
                                                  );
 
+
+
         }
         // gets stuck
         $('#accessibility_btn').tooltip('hide');
