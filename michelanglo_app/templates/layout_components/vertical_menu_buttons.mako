@@ -41,11 +41,14 @@
     </div>
         #### two icon row closed
         <div class="d-flex flex-row float-right">
-        <button class="btn btn-outline-secondary m-1" type="button" style="width: 42px;" id="accessibility_btn">
+        <button class="btn btn-outline-secondary m-1" type="button" style="width: 42px;" id="accessibility_btn"
+                data-toggle="tooltip" title="Increase visibility of prolinks (protein-controlling links)">
         <i class="far fa-eye-slash"></i>
     </button>
         <button class="btn btn-outline-secondary m-1" type="button" style="width: 42px;" data-toggle="modal" data-target="#chat_modal" id="chat_modal_btn">
-        <i class="far fa-comments"></i>
+        <i class="far fa-comments"
+                data-toggle="tooltip" title="Send message to admin (registered users only)"
+        ></i>
     </button>
     </div>
         #### two icon row closed
@@ -53,9 +56,6 @@
     ### inner closed
 </div>
 ### icon block closed
-
-
-
 
 <div class="modal" tabindex="-1" role="dialog" id="menu_modal">
   <div class="modal-dialog" role="document">
@@ -91,4 +91,3 @@
     </div>
   </div>
 </div>
-

@@ -301,6 +301,8 @@
     ${ next.body() }
 </main>
 
+<%include file="chat.mako"/>
+
 <footer class="footer">
     <div class="container-fluid">
         <div class="row" style="line-height: 1rem;">
@@ -472,6 +474,8 @@
                                                     accessibilityElement.sheet.cssRules.length
                                                  );
         }
+        // gets stuck
+        $('#accessibility_btn').tooltip('hide');
     };
     $('#accessibility_btn').click(window.toggleAccessible);
 
