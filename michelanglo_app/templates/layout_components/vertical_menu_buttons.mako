@@ -1,8 +1,18 @@
 <div class="float-right">
     <div class="pointlessly-required-div">
-        <div class="d-flex flex-row">
         #### filled by JS in layout.mako
-    <div id="user" class="my-1 mr-3"></div>
+    <div id="user" class="my-1 mr-3 text-right"></div>
+        #### two icon row closed
+        <div class="d-flex flex-row float-right">
+        <button class="btn btn-outline-secondary m-1" type="button" style="width: 42px;" id="accessibility_btn"
+                data-toggle="tooltip" title="Increase visibility of prolinks (protein-controlling links)">
+        <i class="far fa-eye-slash"></i>
+    </button>
+        <button class="btn btn-outline-secondary m-1" type="button" style="width: 42px;" data-toggle="modal" data-target="#chat_modal" id="chat_modal_btn">
+        <i class="far fa-comments"
+                data-toggle="tooltip" title="Send message to admin (registered users only)"
+        ></i>
+    </button>
     ### Twice because mobile.
      <button class="btn btn-outline-secondary m-1 d-none d-lg-block" type="button" style="width: 42px;"
             title="Menu"
@@ -38,18 +48,6 @@
         <i class="far fa-bars"></i></button>
      <button class="btn btn-outline-secondary m-1 d-lg-none d-block" type="button" style="width: 42px;" data-toggle="modal" data-target="#menu_modal">
         <i class="far fa-bars"></i></button>
-    </div>
-        #### two icon row closed
-        <div class="d-flex flex-row float-right">
-        <button class="btn btn-outline-secondary m-1" type="button" style="width: 42px;" id="accessibility_btn"
-                data-toggle="tooltip" title="Increase visibility of prolinks (protein-controlling links)">
-        <i class="far fa-eye-slash"></i>
-    </button>
-        <button class="btn btn-outline-secondary m-1" type="button" style="width: 42px;" data-toggle="modal" data-target="#chat_modal" id="chat_modal_btn">
-        <i class="far fa-comments"
-                data-toggle="tooltip" title="Send message to admin (registered users only)"
-        ></i>
-    </button>
     </div>
         #### two icon row closed
     </div>

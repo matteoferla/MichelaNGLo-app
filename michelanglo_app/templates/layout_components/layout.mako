@@ -465,6 +465,7 @@
         if (accessible) {
             document.getElementById('accessibilityCSS').remove();
             document.getElementsByClassName('fa-eye')[0].classList.replace('fa-eye', 'fa-eye-slash');
+            $('#user').removeClass('btn btn-outline-secondary m-1 d-none d-lg-block')
         } else {
             document.getElementsByClassName('fa-eye-slash')[0].classList.replace('fa-eye-slash', 'fa-eye');
             const accessibilityElement = document.createElement('style');
@@ -473,6 +474,10 @@
             accessibilityElement.sheet.insertRule( '.prolink { background-color: mediumseagreen; color: white;}',
                                                     accessibilityElement.sheet.cssRules.length
                                                  );
+            accessibilityElement.sheet.insertRule( 'a { text-decoration: underline; }',
+                                                    accessibilityElement.sheet.cssRules.length
+                                                 );
+
         }
         // gets stuck
         $('#accessibility_btn').tooltip('hide');
