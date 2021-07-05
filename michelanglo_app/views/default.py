@@ -146,7 +146,15 @@ class DefaultViews:
 from pyramid.exceptions import URLDecodeError
 from pyramid.view import exception_view_config
 
-@exception_view_config(context=URLDecodeError, renderer="../templates/404.mako")
+from pyramid.request import Request
+
+@exception_view_config(context=URLDecodeError, renderer='json')
+def attack(context, request):
+    request.response.status = 418
+    request.environ['PATH_INFO'] = 'HACKING-ATTEMPT'
+    time.sleep(0.5)
+    return {'status': 404}
+
 @notfound_view_config(renderer="../templates/404.mako")
 def fourzerofour(request):
     username = User.get_username(request)
