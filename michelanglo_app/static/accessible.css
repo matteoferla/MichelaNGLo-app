@@ -1,0 +1,38 @@
+.prolink { background-color: mediumseagreen; color: white;}
+a { text-decoration: underline; }
+main {background-image: none;}
+.card-header {
+    background-color: white;
+    border-bottom: 2px solid black;
+}
+.text-muted {color: black!important;}
+.text-secondary {color: black!important;}
+.valid-feedback { color: black; }
+.valid-feedback:before { content: "SUCCESS: " }
+.invalid-feedback:before { content: "FAILURE: " }
+.card-header {
+    background-color: white;
+    border-bottom: 2px solid black !important;
+}
+.card {
+    background-color: white;
+    border: 2px solid black !important ;
+}
+.btn {
+    color: white;
+    border: 2px solid #007bff !important;
+    background-color: #007bff !important;
+}
+.btn:hover {
+    color: white;
+    border: 2px solid #6c757d !important;
+    background-color: #6c757d !important;
+}
+
+.border {border: 2px solid black !important;}
+.input-group-text {border: 2px solid black !important;}
+.border-left {border-left: 2px solid black !important;}
+.border-right {border-right: 2px solid black !important;}
+.border-top {border-top: 2px solid black !important;}
+.border-bottom {border-top: 2px solid black !important;}
+.form-control {border: 2px solid black !important ;}
