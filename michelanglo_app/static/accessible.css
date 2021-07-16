@@ -20,7 +20,7 @@ main {background-image: none;}
 }
 .btn {
     color: white;
-    border: 2px solid #007bff !important;
+    border: 2px solid black !important;
     background-color: #007bff !important;
 }
 .btn:hover {
@@ -29,8 +29,7 @@ main {background-image: none;}
     background-color: #6c757d !important;
 }
 
-.border {border: 2px solid black !important;}
-.input-group-text {border: 2px solid black !important;}
+.border,.input-group-text,.custom-file-input,.custom-file-label {border: 2px solid black !important;}
 .border-left {border-left: 2px solid black !important;}
 .border-right {border-right: 2px solid black !important;}
 .border-top {border-top: 2px solid black !important;}
