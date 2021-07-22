@@ -167,6 +167,7 @@ class PDBMeta:
 
 
 def get_references(code):
+    code = code.replace('based upon', '').strip().split('.')[0]
     if len(code) == 0:
         return ''
     elif 'swissmodel' in code or len(code) == 24:
