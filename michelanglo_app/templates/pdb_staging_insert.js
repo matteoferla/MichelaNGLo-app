@@ -60,6 +60,8 @@ $('#dehydrate_collapse').on('shown.bs.collapse',event => {
     (protein.structure.getView(new NGL.Selection('ligand')).atomCount !== 0) ? shower(artefact) : hider(artefact);
     if (protein.structure.getView(new NGL.Selection('ligand or water')).atomCount === 0) {
         $('#ligandlist').append('<b>No waters or ligands present</b>');
+        $('#dehydrate').attr('disabled','disabled');
+
     } else {
         $('#ligandlist p').detach();
     }

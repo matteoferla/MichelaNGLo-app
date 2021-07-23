@@ -1,3 +1,5 @@
+// Feature viewer is in features.js
+// del waters etc. is the pdb_staging_insert.js
 //<%text>
 
 

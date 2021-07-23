@@ -239,26 +239,31 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
 %endif
 ################### Structures #######################
 <%
+    ## dict of structure looks like:
+    ## [{'x': 1614, 'y': 2035, 'id': '6028accd97e29bf7eca5c745', 'type': 'swissmodel', 'description': '6tky.2.B (identity:63%)'}, ...]
     limited = 45
     if include_pdb:
-        p = sorted(protein.pdbs, key=lambda n: n.y - n.x, reverse=True)[0:limited]
-        s = sorted(protein.swissmodel, key=lambda n: n.y - n.x, reverse=True)[0:limited-len(protein.pdbs)]
-        m = sorted(protein.pdb_matches, key=lambda n: n.y - n.x, reverse=True)[0:limited-len(protein.pdbs)-len(protein.swissmodel)]
+        dictionarify = lambda data: [structure.to_dict() for structure in data]
+        p = dictionarify(sorted(protein.pdbs, key=lambda n: n.y - n.x, reverse=True)[0:limited])
+        af = [{'x': 1, 'y': len(protein), 'id': protein.uniprot, 'type': 'alphafold2', 'description': 'AlphaFold2 v1'}]
+        s = dictionarify(sorted(protein.swissmodel, key=lambda n: n.y - n.x, reverse=True)[0:limited-len(protein.pdbs)])
+        m = dictionarify(sorted(protein.pdb_matches, key=lambda n: n.y - n.x, reverse=True)[0:limited-len(protein.pdbs)-len(protein.swissmodel)])
     else:
         p = []
+        af = []
         s = []
         m = []
 %>
-%for title, data, color, classname in (("Crystal structures",p, 'lime', 'pdb'), ("Swissmodel", s, 'GreenYellow', 'swiss'), ("Homologue structures", m, 'khaki', 'homo')):
+%for title, data, color, classname in (("Crystal structures",p, 'lime', 'pdb'),("AlphaFold2", af, 'turquoise', 'alphafold'), ("Swissmodel", s, 'GreenYellow', 'swiss'), ("Homologue structures", m, 'khaki', 'homo')):
     %if data:
     ft.addFeature({
-        data: ${str([structure.to_dict() for structure in data])|n},
+        data: ${str(data)|n},
         name: "${title}",
         className: "${classname}",
         color: "${color}",
         type: "rect",
         filter: "Domain"
-    }); addFeatureTooltip("${title}", "Click on the span to load this structure.")
+    }); addFeatureTooltip("${title}", "Click on the span to load this structure.");
     %endif
 %endfor
 
@@ -275,6 +280,12 @@ $('.swiss').click(function () {
     const entries = ${str({s.id: s.url for s in protein.swissmodel})|n};
     let id = $(this).attr('id').slice(1); //remove the first 'f'
     load_pdb(entries[id]);
+});
+
+$('.alphafold').click(function () {
+
+    let url = 'https://alphafold.ebi.ac.uk/files/AF-'+window.uniprotValue+'-F1-model_v1.pdb';
+    load_pdb(url);
 });
 
 $('#label_protName').html("${protein.recommended_name} (encoded by <i>${protein.gene_name}</i>)");

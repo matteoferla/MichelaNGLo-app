@@ -280,15 +280,24 @@ def get_chain_definitions(source: Union[Request,str]):
     else:
         raise TypeError
 
+whitelist = ['https://swissmodel.expasy.org',
+             'https://www.well.ox.ac.uk',
+             'https://alphafold.ebi.ac.uk/files/',
+             'https://raw.githubusercontent.com/',
+             ]
 def get_pdb_block_from_str(text):
     if len(text) == 4:
         return requests.get(f'https://files.rcsb.org/download/{text.upper()}.pdb').text
     elif len(text.strip()) == 0:
         raise ValueError('Empty PDB string?!')
-    elif any([re.match(white, text) for white in ['https://swissmodel.expasy.org', 'https://www.well.ox.ac.uk']]):
+    elif any([re.match(white, text) for white in whitelist]):
         return requests.get(text).text
-    else:
+    elif 'ATOM' in text or 'HETATM' in text: # already a PDB
         return text
+    elif 'http' in text:
+        raise ValueError(f'Unknown web address {text}. Please email admin to add to approved URLs')
+    else:
+        raise ValueError(f'Unknown type of PDB block {text}')
 
 def get_pdb_block_from_request(request):
     if isinstance(request.params['pdb'], str):  # string
