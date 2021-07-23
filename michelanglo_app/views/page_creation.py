@@ -286,7 +286,7 @@ def convert_pdb(request):
                                                    'history': history}])
             settings['title'] = 'User submitted structure (from external PDB)'
             settings['descriptors'] = {'text': f'PDB loaded from [source <i class="far fa-external-link"></i>]({pdb})'}
-            if 'https://swissmodel.expasy.org' in pdb:
+            if is_model(pdb):
                 settings['model'] = True
                 settings['descriptors']['ref'] = get_references(pdb)
     elif request.params['mode'] in ('renumbered', 'file'):
@@ -323,6 +323,13 @@ def convert_pdb(request):
     commit_submission(request, settings, pagename)
     return {'page': pagename}
 
+def is_model(code):
+    if 'https://swissmodel.expasy.org' in code:
+        return True
+    elif 'https://alphafold.ebi.ac.uk/files/' in code:
+        return True
+    else:
+        return False
 
 ############################## Make the page for venus.
 @view_config(route_name='venus_create', renderer="json")
@@ -376,7 +383,7 @@ def create_venus(request):
                 'backgroundcolor': 'white',
                 'validation': None,
                 'js': 'external',
-                'model': True if 'https://swissmodel.expasy.org' in code else False,
+                'model': is_model(code),
                 'pdb': [],
                 'loadfun': '',
                 'columns_viewport': 5,

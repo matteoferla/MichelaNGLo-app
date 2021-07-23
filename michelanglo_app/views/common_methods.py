@@ -171,6 +171,11 @@ def get_references(code):
         code = code.replace('based upon', '').strip().split('.')[0]
         if len(code) == 0:
             return ''
+        elif 'alphafold' in code:
+            return 'Model derived from EBI AlphaFold2 '+\
+                   '<a href="https://www.nature.com/articles/s41586-021-03819-2" target="_blank">'+\
+                   'Jumper, J., Evans, R., Pritzel, A. et al. Highly accurate protein structure prediction with AlphaFold. Nature (2021).'+\
+                   '</a>'
         elif 'swissmodel' in code or len(code) == 24:
             return 'Model derived from SWISSMODEL <a href="https://academic.oup.com/nar/article/46/W1/W296/5000024" target="_blank">'+\
                    'Waterhouse, A., Bertoni, M., Bienert, S., Studer, G., Tauriello, G., Gumienny, R., Heer, F.T., de Beer, T.A.P., Rempfer, C., Bordoli, L., Lepore, R., Schwede, T.'+\
