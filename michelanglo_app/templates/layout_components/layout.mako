@@ -466,6 +466,7 @@
             document.getElementById('accessibilityCSS').remove();
             document.getElementsByClassName('fa-eye')[0].classList.replace('fa-eye', 'fa-eye-slash');
             $('#user').removeClass('btn btn-outline-secondary m-1 d-none d-lg-block')
+            localStorage.setItem('accessible', false);
         } else {
             document.getElementsByClassName('fa-eye-slash')[0].classList.replace('fa-eye-slash', 'fa-eye');
             const accessibilityElement = document.createElement('link');
@@ -473,11 +474,24 @@
             accessibilityElement.rel = 'stylesheet';
             accessibilityElement.href = '/static/accessible.css';
             document.head.appendChild(accessibilityElement);
+            localStorage.setItem('accessible', 'true');
+            if (localStorage.getItem('accessible_toast_shown') !== 'true') {
+                localStorage.setItem('accessible_toast_shown', 'false');
+            }
         }
         // gets stuck
         $('#accessibility_btn').tooltip('hide');
     };
     $('#accessibility_btn').click(window.toggleAccessible);
+    if ((localStorage.getItem('accessible') === 'true') && (localStorage.getItem('accessible_toast_shown') === 'false')) {
+        ops.addToast('accessibletoast','High constrast mode - privacy notice',
+                'You have previously clicked to enable high-contrast mode. This information is stored in your browser and not serverside.',
+                'bg-white');
+        localStorage.setItem('accessible_toast_shown', 'true');
+        window.toggleAccessible();
+    } else if (localStorage.getItem('accessible') === 'true') {
+        window.toggleAccessible();
+    }
 
 </script>
 
