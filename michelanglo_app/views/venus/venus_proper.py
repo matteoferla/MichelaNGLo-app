@@ -7,7 +7,7 @@ from ..uniprot_data import *
 from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structure
 
 from ...models import User, Page  ##needed solely for log.
-from ..common_methods import is_malformed, notify_admin, get_pdb_block_from_request, is_alphafolded
+from ..common_methods import is_malformed, notify_admin, get_pdb_block_from_request, is_alphafold_taxon
 from ..user_management import permission
 from .. import custom_messages
 
@@ -151,7 +151,7 @@ class Venus(VenusBase):
                                       {'protein': protein,
                                        'featureView': '#fv',
                                        'include_pdb': False,
-                                       'alphafolded': is_alphafolded(self.request.params['species'])
+                                       'alphafolded': is_alphafold_taxon(self.request.params['species'])
                                        },
                                       self.request)
         elif step == 'extra':

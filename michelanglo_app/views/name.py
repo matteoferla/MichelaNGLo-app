@@ -143,7 +143,7 @@ def choose_pdb(request):
                                   {'protein': protein,
                                    'featureView': fv,
                                    'include_pdb': ip,
-                                   'alphafolded': is_alphafolded(taxid)
+                                   'alphafolded': is_alphafold_taxon(taxid)
                                    },
                                   request)
     ######### get_name: uniprot > json of name
