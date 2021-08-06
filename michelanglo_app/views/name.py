@@ -3,7 +3,9 @@ from pyramid.view import view_config
 from pyramid.renderers import render_to_response
 
 from .uniprot_data import *
-#ProteinCore organism human uniprot2pdb
+
+
+# ProteinCore organism human uniprot2pdb
 
 @view_config(route_name='choose_pdb', renderer='json')
 def choose_pdb(request):
@@ -14,24 +16,24 @@ def choose_pdb(request):
     malformed = is_malformed(request, 'item')
     if malformed:
         return {'status': malformed}
-    if request.params['item'] == 'match species': ######################################
+    if request.params['item'] == 'match species':  ######################################
         malformed = is_malformed(request, 'name')
         if malformed:
             return {'status': malformed}
         name = request.params['name'].strip()
-        if not name: #empty name
+        if not name:  # empty name
             return {'options': 'many'}
-        elif name in organism: #name exists!
+        elif name in organism:  # name exists!
             return {'taxid': organism[name]}
-        elif name.title() in organism: #name exists and is formatted differently
+        elif name.title() in organism:  # name exists and is formatted differently
             return {'taxid': organism[name.title()]}
-        elif len(name) < 4: #too short.
+        elif len(name) < 4:  # too short.
             return {'options': 'many'}
         else:
             lowname = name.lower()
             options = [k for k in organism if lowname in k.lower()]
             return {'options': options}
-    elif request.params['item'] == 'match gene': ######################################
+    elif request.params['item'] == 'match gene':  ######################################
         malformed = is_malformed(request, 'species', 'gene')
         if malformed:
             return {'status': malformed}
@@ -42,7 +44,8 @@ def choose_pdb(request):
         if species == 9606:
             genedex = human
         else:
-            genedex = json.load(open(os.path.join(ProteinCore.settings.dictionary_folder, f'taxid{species}-names2uniprot.json')))
+            genedex = json.load(
+                open(os.path.join(ProteinCore.settings.dictionary_folder, f'taxid{species}-names2uniprot.json')))
         if gene in genedex:
             u = genedex[gene]
             if u in uniprot2pdb:
@@ -72,35 +75,35 @@ def choose_pdb(request):
                 uni = json.load(open(os.path.join(ProteinCore.settings.dictionary_folder, 'uniprot2species.json')))
                 if gene.upper() in uni:
                     tax = uni[gene.upper()]
-                    return {'species_correction': [o for o,i in organism.items() if i == tax]}
+                    return {'species_correction': [o for o, i in organism.items() if i == tax]}
             else:
                 return {'options': []}
         else:
             return {'invalid': True}
-    elif request.params['item'] == 'get_pdbs': ######################################
+    elif request.params['item'] == 'get_pdbs':  ######################################
         ### gets the metadata for a given PDB list
         malformed = is_malformed(request, 'entries', 'uniprot')
         if malformed:
             return {'status': malformed}
         pdbs = request.params.getall('entries[]')
         log.info(f'{User.get_username(request)} wants pdb list')
-        #PDBMeta is in common methods
+        # PDBMeta is in common methods
         details = []
         for entry in pdbs:
             try:
                 details.append(PDBMeta(entry).wordy_describe())
             except KeyError:
-                pass # this protein was removed. We shalt speak of it.
+                pass  # this protein was removed. We shalt speak of it.
         return {'descriptions': ' <br/> '.join(details)}
-    elif request.params['item'] == 'get_pdb': ######################################
+    elif request.params['item'] == 'get_pdb':  ######################################
         ### gets the metadata for a given PDB code
         malformed = is_malformed(request, 'pdb')
         if malformed:
             return {'status': malformed}
         pdb = request.params['pdb']
-        #chain = request.params['chain'] if 'chain' in request.params else 'A'
+        # chain = request.params['chain'] if 'chain' in request.params else 'A'
         log.info(f'{User.get_username(request)} wants pdb info')
-        #Fomerly via PDBe. PDBMeta is in common methods `PDBMeta(entry).describe()`
+        # Fomerly via PDBe. PDBMeta is in common methods `PDBMeta(entry).describe()`
         if 'uniprot' in request.params and 'species' in request.params and len(pdb) == 4:
             protein = ProteinCore(uniprot=request.params['uniprot'], taxid=request.params['species']).load()
             structure = [s for s in protein.pdbs if s.code == pdb]
@@ -132,13 +135,19 @@ def choose_pdb(request):
             try:
                 protein = ProteinGatherer(uniprot=uniprot, taxid=taxid).parse_uniprot()
             except:
-                request.response.status = 410 #malformed
+                request.response.status = 410  # malformed
                 return {'status': 'Unknown Uniprot code.'}
         fv = request.params['fv'] if 'fv' in request.params else '#fv'
         ip = False if 'no_pdb' in request.params else True
-        return render_to_response("../templates/results/features.js.mako", {'protein': protein, 'featureView': fv, 'include_pdb': ip}, request)
+        return render_to_response("../templates/results/features.js.mako",
+                                  {'protein': protein,
+                                   'featureView': fv,
+                                   'include_pdb': ip,
+                                   'alphafolded': is_alphafolded(taxid)
+                                   },
+                                  request)
     ######### get_name: uniprot > json of name
-    elif request.params['item'] == 'get_name':   ### a smaller version...
+    elif request.params['item'] == 'get_name':  ### a smaller version...
         malformed = is_malformed(request, 'uniprot', 'species')
         if malformed:
             return {'status': malformed}
@@ -147,10 +156,11 @@ def choose_pdb(request):
         log.info(f'{User.get_username(request)} wants uniprot data')
         try:
             protein = ProteinCore(uniprot=uniprot, taxid=taxid).load()
-        except: # to do fix this.
+        except:  # to do fix this.
             return {'uniprot': uniprot, 'gene_name': '???', 'recommended_name': 'different species',
                     'length': -1}
-        return {'uniprot': uniprot, 'gene_name': protein.gene_name, 'recommended_name': protein.recommended_name, 'length': len(protein)}
+        return {'uniprot': uniprot, 'gene_name': protein.gene_name, 'recommended_name': protein.recommended_name,
+                'length': len(protein)}
     else:
         request.response.status = 400
         return {'status': 'unknown cmd'}

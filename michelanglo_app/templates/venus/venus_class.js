@@ -128,17 +128,22 @@ class Venus {
     }
 
     //###################  Steps
-    //sends ajax request
-    analyse(step) {
-        return $.post({
-            url: "venus_analyse", data: {
+    //sends ajax request. Some do not use this. analyse_target for example.
+    analyse(step, extras) {
+        let data = {
                 uniprot: this.uniprot,
                 species: this.taxid,
                 step: step,
                 mutation: this.mutation,
                 debug: this.debug,
+            };
+        if (extras !== undefined) {
+            for (const [key, value] of Object.entries(extras)) {
+                // no sanitisation ATM
+              data[key] = value;
             }
-        }).fail(ops.addErrorToast).then(reply => {
+        }
+        return $.post({url: "venus_analyse", data: data}).fail(ops.addErrorToast).then(reply => {
             this.timeTaken = reply.time_taken;
             return reply
         });
@@ -146,7 +151,7 @@ class Venus {
 
     //step 0
     isValidMutation() {
-        //check the mutation is valid
+        //check the mutation is valid client side
         //this is a copy paste of the fun from pdb_staging_insert.js
         const aa = {
             'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
@@ -173,6 +178,7 @@ class Venus {
     //step 1
     analyseProtein() {
         //step one
+        // Check mutations are valid for the protein. In Python ``protein.check_mutation()``
         this.mutation = $('#mutation').val().replace('p.', '').toUpperCase();
         this.position = parseInt(this.mutation.match(/\d+/)[0]);
         if (this.isValidMutation() === false) {
@@ -228,6 +234,8 @@ class Venus {
     //step 2
     analyseMutation() {
         //step 2
+        // what is the structure independent effect?
+        // Runs ``protein.predict_effect()`` in Python.
         this.setStepStatus(1);
         return this.analyse('mutation').done(msg => {
             if (msg.error) {
@@ -295,6 +303,12 @@ class Venus {
         //step 3
         // see parseStructuralResponse for main.
         this.setStepStatus(3);
+        let extras = {'allow_pdb': $('#allow_pdb').prop('checked'),
+                    'allow_swiss': $('#allow_swiss').prop('checked'),
+                    'allow_alphafold': $('#allow_alphafold').prop('checked')
+        };
+
+
         return this.analyse('structural').done(msg => this.parseStructuralResponse.call(this, msg));
     }
 
@@ -512,20 +526,21 @@ class Venus {
         //     window.ops.addToast('busy', 'Please be patient', 'To prevent overuse, only one at the time', 'bg-warning');
         //     return null;
         // }
-        console.log(mutation);
-        console.log(algorithm);
-        this.setStatus(`Running extra job ${mutation}`, 'working');
-        return $.post({
-            url: "venus_analyse", data: {
+        let submissionData = {
                 uniprot: this.uniprot,
                 species: this.taxid,
                 step: 'extra',
                 mutation: this.mutation, //the data is stored serverside for an hour. and this is one part of the hash.
                 extra: mutation,
                 algorithm: algorithm,
+                allow_pdb: $('#allow_pdb').prop('checked'),
+                allow_swiss: $('#allow_swiss').prop('checked'),
+                allow_alphafold: $('#allow_alphafold').prop('checked'),
                 debug: this.debug
-            }
-        }).fail(ops.addErrorToast)
+            };
+        this.setStatus(`Running extra job ${mutation}`, 'working');
+        return $.post({
+            url: "venus_analyse", data: submissionData}).fail(ops.addErrorToast)
             .done(msg => {
                 if (msg.error) {
                     this.setStatus('Failure at extra job', 'crash');

@@ -8,7 +8,7 @@ from ..uniprot_data import *
 from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structure
 
 from ...models import User, Page  ##needed solely for log.
-from ..common_methods import is_malformed, notify_admin, get_pdb_block_from_request
+from ..common_methods import is_malformed, notify_admin, get_pdb_block_from_request, is_alphafolded
 from ..user_management import permission
 from ..custom_message import custom_messages
 from mako.template import Template
@@ -133,4 +133,7 @@ class MultiVenus(VenusBase):
         template = Template(filename=filename)
         return template.render(protein=self.protein,
                                  featureView= '#fv',
-                                 include_pdb=True)
+                                 include_pdb=True,
+                                 alphafolded = is_alphafolded(self.taxid)
+                               )
+

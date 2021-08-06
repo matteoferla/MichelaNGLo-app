@@ -7,7 +7,7 @@ from ..uniprot_data import *
 from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structure
 
 from ...models import User, Page  ##needed solely for log.
-from ..common_methods import is_malformed, notify_admin, get_pdb_block_from_request
+from ..common_methods import is_malformed, notify_admin, get_pdb_block_from_request, is_alphafolded
 from ..user_management import permission
 from .. import custom_messages
 
@@ -148,7 +148,12 @@ class Venus(VenusBase):
                 self.protein_step()
             protein = system_storage[self.handle]
             return render_to_response(os.path.join("..", "..", "templates", "results", "features.js.mako"),
-                                      {'protein': protein, 'featureView': '#fv', 'include_pdb': False}, self.request)
+                                      {'protein': protein,
+                                       'featureView': '#fv',
+                                       'include_pdb': False,
+                                       'alphafolded': is_alphafolded(self.request.params['species'])
+                                       },
+                                      self.request)
         elif step == 'extra':
             self.assert_malformed('extra', 'algorithm')
             self.extra_step(mutation=self.request.params['extra'], algorithm=self.request.params['algorithm'])
@@ -228,7 +233,6 @@ class Venus(VenusBase):
         self.stop_timer()
 
         ### STEP 3
-
     def structural_step(self, structure=None, retrieve=True):
         """
         runs protein.analyse_structure() iteratively until it works.
@@ -239,54 +243,11 @@ class Venus(VenusBase):
         if not self.has():
             self.mutation_step()
         protein = system_storage[self.handle]
-        if not self.has('structural'):
-            if structure is not None:
+        if not self.has('structural'):  # this step has not been run before.
+            if structure is not None:  # user submitted structure.
                 protein.analyse_structure(structure)
             else:
-                # do not use the stored values of pdbs, but get the swissmodel ones:
-                if retrieve:
-                    try:
-                        protein.retrieve_structures_from_swissmodel()
-                    except Exception as error:
-                        if not self.suppress_errors:
-                            raise error
-                        msg = f'Swissmodel retrieval step failed: {error.__class__.__name__}: {error}'
-                        log.critical(msg)
-                        notify_admin(msg)
-                        self.reply['warnings'].append('Retrieval of latest PDB data failed (admin notified). ' +
-                                                      'Falling back onto stored data.')
-                try:
-                    protein.analyse_structure()
-                except Exception as error:
-                    if not self.suppress_errors:
-                        raise error
-                    # ConnectionError: # failed to download model  # deubg
-                    broken_structure = best = protein.get_best_model()
-                    # ---- remove
-                    if protein.swissmodel.count(broken_structure) != 0:
-                        i = protein.swissmodel.remove(broken_structure)
-                        source = 'Swissmodel'
-                    elif protein.pdbs.count(broken_structure) != 0:
-                        i = protein.pdbs.remove(broken_structure)
-                        source = 'RCSB PDB'
-                    else:
-                        raise ValueError('structure from mystery source')
-                    # ---- logging
-                    if isinstance(error, ConnectionError):
-                        msg = f'{source} {broken_structure} could not be downloaded'
-                        log.info(msg)
-                        self.reply['warnings'].append(msg)
-                    elif isinstance(error, ValueError):
-                        msg = f'Residue missing in structure ({source}): {broken_structure.code} ({error})'
-                        log.info(msg)
-                        self.reply['warnings'].append(msg)
-                    else:  # this should not happen in step 3.
-                        msg = f'Major issue ({error.__class__.__name__}) with model {broken_structure.code} ({error})'
-                        self.reply['warnings'].append(msg)
-                        log.critical(msg)
-                        notify_admin(msg)
-                    # ---- repeat
-                    self.structural_step(retrieve=False)
+                self.structural_workings(protein, structure, retrieve)
         if protein.structural:
             self.reply['structural'] = self.jsonable(protein.structural)
             self.reply['has_structure'] = True
@@ -298,6 +259,63 @@ class Venus(VenusBase):
             self.reply['has_structure'] = False
             raise VenusException(self.reply['msg'])
         self.stop_timer()
+
+    def structural_workings(self, protein, structure, retrieve):
+        """
+        Inner function of step 3 structural_step
+        """
+        # try options
+        # do not use the stored values of pdbs, but get the swissmodel ones (more uptodate)
+        if retrieve:
+            try:
+                protein.retrieve_structures_from_swissmodel()
+            except Exception as error:
+                if not self.suppress_errors:
+                    raise error
+                msg = f'Swissmodel retrieval step failed: {error.__class__.__name__}: {error}'
+                log.critical(msg)
+                notify_admin(msg)
+                self.reply['warnings'].append('Retrieval of latest PDB data failed (admin notified). ' +
+                                              'Falling back onto stored data.')
+        try:
+            # disable structures if requested
+            if 'allow_pdb' in self.request.params and self.request.params['allow_pdb'] in (False, 0, 'false', '0'):
+                protein.pdbs = []
+            if 'allow_swiss' in self.request.params and self.request.params['allow_swiss'] in (False, 0, 'false', '0'):
+                protein.swissmodel = []
+            # allow_alphafold
+            protein.analyse_structure()
+        except Exception as error:
+            if not self.suppress_errors:
+                raise error
+            # ConnectionError: # failed to download model  # deubg
+            broken_structure = best = protein.get_best_model()
+            # ---- remove
+            if protein.swissmodel.count(broken_structure) != 0:
+                i = protein.swissmodel.remove(broken_structure)
+                source = 'Swissmodel'
+            elif protein.pdbs.count(broken_structure) != 0:
+                i = protein.pdbs.remove(broken_structure)
+                source = 'RCSB PDB'
+            else:
+                raise ValueError('structure from mystery source')
+            # ---- logging
+            if isinstance(error, ConnectionError):
+                msg = f'{source} {broken_structure} could not be downloaded'
+                log.info(msg)
+                self.reply['warnings'].append(msg)
+            elif isinstance(error, ValueError):
+                msg = f'Residue missing in structure ({source}): {broken_structure.code} ({error})'
+                log.info(msg)
+                self.reply['warnings'].append(msg)
+            else:  # this should not happen in step 3.
+                msg = f'Major issue ({error.__class__.__name__}) with model {broken_structure.code} ({error})'
+                self.reply['warnings'].append(msg)
+                log.critical(msg)
+                notify_admin(msg)
+            # ---- repeat
+            self.structural_step(retrieve=False)
+
 
     ### Step 4
     def ddG_step(self):

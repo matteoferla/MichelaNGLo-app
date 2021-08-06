@@ -292,6 +292,12 @@ const urlQueriest = () => {
     if (!!queryMutation) {
         $('#mutation').val(queryMutation);
     }
+    ['allow_pdb','allow_swiss','allow_alphafold'].forEach(v => {
+        let status = query.get(v);
+        if (['off', 'false', '0', false, 0].includes(status)) {
+            $('#'+v).prop('checked', false);
+        }
+    });
 };
 
 urlQueriest();

@@ -51,7 +51,39 @@
                             </div>
         </div>
 
-        <div class="col-12 offset-lg-4 col-lg-4">
+        <div class="col-12">
+            <div class="mx-2 my-1 p-2 border rounded bg-light collapse" id="advanced">
+                <h5>Advanced options</h5>
+                <div class="row">
+                % for id_name, name in [('allow_pdb','PDB structures'), ('allow_swiss','SwissModel threaded models'), ('allow_alphafold','AlphaFold2 models')]:
+                <div class="col-4">
+                    <div class="input-group" data-toggle="tooltip" title="Disabling prevents VENUS from using ${name}, otherwise they may be used if best">
+                <div class="input-group-prepend">
+                <div class="input-group-text">
+                <div class="custom-control custom-switch">
+                <input type="checkbox" id="${id_name}" class="custom-control-input" checked>
+                <label class="custom-control-label" for="${id_name}">Use ${name}</label>
+                </div>
+                </div>
+                </div>
+                </div>
+                </div>
+                %endfor
+                </div>
+
+
+
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-2">
+            % if user and user.role == 'admin':
+            <a class="btn btn-outline-info" data-toggle="collapse" href="#advanced" role="button" aria-expanded="false" aria-controls="advanced">
+                <i class="far fa-cogs"></i> Advanced
+              </a>
+            %endif
+        </div>
+        <div class="col-12 offset-lg-2 col-lg-4">
             <button type="button" class="btn btn-outline-primary w-100" id="venus_calc" style="display: none;">Analyse</button>
         </div>
     </div>

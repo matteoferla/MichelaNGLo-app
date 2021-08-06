@@ -245,7 +245,10 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
     if include_pdb:
         dictionarify = lambda data: [structure.to_dict() for structure in data]
         p = dictionarify(sorted(protein.pdbs, key=lambda n: n.y - n.x, reverse=True)[0:limited])
-        af = [{'x': 1, 'y': len(protein), 'id': protein.uniprot, 'type': 'alphafold2', 'description': 'AlphaFold2 v1'}]
+        if alphafolded:  # bool returned by common_methods.py :: is_alphafolded
+            af = [{'x': 1, 'y': len(protein), 'id': protein.uniprot, 'type': 'alphafold2', 'description': 'AlphaFold2 v1'}]
+        else:
+            af = []
         s = dictionarify(sorted(protein.swissmodel, key=lambda n: n.y - n.x, reverse=True)[0:limited-len(protein.pdbs)])
         m = dictionarify(sorted(protein.pdb_matches, key=lambda n: n.y - n.x, reverse=True)[0:limited-len(protein.pdbs)-len(protein.swissmodel)])
     else:
