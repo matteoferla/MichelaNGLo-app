@@ -5,21 +5,24 @@ from michelanglo_protein import Structure, global_settings, is_alphafold_taxon
 from . import valid_extensions
 from .uniprot_data import uniprot2name
 from pyramid.request import Request
+
 log = logging.getLogger(__name__)
 from typing import Union
 ### The latter two are utterly stupid usage.
 from Bio.PDB.MMCIF2Dict import MMCIF2Dict
 import io
 
+
 ## convert booleans and settings
-def is_js_true(value:str):
+def is_js_true(value: str):
     """
     booleans get converted into strings in json. This fixes that.
     """
-    if not value or value in ('false', 'False', False, 'No','no', 'F','null', 'off', 0, ''):
+    if not value or value in ('false', 'False', False, 'No', 'no', 'F', 'null', 'off', 0, ''):
         return False
     else:  ## while also return True if its a number or string.
         return True
+
 
 def get_uuid(request):
     identifier = str(uuid.uuid4())
@@ -27,6 +30,7 @@ def get_uuid(request):
         log.error('UUID collision!!!')
         return get_uuid(request)  # one in a ten-quintillion!
     return identifier
+
 
 def notify_admin(msg):
     """
@@ -38,8 +42,8 @@ def notify_admin(msg):
         log.critical(f'SLACK_WEBHOOK is absent! Cannot send message {msg}')
         return
     # sanitise.
-    msg = unicodedata.normalize('NFKD',msg).encode('ascii','ignore').decode('ascii')
-    msg = re.sub('[^\w\s\-.,;?!@#()\[\]]','', msg)
+    msg = unicodedata.normalize('NFKD', msg).encode('ascii', 'ignore').decode('ascii')
+    msg = re.sub('[^\w\s\-.,;?!@#()\[\]]', '', msg)
 
     r = requests.post(url=os.environ['SLACK_WEBHOOK'],
                       headers={'Content-type': 'application/json'},
@@ -51,9 +55,9 @@ def notify_admin(msg):
         return False
 
 
-
 import smtplib
 from email.mime.text import MIMEText
+
 
 def email(text, recipient, subject='[Michelanglo] Notification'):
     if "SERVER_EMAIL" not in os.environ:
@@ -68,6 +72,7 @@ def email(text, recipient, subject='[Michelanglo] Notification'):
         msg.add_header('reply-to', os.environ["ADMIN_EMAIL"])
         smtp.send_message(msg)
         smtp.quit()
+
 
 def is_malformed(request, *args) -> Union[None, str]:
     """
@@ -90,6 +95,7 @@ class PDBMeta:
     Query the PDBe for what the code parts are.
     Herein by chain the chain letter is meant, while the data of the chain is called entity... terrible.
     """
+
     def __init__(self, entry):
         if entry.find('_') != -1:
             self.code, self.chain = entry.split('_')
@@ -122,7 +128,7 @@ class PDBMeta:
                 s = mappings[0]['start']['residue_number']
                 e = mappings[0]['end']['residue_number']
                 return (s, e)
-            else: ## synthetic.
+            else:  ## synthetic.
                 return (1, len(entity['sequence']))
         else:
             raise ValueError('This is not a peptide')
@@ -144,15 +150,18 @@ class PDBMeta:
 
     def is_boring_ligand(self, entity):
         if 'chem_comp_ids' not in entity:
-            return True #this entity isnt even a thing
+            return True  # this entity isnt even a thing
         elif len(entity['chem_comp_ids']) == 0:
-            return True #this entity isnt even a thing
+            return True  # this entity isnt even a thing
         else:
-            return entity['chem_comp_ids'][0] in PyMolTranspiler.boring_ligand or entity['chem_comp_ids'][0] in ('WAT', 'HOH', 'TP3')
+            return entity['chem_comp_ids'][0] in PyMolTranspiler.boring_ligand or entity['chem_comp_ids'][0] in (
+            'WAT', 'HOH', 'TP3')
 
     def wordy_describe(self, delimiter=' + '):
         descr = delimiter.join([self.wordy_describe_entity(entity) for entity in self.get_proteins()])
-        descr += ' &mdash; ' + delimiter.join([self.wordy_describe_entity(entity) for entity in self.get_nonproteins() if not self.is_boring_ligand(entity)])
+        descr += ' &mdash; ' + delimiter.join(
+            [self.wordy_describe_entity(entity) for entity in self.get_nonproteins() if
+             not self.is_boring_ligand(entity)])
         return f'<span class="prolink" name="pdb" data-code="{self.code}" data-chain="{self.chain}">{self.code}</span> ({descr})'
 
     def describe(self):
@@ -172,13 +181,13 @@ def get_references(code):
         if len(code) == 0:
             return ''
         elif 'alphafold' in code:
-            return 'Model derived from EBI AlphaFold2 '+\
-                   '<a href="https://www.nature.com/articles/s41586-021-03819-2" target="_blank">'+\
-                   'Jumper, J., Evans, R., Pritzel, A. et al. Highly accurate protein structure prediction with AlphaFold. Nature (2021).'+\
+            return 'Model derived from EBI AlphaFold2 ' + \
+                   '<a href="https://www.nature.com/articles/s41586-021-03819-2" target="_blank">' + \
+                   'Jumper, J., Evans, R., Pritzel, A. et al. Highly accurate protein structure prediction with AlphaFold. Nature (2021).' + \
                    '</a>'
         elif 'swissmodel' in code or len(code) == 24:
-            return 'Model derived from SWISSMODEL <a href="https://academic.oup.com/nar/article/46/W1/W296/5000024" target="_blank">'+\
-                   'Waterhouse, A., Bertoni, M., Bienert, S., Studer, G., Tauriello, G., Gumienny, R., Heer, F.T., de Beer, T.A.P., Rempfer, C., Bordoli, L., Lepore, R., Schwede, T.'+\
+            return 'Model derived from SWISSMODEL <a href="https://academic.oup.com/nar/article/46/W1/W296/5000024" target="_blank">' + \
+                   'Waterhouse, A., Bertoni, M., Bienert, S., Studer, G., Tauriello, G., Gumienny, R., Heer, F.T., de Beer, T.A.P., Rempfer, C., Bordoli, L., Lepore, R., Schwede, T.' + \
                    ' (2018) SWISS-MODEL: homology modelling of protein structures and complexes. <i>Nucleic Acids Res.</i> <b>46(W1)</b>, W296-W303.</a>'
         else:
             reply = requests.get(f'https://www.ebi.ac.uk/pdbe/api/pdb/entry/publications/{code}').json()
@@ -187,15 +196,18 @@ def get_references(code):
                 for ref in reply[code.lower()]:
                     authors = ', '.join([author["full_name"] for author in ref["author_list"]])
                     if ref["doi"] is None:
-                            continue
+                        continue
                     try:
-                        jname = ref["journal_info"]["ISO_abbreviation"] if ref["journal_info"]["ISO_abbreviation"] is not None else ref["journal_info"]["pdb_abbreviation"]
+                        jname = ref["journal_info"]["ISO_abbreviation"] if ref["journal_info"][
+                                                                               "ISO_abbreviation"] is not None else \
+                        ref["journal_info"]["pdb_abbreviation"]
                         issue = ref["journal_info"]["issue"] if ref["journal_info"]["issue"] is not None else ''
                         pages = ref["journal_info"]["pages"] if ref["journal_info"]["pages"] is not None else ''
                         journal = f'({ref["journal_info"]["year"]}) {ref["title"]} <i>{jname}</i> <b>{issue}</b> {pages}'
                     except:
                         journal = 'NA'
-                    citations.append(f'Structure {code} was reported in <a target="_blank" href="https://dx.doi.org/{ref["doi"]}">{authors} {journal}</a>')
+                    citations.append(
+                        f'Structure {code} was reported in <a target="_blank" href="https://dx.doi.org/{ref["doi"]}">{authors} {journal}</a>')
                 return '<br/>'.join(citations)
             else:
                 return ''
@@ -203,8 +215,8 @@ def get_references(code):
         msg = f'get_reference {error.__class__.__name__} - {error} for "{code}"'
         log.error(msg)
         notify_admin(msg)
-    
-    
+
+
 def save_file(request, extension, field='file'):
     """
     Saves the file without doing anything to it.
@@ -218,6 +230,7 @@ def save_file(request, extension, field='file'):
             request.params[field].file.seek(0)
             shutil.copyfileobj(request.params[field].file, output_file)
     return filename
+
 
 def save_coordinates(request, mod_fx=None):
     """
@@ -234,11 +247,13 @@ def save_coordinates(request, mod_fx=None):
         os.remove(filename.replace(extension, 'pdb'))
     return trans
 
-def get_chain_definitions(source: Union[Request,str]):
+
+def get_chain_definitions(source: Union[Request, str]):
     """
     In parts of the code (backend) it is called definition. in the frontend it is descriptions.
     It accepts either a 4 letter code or a request object.
     """
+
     def get_from_code(code):
         code = code.split('_')[0]
         if len(code) == 4:
@@ -269,7 +284,9 @@ def get_chain_definitions(source: Union[Request,str]):
                 for i, c in enumerate(chains):
                     n = name[i].split(',')[0]
                     assert species[i].isdigit()
-                    uniprot = json.load(open(os.path.join(global_settings.dictionary_folder, f'taxid{species[i]}-names2uniprot.json')))[n]
+                    uniprot = json.load(
+                        open(os.path.join(global_settings.dictionary_folder, f'taxid{species[i]}-names2uniprot.json')))[
+                        n]
                     for x in c.split(','):
                         details.append({'chain': x,
                                         'name': n,
@@ -279,17 +296,20 @@ def get_chain_definitions(source: Union[Request,str]):
             except:
                 return []
         else:
-            #raise ValueError('Neither a pdb code or a definition json')
+            # raise ValueError('Neither a pdb code or a definition json')
             return []
         return definitions
     else:
         raise TypeError
+
 
 whitelist = ['https://swissmodel.expasy.org',
              'https://www.well.ox.ac.uk',
              'https://alphafold.ebi.ac.uk/files/',
              'https://raw.githubusercontent.com/',
              ]
+
+
 def get_pdb_block_from_str(text):
     if len(text) == 4:
         return requests.get(f'https://files.rcsb.org/download/{text.upper()}.pdb').text
@@ -297,12 +317,13 @@ def get_pdb_block_from_str(text):
         raise ValueError('Empty PDB string?!')
     elif any([re.match(white, text) for white in whitelist]):
         return requests.get(text).text
-    elif 'ATOM' in text or 'HETATM' in text: # already a PDB
+    elif 'ATOM' in text or 'HETATM' in text:  # already a PDB
         return text
     elif 'http' in text:
         raise ValueError(f'Unknown web address {text}. Please email admin to add to approved URLs')
     else:
         raise ValueError(f'Unknown type of PDB block {text}')
+
 
 def get_pdb_block_from_request(request):
     if isinstance(request.params['pdb'], str):  # string
@@ -324,6 +345,7 @@ def get_pdb_block_from_request(request):
     else:
         raise TypeError
 
+
 def get_pdb_block(source):
     """
     This may do an unneccassry round trip.
@@ -332,12 +354,13 @@ def get_pdb_block(source):
     ##
     if isinstance(source, str):
         text = source
-        return get_pdb_block_from_str(text).replace('`','').replace('\\','').replace('$','')
+        return get_pdb_block_from_str(text).replace('`', '').replace('\\', '').replace('$', '')
     elif isinstance(source, Request):
         request = source
-        return get_pdb_block_from_request(request).replace('`','').replace('\\','').replace('$','')
+        return get_pdb_block_from_request(request).replace('`', '').replace('\\', '').replace('$', '')
     else:
         raise TypeError
+
 
 def get_pdb_code(request):
     if 'pdb' in request.params:
@@ -354,6 +377,7 @@ def get_pdb_code(request):
     if 'history' in request.params:
         return json.loads(request.params['history'])['code']
     return ''
+
 
 def get_history(request):
     if 'history' in request.params:
