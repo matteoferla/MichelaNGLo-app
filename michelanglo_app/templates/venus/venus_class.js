@@ -216,6 +216,7 @@ class Venus {
                     $('#result_title').html(`${this.protein.gene_name} ${this.protein._mutation} <small>(${this.protein.recommended_name})</small>`);
                     let extElements = [this.makeBSListExt('https://www.uniprot.org/uniprot/' + this.uniprot, 'Uniprot:' + this.uniprot),
                         this.makeBSListExt('https://www.rcsb.org/pdb/protein/' + this.uniprot, 'PDB:' + this.uniprot),
+                        this.makeBSListExt('https://alphafold.ebi.ac.uk/entry/' + this.uniprot, 'EBI-AlphaFold2:' + this.uniprot),
                         this.makeBSListExt('https://gnomAD.broadinstitute.org/gene/' + this.protein.gene_name, 'gnomAD:' + this.protein.gene_name),
                         this.makeBSListExt('https://www.phosphosite.org/homeAction.action', 'PhosphositePlus'),
                         this.makeBSListExt('http://elm.eu.org/index.html', 'ELM'),

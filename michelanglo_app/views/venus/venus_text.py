@@ -135,10 +135,16 @@ ref_inner = ''.join([table_rower('VENUS',
                                  linker('https://doi.org/10.1093/nar/gkaa1038')
                                  ),
                      table_rower('Swiss-Model',
-                                 'If no structures are available, VENUS uses Swiss-Models. Other database of models exist, such as ModBase, as do modelling servers, such as Phyre or I-Tasser.',
+                                 'If no structures are available, VENUS uses Swiss-Models as these are threaded and may contain oligomers. Other database of models exist, such as ModBase, as do modelling servers, such as Phyre or I-Tasser.',
                                  linker('https://swissmodel.expasy.org/'),
                                  'Bienert, S., Waterhouse, A., De Beer, T. A. P., Tauriello, G., Studer, G., Bordoli, L., & Schwede, T. (2017). The SWISS-MODEL Repository-new features and functionality. Nucleic Acids Research, 45(D1), D313–D319.' +
                                  linker('https://doi.org/10.1093/nar/gkw1132')
+                                 ),
+                     table_rower('AlphaFold2',
+                                 'If no suitable model can be found Venus uses the EBI-AlphaFold2 models.',
+                                 linker('https://swissmodel.expasy.org/'),
+                                 'Jumper, J et al. Highly accurate protein structure prediction with AlphaFold. Nature (2021).' +
+                                 linker('https://www.nature.com/articles/s41586-021-03819-2')
                                  ),
                      table_rower('PDB model depositors',
                                  'The paper associated with a structure (or the homologue used by Swiss-Model or other tools) generally contains a treasure trove of information',
