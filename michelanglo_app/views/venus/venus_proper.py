@@ -245,9 +245,11 @@ class Venus(VenusBase):
         protein = system_storage[self.handle]
         if not self.has('structural'):  # this step has not been run before.
             if structure is not None:  # user submitted structure.
-                protein.analyse_structure(structure)
+                protein.analyse_structure(structure=structure,
+                                          **self.get_user_modelling_options()
+                                          )
             else:
-                self.structural_workings(protein, structure, retrieve)
+                self.structural_workings(protein, retrieve)
         if protein.structural:
             self.reply['structural'] = self.jsonable(protein.structural)
             self.reply['has_structure'] = True
@@ -260,15 +262,44 @@ class Venus(VenusBase):
             raise VenusException(self.reply['msg'])
         self.stop_timer()
 
-    def structural_workings(self, protein, structure, retrieve):
+    def get_user_modelling_options(self):
+        """
+        User dictated choices.
+        """
+        user_modelling_options = {}
+        # ------ booleans
+        for key in ['allow_pdb','allow_swiss','allow_alphafold']:
+            if key not in self.request.params:
+                log.debug(f'Allow... {key} absent')
+                user_modelling_options[key] = True
+            elif self.request.params[key] not in (False, 0, 'false', '0'):
+                log.debug(f'Allow... {key} not falsy: {self.request.params[key]}')
+                user_modelling_options[key] = True
+            else:
+                user_modelling_options[key] = False
+        # ------ floats
+        for key in ['swiss_oligomer_identity_cutoff','swiss_monomer_identity_cutoff',
+                    'swiss_oligomer_qmean_cutoff','swiss_monomer_qmean_cutoff']:
+            if key not in self.request.params:
+                pass  # defaults from defaults in protein class. This must be an API call.
+            else:
+                user_modelling_options[key] = float(self.request.params[key])
+        return user_modelling_options
+
+    def structural_workings(self, protein, retrieve):
         """
         Inner function of step 3 structural_step
         """
+        user_modelling_options = self.get_user_modelling_options()
         # try options
         # do not use the stored values of pdbs, but get the swissmodel ones (more uptodate)
         if retrieve:
+            # alphafold2
+            protein.add_alphafold2()  # protein::alphafold2_retrieval::FromAlphaFold2
+            # swissmodel
             try:
-                protein.retrieve_structures_from_swissmodel()
+                if user_modelling_options['allow_pdb'] or user_modelling_options['allow_swiss']:
+                    protein.retrieve_structures_from_swissmodel()  # protein::swissmodel_retrieval::FromSwissmodel
             except Exception as error:
                 if not self.suppress_errors:
                     raise error
@@ -277,39 +308,41 @@ class Venus(VenusBase):
                 notify_admin(msg)
                 self.reply['warnings'].append('Retrieval of latest PDB data failed (admin notified). ' +
                                               'Falling back onto stored data.')
+        chosen_structure = None
         try:
-            # disable structures if requested
-            if 'allow_pdb' in self.request.params and self.request.params['allow_pdb'] in (False, 0, 'false', '0'):
-                protein.pdbs = []
-            if 'allow_swiss' in self.request.params and self.request.params['allow_swiss'] in (False, 0, 'false', '0'):
-                protein.swissmodel = []
-            # allow_alphafold
-            protein.analyse_structure()
+            chosen_structure = protein.get_best_model(**user_modelling_options)
+            # IMPORTANT PART ****************************************************
+            # ------------- find the best and analyse it
+            protein.analyse_structure(structure=chosen_structure, **user_modelling_options)
+            # *******************************************************************
         except Exception as error:
-            if not self.suppress_errors:
+            if not self.suppress_errors or chosen_structure is None:
                 raise error
-            # ConnectionError: # failed to download model  # deubg
-            broken_structure = best = protein.get_best_model()
-            # ---- remove
-            if protein.swissmodel.count(broken_structure) != 0:
-                i = protein.swissmodel.remove(broken_structure)
+            # ConnectionError: # failed to download model...
+            if protein.swissmodel.count(chosen_structure) != 0:
+                i = protein.swissmodel.remove(chosen_structure)
                 source = 'Swissmodel'
-            elif protein.pdbs.count(broken_structure) != 0:
-                i = protein.pdbs.remove(broken_structure)
+            elif protein.pdbs.count(chosen_structure) != 0:
+                i = protein.pdbs.remove(chosen_structure)
                 source = 'RCSB PDB'
+            elif protein.alphafold2.count(chosen_structure) != 0:
+                i = protein.alphafold2.remove(chosen_structure)
+                source = 'AlphaFold2'
+                msg = 'AlphaFold2 model was problematic'
+                log.critical(msg)  # ideally should message admin.
             else:
                 raise ValueError('structure from mystery source')
             # ---- logging
             if isinstance(error, ConnectionError):
-                msg = f'{source} {broken_structure} could not be downloaded'
+                msg = f'{source} {chosen_structure} could not be downloaded'
                 log.info(msg)
                 self.reply['warnings'].append(msg)
             elif isinstance(error, ValueError):
-                msg = f'Residue missing in structure ({source}): {broken_structure.code} ({error})'
+                msg = f'Residue missing in structure ({source}): {chosen_structure.code} ({error})'
                 log.info(msg)
                 self.reply['warnings'].append(msg)
             else:  # this should not happen in step 3.
-                msg = f'Major issue ({error.__class__.__name__}) with model {broken_structure.code} ({error})'
+                msg = f'Major issue ({error.__class__.__name__}) with model {chosen_structure.code} ({error})'
                 self.reply['warnings'].append(msg)
                 log.critical(msg)
                 notify_admin(msg)
@@ -409,6 +442,8 @@ class Venus(VenusBase):
     def save_params(self) -> List[str]:
         """
         Confusingly, by params I mean Rosetta topology files
+        This could be done without saving to disk (cf. rdkit_to_params module)... One day will be fixed.
+
         saves params : str to params as filenames
         """
         if 'params' in self.request.params:

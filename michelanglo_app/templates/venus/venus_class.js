@@ -305,11 +305,14 @@ class Venus {
         this.setStepStatus(3);
         let extras = {'allow_pdb': $('#allow_pdb').prop('checked'),
                     'allow_swiss': $('#allow_swiss').prop('checked'),
-                    'allow_alphafold': $('#allow_alphafold').prop('checked')
+                    'allow_alphafold': $('#allow_alphafold').prop('checked'),
+                    'swiss_oligomer_identity_cutoff': parseFloat($('#swiss_oligomer_identity_cutoff').val()),
+                    'swiss_monomer_identity_cutoff': parseFloat($('#swiss_monomer_identity_cutoff').val()),
+                    'swiss_oligomer_qmean_cutoff': parseFloat($('#swiss_oligomer_qmean_cutoff').val()),
+                    'swiss_monomer_qmean_cutoff': parseFloat($('#swiss_monomer_qmean_cutoff').val()),
         };
 
-
-        return this.analyse('structural').done(msg => this.parseStructuralResponse.call(this, msg));
+        return this.analyse('structural', extras).done(msg => this.parseStructuralResponse.call(this, msg));
     }
 
     parseStructuralResponse(msg) {
