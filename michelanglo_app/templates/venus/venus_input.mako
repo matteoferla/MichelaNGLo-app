@@ -25,6 +25,14 @@
                         ('swiss_monomer_qmean_cutoff',
                          'Cutoff for SwissModel quality (qMean) (monomer)',
                          dict(min=-5, max=5, default=-2, step=0.5)
+                         ),
+                        ('cycles',
+                         'FastRelax cycles',
+                         dict(min=1, max=5, default=1, step=1)
+                         ),
+                        ('radius',
+                         'FastRelax C-beta neighbourhood radius',
+                         dict(min=8, max=15, default=12, step=1)
                          )
                     ]
 
@@ -93,7 +101,7 @@
                     <div class="col-6">
                     <div class="input-group my-3">
                         <div class="input-group-prepend">
-                            <span class="input-group-text" id="${id_name}_add"><small>${label|n}</small></span>
+                            <span class="input-group-text" id="${id_name}_add"><small>${label}</small></span>
                         </div>
                         <input type="range"
                                    min="${values['min']}"
@@ -111,7 +119,18 @@
                     </div>
                 </div>
                 %endfor
-
+                <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+                    <label class="input-group-text" for="scorefxn_name">Scorefunction name</label>
+                  </div>
+                  <select class="custom-select" id="scorefxn_name">
+                    <option selected value="ref2015">ref2015</option>
+                      %for scorefxn in ('beta_july15', 'beta_nov16', 'ref2015_cart', 'beta_july15_cart', 'beta_nov16_cart'):
+                        <option value="${scorefxn}">${scorefxn}</option>
+                      %endfor
+                  </select>
+                </div>
+                ### missing booleans: 'outer_constrained', 'remove_ligands',  'single_chain',
                 ### row end:
             </div>
 

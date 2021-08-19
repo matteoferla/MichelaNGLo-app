@@ -299,20 +299,28 @@ class Venus {
         })
     }
 
+    get_user_settings() {
+        let extras = {'scorefxn_name': $('#scorefxn_name').val()};
+        ['allow_pdb', 'allow_swiss', 'allow_alphafold'].forEach(name => {
+            extras[name] = $('#allow_alphafold').prop('checked');
+        });
+        ['swiss_oligomer_identity_cutoff',
+         'swiss_monomer_identity_cutoff',
+         'swiss_oligomer_qmean_cutoff',
+         'swiss_monomer_qmean_cutoff',
+        'radius',
+        'cycles'].forEach(name => {
+            extras[name] = parseFloat($('#'+name).val())
+        });
+        return extras;
+    }
+
     //step 3
     analyseStructural() {
         //step 3
         // see parseStructuralResponse for main.
         this.setStepStatus(3);
-        let extras = {'allow_pdb': $('#allow_pdb').prop('checked'),
-                    'allow_swiss': $('#allow_swiss').prop('checked'),
-                    'allow_alphafold': $('#allow_alphafold').prop('checked'),
-                    'swiss_oligomer_identity_cutoff': parseFloat($('#swiss_oligomer_identity_cutoff').val()),
-                    'swiss_monomer_identity_cutoff': parseFloat($('#swiss_monomer_identity_cutoff').val()),
-                    'swiss_oligomer_qmean_cutoff': parseFloat($('#swiss_oligomer_qmean_cutoff').val()),
-                    'swiss_monomer_qmean_cutoff': parseFloat($('#swiss_monomer_qmean_cutoff').val()),
-        };
-
+        const extras = this.get_user_settings();
         return this.analyse('structural', extras).done(msg => this.parseStructuralResponse.call(this, msg));
     }
 
@@ -355,7 +363,8 @@ class Venus {
     analyseddG() {
         //step 4
         this.setStepStatus(4);
-        return this.analyse('ddG').done(msg => {
+        const extras = this.get_user_settings();
+        return this.analyse('ddG', extras).done(msg => {
             if (msg.error) {
                 this.setStepStatus(4, 'crash');
                 ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
@@ -424,7 +433,9 @@ class Venus {
                                     For meaning, see <a href="/docs/venus" target="_blank">documentation</a>.</p>
                                     <p><b>Total &Delta;&Delta;G</b>: ${this.energetical.ddG.toFixed(1)} kcal/mol<br/>
                                     <b>Residue contribution to &Delta;&Delta;G</b>: ${this.energetical.ddG_residue.toFixed(1)} kcal/mol<br/>
-                                    <b>Scorefunction</b>: ${this.energetical.score_fxn}</p>`;
+                                    <b>Scorefunction</b>: ${this.energetical.score_fxn}<br/>
+                                    <b>FastRelax cycles</b>: ${this.energetical.cycles}</p>
+                                    <b>Movemap radius</b>: ${this.energetical.radius}</p>`;
                 modalText += `<table class="table">
                               <thead>
                                 <tr>
@@ -1284,6 +1295,10 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             const seqs = msa.io.fasta.parse(`>template\n${this.structural.structure.alignment.template}\n` +
                 `>uniprot\n${this.structural.structure.alignment.uniprot}\n`);
             align.on('shown.bs.modal', event => msa({el: align.find('#msa_viewer'), seqs: seqs}).render());
+        } else if (this.structural.structure.type === 'alphafold2') {
+            strloctext += '<p><i>Chosen model:</i> ';
+            strloctext += this.makeExt("https://alphafold.ebi.ac.uk/entry/" + this.uniprot, 'AlphaFold2:' + this.uniprot);
+            strloctext += '</p>';
         } else {
             strloctext += '<p><i>Chosen model:</i> ';
             strloctext += `User submitted file (orginal filename: ${this.structural.structure.id})`;

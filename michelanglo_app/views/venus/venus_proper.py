@@ -266,17 +266,15 @@ class Venus(VenusBase):
         """
         User dictated choices.
         """
-        user_modelling_options = {}
+        user_modelling_options = {'allow_pdb': True,
+                                  'allow_swiss': True,
+                                  'allow_alphafold': True}
         # ------ booleans
-        for key in ['allow_pdb','allow_swiss','allow_alphafold']:
+        for key in ['allow_pdb','allow_swiss','allow_alphafold', 'outer_constrained', 'remove_ligands','single_chain']:
             if key not in self.request.params:
-                log.debug(f'Allow... {key} absent')
-                user_modelling_options[key] = True
-            elif self.request.params[key] not in (False, 0, 'false', '0'):
-                log.debug(f'Allow... {key} not falsy: {self.request.params[key]}')
-                user_modelling_options[key] = True
+                pass
             else:
-                user_modelling_options[key] = False
+                user_modelling_options[key] = self.request.params[key] not in (False, 0, 'false', '0')
         # ------ floats
         for key in ['swiss_oligomer_identity_cutoff','swiss_monomer_identity_cutoff',
                     'swiss_oligomer_qmean_cutoff','swiss_monomer_qmean_cutoff']:
@@ -284,6 +282,15 @@ class Venus(VenusBase):
                 pass  # defaults from defaults in protein class. This must be an API call.
             else:
                 user_modelling_options[key] = float(self.request.params[key])
+        # ----- for ddG calculations.
+        for key, minimum, maximum in (('cycles',1,5), ('radius',8, 15) ):
+            if key in self.request.params:
+                user_modelling_options[key] = max(minimum, min(maximum, int(self.request.params[key])))
+        # scorefxn... More are okay... but I really do not wish for users to randomly use these.
+        allowed_names = ('ref2015', 'beta_july15', 'beta_nov16',
+                         'ref2015_cart', 'beta_july15_cart', 'beta_nov16_cart')
+        if  'scorefxn_name' in self.request.params and self.request.params['scorefxn_name'] in allowed_names:
+            user_modelling_options['scorefxn_name'] = self.request.params['scorefxn_name']
         return user_modelling_options
 
     def structural_workings(self, protein, retrieve):
@@ -367,7 +374,10 @@ class Venus(VenusBase):
         if hasattr(protein, 'energetics') and protein.energetics is not None:
             analysis = protein.energetics
         else:
-            analysis = protein.analyse_FF()
+            applicable_keys = ( 'scorefxn_name', 'outer_constrained', 'remove_ligands',
+                                'single_chain', 'cycles', 'radius')
+            options = {k: v for k, v in self.get_user_modelling_options().items() if k in applicable_keys}
+            analysis = protein.analyse_FF(**options)
         if 'error' in analysis:
             self.log_if_error('pyrosetta step', analysis)
         else:
