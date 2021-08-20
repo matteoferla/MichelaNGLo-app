@@ -9,7 +9,3 @@
   <a href="/docs/venus_energetics" class="btn btn-outline-info ${'disabled' if topic=='energy' else ''}">Free energy</a>
   <a href="/docs/venus_urls" class="btn btn-outline-info ${'disabled' if topic=='url' else ''}">URLs</a>
 </div>
-
-<div class="alert alert-warning mb-3" role="alert">
-    Note that <a href="/venus">VENUS</a> is still under construction.
-</div>

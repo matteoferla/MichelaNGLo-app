@@ -12,11 +12,11 @@
     range_settings = [
                         ('swiss_oligomer_identity_cutoff',
                          'Cutoff for SwissModel identity (oligomer)',
-                         dict(min=0, max=100, default=20, step=1)
+                         dict(min=0, max=100, default=40, step=1)
                          ),
                         ('swiss_monomer_identity_cutoff',
                          'Cutoff for SwissModel identity (monomer)',
-                         dict(min=0, max=100, default=20, step=1)
+                         dict(min=0, max=100, default=70, step=1)
                          ),
                         ('swiss_oligomer_qmean_cutoff',
                          'Cutoff for SwissModel quality (qMean) (oligomer)',
@@ -81,9 +81,10 @@
     <div class="col-12">
         <div class="mx-2 my-1 p-2 border rounded bg-light collapse" id="advanced">
             <h5>Advanced options</h5>
-            <p>In most cases it is not necessary to alter these settings. For description see documentation.</p>
+            <p>In most cases it is not necessary to alter these settings.
+                For description <a href="/docs/venus_model">see documentation</a>.</p>
             <div class="row">
-                <div class="col-4">
+                <div class="col-12">
                 <button type="button" class="btn btn-info m-2" id="change_model_btn"
                                 data-toggle="modal" data-target="#change_modal"
                         ><i class="far fa-upload"></i> Upload own model
@@ -129,7 +130,7 @@
                 %endfor
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
-                    <label class="input-group-text" for="scorefxn_name">Scorefunction name</label>
+                    <label class="input-group-text" for="scorefxn_name">Scorefunction</label>
                   </div>
                   <select class="custom-select" id="scorefxn_name">
                     <option selected value="ref2015">ref2015</option>
