@@ -37,7 +37,7 @@ class Venus {
             '*': 'Stop (*/Stop)'
         };
         this.mutalist = $('#results_mutalist');
-        // these will be declared later. these here are for documentation.
+        // these will be declared later. these here are for self clarity
         this.mutation = undefined;
         this.position = undefined;
         this.protein = undefined;
@@ -1256,7 +1256,13 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             strloctext += this.makeExt("https://www.rcsb.org/structure/" + this.structural.code, 'PDB:' + this.structural.code);
             strloctext += ` ${this.structural.structure.resolution} &Aring;`;
             strloctext += '</p>';
-        } else if (this.structural.structure.type === 'swissmodel') {
+            // conservation overrides this
+            // if (!! this.structural.bfactor) {
+            //     strloctext += `<p data-toggle="tooltip" title="In a crystal structure, high b-factor is bad, but is a relative value dependant on the resolution etc.">
+            //                     <i>b-factor</i>: ${this.structural.bfactor.toFixed(2)}</p>`;
+            // }
+        }
+        else if (this.structural.structure.type === 'swissmodel') {
             // warnings
             const qmean = this.structural.structure.extra.qmean.qmean4_z_score;
             const identity = this.structural.structure.extra.identity;
@@ -1286,7 +1292,6 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             strloctext += this.makeExt("https://swissmodel.expasy.org/repository/uniprot/" + this.uniprot, 'SWISSMODEL:' + this.structural.code);
             strloctext += ` ${(this.structural.structure.extra.identity).toFixed(0)}% identity `;
             strloctext += `<button type="button" class="btn btn-outline-info venus-no-mike m-2" data-toggle="modal" data-target="#alignment_extra">see alignment</button>`;
-            strloctext += changer;
             strloctext += '</p>';
             align.find('.modal-body').append(`<p>Template: the sequence of the protein structure used for threading by Swissmodel,
                             in this case template(${venus.structural.code.split(' ')[2]})<br/>
@@ -1295,16 +1300,38 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             const seqs = msa.io.fasta.parse(`>template\n${this.structural.structure.alignment.template}\n` +
                 `>uniprot\n${this.structural.structure.alignment.uniprot}\n`);
             align.on('shown.bs.modal', event => msa({el: align.find('#msa_viewer'), seqs: seqs}).render());
-        } else if (this.structural.structure.type === 'alphafold2') {
+        }
+        else if (this.structural.structure.type === 'alphafold2') {
             strloctext += '<p><i>Chosen model:</i> ';
             strloctext += this.makeExt("https://alphafold.ebi.ac.uk/entry/" + this.uniprot, 'AlphaFold2:' + this.uniprot);
             strloctext += ` (<span class='prolink' data-target="#viewport" data-toggle="protein" data-selection="*"
-                                data-focus="domain" data-color="bfactor">show confidence</span>, pLDDT, red=high)`;
+                                data-focus="domain" data-color="bfactor">show confidence in  pLDDT</span>)`;
             strloctext += '</p>';
+            let plddt_color = 'error';
+            let plddt_word = 'error'
+            if (this.structural.bfactor > 90) {
+                plddt_color = 'success';
+                plddt_word = 'very highly confident';
+            }
+            else if (this.structural.bfactor > 70) {
+                plddt_color = 'info';
+                plddt_word = 'confident';
+            }
+            else if (this.structural.bfactor > 50) {
+                plddt_color = 'warning';
+                plddt_word = 'low';
+            }
+            else {
+                plddt_color = 'danger';
+                plddt_word = 'very low';
+            }
+
+            strloctext += `<p class="bg-${plddt_color}" data-toggle="tooltip" 
+                            title="A pLDDT over 70% is confident. Below 50% is poor.">
+                                <i>pLDDT</i>: ${this.structural.bfactor.toFixed(1)}% (${plddt_word})</p>`;
         } else {
             strloctext += '<p><i>Chosen model:</i> ';
             strloctext += `User submitted file (orginal filename: ${this.structural.structure.id})`;
-            strloctext += changer;
             strloctext += '</p>';
         }
         strloctext += `<p><i>Solvent exposure:</i> ${(this.structural.buried) ? 'buried' : 'surface'} (RSA: ${Math.round(this.structural.RSA * 100) / 100})</p>`;
