@@ -162,6 +162,8 @@ $('#change_model').click(async event => {
         const pdb = await f.text();
         const name = f.name;
         window.user_uploaded_data = {'pdb': pdb, 'name': name, 'params': params};
+        $('#change_model_btn').removeClass('btn-info');
+        $('#change_model_btn').addClass('btn-success');
         // used by step 3.
         // window.venus.analyseCustomFile(pdb, name, params);
     } else if (!changeByPage_selector.hasAttribute('disabled')) {
@@ -176,6 +178,8 @@ $('#change_model').click(async event => {
             .done(pdb => {
                     const format = pdb.includes('_atom_site.Cartn_x') ? 'cif' : 'pdb';
                     window.user_uploaded_data = {'pdb': pdb, 'name': name + '.' + format, 'params': params};
+                    $('#change_model_btn').removeClass('btn-info');
+                    $('#change_model_btn').addClass('btn-success');
                 }
             );
     } else {
@@ -187,10 +191,6 @@ $('#change_model').click(async event => {
     }
     $('#change_modal').modal('hide');
 });
-
-
-$('#change_model_btn').removeClass('btn-info');
-$('#change_model_btn').addClass('btn-success');
 
 
 //</%text>
