@@ -48,7 +48,7 @@
         and involved in complexes. In MEF2C, the C-terminal loop wraps around other proteins or DNA, because after all,
         a transcript factor DNA recognition domain by its own just binds DNA, while the rest of the protein recruits the mediator complex etc.
         For more details about what to look out for in an AlphaFold2 model see this
-        <a href="http://blog.matteoferla.com/2021/07/what-to-look-out-for-with-alphafold2.html">blog post by Matteo Ferla (author of Michelanglo)</a>.
+        <a href="https://blog.matteoferla.com/2021/07/what-to-look-out-for-with-alphafold2.html">blog post by Matteo Ferla (author of Michelanglo)</a>.
         Also, it is possible to model oligomers and complexes, as seen in the notebooks
         <a href="https://github.com/sokrypton/ColabFold" target="_blank">in the ColabFold GitHub repo by Sergey Ovchinnikov</a>.
     </p>
