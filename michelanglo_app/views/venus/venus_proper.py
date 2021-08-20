@@ -401,7 +401,6 @@ class Venus(VenusBase):
     def ddG_gnomad_step(self):
         log.info(f'Step 5 analysis requested by {User.get_username(self.request)}')
         if self.handle not in system_storage:
-            raise SystemExit
             status = self.protein_step()
             if 'error' in status:
                 return status
