@@ -151,6 +151,7 @@ $('#changeByPage_fetch').click(event => {
     window.venus.fetchMike(uuid);
 });
 
+/// this is very confusing. change_model is the button in change_modal
 $('#change_model').click(async event => {
     // get params
     const params = await Promise.all(Array.from(upload_params.files).map(f => f.text()));
@@ -160,7 +161,9 @@ $('#change_model').click(async event => {
         const f = upload_pdb.files[0];
         const pdb = await f.text();
         const name = f.name;
-        window.venus.analyseCustomFile(pdb, name, params);
+        window.user_uploaded_data = {'pdb': pdb, 'name': name, 'params': params};
+        // used by step 3.
+        // window.venus.analyseCustomFile(pdb, name, params);
     } else if (!changeByPage_selector.hasAttribute('disabled')) {
         const index = changeByPage_selector.selectedIndex;
         const name = changeByPage_selector.options[index].value;
@@ -172,14 +175,22 @@ $('#change_model').click(async event => {
         }).fail(ops.addErrorToast)
             .done(pdb => {
                     const format = pdb.includes('_atom_site.Cartn_x') ? 'cif' : 'pdb';
-                    window.venus.analyseCustomFile(pdb, name + '.' + format, params)
+                    window.user_uploaded_data = {'pdb': pdb, 'name': name + '.' + format, 'params': params};
                 }
             );
     } else {
         ops.addToast('errorate', 'Invalid', 'Nothing provided.', 'bg-warning');
+        $('#change_model_btn').removeClass('btn-info');
+        $('#change_model_btn').removeClass('btn-success');
+        $('#change_model_btn').addClass('btn-warning');
         throw 'Nothing given!';
     }
-    $(change_modal).modal('hide');
+    $('#change_modal').modal('hide');
 });
+
+
+$('#change_model_btn').removeClass('btn-info');
+$('#change_model_btn').addClass('btn-success');
+
 
 //</%text>

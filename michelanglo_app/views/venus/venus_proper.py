@@ -36,7 +36,14 @@ class Venus(VenusBase):
 
     @property
     def handle(self):
-        return self.request.params['uniprot'] + self.request.params['mutation']
+        """
+        The subterfuge isn't that required: this is not written to disk
+        """
+        settings = self.get_user_modelling_options()
+        concatenation = self.request.params['uniprot'] + \
+                        self.request.params['mutation'] + \
+                        '-'.join(map(str, settings.values()))
+        return str(hash(concatenation))
 
     ############################### server main page
     @view_config(renderer="../../templates/venus/venus_main.mako")
@@ -270,7 +277,7 @@ class Venus(VenusBase):
                                   'allow_swiss': True,
                                   'allow_alphafold': True}
         # ------ booleans
-        for key in ['allow_pdb','allow_swiss','allow_alphafold', 'outer_constrained', 'remove_ligands','single_chain']:
+        for key in ['allow_pdb', 'allow_swiss', 'allow_alphafold', 'outer_constrained', 'remove_ligands','single_chain']:
             if key not in self.request.params:
                 pass
             else:
@@ -289,8 +296,11 @@ class Venus(VenusBase):
         # scorefxn... More are okay... but I really do not wish for users to randomly use these.
         allowed_names = ('ref2015', 'beta_july15', 'beta_nov16',
                          'ref2015_cart', 'beta_july15_cart', 'beta_nov16_cart')
-        if  'scorefxn_name' in self.request.params and self.request.params['scorefxn_name'] in allowed_names:
+        if 'scorefxn_name' in self.request.params and self.request.params['scorefxn_name'] in allowed_names:
             user_modelling_options['scorefxn_name'] = self.request.params['scorefxn_name']
+        if 'custom_filename' in self.request.params:
+            # this is required to make the hash unique.
+            user_modelling_options['custom_filename'] = self.request.params['custom_filename']
         return user_modelling_options
 
     def structural_workings(self, protein, retrieve):
@@ -377,8 +387,10 @@ class Venus(VenusBase):
             applicable_keys = ( 'scorefxn_name', 'outer_constrained', 'remove_ligands',
                                 'single_chain', 'cycles', 'radius')
             options = {k: v for k, v in self.get_user_modelling_options().items() if k in applicable_keys}
-            analysis = protein.analyse_FF(**options)
-        if 'error' in analysis:
+            analysis = protein.analyse_FF(**options, spit_process=True)
+        if analysis is None:
+            self.log_if_error('pyrosetta step', 'likely segfault')
+        elif 'error' in analysis:
             self.log_if_error('pyrosetta step', analysis)
         else:
             self.reply['ddG'] = analysis
@@ -389,6 +401,7 @@ class Venus(VenusBase):
     def ddG_gnomad_step(self):
         log.info(f'Step 5 analysis requested by {User.get_username(self.request)}')
         if self.handle not in system_storage:
+            raise SystemExit
             status = self.protein_step()
             if 'error' in status:
                 return status
@@ -399,7 +412,12 @@ class Venus(VenusBase):
         if hasattr(protein, 'energetics_gnomAD') and protein.energetics_gnomAD is not None:
             analysis = protein.energetics_gnomAD
         else:
-            analysis = protein.analyse_gnomad_FF()
+            applicable_keys = ('scorefxn_name', 'outer_constrained', 'remove_ligands',
+                               'single_chain', 'cycles', 'radius')
+            options = {k: v for k, v in self.get_user_modelling_options().items() if k in applicable_keys}
+            analysis = protein.analyse_gnomad_FF(**options, spit_process=True)
+        if analysis is None:
+            analysis = dict(error='likely segfault', msg='likely segfault')
         if 'error' in analysis:  # it is a failure.
             self.log_if_error('ddG_gnomad_step', analysis)
             self.reply['status'] = 'error'

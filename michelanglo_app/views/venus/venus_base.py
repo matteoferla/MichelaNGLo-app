@@ -109,7 +109,7 @@ class VenusBase:
             self.reply['msg'] = msg
             raise VenusException(msg)
         else:
-            raise ValueError('This response is not an dict?!?')
+            raise ValueError(f'This response ({type(response)}) is not an dict?!?')
 
     def jsonable(self, obj: Any):
         def deobjectify(x):

@@ -89,7 +89,9 @@ class Venus {
         this.shown_warnings = [];
         this.timeTaken = null;
         this.debug = window.venusDebug;
-        if (this.debug) {NGL.setDebug(true);}
+        if (this.debug) {
+            NGL.setDebug(true);
+        }
     }
 
     reset() {
@@ -131,17 +133,16 @@ class Venus {
     //sends ajax request. Some do not use this. analyse_target for example.
     analyse(step, extras) {
         let data = {
-                uniprot: this.uniprot,
-                species: this.taxid,
-                step: step,
-                mutation: this.mutation,
-                debug: this.debug,
-            };
-        if (extras !== undefined) {
-            for (const [key, value] of Object.entries(extras)) {
-                // no sanitisation ATM
-              data[key] = value;
-            }
+            uniprot: this.uniprot,
+            species: this.taxid,
+            step: step,
+            mutation: this.mutation,
+            debug: this.debug,
+        };
+        extras = extras || this.get_user_settings();
+        for (const [key, value] of Object.entries(extras)) {
+            // no sanitisation ATM
+            data[key] = value;
         }
         return $.post({url: "venus_analyse", data: data}).fail(ops.addErrorToast).then(reply => {
             this.timeTaken = reply.time_taken;
@@ -300,17 +301,20 @@ class Venus {
     }
 
     get_user_settings() {
-        let extras = {'scorefxn_name': $('#scorefxn_name').val()};
+        let extras = {
+            'scorefxn_name': $('#scorefxn_name').val(),
+            'custom_filename': upload_pdb.files.length > 0 ? upload_pdb.files[0].name : undefined
+        };
         ['allow_pdb', 'allow_swiss', 'allow_alphafold'].forEach(name => {
-            extras[name] = $('#allow_alphafold').prop('checked');
+            extras[name] = $('#' + name).prop('checked');
         });
         ['swiss_oligomer_identity_cutoff',
-         'swiss_monomer_identity_cutoff',
-         'swiss_oligomer_qmean_cutoff',
-         'swiss_monomer_qmean_cutoff',
-        'radius',
-        'cycles'].forEach(name => {
-            extras[name] = parseFloat($('#'+name).val())
+            'swiss_monomer_identity_cutoff',
+            'swiss_oligomer_qmean_cutoff',
+            'swiss_monomer_qmean_cutoff',
+            'radius',
+            'cycles'].forEach(name => {
+            extras[name] = parseFloat($('#' + name).val())
         });
         return extras;
     }
@@ -320,8 +324,12 @@ class Venus {
         //step 3
         // see parseStructuralResponse for main.
         this.setStepStatus(3);
-        const extras = this.get_user_settings();
-        return this.analyse('structural', extras).done(msg => this.parseStructuralResponse.call(this, msg));
+        if (window.user_uploaded_data === undefined) {
+            // normal. File not provided.
+            return this.analyse('structural').done(msg => this.parseStructuralResponse.call(this, msg));
+        } else {
+            return this.analyseCustomFile().done(msg => this.parseStructuralResponse.call(this, msg));
+        }
     }
 
     parseStructuralResponse(msg) {
@@ -363,8 +371,7 @@ class Venus {
     analyseddG() {
         //step 4
         this.setStepStatus(4);
-        const extras = this.get_user_settings();
-        return this.analyse('ddG', extras).done(msg => {
+        return this.analyse('ddG').done(msg => {
             if (msg.error) {
                 this.setStepStatus(4, 'crash');
                 ops.addToast('error', 'Error - ' + msg.error, '<i class="far fa-bug"></i> An issue arose analysing the results.<br/>' + msg.msg, 'bg-warning');
@@ -542,20 +549,21 @@ class Venus {
         //     return null;
         // }
         let submissionData = {
-                uniprot: this.uniprot,
-                species: this.taxid,
-                step: 'extra',
-                mutation: this.mutation, //the data is stored serverside for an hour. and this is one part of the hash.
-                extra: mutation,
-                algorithm: algorithm,
-                allow_pdb: $('#allow_pdb').prop('checked'),
-                allow_swiss: $('#allow_swiss').prop('checked'),
-                allow_alphafold: $('#allow_alphafold').prop('checked'),
-                debug: this.debug
-            };
+            uniprot: this.uniprot,
+            species: this.taxid,
+            step: 'extra',
+            mutation: this.mutation, //the data is stored serverside for an hour. and this is one part of the hash.
+            extra: mutation,
+            algorithm: algorithm,
+            allow_pdb: $('#allow_pdb').prop('checked'),
+            allow_swiss: $('#allow_swiss').prop('checked'),
+            allow_alphafold: $('#allow_alphafold').prop('checked'),
+            debug: this.debug
+        };
         this.setStatus(`Running extra job ${mutation}`, 'working');
         return $.post({
-            url: "venus_analyse", data: submissionData}).fail(ops.addErrorToast)
+            url: "venus_analyse", data: submissionData
+        }).fail(ops.addErrorToast)
             .done(msg => {
                 if (msg.error) {
                     this.setStatus('Failure at extra job', 'crash');
@@ -632,23 +640,13 @@ class Venus {
     }
 
     //custom pdb
-    analyseCustomFile(pdb, name, params) {
-        this.setStepStatus(3, 'working', true);
-        const extension = name.split('.').pop();
-        $.post({
-            url: "venus_analyse", data: {
-                uniprot: this.uniprot,
-                species: this.taxid,
-                step: 'customfile',
-                mutation: this.mutation,
-                pdb: pdb,
-                filename: name,
-                format: extension,
-                params: params,
-                debug: this.debug
-            }
-        }).fail(ops.addErrorToast)
-            .done(msg => this.parseStructuralResponse.call(this, msg));
+    analyseCustomFile() {
+        const extras = this.get_user_settings();
+        extras.pdb = window.user_uploaded_data.pdb;
+        extras.filename = window.user_uploaded_data.name;
+        extras.params = window.user_uploaded_data.params;
+        extras.format = extras.name.split('.').pop();
+        return this.analyse('customfile', extras);
     }
 
     fetchMike(uuid, params) {
@@ -698,19 +696,26 @@ class Venus {
         mode = mode || 'working';
         custom = custom || false;
         let forelabels = {'working': 'Running step', 'crash': 'Failure at step'};
-        let label = `${forelabels[mode]} ${step}/5 (${this.stepNames[step-1]})`;
-        if (custom) {label += ' (rerunning with custom file) '}
+        let label = `${forelabels[mode]} ${step}/5 (${this.stepNames[step - 1]})`;
+        if (custom) {
+            label += ' (rerunning with custom file) '
+        }
         let boxes = ' &nbsp; ';
         boxes += this.stepNames.map((val, i) => {
-                                                                if (i < step - 1) {return `<i class="far fa-check-square" data-toggle="tooltip" title="${val}"></i>`;}
-                                                                else if (mode === 'crash') {return `<i class="far fa-times-square" data-toggle="tooltip" title="${val}"></i>`;}
-                                                                else if (i === step - 1) {return `<i class="far fa-plus-square" data-toggle="tooltip" title="${val}"></i>`;}
-                                                                else {return `<i class="far fa-square" data-toggle="tooltip" title="${val}"></i>`;}
-                                                                }).join('');
+            if (i < step - 1) {
+                return `<i class="far fa-check-square" data-toggle="tooltip" title="${val}"></i>`;
+            } else if (mode === 'crash') {
+                return `<i class="far fa-times-square" data-toggle="tooltip" title="${val}"></i>`;
+            } else if (i === step - 1) {
+                return `<i class="far fa-plus-square" data-toggle="tooltip" title="${val}"></i>`;
+            } else {
+                return `<i class="far fa-square" data-toggle="tooltip" title="${val}"></i>`;
+            }
+        }).join('');
 
         this.setStatus(label + boxes, mode);
         if (mode === 'working') {
-         window.ops.addToast('step'+step, 'Starting step', label, 'bg-primary');
+            window.ops.addToast('step' + step, 'Starting step', label, 'bg-primary');
         }
 
     }
@@ -1245,16 +1250,11 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             $('#conservationBtn').hide();
         }
         // links
-        const changer = ` <button type="button" class="btn btn-outline-secondary m-2 venus-no-mike"
-                                data-toggle="modal" data-target="#change_modal"
-                        ><i class="far fa-upload"></i> Change
-                        </button> `;
         let strloctext = '';
         if (this.structural.structure.type === 'rcsb') {
             strloctext += '<p><i>Chosen model:</i> ';
             strloctext += this.makeExt("https://www.rcsb.org/structure/" + this.structural.code, 'PDB:' + this.structural.code);
             strloctext += ` ${this.structural.structure.resolution} &Aring;`;
-            strloctext += changer;
             strloctext += '</p>';
         } else if (this.structural.structure.type === 'swissmodel') {
             // warnings
@@ -1298,6 +1298,8 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         } else if (this.structural.structure.type === 'alphafold2') {
             strloctext += '<p><i>Chosen model:</i> ';
             strloctext += this.makeExt("https://alphafold.ebi.ac.uk/entry/" + this.uniprot, 'AlphaFold2:' + this.uniprot);
+            strloctext += ` (<span class='prolink' data-target="#viewport" data-toggle="protein" data-selection="*"
+                                data-focus="domain" data-color="bfactor">show confidence</span>, pLDDT, red=high)`;
             strloctext += '</p>';
         } else {
             strloctext += '<p><i>Chosen model:</i> ';
@@ -1331,8 +1333,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                 let text = chain;
                 if (definition.name) {
                     text += definition.name + ' ';
-                }
-                else if (definition.description) {  // name is the official name, description is crap from submitter
+                } else if (definition.description) {  // name is the official name, description is crap from submitter
                     text += definition.description + ' ';
                 }
                 if (definition.uniprot && definition.uniprot !== 'P00404') {
@@ -1381,14 +1382,18 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         if (data.detail.includes('gnomAD:')) {
             const mutation = data.detail.replace('gnomAD:', '').split(' ')[0];
             const deets = this.get_gnomAD_details(mutation);
-            const homozygous = deets.homozygous;
-            const icon = homozygous === 0 ? 'far fa-adjust' : 'fas fa-circle';
-            detail = `&mdash; <span style='cursor: pointer;'
-                            class='underlined'
-                            data-gnomad='${JSON.stringify([mutation])}'
-                            >${data.detail}
-                            </span>
-                            <i class="far ${icon}" data-toggle="tooltip" title="${homozygous} homozygous cases"></i>`;
+            if (deets !== undefined) {
+                const homozygous = deets.homozygous;
+                const icon = homozygous === 0 ? 'far fa-adjust' : 'fas fa-circle';
+                detail = `&mdash; <span style='cursor: pointer;'
+                                class='underlined'
+                                data-gnomad='${JSON.stringify([mutation])}'
+                                >${data.detail}
+                                </span>
+                                <i class="far ${icon}" data-toggle="tooltip" title="${homozygous} homozygous cases"></i>`;
+            } else {
+                detail = '&mdash; ' + data.detail;
+            }
         } else if (data.detail !== undefined && data.detail.length) {
             detail = '&mdash; ' + data.detail;
         }
@@ -1488,7 +1493,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         results.find('.venus-no-mike').detach();
         results.find('.venus-plain-mike').each((i, el) => $(el).html(`<span>${$(el).text()}</span>`));
         results.find('#results_mutalist').append(`<li class="list-group-item">${$('#structureOption').html()}</li>`);
-        let text = results.html().replaceAll(/\n\s+/g,'\n');
+        let text = results.html().replaceAll(/\n\s+/g, '\n');
         // get the view data
         let prolink = $(this.last_clicked_prolink).data() || {};
         if (this.alwaysShowMutant) {
@@ -1682,7 +1687,8 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             const name = this.structural.closest_ligand.match(/\[.*\]/) !== null ?
                 this.structural.closest_ligand.match(/\[(.*)\]/)[1] :
                 'unknown';
-            return `the mutation is ${this.structural.distance_to_closest_ligand.toPrecision(2)} &Aring; away from the ligand labelled ${name}`;
+            return `the mutation is ${this.structural.distance_to_closest_ligand.toPrecision(2)} 
+            &Aring; away from the ligand labelled ${name}`;
         } else {
             return null;
         }

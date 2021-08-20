@@ -353,7 +353,7 @@
                             <label class="custom-file-label" for="upload_pdb">Choose Params file</label>
                         </div>
                     </div>
-                <button type="button" class="btn btn-primary w-100" id="change_model"><i class="far fa-chart-network"></i> Analyse</button>
+                <button type="button" class="btn btn-primary w-100" id="change_model"><i class="far fa-chart-network"></i> Utilise</button>
 
 
             </div>

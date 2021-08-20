@@ -81,7 +81,15 @@
     <div class="col-12">
         <div class="mx-2 my-1 p-2 border rounded bg-light collapse" id="advanced">
             <h5>Advanced options</h5>
+            <p>In most cases it is not necessary to alter these settings. For description see documentation.</p>
             <div class="row">
+                <div class="col-4">
+                <button type="button" class="btn btn-info m-2" id="change_model_btn"
+                                data-toggle="modal" data-target="#change_modal"
+                        ><i class="far fa-upload"></i> Upload own model
+                        </button>
+                </div>
+
                 % for id_name, name in [('allow_pdb','PDB structures'), ('allow_swiss','SwissModel threaded models'), ('allow_alphafold','AlphaFold2 models')]:
                     <div class="col-4">
                         <div class="input-group" data-toggle="tooltip"
@@ -139,12 +147,10 @@
     </div>
 
     <div class="col-12 col-lg-2">
-        % if user and user.role == 'admin':
-            <a class="btn btn-outline-info" data-toggle="collapse" href="#advanced" role="button" aria-expanded="false"
+        <a class="btn btn-outline-info" data-toggle="collapse" href="#advanced" role="button" aria-expanded="false"
                aria-controls="advanced">
                 <i class="far fa-cogs"></i> Advanced
-            </a>
-        %endif
+        </a>
     </div>
     <div class="col-12 offset-lg-2 col-lg-4">
         <button type="button" class="btn btn-outline-primary w-100" id="venus_calc" style="display: none;">Analyse
