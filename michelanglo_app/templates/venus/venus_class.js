@@ -38,6 +38,7 @@ class Venus {
         };
         this.mutalist = $('#results_mutalist');
         // these will be declared later. these here are for self clarity
+        this.job_id = undefined;
         this.mutation = undefined;
         this.position = undefined;
         this.protein = undefined;
@@ -105,6 +106,7 @@ class Venus {
         this.prepareDOM();
         this.shown_warnings = [];
         this.timeTaken = null;
+        this.job_id = undefined;
     }
 
     prepareDOM() {
@@ -131,6 +133,7 @@ class Venus {
 
     //###################  Steps
     //sends ajax request. Some do not use this. analyse_target for example.
+    // job_id === undefined means that job_id is not sent, so all good.
     analyse(step, extras) {
         let data = {
             uniprot: this.uniprot,
@@ -138,6 +141,7 @@ class Venus {
             step: step,
             mutation: this.mutation,
             debug: this.debug,
+            job_id: this.job_id,
         };
         extras = extras || this.get_user_settings();
         for (const [key, value] of Object.entries(extras)) {
@@ -205,6 +209,7 @@ class Venus {
                     this.analyseMutation();
                     this.protein = msg.protein;
                     this.createLinks();
+                    this.job_id = msg.job_id;
 
                     //this.analyse('fv') is the same as get_uniprot but utilising the protein data.
                     $('#results').show(500, () => this.analyse('fv').done(msg => {
@@ -380,7 +385,7 @@ class Venus {
                 this.energetical = msg.ddG;
                 //this.loadStructure();
                 const units = '<span title="Technically REU, Rosetta Energy Units, which are approximately the same as kcal/mol when using the ref2015 force-field score function">kcal/mol</span> ';
-                let ddgtext = `<i>ddG (with backbone movement allowed):</i> ${Math.round(this.energetical.ddG)} ${units} `;
+                let ddgtext = `<i>&Delta;&Delta;dG (with backbone movement allowed):</i> ${Math.round(this.energetical.ddG)} ${units} `;
                 if (this.energetical.ddG < -5) {
                     ddgtext += '(stabilising)'
                 } else if (this.energetical.ddG > +5) {
@@ -388,9 +393,58 @@ class Venus {
                 } else {
                     ddgtext += '(neutral)'
                 }
+                let shape = ['error',
+                            ...['smaller', 'bigger','differently shaped', 'equally sized']
+                                .filter(v => venus.mutational.apriori_effect.includes(v))
+                            ].pop();
+                let mae;
+                let neutrality;
+                // in full as this is confusing.
+                // MAE from O2567
+                if ((shape === 'differently shaped') && this.structural.buried) {
+                    mae = 2.65;
+                    neutrality = 58;
+                }
+                else if ((shape === 'differently shaped') && ! this.structural.buried) {
+                    mae = 1.53;
+                    neutrality = 64;
+                }
+                else if ((shape === 'smaller') && this.structural.buried) {
+                    mae = 2.75;
+                    neutrality = 71;
+                }
+                else if ((shape === 'smaller') && ! this.structural.buried) {
+                    mae = 1.76;
+                    neutrality = 61;
+                }
+                else if ((shape === 'bigger') && this.structural.buried) {
+                    mae = 3.08;
+                    neutrality = 53;
+                }
+                else if ((shape === 'bigger') && ! this.structural.buried) {
+                    mae = 2.44;
+                    neutrality = 56;
+                }
+                else if ((shape === 'equally sized') && this.structural.buried) {
+                    mae = 2.24;
+                    neutrality = 67;
+                }
+                else if ((shape === 'equally sized') && ! this.structural.buried) {
+                    mae = 1.35;
+                    neutrality = 67;
+                }
+                else {
+                    mae = NaN;
+                    neutrality = NaN;
+                }
                 ddgtext += '<br/>';
+                ddgtext += `<i>Category of mutation:</i> ${shape}, ${this.structural.buried ? 'buried' : 'surface'}<br/>`;
+                ddgtext += `<i><span title="Median Absolute Error calculated with the O2567 dataset, single chain, not ligands. Median: 50% of cases will be off by more than this." data-toggle="tooltip">
+                            median error for category:
+                            </span></i> ±${mae} kcal/mol<br/>`;
+                ddgtext += `<i><span title="concordant >2 kcal/mol in O2567 dataset" data-toggle="tooltip">Correct neutrality assignment for category</span></i>: ${neutrality}%<br/>`;
                 let bb = this.energetical.scores.mutate - this.energetical.scores.relaxed;
-                ddgtext += `<i>ddG (with backbone movement forbidden):</i> ${Math.round(bb)}  ${units} `;
+                ddgtext += `<i>&Delta;&Delta;G (with backbone movement forbidden):</i> ${Math.round(bb)}  ${units} `;
                 if (bb < -5) {
                     ddgtext += '(stabilising)'
                 } else if (bb > +5) {
@@ -558,7 +612,8 @@ class Venus {
             allow_pdb: $('#allow_pdb').prop('checked'),
             allow_swiss: $('#allow_swiss').prop('checked'),
             allow_alphafold: $('#allow_alphafold').prop('checked'),
-            debug: this.debug
+            debug: this.debug,
+            job_id: this.job_id
         };
         this.setStatus(`Running extra job ${mutation}`, 'working');
         return $.post({
@@ -650,6 +705,7 @@ class Venus {
     }
 
     fetchMike(uuid, params) {
+        // '#createMike' does not provide a uuid.
         $.post({
             url: "save_pdb", data: {
                 uuid: uuid,
@@ -1335,6 +1391,15 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             strloctext += '</p>';
         }
         strloctext += `<p><i>Solvent exposure:</i> ${(this.structural.buried) ? 'buried' : 'surface'} (RSA: ${Math.round(this.structural.RSA * 100) / 100})</p>`;
+        let simbaVerdict;
+        if (this.structural.simbai_ddG > +2) {
+            simbaVerdict = 'destabilising';
+        } else if (this.structural.simbai_ddG < -2) {
+            simbaVerdict = 'stabilising';
+        } else {
+            simbaVerdict = 'neutral';
+        }
+        strloctext += `<p><i>Quick ∆∆G (SIMBA-I)</i> ${Math.round(this.structural.simbai_ddG * 10)/10} kcal/mol (${simbaVerdict})</p>`;
         strloctext += `<p><i>Secondary structure type:</i> ${this.structural.SS}</p>`;
         strloctext += `<p><i>Residue resolution:</i> ${(this.structural.has_all_heavy_atoms) ? 'Resolved in crystal/model' : 'Some heavy atoms unresolved (too dynamic)'}</p>`;
         if (this.structural.closest_ligand !== undefined && this.structural.closest_ligand.match(/\[.*\]/) !== null) {
@@ -1413,7 +1478,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                 const homozygous = deets.homozygous;
                 const icon = homozygous === 0 ? 'far fa-adjust' : 'fas fa-circle';
                 detail = `&mdash; <span style='cursor: pointer;'
-                                class='underlined'
+                                class='underlined venus-plain-mike'
                                 data-gnomad='${JSON.stringify([mutation])}'
                                 >${data.detail}
                                 </span>
@@ -1513,9 +1578,10 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         document.body.removeChild(element);
     }
 
-    createPage() {
-        //Make a Michelanglo page
-        //Get the text block
+    createPage(wantedIndices) {
+        // Make a Michelanglo page
+        // gets called by the click listener of #createMike
+        // Get the text block
         let results = $('#results_mutalist').clone();
         results.find('.venus-no-mike').detach();
         results.find('.venus-plain-mike').each((i, el) => $(el).html(`<span>${$(el).text()}</span>`));
@@ -1529,10 +1595,6 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         }
         prolink['hetero'] = this.alwaysShowLigands;
         prolink['view'] = NGL.getStage().viewerControls.getOrientation().elements;
-        // get the chosen models
-        let wantedIndices = $('#modelOptions [type="checkbox"]:checked').toArray().map(v => $(v).data('index'));
-        wantedIndices.pop(myData.currentIndices['viewport']);
-        wantedIndices.unshift(myData.currentIndices['viewport']);
         let data = {
             uniprot: this.uniprot, // same as this.protein.uniprot or window.UniprotValue
             species: this.taxid,
@@ -1542,7 +1604,8 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             definitions: this.structural.chain_definitions,
             history: this.structural.history,
             prolink: prolink,
-            protein: myData.proteins.filter((v, i) => wantedIndices.includes(i))
+            protein: myData.proteins.filter((v, i) => wantedIndices.includes(i)),
+            job_id: this.job_id,
         };
         // other end at page_creation.py
         return $.post({
@@ -1556,7 +1619,6 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             })
             .fail(ops.addErrorToast);
     }
-
 // ------------ Summary conclusions ----------------------------------------
 // From mutational
     concludeMutational() {
@@ -1607,7 +1669,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
     ;
 
     concludeMutational_buttonMaker(id, msg) {
-        return `<a href="#${id}" class="text-info" data-toggle="modal" data-target="#${id}">${msg}</a>`;
+        return `<a href="#${id}" class="text-info venus-plain-mike" data-toggle="modal" data-target="#${id}">${msg}</a>`;
     }
 
     concludeMutational_filter(filterFx) {
