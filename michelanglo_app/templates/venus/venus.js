@@ -111,7 +111,7 @@ $('#report-btn').click(event => {
         </div>
         `));
     // mark the currently selected one.
-    const current = $(`#modelOptions [data-index="${myData.currentIndices['viewport']}"]`)
+    const current = $(`#modelOptions [data-index="${myData.currentIndices['viewport']}"]`);
     current.addClass('is-valid');
     current.prop( "checked", true );
     current.prop( "disabled", true );
@@ -119,10 +119,17 @@ $('#report-btn').click(event => {
 });
 
 $('#createMike').click(event => {
+    // button that creates the Mike page. Not to be confused with createMikeModal, which is its modal
     $(event.target).attr('disabled', 'disabled');
     const text = $(event.target).html();
     $(event.target).html('<i class="far fa-spinner fa-spin"></i> ' + text);
-    venus.createPage().then(() => {
+    // get the chosen models
+    let wantedIndices = $('#modelOptions [type="checkbox"]:checked').toArray().map(v => $(v).data('index'));
+    // But always add the current:
+    wantedIndices.unshift(myData.currentIndices['viewport']);
+    // lets prevent duplication
+    wantedIndices = wantedIndices.filter((item, pos) => wantedIndices.indexOf(item) === pos);
+    venus.createPage(wantedIndices).then(() => {
         $(event.target).attr('disabled', 'disabled');
         $(event.target).html(text);
     });
