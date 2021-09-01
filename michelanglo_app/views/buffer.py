@@ -16,7 +16,7 @@ class SysStorage(MutableMapping):
 
     def __getitem__(self, key):
         if key not in self.mapping:
-            raise ValueError(f'This key {key} does not exists in the buffer!')
+            raise ValueError(f'This key {key} does not exists in the buffer (likely expired)!')
         return self.mapping[key]
 
     def __delitem__(self, key):
