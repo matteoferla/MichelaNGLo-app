@@ -64,13 +64,22 @@ class VenusBase:
 
     def __init__(self, request):
         self.request = request
-        self.reply = {'status': 'success', 'warnings': [], 'time_taken': 0}  # filled by the steps and kept even if an error is raised.
+        self.reply = {'status': 'success',   # filled by the steps and kept even if an error is raised.
+                      'warnings': [],
+                      'time_taken': 0
+        }
+        if self.handle:
+            self.reply['job_id'] = self.handle
         # status=error, error=single-word, msg=long
         self._tick = float('nan')  # required for self.reply['time_taken']
         self.time_taken = 0.
         if 'debug' in self.request.params and self.request.params['debug']:
             self.suppress_errors = False
             log.info('Debug mode requested!')
+
+    @property
+    def handle(self):
+        pass # overridden.
 
     def start_timer(self):
         self._tick = time.time()

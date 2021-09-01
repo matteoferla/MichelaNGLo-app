@@ -39,6 +39,12 @@ class Venus(VenusBase):
         """
         The subterfuge isn't that required: this is not written to disk
         """
+        if 'job_id' in self.request.params:
+            return str(self.request.params['job_id'])
+        if 'mutation' not in self.request.params or 'uniprot' not in self.request.params:
+            return None
+        if str(self.request.params['uniprot']) == '9606' or str(self.request.params['mutation']) == '9606':
+            raise ValueError('Chrome autofill')
         settings = self.get_user_modelling_options()
         concatenation = self.request.params['uniprot'] + \
                         self.request.params['mutation'] + \
@@ -208,7 +214,10 @@ class Venus(VenusBase):
         if not protein.check_mutation():
             log.info('protein mutation discrepancy error')
             discrepancy = protein.mutation_discrepancy()
-            self.reply = {**self.reply, 'error': 'mutation', 'msg': discrepancy, 'status': 'error'}
+            self.reply = {**self.reply,
+                          'error': 'mutation',
+                          'msg': discrepancy,
+                          'status': 'error'}
             raise VenusException(discrepancy)
         else:
             system_storage[self.handle] = protein
