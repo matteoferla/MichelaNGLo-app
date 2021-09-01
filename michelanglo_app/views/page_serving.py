@@ -293,6 +293,7 @@ def thumbnail(request):
 
 @view_config(route_name='save_pdb', renderer='json')
 def save_pdb(request):
+    """Should have been called download PDB file"""
     malformed = is_malformed(request, 'uuid', 'index')
     if malformed:
         return {'status': malformed}
