@@ -95,12 +95,10 @@
                     <div class="col-4">
                         <div class="input-group" data-toggle="tooltip"
                              title="Disabling prevents VENUS from using ${name}, otherwise they may be used if best">
-                            <div class="input-group-prepend">
-                                <div class="input-group-text">
-                                    <div class="custom-control custom-switch">
-                                        <input type="checkbox" id="${id_name}" class="custom-control-input" checked>
-                                        <label class="custom-control-label" for="${id_name}">Use ${name}</label>
-                                    </div>
+                            <div class="input-group-text">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" id="${id_name}" class="custom-control-input" checked>
+                                    <label class="custom-control-label" for="${id_name}">Use ${name}</label>
                                 </div>
                             </div>
                         </div>
@@ -128,6 +126,8 @@
                     </div>
                 </div>
                 %endfor
+                <div class="col-6">
+
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <label class="input-group-text" for="scorefxn_name">Scorefunction</label>
@@ -140,7 +140,21 @@
                   </select>
                 </div>
                 ### missing booleans: 'outer_constrained', 'remove_ligands',  'single_chain',
+                </div>
                 ### row end:
+            </div>
+            <div class="row">
+                <div class="col-5">
+                        <div class="input-group" data-toggle="tooltip"
+                             title="Certain features, such as PyRosetta, PhosphoSitePlus and ELM are not under a MIT/Apache licence and have complex legalese for commercial users.">
+                            <div class="input-group-text">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" id="academic" class="custom-control-input" checked>
+                                    <label class="custom-control-label" for="academic">Academic user</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
             </div>
 
 
