@@ -12,27 +12,33 @@
     range_settings = [
                         ('swiss_oligomer_identity_cutoff',
                          'Cutoff for SwissModel identity (oligomer)',
-                         dict(min=0, max=100, default=40, step=1)
+                         dict(min=0, max=100, default=40, step=1),
+                         'SwissModel has the advantage over EBI-AlphaFold2 in that the protein may be in a homo/hetero-oligomeric state, with a ligand. However, if the distance is too great the benefit is lost'
                          ),
                         ('swiss_monomer_identity_cutoff',
                          'Cutoff for SwissModel identity (monomer)',
-                         dict(min=0, max=100, default=70, step=1)
+                         dict(min=0, max=100, default=70, step=1),
+                         'This cutoff comes into play if the SwissModel isn\'t an oligomer and may or may have a ligand',
                          ),
                         ('swiss_oligomer_qmean_cutoff',
                          'Cutoff for SwissModel quality (qMean) (oligomer)',
-                         dict(min=-5, max=5, default=-2, step=0.5)
+                         dict(min=-5, max=5, default=-2, step=0.5),
+                         'qMean is the SwissModel metric of naturality of the pose: below -2 is bad and may have weird torsions'
                          ),
                         ('swiss_monomer_qmean_cutoff',
                          'Cutoff for SwissModel quality (qMean) (monomer)',
-                         dict(min=-5, max=5, default=-2, step=0.5)
+                         dict(min=-5, max=5, default=-2, step=0.5),
+                         'Same as for oligomer'
                          ),
                         ('cycles',
                          'FastRelax cycles',
-                         dict(min=1, max=5, default=1, step=1)
+                         dict(min=1, max=5, default=1, step=1),
+                         'How many cycles of minimisation to perform, each cycle adds some 15 seconds to the operations.'
                          ),
                         ('radius',
                          'FastRelax C-beta neighbourhood radius',
-                         dict(min=8, max=15, default=12, step=1)
+                         dict(min=8, max=15, default=12, step=1),
+                         'The neighbourhood is defined as the residues that have a given distance from the cetral atom: this is not an atom-to-atom value as these would depend on the sidechain conformation and identity'
                          )
                     ]
 
@@ -84,7 +90,7 @@
             <p>In most cases it is not necessary to alter these settings.
                 For description <a href="/docs/venus_model">see documentation</a>.</p>
             <div class="row">
-                <div class="col-12">
+                <div class="col-6">
                 <button type="button" class="btn btn-info m-2" id="change_model_btn"
                                 data-toggle="modal" data-target="#change_modal"
                         ><i class="far fa-upload"></i> Upload own model
@@ -92,7 +98,7 @@
                 </div>
 
                 % for id_name, name in [('allow_pdb','PDB structures'), ('allow_swiss','SwissModel threaded models'), ('allow_alphafold','AlphaFold2 models')]:
-                    <div class="col-4">
+                    <div class="col-6">
                         <div class="input-group" data-toggle="tooltip"
                              title="Disabling prevents VENUS from using ${name}, otherwise they may be used if best">
                             <div class="input-group-text">
@@ -104,25 +110,25 @@
                         </div>
                     </div>
                 %endfor
-                % for id_name, label, values in range_settings:
+                % for id_name, label, values, tooltip in range_settings:
                     <div class="col-6">
-                    <div class="input-group my-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" id="${id_name}_add"><small>${label}</small></span>
+                    <div class="input-group my-3" data-toggle="tooltip" title="${tooltip}">
+                        <div class="input-group-text w-100">
+                            <span id="${id_name}_add"><small>${label}</small>&nbsp;</span>
+                            <input type="range"
+                                       min="${values['min']}"
+                                       max="${values['max']}"
+                                       value="${values['default']}"
+                                       step="${values['step']}"
+                                       id="${id_name}"
+                                       class="form-control-range" aria-label="RANGE"
+                                       aria-describedby="${id_name}_add"
+                                       oninput="this.nextElementSibling.value = this.value"
+                                >&nbsp;
+                            <output>
+                                ${values['default']}
+                            </output>
                         </div>
-                        <input type="range"
-                                   min="${values['min']}"
-                                   max="${values['max']}"
-                                   value="${values['default']}"
-                                   step="${values['step']}"
-                                   id="${id_name}"
-                                   class="form-control-range" aria-label="RANGE"
-                                   aria-describedby="${id_name}_add"
-                                   oninput="this.nextElementSibling.value = this.value"
-                            >
-                        <output class="input-group-append">
-                            ${values['default']}
-                        </output>
                     </div>
                 </div>
                 %endfor
