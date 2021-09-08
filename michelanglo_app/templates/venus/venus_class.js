@@ -438,6 +438,17 @@ class Venus {
                     neutrality = NaN;
                 }
                 ddgtext += '<br/>';
+                let bb = this.energetical.scores.mutate - this.energetical.scores.relaxed;
+                ddgtext += '<i>Predicted effect: </i>';
+                const cutoff = 2;
+                if (bb < -cutoff) {
+                    ddgtext += 'stabilising'
+                } else if (bb > +cutoff) {
+                    ddgtext += 'destabilising'
+                } else {
+                    ddgtext += 'neutral'
+                }
+                ddgtext += '<br/>';
                 ddgtext += `<i>Category of mutation:</i> ${shape}, ${this.structural.buried ? 'buried' : 'surface'}<br/>`;
                 ddgtext += `<i><span title="Median Absolute Error calculated with the O2567 dataset, single chain, not ligands. Median: 50% of cases will be off by more than this." data-toggle="tooltip">
                             median error for category:
@@ -445,13 +456,6 @@ class Venus {
                 ddgtext += `<i><span title="concordant >2 kcal/mol in O2567 dataset" data-toggle="tooltip">Correct neutrality assignment for category</span></i>: ${neutrality}%<br/>`;
                 let bb = this.energetical.scores.mutate - this.energetical.scores.relaxed;
                 ddgtext += `<i>&Delta;&Delta;G (with backbone movement forbidden):</i> ${Math.round(bb)}  ${units} `;
-                if (bb < -5) {
-                    ddgtext += '(stabilising)'
-                } else if (bb > +5) {
-                    ddgtext += '(destabilising)'
-                } else {
-                    ddgtext += '(neutral)'
-                }
                 ddgtext += '<br/>';
                 if (this.energetical.scores.mutate + 3 > this.energetical.scores.mutarelax) {
                     ddgtext += `Results in backbone change (RMSD<sub>CA</sub>: ${Math.round(this.energetical.rmsd * 100) / 100})<br/>`;
