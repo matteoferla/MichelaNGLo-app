@@ -87,6 +87,7 @@ class DefaultViews:
                     'venus': 'venus',
                     'venus_energetics': 'venus_energetics',
                     'venus_model': 'venus_model',
+                    'venus_hypothesis': 'venus_hypothesis',
                     'venus_urls': 'venus_urls',
                     'video': 'video',
                     'github': 'github'

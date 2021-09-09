@@ -1650,7 +1650,11 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         //       'buried_salt
         //        'alter',
         const icon = '<span class="fa-li"><i class="far fa-lightbulb-on"></i></span>';
-        const effect = ('<ul  class="fa-ul">' + (effects.map(v => `<li>${icon}${v}</li>`)).join('\n') + '</ul>');
+        const effect = ('<ul  class="fa-ul">' +
+                            (effects.map(v => `<li>${icon}${v}</li>`)).join('\n') +
+                            '<li><span class="fa-li"><i class="far fa-clipboard-list-check"></i></span> For a discussion of possible hypotheses to draw see <a href="/docs/venus_hypothesis" target="_blank">hypothesis generation notes</a></li>' +
+                            '</ul>'
+                        );
         this.createEntry('effect', 'Effect', effect);
     }
 
