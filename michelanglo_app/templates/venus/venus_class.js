@@ -385,14 +385,21 @@ class Venus {
                 this.energetical = msg.ddG;
                 //this.loadStructure();
                 const units = '<span title="Technically REU, Rosetta Energy Units, which are approximately the same as kcal/mol when using the ref2015 force-field score function">kcal/mol</span> ';
-                let ddgtext = `<i>&Delta;&Delta;dG (with backbone movement allowed):</i> ${Math.round(this.energetical.ddG)} ${units} `;
-                if (this.energetical.ddG < -5) {
-                    ddgtext += '(stabilising)'
-                } else if (this.energetical.ddG > +5) {
-                    ddgtext += '(destabilising)'
+
+                let ddgtext = '<i>Predicted effect: </i>';
+                const cutoff = 2;
+                if (this.energetical.ddG < -cutoff) {
+                    ddgtext += '<b>stabilising</b>'
+                } else if (this.energetical.ddG > +cutoff) {
+                    ddgtext += '<b>destabilising</b>'
                 } else {
-                    ddgtext += '(neutral)'
+                    ddgtext += '<b>neutral</b>'
                 }
+                ddgtext += '<br/>';
+
+
+                ddgtext += `<i>Estimated &Delta;&Delta;G (with backbone movement allowed):</i> ${Math.round(this.energetical.ddG)} ${units} `;
+
                 let shape = ['error',
                             ...['smaller', 'bigger','differently shaped', 'equally sized']
                                 .filter(v => venus.mutational.apriori_effect.includes(v))
@@ -438,19 +445,8 @@ class Venus {
                     neutrality = NaN;
                 }
                 ddgtext += '<br/>';
-                let bb = this.energetical.scores.mutate - this.energetical.scores.relaxed;
-                ddgtext += '<i>Predicted effect: </i>';
-                const cutoff = 2;
-                if (bb < -cutoff) {
-                    ddgtext += 'stabilising'
-                } else if (bb > +cutoff) {
-                    ddgtext += 'destabilising'
-                } else {
-                    ddgtext += 'neutral'
-                }
-                ddgtext += '<br/>';
                 ddgtext += `<i>Category of mutation:</i> ${shape}, ${this.structural.buried ? 'buried' : 'surface'}<br/>`;
-                ddgtext += `<i><span title="Median Absolute Error calculated with the O2567 dataset, single chain, not ligands. Median: 50% of cases will be off by more than this." data-toggle="tooltip">
+                ddgtext += `<i><span title="Median Absolute Error calculated with the O2567 dataset, single chain, no ligand and radius = 12 Å, 1 cycle and ref2015 scorefunction. Median: 50% of cases will be off by more than this." data-toggle="tooltip">
                             median error for category:
                             </span></i> ±${mae} kcal/mol<br/>`;
                 ddgtext += `<i><span title="concordant >2 kcal/mol in O2567 dataset" data-toggle="tooltip">Correct neutrality assignment for category</span></i>: ${neutrality}%<br/>`;
@@ -494,7 +490,7 @@ class Venus {
                 //     liEl('ddG contributed by residue', this.energetical.ddG_residue.toFixed(1) + ' kcal/mol') +
                 //     liEl('Native residue terms', innerList(this.energetical.native_residue_terms)) +
                 //     liEl('Mutant residue terms', innerList(this.energetical.mutant_residue_terms));
-                let modalText = `<p>Detail for ddG score.
+                let modalText = `<p>Detail for &Delta;&Delta;G score.
                                     For meaning, see <a href="/docs/venus" target="_blank">documentation</a>.</p>
                                     <p><b>Total &Delta;&Delta;G</b>: ${this.energetical.ddG.toFixed(1)} kcal/mol<br/>
                                     <b>Residue contribution to &Delta;&Delta;G</b>: ${this.energetical.ddG_residue.toFixed(1)} kcal/mol<br/>
