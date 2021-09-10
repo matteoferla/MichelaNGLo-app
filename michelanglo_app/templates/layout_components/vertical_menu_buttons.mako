@@ -31,7 +31,7 @@
                                ('Name to PDB', '/name', 'far fa-id-badge'),
                                ('VENUS', '/venus', 'far fa-radar'),
                                ('Convert custom mesh','/custom','far fa-mortar-pestle'),
-                               ('Primary documentation','/docs','far fa-books'),
+                               ('Documentation','/docs','far fa-books'),
                                ('Gallery','/gallery','far fa-palette'),
                                ('Github repository','https://github.com/matteoferla/PyMOL-to-NGL-transpiler','fab fa-github')
                                )
@@ -72,7 +72,7 @@
                    ('Convert PDB file','/pdb','far fa-wrench'),
                    ('Name to PDB', '/name', 'far fa-id-badge'),
                    ('Convert custom mesh','/custom','far fa-mortar-pestle'),
-                   ('Primary documentation','/docs','far fa-books'),
+                   ('Documentation','/docs','far fa-books'),
                    ('Gallery','/gallery','far fa-palette'),
                    ('Github repository','https://github.com/matteoferla/PyMOL-to-NGL-transpiler','fab fa-github')
                    )
