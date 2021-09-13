@@ -49,9 +49,17 @@
         a transcript factor DNA recognition domain by its own just binds DNA, while the rest of the protein recruits the mediator complex etc.
         For more details about what to look out for in an AlphaFold2 model see this
         <a href="https://blog.matteoferla.com/2021/07/what-to-look-out-for-with-alphafold2.html">blog post by Matteo Ferla (author of Michelanglo)</a>.
-        Also, it is possible to model oligomers and complexes, as seen in the notebooks
-        <a href="https://github.com/sokrypton/ColabFold" target="_blank">in the ColabFold GitHub repo by Sergey Ovchinnikov</a>.
     </p>
+    <h4>Choice</h4>
+    <p>The top choice is obviously a submitted structure. Then a crystal structure is preferable to a predicted model,
+        while a complex from SwissModel is preferable to AlphaFold2 assuming the homology is sufficient.</p>
+    This is because interactions with a ligand, other monomer or other protein are crucial for activity and/or structure.
+    It is possible to model oligomers and complexes, with AlphaFold2 as seen in the notebooks
+        <a href="https://github.com/sokrypton/ColabFold" target="_blank">in the ColabFold GitHub repo by Sergey Ovchinnikov</a>.
+        The best interface forming complex outputted by these then can be used as an uploaded structure in Venus,
+        assuming the PDB number is corrected.
+    </p>
+
 </%block>
 
 <%block name='modals'>
