@@ -82,6 +82,7 @@ def get_pages(request):
     user = request.user
     log.info(f'{User.get_username(request)} request API view of pages')
     data = {}
+    to_list = lambda x: [p.identifier for p in x]  ## crap name. converts the objects to names only.
     if not user:
         data['owned'] = 'not logged in'
         data['visited'] = 'not logged in'
@@ -95,7 +96,6 @@ def get_pages(request):
                            'deleted_entries': [p.identifier for p in request.dbsession.query(Page) if not p.existant]}
         else:
             data['all'] = 'RESTRICTED'
-        to_list = lambda x: [p.identifier for p in x]  ## crap name. converts the objects to names only.
         data['owned'] = to_list(user.owned.select(request.dbsession))
         data['visited'] = to_list(user.visited.select(request.dbsession))
     data['public'] = to_list(request.dbsession.query(Page).filter(Page.privacy != 'private').all())
