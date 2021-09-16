@@ -38,7 +38,7 @@
 			<div id="viewport" style="width:100%; height: 0; padding-bottom: 100%; overflow: visible;"></div>
 		</div>
 <div class="col-12">
-<p><i class="far fa-hand-point-right"></i> This page is running on NGL extended with the <a href="static/michelanglo.js">file michelanglo.js</a></p>
+<p><i class="far fa-hand-point-right"></i> This page is running on NGL extended with the <a href="/static/michelanglo.js">file michelanglo.js</a></p>
                 <h3>Markup</h3>
 
                 <p>Following Bootstrap, the most common CSS framework, several <code>data-*</code> attributes are proposed and implemented to control what is shown. If you are unfamilar with the terms "attribute" or "element" see <a href="#basics">basics</a>.</p>
