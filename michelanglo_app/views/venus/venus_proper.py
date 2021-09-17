@@ -382,12 +382,10 @@ class Venus(VenusBase):
         log.info(f'Step 4 analysis requested by {User.get_username(self.request)}')
         # ------- get protein
         if self.handle not in system_storage:
-            status = self.protein_step()
-            if 'error' in status:
-                return status
-            status = self.mutation_step()
-            if 'error' in status:
-                return status
+            for fun in (self.protein_step, self.mutation_step, self.structural_step):
+                fun()
+                if 'error' in self.reply:
+                    return self.reply
         protein = system_storage[self.handle]
         # -------- analyse
         if hasattr(protein, 'energetics') and protein.energetics is not None:
