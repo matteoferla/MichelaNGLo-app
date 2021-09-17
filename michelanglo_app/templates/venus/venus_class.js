@@ -400,7 +400,7 @@ class Venus {
 
                 ddgtext += `<i>Estimated &Delta;&Delta;G (with backbone movement allowed):</i> ${Math.round(this.energetical.ddG)} ${units} `;
 
-                let shape = ['error',
+                let shape = ['silent',
                             ...['smaller', 'bigger','differently shaped', 'equally sized']
                                 .filter(v => venus.mutational.apriori_effect.includes(v))
                             ].pop();
@@ -1364,7 +1364,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                                 data-focus="domain" data-color="bfactor">show confidence in  pLDDT</span>)`;
             strloctext += '</p>';
             let plddt_color = 'error';
-            let plddt_word = 'error'
+            let plddt_word = 'error';
             if (this.structural.bfactor > 90) {
                 plddt_color = 'success';
                 plddt_word = 'very highly confident';
