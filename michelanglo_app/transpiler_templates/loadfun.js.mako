@@ -1,3 +1,5 @@
+<%page args="structure, funname='loadProtein', viewport='viewport'"/>
+
 function ${funname} (protein) {
     var stage=NGL.getStage('${viewport}'); //alter if not using multiLoader.
 
