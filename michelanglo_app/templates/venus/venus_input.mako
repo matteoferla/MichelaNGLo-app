@@ -1,46 +1,67 @@
 <%
-    # this is a very silly grammatical change.
-    if mutation_mode == 'main':
-        mut_label = 'Mutation'
-        mut_title = 'A protein mutation within the canonical transcript of the chosen gene (e.g. p.A20W). The "p." is redundant, but tolerated'
-    elif mutation_mode == 'multi':
-         mut_label = 'Mutations'
-         mut_title = 'A series of protein mutations within the canonical transcript of the chosen gene (e.g. p.A20W). The "p." is redundant, but tolerated. Space, comma, semicolon or tab separated.'
-    else:
-        raise Exception('No mode!')
+# this is a very silly grammatical change.
+if mutation_mode == 'main':
+    mut_label = 'Mutation'
+    mut_title = 'A protein mutation within the canonical transcript of the chosen gene (e.g. p.A20W). The "p." is redundant, but tolerated'
+elif mutation_mode == 'multi':
+     mut_label = 'Mutations'
+     mut_title = 'A series of protein mutations within the canonical transcript of the chosen gene (e.g. p.A20W). The "p." is redundant, but tolerated. Space, comma, semicolon or tab separated.'
+else:
+    raise Exception('No mode!')
 
-    range_settings = [
-                        ('swiss_oligomer_identity_cutoff',
-                         'Cutoff for SwissModel identity (oligomer)',
-                         dict(min=0, max=100, default=40, step=1),
-                         'SwissModel has the advantage over EBI-AlphaFold2 in that the protein may be in a homo/hetero-oligomeric state, with a ligand. However, if the distance is too great the benefit is lost'
-                         ),
-                        ('swiss_monomer_identity_cutoff',
-                         'Cutoff for SwissModel identity (monomer)',
-                         dict(min=0, max=100, default=70, step=1),
-                         'This cutoff comes into play if the SwissModel isn\'t an oligomer and may or may have a ligand',
-                         ),
-                        ('swiss_oligomer_qmean_cutoff',
-                         'Cutoff for SwissModel quality (qMean) (oligomer)',
-                         dict(min=-5, max=5, default=-2, step=0.5),
-                         'qMean is the SwissModel metric of naturality of the pose: below -2 is bad and may have weird torsions'
-                         ),
-                        ('swiss_monomer_qmean_cutoff',
-                         'Cutoff for SwissModel quality (qMean) (monomer)',
-                         dict(min=-5, max=5, default=-2, step=0.5),
-                         'Same as for oligomer'
-                         ),
-                        ('cycles',
-                         'FastRelax cycles',
-                         dict(min=1, max=5, default=1, step=1),
-                         'How many cycles of minimisation to perform, each cycle adds some 15 seconds to the operations.'
-                         ),
-                        ('radius',
-                         'FastRelax C-beta neighbourhood radius',
-                         dict(min=8, max=15, default=12, step=1),
-                         'The neighbourhood is defined as the residues that have a given distance from the cetral atom: this is not an atom-to-atom value as these would depend on the sidechain conformation and identity'
-                         )
-                    ]
+range_settings = [
+                    ('swiss_oligomer_identity_cutoff',
+                     'Cutoff for SwissModel identity (oligomer)',
+                     dict(min=0, max=100, default=40, step=1),
+                     'SwissModel has the advantage over EBI-AlphaFold2 in that the protein may be in a homo/hetero-oligomeric state, with a ligand. However, if the distance is too great the benefit is lost'
+                     ),
+                    ('swiss_monomer_identity_cutoff',
+                     'Cutoff for SwissModel identity (monomer)',
+                     dict(min=0, max=100, default=70, step=1),
+                     'This cutoff comes into play if the SwissModel isn\'t an oligomer and may or may have a ligand',
+                     ),
+                    ('swiss_oligomer_qmean_cutoff',
+                     'Cutoff for SwissModel quality (qMean) (oligomer)',
+                     dict(min=-5, max=5, default=-2, step=0.5),
+                     'qMean is the SwissModel metric of naturality of the pose: below -2 is bad and may have weird torsions'
+                     ),
+                    ('swiss_monomer_qmean_cutoff',
+                     'Cutoff for SwissModel quality (qMean) (monomer)',
+                     dict(min=-5, max=5, default=-2, step=0.5),
+                     'Same as for oligomer'
+                     ),
+                    ('cycles',
+                     'FastRelax cycles',
+                     dict(min=1, max=5, default=1, step=1),
+                     'How many cycles of minimisation to perform, each cycle adds some 15 seconds to the operations.'
+                     ),
+                    ('radius',
+                     'FastRelax C-beta neighbourhood radius',
+                     dict(min=8, max=15, default=12, step=1),
+                     'The neighbourhood is defined as the residues that have a given distance from the cetral atom: this is not an atom-to-atom value as these would depend on the sidechain conformation and identity'
+                     )
+                ]
+
+booleans = [('Add Rosetta constraints (restraints) to maintain interactions across the boundary of the mobile residue neighbourhood, because if there is something really bad beyond it may throw off the calculations',
+            'outer_constrained',
+            '',
+            'Constrained outer shell'
+            ),
+            ('Removing ligands will make the calculations more accurate, but the presence of a ligand is an essential piece of info',
+            'remove_ligands',
+            '',
+            'Remove ligands'
+            ),
+            ('Multiple chains slow down things and may not be the biology assembly',
+            'single_chain',
+            '',
+            'Single chain'
+            ),
+            ('Certain features, such as PyRosetta, PhosphoSitePlus and ELM are not under a MIT/Apache licence and have complex legalese for commercial users.',
+            'academic',
+            'checked',
+            'Academic user'
+            )]
 
 %>
 
@@ -101,7 +122,7 @@
                     <div class="col-6">
                         <div class="input-group" data-toggle="tooltip"
                              title="Disabling prevents VENUS from using ${name}, otherwise they may be used if best">
-                            <div class="input-group-text">
+                            <div class="input-group-text w-100">
                                 <div class="custom-control custom-switch">
                                     <input type="checkbox" id="${id_name}" class="custom-control-input" checked>
                                     <label class="custom-control-label" for="${id_name}">Use ${name}</label>
@@ -145,22 +166,24 @@
                       %endfor
                   </select>
                 </div>
-                ### missing booleans: 'outer_constrained', 'remove_ligands',  'single_chain',
+                ### booleans
                 </div>
                 ### row end:
             </div>
             <div class="row">
-                <div class="col-5">
-                        <div class="input-group" data-toggle="tooltip"
-                             title="Certain features, such as PyRosetta, PhosphoSitePlus and ELM are not under a MIT/Apache licence and have complex legalese for commercial users.">
-                            <div class="input-group-text">
+                %for title, id_name, checked, label in booleans:
+                    <div class="col-6">
+                        <div class="input-group my-3" data-toggle="tooltip"
+                             title="${title}">
+                            <div class="input-group-text w-100">
                                 <div class="custom-control custom-switch">
-                                    <input type="checkbox" id="academic" class="custom-control-input" checked>
-                                    <label class="custom-control-label" for="academic">Academic user</label>
+                                    <input type="checkbox" id="${id_name}" class="custom-control-input" ${checked}>
+                                    <label class="custom-control-label" for="${id_name}">${label}</label>
                                 </div>
                             </div>
                         </div>
                     </div>
+                %endfor
             </div>
 
 
@@ -168,10 +191,12 @@
     </div>
 
     <div class="col-12 col-lg-2">
+        %if mutation_mode == 'main':
         <a class="btn btn-outline-info" data-toggle="collapse" href="#advanced" role="button" aria-expanded="false"
                aria-controls="advanced">
                 <i class="far fa-cogs"></i> Advanced
         </a>
+        %endif
     </div>
     <div class="col-12 offset-lg-2 col-lg-4">
         <button type="button" class="btn btn-outline-primary w-100" id="venus_calc" style="display: none;">Analyse
