@@ -44,7 +44,7 @@ class Venus(VenusBase):
         if 'mutation' not in self.request.params or 'uniprot' not in self.request.params:
             return None
         if str(self.request.params['uniprot']) == '9606' or str(self.request.params['mutation']) == '9606':
-            raise ValueError('Chrome autofill')
+            raise ValueError('Chrome autofill')   # this is uncaught
         settings = self.get_user_modelling_options()
         concatenation = self.request.params['uniprot'] + \
                         self.request.params['mutation'] + \
