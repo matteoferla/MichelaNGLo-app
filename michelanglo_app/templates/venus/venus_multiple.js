@@ -171,10 +171,11 @@ class MultiVenus {
             NGL.specialOps._preventScroll('viewport');
             NGL.specialOps.enableClickToShow('viewport');
         }, 1000);
-        $('#results_card').append(`<div class="p-2">
-<button type="button" class="btn btn-outline-warning w-100" data-toggle="modal" data-target="#createCombo">
-    <i class="far fa-dumpster-fire"></i> Merge structures</button>
-</div>`);
+        // Disabled for now as AF2 does all!
+        // $('#results_card').append(`<div class="p-2">
+        // <button type="button" class="btn btn-outline-warning w-100" data-toggle="modal" data-target="#createCombo">
+        //     <i class="far fa-dumpster-fire"></i> Merge structures</button>
+        // </div>`);
 
     }
 
