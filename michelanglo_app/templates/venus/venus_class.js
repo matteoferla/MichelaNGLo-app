@@ -116,7 +116,8 @@ class Venus {
             delete window.myData;
             NGL.getStage().removeAllComponents();
         }
-        $('#viewport').children().filter((i, elem) => elem.nodeName !== 'BUTTON').detach()
+        $('#viewport').children().filter((i, elem) => elem.nodeName !== 'BUTTON').detach();
+        NGL.stageIds.viewport = undefined;
         this.updateStructureOption();
         if (this.mutalist !== undefined) this.mutalist.html('');
         $('#results_mutalist').children().detach();
@@ -144,6 +145,12 @@ class Venus {
             job_id: this.job_id,
         };
         extras = extras || this.get_user_settings();
+        // chrome autofills usernames and passwords or 9606
+        if ((this.uniprot + '' === '9606')  ||
+            (this.mutation + '' === '9606') ||
+            (this.uniprot.search(/\d/) === -1) ||
+            (this.mutation.search(/\d/) === -1)
+        ) { throw 'chrome autofill prevented.'}
         for (const [key, value] of Object.entries(extras)) {
             // no sanitisation ATM
             data[key] = value;
@@ -310,7 +317,7 @@ class Venus {
             'scorefxn_name': $('#scorefxn_name').val(),
             'custom_filename': upload_pdb.files.length > 0 ? upload_pdb.files[0].name : undefined
         };
-        ['allow_pdb', 'allow_swiss', 'allow_alphafold'].forEach(name => {
+        ['allow_pdb', 'allow_swiss', 'allow_alphafold', 'outer_constrained', 'remove_ligands', 'single_chain'].forEach(name => {
             extras[name] = $('#' + name).prop('checked');
         });
         ['swiss_oligomer_identity_cutoff',
@@ -396,9 +403,8 @@ class Venus {
                     ddgtext += '<b>neutral</b>'
                 }
                 ddgtext += '<br/>';
-
-
-                ddgtext += `<i>Estimated &Delta;&Delta;G (with backbone movement allowed):</i> ${Math.round(this.energetical.ddG)} ${units} `;
+                const ddGLine = this.energetical.ddG < 10 ? Math.round(this.energetical.ddG) : '>10';
+                ddgtext += `<i>Estimated &Delta;&Delta;G (with backbone movement allowed):</i> ${ddGLine} ${units} `;
 
                 let shape = ['silent',
                             ...['smaller', 'bigger','differently shaped', 'equally sized']
@@ -451,7 +457,8 @@ class Venus {
                             </span></i> ±${mae} kcal/mol<br/>`;
                 ddgtext += `<i><span title="concordant >2 kcal/mol in O2567 dataset" data-toggle="tooltip">Correct neutrality assignment for category</span></i>: ${neutrality}%<br/>`;
                 let bb = this.energetical.scores.mutate - this.energetical.scores.relaxed;
-                ddgtext += `<i>&Delta;&Delta;G (with backbone movement forbidden):</i> ${Math.round(bb)}  ${units} `;
+                const ddGline2 = bb < 10 ? Math.round(bb) : '>10 ';
+                ddgtext += `<i>&Delta;&Delta;G (with backbone movement forbidden):</i> ${ddGline2}  ${units} `;
                 ddgtext += '<br/>';
                 if (this.energetical.scores.mutate + 3 > this.energetical.scores.mutarelax) {
                     ddgtext += `Results in backbone change (RMSD<sub>CA</sub>: ${Math.round(this.energetical.rmsd * 100) / 100})<br/>`;
@@ -461,9 +468,10 @@ class Venus {
                 Object.entries(this.structural.custom_ddG)
                     .forEach(({mutation, data}) => {
                         const color = data > this.energetical.ddG ? 'text-warning' : 'text-secondary';
+                        const ddGLine = data < 10 ? data.toFixed(1) : '>10';
                         ddgtext += `<li><b>${this.makeProlink(mutation.slice(1, -1), mutation)}</b>
                                         <span class="${color}">
-                                        ${data.toFixed(1)} kcal/mol
+                                        ${ddGLine} kcal/mol
                                         </span>
                                         </li>`
                     });
@@ -1763,7 +1771,8 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             return null;
         } else if (this.energetical.ddG > 10) {
             return `the mutation is extremely ${destabilising} and the calculations are likely to be inaccurate
-                    (∆∆G: ~${venus.energetical.ddG.toFixed(0)} kcal/mol)`
+            (∆∆G: <span class="text-decoration-underline" data-toggle="tooltip" data-title="~${venus.energetical.ddG.toFixed(0)} kcal/mol">&gt; 10</span>
+             kcal/mol)`
         } else if (this.energetical.ddG > 5) {
             return `the mutation is strongly ${destabilising} (∆∆G: ${venus.energetical.ddG.toFixed(1)} kcal/mol)`
         } else if (this.energetical.ddG > 2) {
