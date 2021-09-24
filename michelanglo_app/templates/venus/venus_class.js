@@ -6,6 +6,7 @@
 class Venus {
     constructor() {
         this.prepareDOM();
+        this.timeout = 60 * 3;
         this.uniprot = window.uniprotValue; // name.js code.
         this.taxid = window.taxidValue;
         this.prolink = ' class="prolink" data-target="#viewport" data-toggle="protein" ';
@@ -155,10 +156,14 @@ class Venus {
             // no sanitisation ATM
             data[key] = value;
         }
-        return $.post({url: "venus_analyse", data: data}).fail(ops.addErrorToast).then(reply => {
-            this.timeTaken = reply.time_taken;
-            return reply
-        });
+        return $.post({url: "venus_analyse",
+                       data: data,
+                       timeout: this.timeout
+                       }).fail(ops.addErrorToast)
+                          .then(reply => {
+                                            this.timeTaken = reply.time_taken;
+                                            return reply
+                                        });
     }
 
     //step 0
@@ -625,7 +630,9 @@ class Venus {
         };
         this.setStatus(`Running extra job ${mutation}`, 'working');
         return $.post({
-            url: "venus_analyse", data: submissionData
+            url: "venus_analyse",
+            data: submissionData,
+            timeout: this.timeout,
         }).fail(ops.addErrorToast)
             .done(msg => {
                 if (msg.error) {
