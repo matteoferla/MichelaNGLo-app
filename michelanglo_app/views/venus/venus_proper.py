@@ -208,6 +208,7 @@ class Venus(VenusBase):
             protein = ProteinAnalyser(uniprot=uniprot,
                                       taxid=taxid,
                                       **rosetta_settings)
+            assert protein.exists(), f'{uniprot} of {taxid} is absent'
             protein.load()
             protein.mutation = mutation
         # assess
@@ -320,7 +321,8 @@ class Venus(VenusBase):
         # try options
         # do not use the stored values of pdbs, but get the swissmodel ones (more uptodate)
         if retrieve:
-            # alphafold2
+            # if it is not a valid species nothing happens.
+            # if the gene is not valid... then this record is wrong.
             protein.add_alphafold2()  # protein::alphafold2_retrieval::FromAlphaFold2
             # swissmodel
             try:
@@ -487,6 +489,8 @@ class Venus(VenusBase):
         else:
             params = []
         temp_folder = os.path.join('michelanglo_app', 'temp')
+        # TODO In many places the data is stored in the module!
+        # In module page there is biggest offender.
         if not os.path.exists(temp_folder):
             os.mkdir(temp_folder)
         files = []
