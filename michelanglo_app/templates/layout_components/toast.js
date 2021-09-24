@@ -39,8 +39,11 @@ ops.addErrorToast = (xhr) => {if (!! xhr.responseJSON) {
                                                 ops.addToast('userpageerror', 'Error ' + xhr.status, 'An unknown error occured serverside and the admin has been notified.', 'bg-danger');
                                             }
                                         }
+                              else if (!! xhr.statusText) {
+                                  ops.addToast('userpageerror','Error '+xhr.status,'An unknown error occured. '+ xhr.statusText, 'bg-danger');
+                                     }
                               else {
-                                            ops.addToast('userpageerror','Error '+xhr.status,'An unknown error occured.', 'bg-danger');
+                                  ops.addToast('userpageerror','Error '+xhr.status,'An unknown error occured.', 'bg-danger');
                                      }
                              };
 

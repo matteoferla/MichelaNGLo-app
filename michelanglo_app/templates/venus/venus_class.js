@@ -6,7 +6,7 @@
 class Venus {
     constructor() {
         this.prepareDOM();
-        this.timeout = 60 * 3;
+        this.timeout = 60 * 3 * 1000;
         this.uniprot = window.uniprotValue; // name.js code.
         this.taxid = window.taxidValue;
         this.prolink = ' class="prolink" data-target="#viewport" data-toggle="protein" ';
@@ -877,6 +877,7 @@ class Venus {
             let [description, x] = m.slice(0, 2);
             x = parseInt(x);
             if (x > this.protein.sequence.length) return; // wrong isoform!
+            if (x <= 1) return;
             coverage[x - 1].color = 'gray';
             coverage[x - 1].tooltip += ' ' + description.replace('description=', '');
         });
