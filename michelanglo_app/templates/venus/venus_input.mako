@@ -32,7 +32,7 @@ range_settings = [
                      ),
                     ('cycles',
                      'FastRelax cycles',
-                     dict(min=1, max=5, default=1, step=1),
+                     dict(min=1, max=5, default=2, step=1),
                      'How many cycles of minimisation to perform, each cycle adds some 15 seconds to the operations.'
                      ),
                     ('radius',
