@@ -1625,8 +1625,9 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         };
         // other end at page_creation.py
         return $.post({
-            url: "venus_create", data: {'proteindata': JSON.stringify(data)}
-            , dataType: 'json'
+            url: "venus_create", data: {'proteindata': JSON.stringify(data)},
+            dataType: 'json',
+            timeout: this.timeout
         })
             .done(function (msg) {
                 ops.addToast('jobcompletion', 'Conversion complete', 'The data has been converted successfully.', 'bg-success');
