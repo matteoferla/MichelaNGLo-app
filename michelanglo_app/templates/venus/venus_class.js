@@ -6,7 +6,7 @@
 class Venus {
     constructor() {
         this.prepareDOM();
-        this.timeout = 60 * 3 * 1000;
+        this.timeout = 60 * 5 * 1000 - 100; // Apache is also set to 5 minutes.
         this.uniprot = window.uniprotValue; // name.js code.
         this.taxid = window.taxidValue;
         this.prolink = ' class="prolink" data-target="#viewport" data-toggle="protein" ';
