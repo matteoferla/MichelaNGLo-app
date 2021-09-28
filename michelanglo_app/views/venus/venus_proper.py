@@ -280,7 +280,13 @@ class Venus(VenusBase):
                                   'allow_swiss': True,
                                   'allow_alphafold': True}
         # ------ booleans
-        for key in ['allow_pdb', 'allow_swiss', 'allow_alphafold', 'outer_constrained', 'remove_ligands','single_chain']:
+        for key in ['allow_pdb',
+                    'allow_swiss',
+                    'allow_alphafold',
+                    'outer_constrained',
+                    'neighbour_only_score',
+                    'remove_ligands',
+                    'single_chain']:
             if key not in self.request.params:
                 pass
             else:

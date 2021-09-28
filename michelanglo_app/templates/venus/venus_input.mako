@@ -42,7 +42,18 @@ range_settings = [
                      )
                 ]
 
-booleans = [('Add Rosetta constraints (restraints) to maintain interactions across the boundary of the mobile residue neighbourhood, because if there is something really bad beyond it may throw off the calculations',
+booleans = [
+            ('The score can be calculate from the whole protein, including the residues beyond the neighbourhood that is energy minimised '+\
+            ' or only the neighbourhood (=this option checked). '+
+            'The former gives lower median absolute errors, but the latter always results in a zero ∆∆G for a silent mutation. '+
+            'The cause of the difference is that some structures may have highly disfavoured residues conformations just beyond the neighbourhood'+\
+            ' that the boundary of the mobile residue neighbourhood could find a minimum for.',
+            'neighbour_only_score',
+            '',
+            'Neighbourhood only score'
+            ),
+            ('Add Rosetta constraints (restraints) to maintain interactions across the boundary of the mobile residue neighbourhood, '+\
+            'because if there is something really bad beyond it may throw off the calculations —see "Neighbourhood only score"',
             'outer_constrained',
             '',
             'Constrained outer shell'
@@ -57,7 +68,8 @@ booleans = [('Add Rosetta constraints (restraints) to maintain interactions acro
             '',
             'Single chain'
             ),
-            ('Certain features, such as PyRosetta, PhosphoSitePlus and ELM are not under a MIT/Apache licence and have complex legalese for commercial users.',
+            ('Certain features, such as PyRosetta, PhosphoSitePlus and ELM are not under a MIT/Apache licence '+\
+            'and have complex legalese for commercial users.',
             'academic',
             'checked',
             'Academic user'
