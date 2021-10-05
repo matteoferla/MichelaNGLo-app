@@ -224,7 +224,7 @@
                             <h4>Debug (Admin only)</h4>
                             <div class="btn-group" role="group" aria-label="debug">
                               <button type="button" class="btn btn-secondary" onclick="$('.toast').removeClass('fade').removeClass('hide').addClass('show')">Show all toasts</button>
-                              <button type="button" class="btn btn-secondary" onclick="$('.toast').get(0)">Delete first toast</button>
+                              <button type="button" class="btn btn-secondary" onclick="$($('.toast').get(0)).detach()">Delete toast</button>
                               <button type="button" class="btn btn-secondary" onclick="NGL.setDebug(true)">Debug NGL</button>
                             </div>
                         </div>
