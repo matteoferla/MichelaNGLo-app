@@ -219,6 +219,16 @@
                     %elif mutation_mode == 'multi':
                         <button type="button" class="btn btn-outline-info w-100" data-toggle="modal" data-target="#createMikeModal"><i class="far fa-pencil-paintbrush"></i> Create Michela<span style="font-variant: small-caps;">ngl</span>o page</button>
                     %endif
+                    % if mutation_mode == 'main' and user and user.role == 'admin':
+                        <div>
+                            <h4>Debug (Admin only)</h4>
+                            <div class="btn-group" role="group" aria-label="debug">
+                              <button type="button" class="btn btn-secondary" onclick="$('.toast').removeClass('fade').removeClass('hide').addClass('show')">Show all toasts</button>
+                              <button type="button" class="btn btn-secondary" onclick="$('.toast').get(0)">Delete first toast</button>
+                              <button type="button" class="btn btn-secondary" onclick="NGL.setDebug(true)">Debug NGL</button>
+                            </div>
+                        </div>
+                    %endif
                 </div>
             </div>
         </div>
