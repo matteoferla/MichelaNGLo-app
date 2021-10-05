@@ -49,6 +49,7 @@ class Venus(VenusBase):
         concatenation = self.request.params['uniprot'] + \
                         self.request.params['mutation'] + \
                         '-'.join(map(str, settings.values()))
+        log.debug(f'request handle: {str(hash(concatenation))}')
         return str(hash(concatenation))
 
     ############################### server main page
@@ -439,8 +440,11 @@ class Venus(VenusBase):
             self.ddG_step()
         protein = system_storage[self.handle]
         log.info(f'Extra analysis ({algorithm}) requested by {User.get_username(self.request)}')
+        applicable_keys = ('scorefxn_name', 'outer_constrained', 'remove_ligands',
+                           'single_chain', 'cycles', 'radius')
+        options = {k: v for k, v in self.get_user_modelling_options().items() if k in applicable_keys}
         self.reply = {**self.reply,
-                      **protein.analyse_other_FF(mutation=mutation, algorithm=algorithm, spit_process=True)}
+                      **protein.analyse_other_FF(**options, mutation=mutation, algorithm=algorithm, spit_process=True)}
         self.log_if_error('extra_step')
 
     ### STEP EXTRA2
