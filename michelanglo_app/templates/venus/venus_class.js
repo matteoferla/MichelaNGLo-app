@@ -415,52 +415,24 @@ class Venus {
                             ...['smaller', 'bigger','differently shaped', 'equally sized']
                                 .filter(v => venus.mutational.apriori_effect.includes(v))
                             ].pop();
-                let mae;
-                let neutrality;
-                // in full as this is confusing.
                 // MAE from O2567
-                if ((shape === 'differently shaped') && this.structural.buried) {
-                    mae = 2.65;
-                    neutrality = 58;
-                }
-                else if ((shape === 'differently shaped') && ! this.structural.buried) {
-                    mae = 1.53;
-                    neutrality = 64;
-                }
-                else if ((shape === 'smaller') && this.structural.buried) {
-                    mae = 2.75;
-                    neutrality = 71;
-                }
-                else if ((shape === 'smaller') && ! this.structural.buried) {
-                    mae = 1.76;
-                    neutrality = 61;
-                }
-                else if ((shape === 'bigger') && this.structural.buried) {
-                    mae = 3.08;
-                    neutrality = 53;
-                }
-                else if ((shape === 'bigger') && ! this.structural.buried) {
-                    mae = 2.44;
-                    neutrality = 56;
-                }
-                else if ((shape === 'equally sized') && this.structural.buried) {
-                    mae = 2.24;
-                    neutrality = 67;
-                }
-                else if ((shape === 'equally sized') && ! this.structural.buried) {
-                    mae = 1.35;
-                    neutrality = 67;
-                }
-                else {
-                    mae = NaN;
-                    neutrality = NaN;
+                const data = {"buried": {"bigger": {"MAE": 1.27, "MSE": -0.75, "SE": 0.12, "allocation": 0.69}, "differently shaped": {"MAE": 2.23, "MSE": -1.96, "SE": 0.36, "allocation": 0.53}, "equally sized": {"MAE": 1.27, "MSE": -1.27, "SE": 0.29, "allocation": 0.5}, "proline involved": {"MAE": 2.32, "MSE": 1.49, "SE": 0.48, "allocation": 0.67}, "smaller": {"MAE": 2.01, "MSE": -1.69, "SE": 0.09, "allocation": 0.48}}, "surface": {"bigger": {"MAE": 0.81, "MSE": 0.37, "SE": 0.02, "allocation": 0.84}, "differently shaped": {"MAE": 0.58, "MSE": 0.07, "SE": 0.02, "allocation": 0.86}, "equally sized": {"MAE": 0.71, "MSE": -0.14, "SE": 0.06, "allocation": 0.79}, "proline involved": {"MAE": 1.06, "MSE": 0.07, "SE": 0.08, "allocation": 0.79}, "smaller": {"MAE": 0.93, "MSE": -0.6, "SE": 0.02, "allocation": 0.7}}};
+                let cat_mae = 'N/A';
+                let cat_mad = 'N/A';
+                let cat_allocation = 'N/A';
+                let buriedStr = ['surface', 'buried'][this.structural.buried + 0]; // coerce this.structural.buried to int
+                if (shape !== 'silent') {
+                    const subdata = data[buriedStr][shape] ;
+                    cat_mae = subdata["MAE"];
+                    cat_mad = subdata["SE"];
+                    cat_allocation = subdata["allocation"];
                 }
                 ddgtext += '<br/>';
                 ddgtext += `<i>Category of mutation:</i> ${shape}, ${this.structural.buried ? 'buried' : 'surface'}<br/>`;
-                ddgtext += `<i><span title="Median Absolute Error calculated with the O2567 dataset, single chain, no ligand and radius = 12 Å, 1 cycle and ref2015 scorefunction. Median: 50% of cases will be off by more than this." data-toggle="tooltip">
+                ddgtext += `<i><span title="Median Absolute Error calculated with the O2567 dataset, single chain, no ligand and radius = 12 Å, 2 cycle and ref2015 scorefunction. Median: 50% of cases will be off by more than this." data-toggle="tooltip">
                             median error for category:
-                            </span></i> ±${mae} kcal/mol<br/>`;
-                ddgtext += `<i><span title="concordant >2 kcal/mol in O2567 dataset" data-toggle="tooltip">Correct neutrality assignment for category</span></i>: ${neutrality}%<br/>`;
+                            </span></i> ${cat_mae} kcal/mol<br/>`;
+                ddgtext += `<i><span title="concordant >2 kcal/mol in O2567 dataset" data-toggle="tooltip">Correct assignment for category</span></i>: ${cat_allocation * 100}%<br/>`;
                 let bb = this.energetical.scores.mutate - this.energetical.scores.relaxed;
                 const ddGline2 = bb < 10 ? Math.round(bb) : '>10 ';
                 ddgtext += `<i>&Delta;&Delta;G (with backbone movement forbidden):</i> ${ddGline2}  ${units} `;
