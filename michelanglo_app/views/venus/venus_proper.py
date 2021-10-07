@@ -279,15 +279,21 @@ class Venus(VenusBase):
         """
         user_modelling_options = {'allow_pdb': True,
                                   'allow_swiss': True,
-                                  'allow_alphafold': True}
+                                  'allow_alphafold': True,
+                                  'overestimate_correction': 0.239  # this is the kJ/mol <--> kcal/mol mystery value
+                                 }
+
+
         # ------ booleans
         for key in ['allow_pdb',
                     'allow_swiss',
                     'allow_alphafold',
                     'outer_constrained',
                     'neighbour_only_score',
+                    'prevent_acceptance_of_incrementor',
                     'remove_ligands',
-                    'single_chain']:
+                    'single_chain',
+                    'overestimate_correction']:
             if key not in self.request.params:
                 pass
             else:
@@ -394,8 +400,15 @@ class Venus(VenusBase):
             analysis = protein.energetics
         else:
             applicable_keys = ( 'scorefxn_name', 'outer_constrained', 'remove_ligands',
-                                'single_chain', 'cycles', 'radius')
-            options = {k: v for k, v in self.get_user_modelling_options().items() if k in applicable_keys}
+                                'overestimate_correction',
+                                'single_chain')
+            user_options = self.get_user_modelling_options()
+            options = {k: v for k, v in user_options.items() if k in applicable_keys}
+            options['cycles'] = 1
+            if 'radius' in user_options:
+                options['radius'] = min(9, user_options['radius'])
+            else:
+                options['radius'] = 9
             analysis = protein.analyse_FF(**options, spit_process=True)
         if analysis is None:
             self.log_if_error('pyrosetta step', 'likely segfault')
@@ -421,6 +434,7 @@ class Venus(VenusBase):
             analysis = protein.energetics_gnomAD
         else:
             applicable_keys = ('scorefxn_name', 'outer_constrained', 'remove_ligands',
+                                'overestimate_correction',
                                'single_chain', 'cycles', 'radius')
             options = {k: v for k, v in self.get_user_modelling_options().items() if k in applicable_keys}
             analysis = protein.analyse_gnomad_FF(**options, spit_process=True)
@@ -441,6 +455,7 @@ class Venus(VenusBase):
         protein = system_storage[self.handle]
         log.info(f'Extra analysis ({algorithm}) requested by {User.get_username(self.request)}')
         applicable_keys = ('scorefxn_name', 'outer_constrained', 'remove_ligands',
+                                'overestimate_correction',
                            'single_chain', 'cycles', 'radius')
         options = {k: v for k, v in self.get_user_modelling_options().items() if k in applicable_keys}
         self.reply = {**self.reply,
