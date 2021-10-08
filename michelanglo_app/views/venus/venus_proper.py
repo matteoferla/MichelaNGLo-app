@@ -280,7 +280,7 @@ class Venus(VenusBase):
         user_modelling_options = {'allow_pdb': True,
                                   'allow_swiss': True,
                                   'allow_alphafold': True,
-                                  'overestimate_correction': 0.239  # this is the kJ/mol <--> kcal/mol mystery value
+                                  'scaling_factor': 0.239  # this is the kJ/mol <--> kcal/mol mystery value
                                  }
 
 
@@ -293,7 +293,7 @@ class Venus(VenusBase):
                     'prevent_acceptance_of_incrementor',
                     'remove_ligands',
                     'single_chain',
-                    'overestimate_correction']:
+                    'scaling_factor']:
             if key not in self.request.params:
                 pass
             else:
@@ -400,7 +400,7 @@ class Venus(VenusBase):
             analysis = protein.energetics
         else:
             applicable_keys = ( 'scorefxn_name', 'outer_constrained', 'remove_ligands',
-                                'overestimate_correction',
+                                'scaling_factor',
                                 'single_chain')
             user_options = self.get_user_modelling_options()
             options = {k: v for k, v in user_options.items() if k in applicable_keys}
@@ -434,7 +434,7 @@ class Venus(VenusBase):
             analysis = protein.energetics_gnomAD
         else:
             applicable_keys = ('scorefxn_name', 'outer_constrained', 'remove_ligands',
-                                'overestimate_correction',
+                                'scaling_factor',
                                'single_chain', 'cycles', 'radius')
             options = {k: v for k, v in self.get_user_modelling_options().items() if k in applicable_keys}
             analysis = protein.analyse_gnomad_FF(**options, spit_process=True)
@@ -455,7 +455,7 @@ class Venus(VenusBase):
         protein = system_storage[self.handle]
         log.info(f'Extra analysis ({algorithm}) requested by {User.get_username(self.request)}')
         applicable_keys = ('scorefxn_name', 'outer_constrained', 'remove_ligands',
-                                'overestimate_correction',
+                                'scaling_factor',
                            'single_chain', 'cycles', 'radius')
         options = {k: v for k, v in self.get_user_modelling_options().items() if k in applicable_keys}
         self.reply = {**self.reply,
