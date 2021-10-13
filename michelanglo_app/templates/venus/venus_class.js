@@ -691,34 +691,6 @@ class Venus {
         return this.analyse('customfile', extras);
     }
 
-    fetchMike(uuid, params) {
-        // '#createMike' does not provide a uuid.
-        $.post({
-            url: "save_pdb", data: {
-                uuid: uuid,
-                index: -1
-            }
-        }).fail(ops.addErrorToast)
-            .done(msg => {
-                if (msg.number === undefined) {
-                    ops.addToast('mike_error',
-                        'Page info retrieval error',
-                        msg.status,
-                        'bg-warning')
-                } else {
-                    this.addMikeOptions(msg.definitions)
-                }
-
-            });
-    }
-
-    addMikeOptions(definitions) {
-        changeByPage_selector.removeAttribute("disabled");
-        //$('#changeByPage_selector').html('');
-        const namer = v => v.name === undefined ? v.value : v.name;
-        changeByPage_selector.innerHTML = definitions.map((v, i) => `<option name="changeByPage" value="${namer(v)}">${i + 1}. ${namer(v)} (${v.type})</option>`).join('\n');
-    }
-
     //progress bar.
     setStatus(label, mode) { //working, crash, done
         mode = mode || 'working';
@@ -1351,26 +1323,26 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             strloctext += ` (<span class='prolink' data-target="#viewport" data-toggle="protein" data-selection="*"
                                 data-focus="domain" data-color="bfactor">show confidence in  pLDDT</span>)`;
             strloctext += '</p>';
-            let plddt_color = 'error';
+            let plddt_color = 'bg-danger';
             let plddt_word = 'error';
             if (this.structural.bfactor > 90) {
-                plddt_color = 'success';
+                plddt_color = 'bg-success';
                 plddt_word = 'very highly confident';
             }
             else if (this.structural.bfactor > 70) {
-                plddt_color = 'info';
+                plddt_color = 'bg-info';
                 plddt_word = 'confident';
             }
             else if (this.structural.bfactor > 50) {
-                plddt_color = 'warning';
+                plddt_color = 'bg-warning'; //text-white and bg-warning looks fine.
                 plddt_word = 'low';
             }
             else {
-                plddt_color = 'danger';
+                plddt_color = 'bg-danger';
                 plddt_word = 'very low';
             }
 
-            strloctext += `<p class="bg-${plddt_color}" data-toggle="tooltip" 
+            strloctext += `<p class="${plddt_color} text-white p-1" data-toggle="tooltip" 
                             title="A pLDDT over 70% is confident. Below 50% is poor.">
                                 <i>pLDDT</i>: ${this.structural.bfactor.toFixed(1)}% (${plddt_word})</p>`;
         } else {

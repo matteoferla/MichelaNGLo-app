@@ -147,6 +147,35 @@ $('#showLigands').click(event => {
     }
 );
 
+function addMikeOptions(definitions) {
+        changeByPage_selector.removeAttribute("disabled");
+        //$('#changeByPage_selector').html('');
+        const namer = v => v.name === undefined ? v.value : v.name;
+        changeByPage_selector.innerHTML = definitions.map((v, i) => `<option name="changeByPage" value="${namer(v)}">${i + 1}. ${namer(v)} (${v.type})</option>`).join('\n');
+    }
+
+function fetchMike(uuid, params) {
+        // '#createMike' does not provide a uuid.
+        $.post({
+            url: "save_pdb", data: {
+                uuid: uuid,
+                index: -1
+            }
+        }).fail(ops.addErrorToast)
+            .done(msg => {
+                if (msg.number === undefined) {
+                    ops.addToast('mike_error',
+                        'Page info retrieval error',
+                        msg.status,
+                        'bg-warning')
+                } else {
+                    addMikeOptions(msg.definitions)
+                }
+
+            });
+    }
+
+
 $('#changeByPage_fetch').click(event => {
     const uuid = changeByPage.value.trim().split('/').pop();
     if (uuid === '') {
@@ -155,7 +184,7 @@ $('#changeByPage_fetch').click(event => {
     } else {
         $('#changeByPage').removeClass('is-invalid');
     }
-    window.venus.fetchMike(uuid);
+    fetchMike(uuid);
 });
 
 /// this is very confusing. change_model is the button in change_modal
@@ -198,6 +227,13 @@ $('#change_model').click(async event => {
     }
     $('#change_modal').modal('hide');
 });
+
+$('#save').click(function () {
+    if (NGL.stageIds.viewport === undefined) {alert('There is no protein loaded.')}
+    else {
+        NGL.getStage('viewport').makeImage({trim: true, antialias: false, transparent: false, factor:10}).then(NGL.download);
+    }
+    });
 
 
 //</%text>
