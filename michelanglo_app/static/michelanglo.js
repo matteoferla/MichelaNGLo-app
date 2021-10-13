@@ -439,11 +439,12 @@ NGL.specialOps.showDomainOverlay = function (id, partner, selection, color, view
 NGL.specialOps.isValid = (id, sele) => NGL.getStage(id).getComponentByType('structure').structure.getView(new NGL.Selection(sele)).atomCount > 0;
 
 NGL.specialOps.expandSelection = (protein, selection, radius) => {
-
     let selector = new NGL.Selection(selection.toString());
     const atomSet = protein.structure.getAtomSetWithinSelection(selector, parseFloat(radius));
     // expand selection to complete groups
     const atomSet2 = protein.structure.getAtomSetWithinGroup(atomSet);
+    // mod of atomset to prevent it from including the original selection and connecting atoms with it.
+    // the latter does not seem to do anything.
     return atomSet2.toSeleString() + ' and not (' + selection.toString() + ' and not (.C or .N)';
 };
 
