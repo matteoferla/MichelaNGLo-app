@@ -57,9 +57,9 @@ class Venus {
             'effect': 'Summary of effect',
             'strcha': 'Model based residue details',
             'ddg': 'Forcefield calculations. A negative value is stabilising, and a value of 1-2 kcal/mol is neutral. A hydrogen bond has about 1-2 kcal/mol. For more see documentation.',
+            'neigh': 'Model based, what residues are within 4 &aring;ngstr&ouml;m?',
             'location': 'What domains are nearby linearly &mdash;but not necessarily containing the residue',
             'domdet': 'what is this?',
-            'neigh': 'Model based, what residues are within 4 &aring;ngstr&ouml;m?',
             'gnomad': 'gnomAD mutations with 5 residues distance (structure independent)',
             'motif': 'Motifs predicted using the linear motif patterns from the ELM database. The presence of a linear motif does not mean it is valid, in fact the secondary structure is important: in a helix residues 3 along are facing the same direction, in a sheet alternating residues and in a loop it varies. If a motif is a phosphosite and the residue is not phosphorylated it is likely not legitimate.',
             'link': 'Link to this search (will be redone) for browser or programmatic access',
@@ -1083,8 +1083,8 @@ class Venus {
     }
 
     createLinks() {
-        let linktext = `<i>this search (browser)</i>: <code>https://venus.sgc.ox.ac.uk/?uniprot=${this.uniprot}&species=${this.taxid}&mutation=${this.mutation}</code><br/>`;
-        linktext += `<i>this search (API)</i>: <code>https://venus.sgc.ox.ac.uk/venus_analyse?uniprot=${this.uniprot}&species=${this.taxid}&mutation=${this.mutation}</code>`;
+        let linktext = `<i>this search (browser)</i>: <code>${window.location.protocol}//${window.location.host}${window.location.pathname}?uniprot=${this.uniprot}&species=${this.taxid}&mutation=${this.mutation}</code><br/>`;
+        linktext += `<i>this search (API)</i>: <code>${window.location.protocol}//${window.location.host}/venus_analyse?uniprot=${this.uniprot}&species=${this.taxid}&mutation=${this.mutation}</code>`;
         this.createEntry('link', 'Links', linktext);
     }
 
@@ -1426,7 +1426,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
     }
 
     makeNeighbourLI(data) {
-        const label = data.resn + data.resi;
+        const label = data.resn + data.resi; //NB. resi is a string because PyMOL and it may be an insertion code (!?)
         const selector = data.resi + ":" + data.chain;
         const prolink = this.makeProlink(selector, label);
         const distance = `&mdash; ${data.distance.toFixed(1)} &Aring; away`;
@@ -1462,7 +1462,14 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                                 `;
             }
         }
-        return `<li>${prolink} ${distance} ${detail} ${conservation}</li>`;
+        if (this.mutational.residue_index.toString() === data.resi.toString()) {
+            // This neighbour is the mutated residue itself.
+            return `<li><b>${prolink}</b> (target) ${detail} ${conservation}</li>`;
+        } else {
+            // This is a normal neighbour
+            return `<li>${prolink} ${distance} ${detail} ${conservation}</li>`;
+        }
+
     }
 
     updateStructureOption() {
