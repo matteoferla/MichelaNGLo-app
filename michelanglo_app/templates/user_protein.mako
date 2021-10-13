@@ -151,7 +151,7 @@ ${loadfun|n}
 
 $(document).ready(function () {
     $('#save').click(function () {
-        NGL.getStage('viewport').makeImage({trim: true, antialias: true, transparent: false, factor:10}).then(NGL.download);
+        NGL.getStage('viewport').makeImage({trim: true, antialias: false, transparent: false, factor:10}).then(NGL.download);
     });
 
     <%include file="edit_modal/implement_modal.js"/>
