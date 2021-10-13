@@ -214,10 +214,22 @@
 
                         ######################
                             <h3>Structure</h3>
-                        <ul id="structureOption"><!--filled dynamically by venus.updateStructure()--></ul>
+                        <div class="row">
+                            <div class="col-12 col-lg-8">
+                                <ul id="structureOption"><!--filled dynamically by venus.updateStructure()--></ul>
+                            </div>
+                            <div class="col-12 col-lg-8">
+                                <div class="btn-group" role="group" aria-label="extras">
+                                  <button type="button" class="btn btn-outline-info" id="save"><i class="far fa-camera"></i> Save image</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     %elif mutation_mode == 'multi':
-                        <button type="button" class="btn btn-outline-info w-100" data-toggle="modal" data-target="#createMikeModal"><i class="far fa-pencil-paintbrush"></i> Create Michela<span style="font-variant: small-caps;">ngl</span>o page</button>
+                        <div class="btn-group" role="group" aria-label="extras">
+                    <button type="button" class="btn btn-outline-info w-100" data-toggle="modal" data-target="#createMikeModal"><i class="far fa-pencil-paintbrush"></i> Create Michela<span style="font-variant: small-caps;">ngl</span>o page</button>
+                    <button type="button" class="btn btn-outline-info" id="save"><i class="far fa-camera"></i> Save image</button>
+                        </div>
                     %endif
                     % if mutation_mode == 'main' and user and user.role == 'admin':
                         <div>

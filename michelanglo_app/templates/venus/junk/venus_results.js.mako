@@ -110,10 +110,6 @@ var collectedData = [];
         else {myData.currentChain ='A'}
 
     collectedData.push(...data);
-
-    $('#save').click(function () {
-       stage.makeImage( {trim: true, antialias: true, transparent: false }).then(function (img) {window.img=img; NGL.download(img);});
-    });
 %endif
 
     if (!! collectedData) {
