@@ -574,6 +574,7 @@ class Venus {
                 this.setStatus('All tasks complete', 'done');
                 this.energetical_gnomAD = msg.gnomAD_ddG;
                 //refill
+                this.updateNeighbourhood();
                 this.createLocation();
                 this.activate_data_gnomad();
                 this.concludeMutational();
@@ -1212,14 +1213,13 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
     }
 
     get_gnomAD_details(mutation) {
-        // mutation is str "A23Q" returns { id: "gnomAD_114_114_rs1163968308", x: 114, y: 114, impact: "MODERATE", description: "V114L (rs1163968308)", homozygous: 0 }
-        return this.protein.gnomAD.filter(v => v.description.includes(mutation))[0];
         //Python Variant object (gnomad) wass saved as string --> corrected.
-        // .replace(/Variant\((.*)\)/, '$1')
-        // .replace(/\'/g, '')
-        // .split(',')
-        // .map(v => v.split('='))
-        // .map(([k, v]) => [k.trim(), isNaN(parseInt(v)) ? v : parseInt(v)])
+        // mutation is str "A23Q" returns { id: "gnomAD_114_114_rs1163968308", x: 114, y: 114, impact: "MODERATE", description: "V114L (rs1163968308)", homozygous: 0 }
+        const detail = this.protein.gnomAD.filter(v => v.description.includes(mutation))[0];
+        if (this.energetical_gnomAD !== undefined && this.energetical_gnomAD[mutation] !== undefined) {
+            detail.ddG = this.energetical_gnomAD[mutation];
+        }
+        return detail
     }
 
     loadStructure() {
@@ -1403,18 +1403,55 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         this.createEntry('strcha', 'Structural character', strloctext);
         // unsure why these do not get picked up.
         $('#chainDescr [href="#viewport"]').protein();
+        this.updateNeighbourhood();
+    }
+
+    updateNeighbourhood() {
+        // # =========== Neighbours ===========
+        // ## The all selector
         const allSele = this.structural.neighbours.map(v => v.resi + ':A').join(' or ');
         let omni;
         if (this.structural.has_conservation) {
             omni = `<span ${this.prolink} data-color="bfactor" data-focus="residue" data-selection="${allSele}">
-                    (all, coloured by conservation)</span>`;
+                    all, coloured by conservation</span>`;
         } else {
             omni = `<span ${this.prolink} data-color="turquoise" data-focus="residue" data-selection="${allSele}">
-                    (all)</span>`;
+                    all</span>`;
         }
-        //this.makeProlink(allSele, '(all)');
 
-        let strtext = `<p>Structural neighbourhood ${omni}.
+        // ## the ptm selector
+        const ptmSele = this.structural.neighbours
+                            .filter(v => v.ptms.length)
+                            .map(v => v.resi + ':A').join(' or ');
+        const ptms = `<span ${this.prolink} data-color="turquoise"  data-focus="residue" data-selection="${ptmSele}">
+                    PTM sites</span>`;
+
+        // ## the gnomad selector
+        const gnomadSele = this.structural.neighbours
+                            .filter(v => Object.keys(v.gnomads).length)
+                            .map(v => v.resi + ':A').join(' or ');
+        const gnomads = `<span ${this.prolink} data-color="turquoise"  data-focus="residue" data-selection="${gnomadSele}">
+                    gnomAD</span>`;
+        let badGnomads = '';
+        if (this.energetical_gnomAD !== undefined) {
+            // there should always be an object gnomads, so the ternary is overkill
+            const cacognomadSele = this.structural.neighbours
+                            .filter(v => Object.keys(v.gnomads)
+                                               .map(mutation => this.get_gnomAD_details(mutation).ddG >= 2)
+                                               .some(v=>v)
+                            )
+                            .map(v => v.resi + ':A').join(' or ');
+            badGnomads = `<span ${this.prolink} data-color="salmon"  data-focus="residue" data-selection="${cacognomadSele}">
+                    destabilising gnomAD</span>`;
+        }
+        let ddGNeighs = '';
+        if (this.energetical !== undefined) {
+            const energySele = this.energetical.neighbours.map(v => v.trim().replace(' ',':')).join(' or ');
+            ddGNeighs = `<span ${this.prolink} data-color="teal"  data-focus="residue" data-selection="${energySele}">
+                    minimisation</span>`;
+        }
+
+        let strtext = `<p>Structural neighbourhood (${omni}; ${ptms}; ${gnomads}; ${badGnomads}; ${ddGNeighs}).
                         (see ${this.makeExt('https://gnomad.broadinstitute.org/', 'gnomAD')} and
                         ${this.makeExt('https://www.phosphosite.org', 'PhosphoSitePlus')} 
                         for extra information)</p>`;
@@ -1429,29 +1466,69 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         const label = data.resn + data.resi; //NB. resi is a string because PyMOL and it may be an insertion code (!?)
         const selector = data.resi + ":" + data.chain;
         const prolink = this.makeProlink(selector, label);
-        const distance = `&mdash; ${data.distance.toFixed(1)} &Aring; away`;
-        let detail = '';
-        if (data.detail.includes('gnomAD:')) {
-            const mutation = data.detail.replace('gnomAD:', '').split(' ')[0];
-            const deets = this.get_gnomAD_details(mutation);
-            if (deets !== undefined) {
-                const homozygous = deets.homozygous;
-                const icon = homozygous === 0 ? 'far fa-adjust' : 'fas fa-circle';
-                detail = `&mdash; <span style='cursor: pointer;'
-                                class='underlined venus-plain-mike'
-                                data-gnomad='${JSON.stringify([mutation])}'
-                                >${data.detail}
-                                </span>
-                                <i class="far ${icon}" data-toggle="tooltip" title="${homozygous} homozygous cases"></i>`;
+        const distance = ` &mdash; ${data.distance.toFixed(1)} &Aring; away`;
+        let detail = ''; // mdash sepearated. Mostly.
+        // ----------------------------- Interface
+        if (data.other_chain) {
+            const chainDeets = this.structural.chain_definitions.filter(v => v.chain = 'A');
+            if (chainDeets) {
+                detail = ` from interacting protein (${data.chain}: ${chainDeets[0].name})`;
             } else {
-                detail = '&mdash; ' + data.detail;
+                 console.log('Warning: no name in chain definitions??');
+                 detail = ` from interacting protein (${data.chain})`;
             }
-        } else if (data.detail !== undefined && data.detail.length) {
-            detail = '&mdash; ' + data.detail;
         }
+        // ----------------------------- Fill PTMs stuff.
+        data.ptms.map(ptm => {
+                  detail += ' &mdash; ' + ptm;
+              });
+        // ----------------------------- Fill gnomAD stuff.
+        Object.keys(data.gnomads)
+              .map(mutation => {
+                         const properties = data.gnomads[mutation];
+                         const datagnomad = `data-gnomad='${JSON.stringify([mutation])}'`;
+                         const deets = this.get_gnomAD_details(mutation);
+                         const homozygous = deets.homozygous;
+                         const icon = homozygous === 0 ? 'far fa-adjust' : 'fas fa-circle';
+                         const iconed = `<i class="far ${icon}" ${datagnomad} data-toggle="tooltip" title="${homozygous} homozygous cases"></i>`;
+
+                         if (! deets) {
+                             //glitched? Generally nonsense mutations?
+                             detail += ' &mdash; ' + data.detail;
+                         }
+                         else if (deets.type !== 'missense') {
+                                // Not a missense.
+                                detail += ` &mdash;
+                                      ${properties.full}
+                                      ${iconed}`;
+                         }
+                         else if (deets.ddG === undefined) {
+                                // Missense w/o ddG
+                                detail += ` &mdash;
+                                      <span style='cursor: pointer;'
+                                            class='underlined venus-plain-mike'
+                                            ${datagnomad}>
+                                      ${properties.full}
+                                      </span>
+                                      ${iconed}`;
+                         }
+                         else {
+                             // Missense w/ ddG
+                             const kcalColor = deets.ddG < 2 ? 'text-muted' : 'text-danger';
+                             const kcal = `<span class='${kcalColor}' ${datagnomad}>${deets.ddG.toPrecision(2)} kcal/mol</span>`;
+                             detail += ` &mdash;
+                                      <span style='cursor: pointer;'
+                                            class='underlined venus-plain-mike'
+                                            ${datagnomad}>
+                                      ${properties.full} ${kcal}
+                                      </span>
+                                      ${iconed}`;
+                         }
+              });
+        // ----------------------------- conservation
         let conservation = '';
         if (!!this.structural.has_conservation) {
-            conservation = '&mdash; no conservation data';
+            conservation = ' &mdash; no conservation data';
             if (data.conscore !== undefined) {
                 conservation = `&mdash; <span  title='Consurf normalised homology score: positive = less conserved. negative = conserved' data-toggle='tooltip'>
                                 conservation=${data.conscore.toFixed(1)}
@@ -1462,6 +1539,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                                 `;
             }
         }
+        // ----------------------------- Output
         if (this.mutational.residue_index.toString() === data.resi.toString()) {
             // This neighbour is the mutated residue itself.
             return `<li><b>${prolink}</b> (target) ${detail} ${conservation}</li>`;
