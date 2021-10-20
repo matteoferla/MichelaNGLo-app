@@ -269,7 +269,7 @@ def mutate(request):
             mutations = request.params['mutations'].split()
             all_protein_data = json.loads(settings['proteinJSON'])
             protein_data = all_protein_data[model]
-            filename = os.path.join('michelanglo_app', 'temp', f'{page.identifier}.mut.pdb')
+            filename = os.path.join(request.registry.settings['michelanglo.user_data_folder'], 'temp', f'{page.identifier}.mut.pdb')
             if protein_data['type'] == 'data':
                 if protein_data['isVariable'] is True or protein_data['isVariable'] == 'true':
                     # if is variable is true the pdb block is in settings pdb.

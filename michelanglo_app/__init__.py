@@ -1,24 +1,26 @@
 ######### sentry.io logging
 
 
-import sentry_sdk, os
-from sentry_sdk.integrations.pyramid import PyramidIntegration
+import os
+from _collections import OrderedDict
 
-if 'SENTRY_DNS_MICHELANGLO' in os.environ:
-    #this is not in the config file due to security as this github repo is public.
-    sentry_sdk.init(
-     dsn=os.environ['SENTRY_DNS_MICHELANGLO'],
-     integrations=[PyramidIntegration()]
-    )
-
+from .data_folder_setup import setup_folders
+from .env_override import override_environmentally, environmental2config
+from .sentry import setup_sentry
 from pyramid.config import Configurator
 from pyramid.session import SignedCookieSessionFactory
+from pyramid.router import Router
 
-def main(global_config, **settings):
+
+def main(global_config: OrderedDict, **settings) -> Router:
     """ This function returns a Pyramid WSGI application.
     """
+    override_environmentally(settings)
+    setup_sentry(settings['sentry.data_source_name'])
+    setup_folders(user_data_folder=settings['michelanglo.user_data_folder'],
+                  protein_data_folder=settings['michelanglo.protein_data_folder'])
     config = Configurator(settings=settings)
-    my_session_factory = SignedCookieSessionFactory('TIM barrels') ##temporary data
+    my_session_factory = SignedCookieSessionFactory(settings['auth.secret'])
     config.set_session_factory(my_session_factory)
     config.include('.models')
     config.include('pyramid_mako')
@@ -27,7 +29,6 @@ def main(global_config, **settings):
     config.include('.scheduler')
     config.scan()
     return config.make_wsgi_app()
-
 
 ##################################
 # import signal

@@ -17,7 +17,9 @@ configure_mappers()
 
 
 def get_engine(settings, prefix='sqlalchemy.'):
-    return engine_from_config(settings, prefix) ## settings = {'sqlalchemy.url': os.env['SQL_URL'], 'sqlalchemy.echo':'False'} basically.
+    return engine_from_config(settings, prefix)
+    # settings = {'sqlalchemy.url': os.env['SQL_URL'],
+    #             'sqlalchemy.echo':'False'} basically.
 
 
 def get_session_factory(engine):
@@ -62,6 +64,7 @@ def includeme(config):
 
     """
     settings = config.get_settings()
+    Page.data_folder = settings['michelanglo.user_data_folder']
     settings['tm.manager_hook'] = 'pyramid_tm.explicit_manager'
 
     # use pyramid_tm to hook the transaction lifecycle to the request

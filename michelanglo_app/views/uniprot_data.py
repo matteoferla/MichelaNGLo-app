@@ -1,5 +1,7 @@
 __description___ = """
 This page loads the data from the protein-data module as is used by both name.py and venus.py
+
+global_settings is initialised in folder setup
 """
 
 import os, json
@@ -7,8 +9,6 @@ from michelanglo_protein import ProteinCore, global_settings, Structure
 from michelanglo_protein.generate import ProteinGatherer
 import logging
 log = logging.getLogger(__name__)
-
-global_settings.startup(os.environ['PROTEIN_DATA'])
 
 ## the folder dictionary has the cross ref files.
 try:

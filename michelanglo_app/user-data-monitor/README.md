@@ -1,1 +1,0 @@
-This folder gets filled with images of pages that require to be "monitored".

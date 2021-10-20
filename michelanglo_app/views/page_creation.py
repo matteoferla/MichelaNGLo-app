@@ -7,10 +7,6 @@ import io
 import re
 import json
 
-# transpiler templates are here.
-PyMolTranspiler.tmp = os.path.join(os.getcwd(), 'michelanglo_app', 'temp')
-PyMolTranspiler.template_folder = os.path.join(os.getcwd(), 'michelanglo_app', 'transpiler_templates')
-
 from .common_methods import is_js_true,\
                              is_malformed,\
                              PDBMeta,\

@@ -26,7 +26,6 @@ from sqlalchemy import (
 from .meta import Base
 
 
-
 class Page(Base):
     """ The SQLAlchemy declarative model class for a Page object.
         This is just to speed up things. The actual data is in user-data as a pickle!
@@ -55,9 +54,11 @@ class Page(Base):
     privacy = Column(Text, default='private') #private | public | published | sgc | pinned
     settings = None  #watchout this ought to be a dict, but dict is mutable.
     key = None
-    unencrypted_path = property(lambda self: os.path.join('michelanglo_app', 'user-data', self.identifier + '.p'))
-    encrypted_path = property(lambda self: os.path.join('michelanglo_app', 'user-data', self.identifier + '.ep'))
-    thumb_path = property(lambda self: os.path.join('michelanglo_app', 'user-data-thumb', self.identifier + '.png'))
+    # paths changed from michelanglo_app/user-data and michelanglo_app/user-data-thumb
+    data_folder = 'user_data'  # class attribute changed in .model.__init__ config.
+    unencrypted_path = property(lambda self: os.path.join(self.data_folder, 'pages', self.identifier + '.p'))
+    encrypted_path = property(lambda self: os.path.join(self.data_folder, 'pages', self.identifier + '.ep'))
+    thumb_path = property(lambda self: os.path.join(self.data_folder, 'thumb', self.identifier + '.png'))
     path = property(lambda self: self.encrypted_path if self.encrypted is True else self.unencrypted_path)
 
     def __init__(self, identifier, key=None):

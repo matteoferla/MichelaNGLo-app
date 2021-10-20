@@ -1,6 +1,7 @@
 from pyramid.view import view_config, notfound_view_config, view_defaults
 from pyramid.renderers import render_to_response
 from pyramid.response import FileResponse
+from pyramid.request import Request
 import os, json, time
 from ..models import User, Page
 from . import custom_messages, valid_extensions
@@ -10,24 +11,12 @@ from .buffer import system_storage
 import logging
 log = logging.getLogger(__name__)
 
-### make folder if exists... MAKE SURE IT IS EXCLUDED FROM GIT!
-for folder in ('user-data', 'user-data-thumb', 'user-data-monitor'):
-    if not os.path.isdir(os.path.join('michelanglo_app',folder)):
-        os.mkdir(os.path.join('michelanglo_app', folder))
-if os.path.isdir(os.path.join('michelanglo_app','temp')):
-    for file in os.listdir(os.path.join('michelanglo_app','temp')):
-        os.remove(os.path.join('michelanglo_app','temp',file))
-else:
-    os.mkdir(os.path.join('michelanglo_app','temp'))
-
 ########################################################################
 ########################################################################
-
-
 
 @view_defaults(route_name='home')
 class DefaultViews:
-    def __init__(self, request):
+    def __init__(self, request: Request):
         self.request = request
         self.user = request.user
         self.page = self.get_page()

@@ -31,6 +31,7 @@ requires = [
     'sentry-sdk',
     'apscheduler',
     'imageio'#,
+    'blosc',  # pyrosetta?
     #'bio',
     #'pyrosetta'
 ]
@@ -43,7 +44,7 @@ tests_require = [
 
 setup(
     name='michelanglo_app',
-    version='0.0',
+    version='1.0',
     description='michelanglo_app',
     long_description=__docs__,
     classifiers=[
@@ -52,9 +53,9 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
     ],
-    author='',
-    author_email='',
-    url='',
+    author='Matteo Ferla',
+    author_email='matteo.ferla@well.ox.ac.uk',
+    url='https://michelanglo.sgc.ox.ac.uk/',
     keywords='web pyramid pylons',
     packages=find_packages(),
     include_package_data=True,

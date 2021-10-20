@@ -221,7 +221,11 @@ def save_file(request, extension, field='file'):
     """
     Saves the file without doing anything to it.
     """
-    filename = os.path.join('michelanglo_app', 'temp', '{0}.{1}'.format(get_uuid(request), extension))
+
+    filename = os.path.join(request.registry.settings['michelanglo.user_data_folder'],
+                            'temp',
+                            '{0}.{1}'.format(get_uuid(request), extension)
+                            )
     with open(filename, 'wb') as output_file:
         if isinstance(request.params[field], str):  ###API user made a mess.
             log.warning(f'user uploaded a str not a file!')

@@ -18,7 +18,7 @@ ALTER TABLE pages ALTER COLUMN encrypted SET DEFAULT false;
 
 if __name__ == '__main__':
     print('RUN AT Michelanglo root folder')
-    path_to_files = 'michelanglo_app/user-data/'
+    path_to_files = '../user-data/'
     from michelanglo_app.models import *
     import os, transaction
     from datetime import datetime

@@ -5,6 +5,7 @@ from __future__ import annotations
 from ..uniprot_data import *
 # ProteinCore organism human uniprot2pdb
 from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structure
+from michelanglo_transpiler import PyMolTranspiler  # used solely for temp folder
 
 from ...models import User, Page  ##needed solely for log.
 from ..common_methods import is_malformed, notify_admin, get_pdb_block_from_request, is_alphafold_taxon
@@ -506,7 +507,7 @@ class Venus(VenusBase):
             params = self.request.params.getall('params')
         else:
             params = []
-        temp_folder = os.path.join('michelanglo_app', 'temp')
+        temp_folder = PyMolTranspiler.temporary_folder
         # TODO In many places the data is stored in the module!
         # In module page there is biggest offender.
         if not os.path.exists(temp_folder):

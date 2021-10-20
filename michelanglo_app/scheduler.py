@@ -20,11 +20,13 @@ log = logging.getLogger('apscheduler')
 # ==============================  MAIN  ================================================================================
 
 def includeme(config):
-    # scheduler.days_delete_unedited = 30
-    # scheduler.days_delete_untouched = 365
     settings = config.get_settings()
-    scheduler = BackgroundScheduler()
+    Entasker.sql_url = settings['sqlalchemy.url']
+    Entasker.user_data_folder = settings['michelanglo.user_data_folder']
+    #Entasker.port = '8088'  # hardcoded because I am not sure I can find out the port...
+    Entasker.puppeteer_chrome = settings["puppeteer.executablePath"]
 
+    scheduler = BackgroundScheduler()
     # =============== PERIODIC TASKS ===============
     scheduler.add_job(Entasker.kill_task, 'interval', days=1, args=[int(settings['scheduler.days_delete_unedited']),
                                                                     int(settings['scheduler.days_delete_untouched'])])
@@ -42,9 +44,15 @@ def includeme(config):
 # ==============================   TASKS  ==============================================================================
 
 class Entasker:
+
+    sql_url = ''  # filled by scheduler.includeme builder function
+    user_data_folder = ''
+    port = '8088'
+    puppeteer_chrome = ''
+
     def __init__(self):
         # not request bound.
-        engine = engine_from_config({'sqlalchemy.url': os.environ['SQL_URL'],
+        engine = engine_from_config({'sqlalchemy.url': self.sql_url,
                                      'sqlalchemy.echo': 'False'},
                                     prefix='sqlalchemy.')
         Session = sessionmaker(bind=engine)
@@ -166,13 +174,19 @@ class Entasker:
                 log.info(f'Monitoring {page}.')
                 state = []
                 try:
-                    if os.system(f'node michelanglo_app/monitor.js {page.identifier} tmp_'):
-                        raise ValueError(f'monitor crashed: node michelanglo_app/monitor.js {page.identifier} tmp_')
+                    # under most conditions the following should be `michelanglo_app`
+                    michelanglo_app_folder = os.path.split(__file__)[0]
+                    cmd = ' '.join([f'USER_DATA={cls.user_data_folder}',
+                                    f'PORT={cls.port}',
+                                    f'PUPPETEER_CHROME={cls.puppeteer_chrome}',
+                                    f'node {michelanglo_app_folder}/monitor.js {page.identifier} tmp_'])
+                    if os.system(cmd):  # exit status != 0
+                        raise ValueError(f'monitor crashed: {cmd}')
                     details = json.load(
-                        open(os.path.join('michelanglo_app', 'user-data-monitor', page.identifier + '.json')))
+                        open(os.path.join(cls.user_data_folder, 'monitor', page.identifier + '.json')))
                     for i in range(len(details)):
-                        ref = os.path.join('michelanglo_app', 'user-data-monitor', f'{page.identifier}-{i}.png')
-                        new = os.path.join('michelanglo_app', 'user-data-monitor', f'tmp_{page.identifier}-{i}.png')
+                        ref = os.path.join(cls.user_data_folder, 'monitor', f'{page.identifier}-{i}.png')
+                        new = os.path.join(cls.user_data_folder, 'monitor', f'tmp_{page.identifier}-{i}.png')
                         assert os.path.exists(ref), 'Reference image does not exist'
                         assert os.path.exists(new), 'Generated image does not exist'
                         ref_img = imageio.imread(ref).flatten()
@@ -192,7 +206,7 @@ class Entasker:
                 else:
                     log.info(f'Page monitoring successful for {page.identifier}')
                 pickle.dump(state,
-                            open(os.path.join('michelanglo_app', 'user-data-monitor', f'verdict_{page.identifier}.p'),
+                            open(os.path.join(cls.user_data_folder, 'monitor', f'verdict_{page.identifier}.p'),
                                  'wb'))
 
     @classmethod

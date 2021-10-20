@@ -15,7 +15,7 @@
 % if user and user.role == 'admin':
     <%
         icon = {'basic': 'user', 'friend': 'user-tie', 'guest': 'user-secret', 'admin': 'user-crown', 'new': 'user-astronaut', 'hacker': 'user-ninja', 'trashcan': 'dumpster'}
-        log = ''.join(reversed(open('michelanglo_app.log','r').readlines()[-500:])) #for some ducked up reason, templates are in root.
+        log = ''.join(reversed(open('michelanglo.log','r').readlines()[-500:])) #for some ducked up reason, templates are in root.
 
         from michelanglo_app.models import Doi
 

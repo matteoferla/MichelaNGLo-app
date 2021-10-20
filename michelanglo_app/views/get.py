@@ -83,22 +83,22 @@ def get_pages(request):
     log.info(f'{User.get_username(request)} request API view of pages')
     data = {}
     to_list = lambda x: [p.identifier for p in x]  ## crap name. converts the objects to names only.
+    pages_folder = os.path.join(request.registry.settings['michelanglo.user_data_folder'], 'pages')
+    data['public'] = to_list(request.dbsession.query(Page).filter(Page.privacy != 'private').all())
+    data['all'] = 'RESTRICTED'
     if not user:
         data['owned'] = 'not logged in'
         data['visited'] = 'not logged in'
         data['error'] = 'not logged in'
-    else:
-        if user.role == 'admin':   ### ULTRABACK DOOR.
-            data['all'] = {'unencrypted_files': [p.replace('.p','') for p in os.listdir(os.path.join('michelanglo_app', 'user-data')) if os.path.splitext(p)[1] == '.p'],
-                           'encrypted_files': [p.replace('.ep','') for p in os.listdir(os.path.join('michelanglo_app', 'user-data')) if os.path.splitext(p)[1] == '.ep'],
-                           'unencrypted_entries': [p.identifier for p in request.dbsession.query(Page) if p.existant and not p.encrypted],
-                           'encrypted_entries': [p.identifier for p in request.dbsession.query(Page) if p.existant and p.encrypted],
-                           'deleted_entries': [p.identifier for p in request.dbsession.query(Page) if not p.existant]}
-        else:
-            data['all'] = 'RESTRICTED'
-        data['owned'] = to_list(user.owned.select(request.dbsession))
-        data['visited'] = to_list(user.visited.select(request.dbsession))
-    data['public'] = to_list(request.dbsession.query(Page).filter(Page.privacy != 'private').all())
+        return data
+    data['owned'] = to_list(user.owned.select(request.dbsession))
+    data['visited'] = to_list(user.visited.select(request.dbsession))
+    if user.role == 'admin':   ### ULTRABACK DOOR.
+        data['all'] = {'unencrypted_files': [p.replace('.p','') for p in os.listdir(pages_folder) if os.path.splitext(p)[1] == '.p'],
+                       'encrypted_files': [p.replace('.ep','') for p in os.listdir(pages_folder) if os.path.splitext(p)[1] == '.ep'],
+                       'unencrypted_entries': [p.identifier for p in request.dbsession.query(Page) if p.existant and not p.encrypted],
+                       'encrypted_entries': [p.identifier for p in request.dbsession.query(Page) if p.existant and p.encrypted],
+                       'deleted_entries': [p.identifier for p in request.dbsession.query(Page) if not p.existant]}
     return data
 
 @view_config(route_name='set', renderer='json')
@@ -117,85 +117,97 @@ def set_ajax(request):
 
     :return: json ('status' as one key)
     """
+    # Case: not Admin
     if not request.user or request.user.role != 'admin':
         request.response.status = 403
-        log.warn(f'{User.get_username(request)} was refused setting.')
-    else:
-        malformed = is_malformed(request, 'item')
+        log.warning(f'{User.get_username(request)} was refused setting.')
+        return {'status': 'forbidden'}
+    # Case: malformed
+    malformed = is_malformed(request, 'item')
+    if malformed:
+        return {'status': malformed}
+    if request.params['item'] == 'msg':
+        malformed = is_malformed(request, 'title','descr','bg')
         if malformed:
             return {'status': malformed}
-        if request.params['item'] == 'msg':
-            malformed = is_malformed(request, 'title','descr','bg')
-            if malformed:
-                return {'status': malformed}
-            custom_messages.append({el: request.params[el] for el in ('title','descr','bg')})
-            log.info(f'{User.get_username(request)} set a new custom message.')
-            return {'status': 'success'}
-        elif request.params['item'] == 'clear_msg':
-            log.info(f'{User.get_username(request)} cleared custom messages.')
-            while custom_messages:
-                custom_messages.pop()
-            return {'status': 'success'}
-        elif request.params['item'] == 'terminate':
-            if 'code' in request.params and request.params['code'] == os.environ['SECRETCODE']:
-                log.warning(f'{User.get_username(request)} terminated the app')
-                notify_admin(f'{User.get_username(request)} terminated the app')
-                os.system('kill `lsof -t -i:8088`') ## is this the most graceful way of kill itself???
-            else:
-                log.warning(f'{User.get_username(request)} tried to terminate the app')
-                notify_admin(f'{User.get_username(request)} tried to terminate the app')
-                return {'status': 'wrong secret code.'}
-        elif request.params['item'] == 'protection':
-            pagename = request.params['page']
-            log.info(f'{User.get_username(request)} changed the monitoring of page {pagename}.')
-            page = Page.select(request.dbsession, pagename)
-            if not page.protected:
-                # to do change to scheduler.
-                os.system(f'node michelanglo_app/monitor.js {pagename} &')
-            page.protected = True
-            return {'status': 'protected successfully'}
-        elif request.params['item'] == 'deprotection':
-            pagename = request.params['page']
-            log.info(f'{User.get_username(request)} changed the monitoring of page {pagename}.')
-            page = Page.select(request.dbsession, pagename)
-            page.protected = False
-            for file in os.listdir('michelanglo_app/user-data-monitor'):
-                if file.find(pagename) == 0:
-                    os.remove(os.path.join('michelanglo_app/user-data-monitor', file))
-            return {'status': 'deprotected successfully'}
-        elif request.params['item'] == 'shorten':
-            malformed = is_malformed(request, 'long', 'short')
-            if malformed:
-                return {'status': malformed}
-            longname = request.params['long']
-            shortname = request.params['short']
-            long = Page.select(request.dbsession, longname)
-            if request.dbsession.query(Doi).filter(Doi.short == shortname).first() is not None:
-                return {'status': f'{shortname} taken already.'}
-            redirect = Doi(long=longname, short=shortname)
-            request.dbsession.add(redirect)
-            log.info(f'{User.get_username(request)} made shorter page {longname} as {shortname}.')
-            return {'status': 'success', 'long': longname, 'short': shortname}
-        elif request.params['item'] == 'publication':
-            malformed = is_malformed(request, 'identifier', 'url')
-            # options include ('identifier', 'url', 'authors', 'year', 'title', 'journal', 'issue')
-            if malformed:
-                return {'status': malformed}
-            publication = Publication.from_request(request)
-        elif request.params['item'] == 'task':
-            malformed = is_malformed(request, 'task')
-            if malformed:
-                return {'status': malformed}
-            taskname = request.params['task']
-            try:
-                Entasker.run(taskname)
-                log.info(f'Admin directed task {taskname} completed.')
-                return {'status': 'success'}
-            except Exception as error:
-                log.warning(f'Admin directed task {taskname} failed - {error.__class__.__name__}: {error}')
-                return {'status': 'error', 'msg': f'{error.__class__.__name__}: {error}'}
+        custom_messages.append({el: request.params[el] for el in ('title','descr','bg')})
+        log.info(f'{User.get_username(request)} set a new custom message.')
+        return {'status': 'success'}
+    elif request.params['item'] == 'clear_msg':
+        log.info(f'{User.get_username(request)} cleared custom messages.')
+        while custom_messages:
+            custom_messages.pop()
+        return {'status': 'success'}
+    elif request.params['item'] == 'terminate':
+        if 'code' in request.params and request.params['code'] == os.environ['SECRETCODE']:
+            log.warning(f'{User.get_username(request)} terminated the app')
+            notify_admin(f'{User.get_username(request)} terminated the app')
+            # is this the most graceful way of kill itself?
+            # raise SystemExit does the same, but raises an error.
+            # ToDo find out how to wait until there are no task!
+            os.system('kill `lsof -t -i:8088`')
         else:
-            return {'status': 'unknown cmd'}
+            log.warning(f'{User.get_username(request)} tried to terminate the app')
+            notify_admin(f'{User.get_username(request)} tried to terminate the app')
+            return {'status': 'wrong secret code.'}
+    elif request.params['item'] == 'protection':
+        pagename = request.params['page']
+        log.info(f'{User.get_username(request)} changed the monitoring of page {pagename}.')
+        page = Page.select(request.dbsession, pagename)
+        if not page.protected: # protected pages are minotored
+            # anticipate scheduler
+            michelanglo_app_folder = os.path.split(os.path.split(__file__)[0])[0]
+            cmd = ' '.join([f'USER_DATA={request.registry.settings["michelanglo.user_data_folder"]}',
+                            'PORT=8088',
+                            f'PUPPETEER_CHROME={request.registry.settings["puppeteer.executablePath"]}',
+                            f'node {michelanglo_app_folder}/monitor.js {page.identifier}'])
+            if os.system(cmd):
+                return {'status': 'protection failed. Contact Admin'}
+        page.protected = True
+        return {'status': 'protected successfully'}
+    elif request.params['item'] == 'deprotection':
+        pagename = request.params['page']
+        log.info(f'{User.get_username(request)} changed the monitoring of page {pagename}.')
+        page = Page.select(request.dbsession, pagename)
+        page.protected = False
+        monitor_folder = os.path.join(request.registry.settings["michelanglo.user_data_folder"], 'monitor')
+        for file in os.listdir(monitor_folder):
+            if file.find(pagename) == 0:
+                os.remove(os.path.join(monitor_folder, file))
+        return {'status': 'deprotected successfully'}
+    elif request.params['item'] == 'shorten':
+        malformed = is_malformed(request, 'long', 'short')
+        if malformed:
+            return {'status': malformed}
+        longname = request.params['long']
+        shortname = request.params['short']
+        long = Page.select(request.dbsession, longname)
+        if request.dbsession.query(Doi).filter(Doi.short == shortname).first() is not None:
+            return {'status': f'{shortname} taken already.'}
+        redirect = Doi(long=longname, short=shortname)
+        request.dbsession.add(redirect)
+        log.info(f'{User.get_username(request)} made shorter page {longname} as {shortname}.')
+        return {'status': 'success', 'long': longname, 'short': shortname}
+    elif request.params['item'] == 'publication':
+        malformed = is_malformed(request, 'identifier', 'url')
+        # options include ('identifier', 'url', 'authors', 'year', 'title', 'journal', 'issue')
+        if malformed:
+            return {'status': malformed}
+        publication = Publication.from_request(request)
+    elif request.params['item'] == 'task':
+        malformed = is_malformed(request, 'task')
+        if malformed:
+            return {'status': malformed}
+        taskname = request.params['task']
+        try:
+            Entasker.run(taskname)
+            log.info(f'Admin directed task {taskname} completed.')
+            return {'status': 'success'}
+        except Exception as error:
+            log.warning(f'Admin directed task {taskname} failed - {error.__class__.__name__}: {error}')
+            return {'status': 'error', 'msg': f'{error.__class__.__name__}: {error}'}
+    else:
+        return {'status': 'unknown cmd'}
 
 
 
