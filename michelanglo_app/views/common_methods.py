@@ -5,6 +5,8 @@ from michelanglo_protein import Structure, global_settings, is_alphafold_taxon
 from . import valid_extensions
 from .uniprot_data import uniprot2name
 from pyramid.request import Request
+import smtplib
+from email.mime.text import MIMEText
 
 log = logging.getLogger(__name__)
 from typing import Union
@@ -24,54 +26,57 @@ def is_js_true(value: str):
         return True
 
 
-def get_uuid(request):
+def get_uuid(request: Request):
     identifier = str(uuid.uuid4())
     if identifier in [p.identifier for p in request.dbsession.query(Page)]:
         log.error('UUID collision!!!')
         return get_uuid(request)  # one in a ten-quintillion!
     return identifier
 
+class Comms:
+    slack_webhook = None  # filled by data_folder_setup.setup_comms
+    server_email = None
+    admin_email = None
 
-def notify_admin(msg):
-    """
-    Send message to a slack webhook
-    :param msg:
-    :return:
-    """
-    if 'SLACK_WEBHOOK' not in os.environ:
-        log.critical(f'SLACK_WEBHOOK is absent! Cannot send message {msg}')
-        return
-    # sanitise.
-    msg = unicodedata.normalize('NFKD', msg).encode('ascii', 'ignore').decode('ascii')
-    msg = re.sub('[^\w\s\-.,;?!@#()\[\]]', '', msg)
+    @classmethod
+    def notify_admin(cls, msg):
+        """
+        Send message to a slack webhook
+        :param msg:
+        :return:
+        """
+        if not cls.slack_webhook:
+            log.critical(f'SLACK_WEBHOOK is absent!')
+            log.warning(f'Cannot send message {msg}')
+            return
+        # sanitise.
+        msg = unicodedata.normalize('NFKD', msg).encode('ascii', 'ignore').decode('ascii')
+        msg = re.sub('[^\w\s\-.,;?!@#()\[\]]', '', msg)
 
-    r = requests.post(url=os.environ['SLACK_WEBHOOK'],
-                      headers={'Content-type': 'application/json'},
-                      data=f"{{'text': '{msg}'}}")
-    if r.status_code == 200 and r.content == b'ok':
-        return True
-    else:
-        log.error(f'{msg} failed to send (code: {r.status_code}, {r.content}).')
-        return False
+        r = requests.post(url=cls.slack_webhook.strip(),
+                          headers={'Content-type': 'application/json'},
+                          data=f"{{'text': '{msg}'}}")
+        if r.status_code == 200 and r.content == b'ok':
+            return True
+        else:
+            log.error(f'{msg} failed to send (code: {r.status_code}, {r.content}).')
+            return False
 
-
-import smtplib
-from email.mime.text import MIMEText
-
-
-def email(text, recipient, subject='[Michelanglo] Notification'):
-    if "SERVER_EMAIL" not in os.environ:
-        log.warning('There is not mailing system configured.')
-    else:
-        smtp = smtplib.SMTP()
-        smtp.connect('localhost')
-        msg = MIMEText(text)
-        msg['Subject'] = subject
-        msg['From'] = os.environ["SERVER_EMAIL"]
-        msg['To'] = recipient
-        msg.add_header('reply-to', os.environ["ADMIN_EMAIL"])
-        smtp.send_message(msg)
-        smtp.quit()
+    @classmethod
+    def email(cls, text, recipient, subject='[Michelanglo] Notification'):
+        if not cls.server_email:
+            log.warning('There is not mailing system configured.')
+        else:
+            smtp = smtplib.SMTP()
+            smtp.connect('localhost')
+            msg = MIMEText(text)
+            msg['Subject'] = subject
+            msg['From'] = cls.server_email
+            msg['To'] = recipient
+            if cls.admin_email:
+                msg.add_header('reply-to', cls.admin_email)
+            smtp.send_message(msg)
+            smtp.quit()
 
 
 def is_malformed(request, *args) -> Union[None, str]:
@@ -214,7 +219,7 @@ def get_references(code):
     except Exception as error:
         msg = f'get_reference {error.__class__.__name__} - {error} for "{code}"'
         log.error(msg)
-        notify_admin(msg)
+        Comms.notify_admin(msg)
 
 
 def save_file(request, extension, field='file'):

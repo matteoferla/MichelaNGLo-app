@@ -27,3 +27,12 @@ def setup_folders(user_data_folder:str, protein_data_folder:str):
     global_settings.startup(protein_data_folder)
     # transpiler templates are here.
     PyMolTranspiler.template_folder = os.path.join(os.getcwd(), 'michelanglo_app', 'transpiler_templates')
+
+def setup_comms(slack_webhook:str, server_email:str, admin_email: str):
+    from .views.common_methods import Comms
+    if slack_webhook:
+        Comms.slack_webhook = slack_webhook.strip()
+    if server_email and '@' in server_email:
+        Comms.server_email = server_email.strip()
+    if admin_email and '@' in admin_email:
+        Comms.admin_email = admin_email.strip()

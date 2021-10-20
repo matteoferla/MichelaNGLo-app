@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql.expression import and_
 import transaction
 from apscheduler.schedulers.background import BackgroundScheduler
-from .views.common_methods import notify_admin, email
+from .views.common_methods import Comms
 from michelanglo_transpiler import GlobalPyMOL
 from mako.template import Template
 
@@ -96,7 +96,7 @@ class Entasker:
                 elif user.email is None or '@' not in user.email:
                     # do not contact
                     msg = f'{user.name} (no email) could not notified of {len(delitura)} pages expiring.'
-                    notify_admin(msg)
+                    Comms.notify_admin(msg)
                     log.info(msg)
                 else:
                     docs = 'https://michelanglo.sgc.ox.ac.uk/docs/users'
@@ -115,14 +115,14 @@ class Entasker:
                            'go to your personal gallery via the menu button and look for a clock icon at the bottom of some cards.)\n' + \
                            f'Thank you,\nMatteo (Michelanglo admin)\n'
                     try:
-                        email(text, user.email, 'Michelanglo page expiry notice') #
+                        Comms.email(text, user.email, 'Michelanglo page expiry notice') #
                         msg = f'{user.name} ({user.email}) was notified of {len(delitura)} pages expiring.'
-                        notify_admin(msg)
+                        Comms.notify_admin(msg)
                         log.info(msg)
                     except Exception as error:
                         msg = f'Failed at emailing {user.name} ({user.email}) about {len(delitura)} pages expiring ' + \
                               f'because of {type(error).__name__} {str(error)}.'
-                        notify_admin(msg)
+                        Comms.notify_admin(msg)
                         log.warning(msg)
 
     @classmethod
@@ -146,7 +146,7 @@ class Entasker:
                 if page.age < int(days_delete_untouched):
                     continue  # too young
                 elif self.session.query(Doi).filter(Doi.long == page.identifier).first() is not None:
-                    notify_admin(f'{page.identifier} is untouched but has a doi.')
+                    Comms.notify_admin(f'{page.identifier} is untouched but has a doi.')
                     continue  # doi
                 else:
                     log.info(f'Deleting abandoned page {page.identifier} ({page.timestamp})')
@@ -157,9 +157,9 @@ class Entasker:
                         # this is a pretty major incident.
                         page.existant = False
                         log.warning(f'{page.identifier} does not exist.')
-                        notify_admin(f'{page.identifier} does not exist.')
+                        Comms.notify_admin(f'{page.identifier} does not exist.')
                     n += 1
-            notify_admin(f'Deleted {n} pages in cleanup.')
+            Comms.notify_admin(f'Deleted {n} pages in cleanup.')
         self.session.commit()
 
     @classmethod
@@ -198,11 +198,11 @@ class Entasker:
                         else:
                             state.append(False)
                             msg = f'Page monitoring unsuccessful for {page.identifier} image {i}'
-                            notify_admin(msg)
+                            Comms.notify_admin(msg)
                 except Exception as err:
                     msg = f'Page monitoring unsuccessful for {page.identifier} {err}'
                     log.warning(msg)
-                    notify_admin(msg)
+                    Comms.notify_admin(msg)
                 else:
                     log.info(f'Page monitoring successful for {page.identifier}')
                 pickle.dump(state,

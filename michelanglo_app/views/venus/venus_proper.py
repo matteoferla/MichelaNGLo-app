@@ -8,7 +8,7 @@ from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structur
 from michelanglo_transpiler import PyMolTranspiler  # used solely for temp folder
 
 from ...models import User, Page  ##needed solely for log.
-from ..common_methods import is_malformed, notify_admin, get_pdb_block_from_request, is_alphafold_taxon
+from ..common_methods import is_malformed, get_pdb_block_from_request, is_alphafold_taxon
 from ..user_management import permission
 from .. import custom_messages
 
@@ -16,7 +16,7 @@ from typing import Optional, Any, List, Union, Tuple, Dict
 import random, traceback, sys
 from pyramid.view import view_config, view_defaults
 from pyramid.renderers import render_to_response
-from ..common_methods import notify_admin
+from ..common_methods import Comms
 import pyramid.httpexceptions as exc
 
 import json, os, logging, operator
@@ -119,7 +119,7 @@ class Venus(VenusBase):
                 self.reply['msg'] = str(err)
             log.warning(f'Venus error {err.__class__.__name__}: {err}')
             if 'Malformed error' not in str(err):
-                notify_admin(f'Venus error {err.__class__.__name__}: {err}')
+                Comms.notify_admin(f'Venus error {err.__class__.__name__}: {err}')
                 log.debug(traceback.format_exc())
             return self.reply
 
@@ -340,7 +340,7 @@ class Venus(VenusBase):
                     raise error
                 msg = f'Swissmodel retrieval step failed: {error.__class__.__name__}: {error}'
                 log.critical(msg)
-                notify_admin(msg)
+                Comms.notify_admin(msg)
                 self.reply['warnings'].append('Retrieval of latest PDB data failed (admin notified). ' +
                                               'Falling back onto stored data.')
         chosen_structure = None
@@ -380,7 +380,7 @@ class Venus(VenusBase):
                 msg = f'Major issue ({error.__class__.__name__}) with model {chosen_structure.code} ({error})'
                 self.reply['warnings'].append(msg)
                 log.critical(msg)
-                notify_admin(msg)
+                Comms.notify_admin(msg)
             # ---- repeat
             self.structural_step(retrieve=False)
 

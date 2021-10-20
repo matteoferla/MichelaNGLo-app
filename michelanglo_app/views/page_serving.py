@@ -295,7 +295,7 @@ def thumbnail(request):
         response = FileResponse(os.path.join('michelanglo_app', 'static', 'tim_barrel.png'))
     elif os.path.exists(page.thumb_path):
         response = FileResponse(page.thumb_path)
-    elif not os.system(cmd) and os.path.exists(page.thumb_path): # system exit 0
+    elif not os.system(cmd) and os.path.exists(page.thumb_path):  # system exit 0
         response = FileResponse(page.thumb_path)
     else:
         log.error(f'Thumbnail generation failed for {pagename}')

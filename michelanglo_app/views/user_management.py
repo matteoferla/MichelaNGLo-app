@@ -13,8 +13,8 @@ The modal that controls it is `login/user_modal.mako`. However the content is co
 """
 
 from pyramid.view import view_config, view_defaults
-from .common_methods import notify_admin, is_malformed
-from .common_methods import email as send_email  # gets ambigous
+from .common_methods import is_malformed
+from .common_methods import Comms
 from ..models import User, Page
 from .uniprot_data import uniprot2name
 
@@ -200,7 +200,7 @@ class UserView:
                   f'is {len(self.password)} long ({lower_n} lowercase, {upper_n} uppercase, ' + \
                   f'{other_n} non-ASCII letters, {number_n} numbers and {symbol_n}).'
             try:
-                send_email(msg, new_user.email, 'Michelanglo registration')
+                Comms.email(msg, new_user.email, 'Michelanglo registration')
             except Exception as error:
                 log.warning(f'{error.__class__.__name__}: {error} in sending email to new user')
                 # this is not a serious issue: they left their email blank.
@@ -218,7 +218,7 @@ class UserView:
             self.request.response.status = 403
             return {'status': 'Unrecognised email address.'}
         elif targetuser.email.find('@') == -1:  # legacy user
-            if notify_admin(f' {targetuser.name} ({email_address}) has requested a manual password reset.'):
+            if Comms.notify_admin(f' {targetuser.name} ({email_address}) has requested a manual password reset.'):
                 return {'status': 'request sent'}
             else:
                 self.request.response.status = 503
@@ -233,7 +233,7 @@ class UserView:
                   f'If you did not request this, please email matteo@well.ox.ac.uk as soon as possible.\n' + \
                   'Thank you'
             try:
-                send_email(msg, email_address, f'Michelanglo password reset for {User.get_username(self.request)}')
+                Comms.email(msg, email_address, f'Michelanglo password reset for {User.get_username(self.request)}')
                 targetuser.set_password(sanitise_text(temp_password))
                 return {'status': 'Reset email sent'}
             except Exception as error:

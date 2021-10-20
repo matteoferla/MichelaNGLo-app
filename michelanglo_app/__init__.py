@@ -4,7 +4,7 @@
 import os
 from _collections import OrderedDict
 
-from .data_folder_setup import setup_folders
+from .data_folder_setup import setup_folders, setup_comms
 from .env_override import override_environmentally, environmental2config
 from .sentry import setup_sentry
 from pyramid.config import Configurator
@@ -28,6 +28,10 @@ def main(global_config: OrderedDict, **settings) -> Router:
     config.include('.security')
     config.include('.scheduler')
     config.scan()
+    # not sure if these have to be to run this after routes:
+    setup_comms(slack_webhook=settings['slack.webhook'],
+                server_email=settings['michelanglo.server_email'],
+                admin_email=settings['michelanglo.admin_email'])
     return config.make_wsgi_app()
 
 ##################################

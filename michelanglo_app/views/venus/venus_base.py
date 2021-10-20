@@ -7,7 +7,7 @@ from ..uniprot_data import *
 from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structure, Variant
 
 from ...models import User, Page  ##needed solely for log.
-from ..common_methods import is_malformed, notify_admin, get_pdb_block_from_request
+from ..common_methods import is_malformed, Comms, get_pdb_block_from_request
 from ..user_management import permission
 from ..custom_message import custom_messages
 from .venus_text import contents as contents

@@ -8,7 +8,7 @@ from ..uniprot_data import *
 from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structure
 
 from ...models import User, Page  ##needed solely for log.
-from ..common_methods import is_malformed, notify_admin, get_pdb_block_from_request, is_alphafold_taxon
+from ..common_methods import is_malformed, Comms, get_pdb_block_from_request, is_alphafold_taxon
 from ..user_management import permission
 from ..custom_message import custom_messages
 from mako.template import Template
@@ -70,7 +70,7 @@ class MultiVenus(VenusBase):
                 self.reply['error'] = 'analysis'
                 self.reply['msg'] = str(err)
             log.warning(f'Multivenus error {err.__class__.__name__}: {err}')
-            # notify_admin(f'Multivenus error {err.__class__.__name__}: {err}')
+            # Comms.notify_admin(f'Multivenus error {err.__class__.__name__}: {err}')
         return self.reply
 
     def load_protein(self) -> ProteinAnalyser:

@@ -5,7 +5,7 @@ import os
 
 import logging
 log = logging.getLogger(__name__)
-from .common_methods import is_malformed, notify_admin
+from .common_methods import is_malformed, Comms
 from ..scheduler import Entasker
 
 from . import custom_messages, votes
@@ -141,14 +141,14 @@ def set_ajax(request):
     elif request.params['item'] == 'terminate':
         if 'code' in request.params and request.params['code'] == os.environ['SECRETCODE']:
             log.warning(f'{User.get_username(request)} terminated the app')
-            notify_admin(f'{User.get_username(request)} terminated the app')
+            Comms.notify_admin(f'{User.get_username(request)} terminated the app')
             # is this the most graceful way of kill itself?
             # raise SystemExit does the same, but raises an error.
             # ToDo find out how to wait until there are no task!
             os.system('kill `lsof -t -i:8088`')
         else:
             log.warning(f'{User.get_username(request)} tried to terminate the app')
-            notify_admin(f'{User.get_username(request)} tried to terminate the app')
+            Comms.notify_admin(f'{User.get_username(request)} tried to terminate the app')
             return {'status': 'wrong secret code.'}
     elif request.params['item'] == 'protection':
         pagename = request.params['page']
