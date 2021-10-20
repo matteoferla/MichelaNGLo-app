@@ -80,7 +80,7 @@ console.log(`Parsing ${uuid}`);
         const file = Buffer.from(response , 'binary');
         fse.writeFileSync(filename, file);
     };
-    await saver(`${prefix}${process.env.USER_DATA}/monitor/${uuid}-0.png`);
+    await saver(`${process.env.USER_DATA}/monitor/${prefix}${uuid}-0.png`);
 
     // start clicking!
     for (let i=0; i < Math.min(nLinks, 100); i++) {
@@ -88,7 +88,7 @@ console.log(`Parsing ${uuid}`);
         labels.push(await page.evaluate((index) => $(`.prolink:eq(${index})`).text(), i));
         //console.log(labels[i]);
         await timeout(4000); //safe side//
-        await saver(`${prefix}${process.env.USER_DATA}/monitor/${uuid}-${i+1}.png`);
+        await saver(`${prefix}${process.env.USER_DATA}/monitor/${prefix}${uuid}-${i+1}.png`);
     }
   await browser.close();
   fse.writeFileSync(`${process.env.USER_DATA}/monitor/${prefix}${uuid}.json`,
