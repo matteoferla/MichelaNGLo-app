@@ -69,7 +69,7 @@ class UserView:
         else:
             self.password = ''
         # double security
-        if 'code' in request.params and request.params['code'] == os.environ['SECRETCODE']:
+        if 'code' in request.params and request.params['code'] == request.registry.settings['michelanglo.secretcode']:
             self.code_verified = True
         else:
             self.code_verified = False

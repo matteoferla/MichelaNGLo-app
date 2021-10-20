@@ -17,7 +17,9 @@
         icon = {'basic': 'user', 'friend': 'user-tie', 'guest': 'user-secret', 'admin': 'user-crown', 'new': 'user-astronaut', 'hacker': 'user-ninja', 'trashcan': 'dumpster'}
         log = ''.join(reversed(open('michelanglo.log','r').readlines()[-500:])) #for some ducked up reason, templates are in root.
 
-        from michelanglo_app.models import Doi
+        print(request.registry.settings)
+        from ..models import Doi
+        #from michelanglo_app.models import Doi
 
         shortened = [(d.long, d.short) for d in request.dbsession.query(Doi).all()]
 

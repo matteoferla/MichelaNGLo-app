@@ -139,7 +139,7 @@ def set_ajax(request):
             custom_messages.pop()
         return {'status': 'success'}
     elif request.params['item'] == 'terminate':
-        if 'code' in request.params and request.params['code'] == os.environ['SECRETCODE']:
+        if 'code' in request.params and request.params['code'] == request.registry.settings['michelanglo.secretcode']:
             log.warning(f'{User.get_username(request)} terminated the app')
             Comms.notify_admin(f'{User.get_username(request)} terminated the app')
             # is this the most graceful way of kill itself?
