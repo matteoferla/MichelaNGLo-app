@@ -30,7 +30,7 @@ requires = [
     'requests',
     'sentry-sdk',
     'apscheduler',
-    'imageio'#,
+    'imageio', #,
     'blosc',  # pyrosetta?
     #'bio',
     #'pyrosetta'
