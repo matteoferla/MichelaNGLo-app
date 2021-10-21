@@ -12,10 +12,10 @@
 // species and uniprot searches are done by name.js
 // Also URL query is resolved by urlQueriest in name.js
 
-$(window).scroll(() => {
-    const card = $('#vieport_side');
+moveScrolledViewport = () => {
     let currentY = $(window).scrollTop();
     let windowH = $(window).innerHeight();
+    const card = $('#vieport_side');
     let cardH = card.height();
     let offsetY = card.offset().top - parseInt(card.css('top')) - 4;
     const rcard = $('#results_card');
@@ -32,6 +32,27 @@ $(window).scroll(() => {
     }
     card.css('top', position);
     //console.log(`scrolltop: ${currentY} win height ${windowY} off: ${offsetY} card top: ${card.offset().top}`);
+};
+
+// moveScrolledTitle = () => {
+//     let currentY = $(window).scrollTop();
+//     const results_status = $('#results_status');
+//     const fcard = $('#featCard');
+//     const unseen = currentY + 50 > fcard.offset().top; // the top of results card is not visible
+//     const encarded = results_status.parent().hasClass('card-body');
+//     if (unseen && encarded) {
+//         // toast Title
+//         $('#toaster').prepend( results_status.clone() );
+//         results_status[0].id = 'former_results_status';
+//         console.log('WOOF')
+//         // card.css('position','fixed').css('padding-top', '5em').css('pointer-events','none')
+//     } else {
+//         // pass
+//     }
+// };
+
+$(window).scroll(() => {
+    moveScrolledViewport();
 });
 
 

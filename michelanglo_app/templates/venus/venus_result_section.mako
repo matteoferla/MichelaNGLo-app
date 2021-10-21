@@ -4,7 +4,7 @@
     %if mutation_mode == 'main':
     <div class="row">
         <!-- Main menu -->
-        <div class="offset-3 col-6 mb-4 py-4">
+        <div class="offset-3 col-6 mb-4 py-4" id="titleCard">
             <div class="card shadow-sm bg-light">
                 <div class="card-body  text-center">
                     <div class="btn-group" role="group" aria-label="Basic example">
@@ -18,7 +18,6 @@
                     </div>
                     <hr>
                     <h3 id="result_title"></h3>
-                    <p id="results_status" class="px-5">Error.</p>
                 </div>
             </div>
         </div>

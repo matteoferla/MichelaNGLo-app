@@ -74,10 +74,10 @@ class Venus {
         };
 
         this.StatusModeColors = {
-            'working': "alert-warning",
-            'crash': "alert-danger",
-            'halt': "alert-info",
-            'done': "alert-success"
+            'working': "bg-warning",
+            'crash': "bg-danger",
+            'halt': "bg-info",
+            'done': "bg-success"
         };
         this.stepNames = ['Retrieval of protein info',
             'Assessment of mutation without structure',
@@ -124,9 +124,22 @@ class Venus {
         $('#results_mutalist').children().detach();
         $('#results').hide();
         $('#venus_calc').removeAttr('disabled');
+        $('#toaster').prepend(`
+                                <div class="toast ml-auto w-100 bg-warning show" 
+                                   role="alert" aria-live="assertive" aria-atomic="true"  id="results_status">
+                                  <div class="toast-header">
+                                    <strong class="mr-auto">Progress</strong>
+                                    <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                                      <span aria-hidden="true">&times;</span>
+                                    </button>
+                                  </div>
+                                  <div class="toast-body">
+                                    Error.
+                                  </div>
+                                </div>`);
         $('#results_status').show();
         $('#result_title').html('<i class="far fa-dna fa-spin"></i> Loading');
-        $('results_status').html('ERROR');
+        $('toast-body').html('ERROR');
         $('#fv').html('');
         $('#changeByPage_selector').html('<option name="changeByPage" value="0" selected>Select page first</option>');
         $('#changeByPage_selector').attr('disabled', 'disabled');
@@ -160,6 +173,7 @@ class Venus {
                        data: data,
                        timeout: this.timeout
                        }).fail(ops.addErrorToast)
+                         .fail(error => this.setStatus(`Error: ${error.message}`, 'crash'))
                           .then(reply => {
                                             this.timeTaken = reply.time_taken;
                                             return reply
@@ -205,7 +219,7 @@ class Venus {
             return 0;
         }
         this.setStepStatus(1);
-        return venus.analyse('protein')
+        return this.analyse('protein')
             .fail(xhr => {
                 this.setStepStatus(1, 'crash');
                 $('#venus_calc').removeAttr('disabled');
@@ -695,16 +709,32 @@ class Venus {
     //progress bar.
     setStatus(label, mode) { //working, crash, done
         mode = mode || 'working';
-        const s = $('#results_status');
-        if (this.StatusModeColors[mode] === undefined) {
-            s.html(label);
-            return;
-        }
-        s.html(`<div class="alert ${this.StatusModeColors[mode]} w-100">
-                <i class="${this.StatusModeIcons[mode]}"></i> 
-                ${label}</div>`);
-        s.find('[data-toggle="tooltip"]').tooltip();
-        if (mode === 'done') setTimeout(() => s.hide(), this.animation_speed);
+        $('#results_status').detach();
+        const color = this.StatusModeColors[mode] || '';
+        $('#toaster').prepend(`
+                                <div class="toast ml-auto w-100 ${color} show" 
+                                      style="z-index:9000; pointer-events: auto"
+                                     role="alert" aria-live="assertive" aria-atomic="true" 
+                                     data-autohide="false" 
+                                     id="results_status">
+                                  <div class="toast-header">
+                                    <strong class="mr-auto">Progress</strong>
+                                    <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                                      <span aria-hidden="true">&times;</span>
+                                    </button>
+                                  </div>
+                                  <div class="toast-body">
+                                    ${label}
+                                    <small id="results_status_caption"></small>
+                                  </div>
+                                </div>`);
+        $('#results_status').mouseover(event => {
+                                            if ($(event.target).data('toggle')) {
+                                                $('#results_status_caption').html(`<br/>(${event.target.title})`);
+                                            }
+                                        })
+            .toast('show');
+        if (mode === 'done') setTimeout(() => $('#results_status').hide(), this.animation_speed * 2);
     }
 
 
