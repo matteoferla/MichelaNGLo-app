@@ -7,7 +7,7 @@ environmental2config = dict(MICHELANGLO_PROTEIN_DATA='michelanglo.protein_data_f
                      MICHELANGLO_SECRETCODE='michelanglo.secretcode',
                      MICHELANGLO_SQL_URL='sqlalchemy.url',
                      MICHELANGLO_SENTRY_DNS='sentry.data_source_name',
-                     PUPPETEER_CHROME='puppeteer.executablePath', # will crash puppeteer if absent.
+                     PUPPETEER_CHROME='puppeteer.executablepath', # will crash puppeteer if absent.
                      SLACK_WEBHOOK='slack.webhook',
                      MICHELANGLO_ADMIN_EMAIL='michelanglo.admin_email',
                      MICHELANGLO_SERVER_EMAIL='michelanglo.server_email',

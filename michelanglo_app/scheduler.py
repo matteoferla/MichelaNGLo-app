@@ -24,7 +24,7 @@ def includeme(config):
     Entasker.sql_url = settings['sqlalchemy.url']
     Entasker.user_data_folder = settings['michelanglo.user_data_folder']
     #Entasker.port = '8088'  # hardcoded because I am not sure I can find out the port...
-    Entasker.puppeteer_chrome = settings["puppeteer.executablePath"]
+    Entasker.puppeteer_chrome = settings["puppeteer.executablepath"]
 
     scheduler = BackgroundScheduler()
     # =============== PERIODIC TASKS ===============

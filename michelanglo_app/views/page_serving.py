@@ -288,7 +288,7 @@ def thumbnail(request):
     michelanglo_app_folder = os.path.split(os.path.split(__file__)[0])[0]
     cmd = ' '.join([f'USER_DATA={request.registry.settings["michelanglo.user_data_folder"]}',
                     'PORT=8088',
-                    f'PUPPETEER_CHROME={request.registry.settings["puppeteer.executablePath"]}',
+                    f'PUPPETEER_CHROME={request.registry.settings["puppeteer.executablepath"]}',
                     f'node {michelanglo_app_folder}/thumbnail.js {pagename}'])
     if verdict['status'] != 'OK' or not page.existant:
         request.response.status = 200 # we would block facebook and twitter otherwise as they redirect.

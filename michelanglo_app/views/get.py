@@ -159,7 +159,7 @@ def set_ajax(request):
             michelanglo_app_folder = os.path.split(os.path.split(__file__)[0])[0]
             cmd = ' '.join([f'USER_DATA={request.registry.settings["michelanglo.user_data_folder"]}',
                             'PORT=8088',
-                            f'PUPPETEER_CHROME={request.registry.settings["puppeteer.executablePath"]}',
+                            f'PUPPETEER_CHROME={request.registry.settings["puppeteer.executablepath"]}',
                             f'node {michelanglo_app_folder}/monitor.js {page.identifier}'])
             if os.system(cmd):
                 return {'status': 'protection failed. Contact Admin'}
