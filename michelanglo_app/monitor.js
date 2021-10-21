@@ -36,7 +36,7 @@ console.log(`Parsing ${uuid}`);
 
     //await page.setRequestInterception(true);
     //page.on('request', (request) => ...); // block requests?
-    await page.goto(`http://localhost:${process.env.PORT}/data/${uuid}?columns_viewport=6`);
+    await page.goto(`http://localhost:${process.env.PORT}/data/${uuid}?columns_viewport=6&no_user=1&offline=1&no_buttons=1&key=None`);
     let labels = ['Initial view'];
     //conf.
     await page.setViewport({
