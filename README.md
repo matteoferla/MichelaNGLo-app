@@ -18,18 +18,16 @@ A future possibility is that in collaboration with specific journals this could 
 
 ## Deployment
 
-Want to install this webserver locally? Then check out [deployment notes](git_docs/deploy.md).
+If you want to install this webserver locally, then see [the repo encompassing the whole project](https://github.com/matteoferla/Michelanglo-and-Venus)
+as this repo covers only the front end. This includes [deployment notes](https://github.com/matteoferla/Michelanglo-and-Venus/blob/main/app_deployment.md).
 
-The site [michelanglo.sgc.ox.ac.uk](https://michelanglo.sgc.ox.ac.uk) depends on three repos:
+Briefly site [michelanglo.sgc.ox.ac.uk](https://michelanglo.sgc.ox.ac.uk) depends on three repos:
 * **MichelaNGLo-app**
 * [MichelaNGLo-transpiler](https://github.com/matteoferla/MichelaNGLo-transpiler)
-* [MichelaNGLo-protein-module](https://github.com/matteoferla/MichelaNGLo-protein-module)
+* [MichelaNGLo-protein-analysis](https://github.com/matteoferla/MichelaNGLo-protein-analysis)
 
-## Transpiler
-
-> See [MichelaNGLo-transpiler repo](https://github.com/matteoferla/MichelaNGLo-transpiler) for details
-
-The transpiler script does the conversion the PyMol files and a few extras. It is now located within its own repo: [MichelaNGLo-transpiler](https://github.com/matteoferla/MichelaNGLo-transpiler).
+The transpiler module does the conversion the PyMol files and a few extras.
+It is now located within its own repo, but originally was part of this repo.
 
 ## Michelanglo.js
 The js that allows web content creators to control NGL without using JS is `michelanglo_app/static/michelanglo.js`, while its documentation is at [michelanglo.sgc.ox.ac.uk/docs/markup](michelanglo.sgc.ox.ac.uk/docs/markup).
