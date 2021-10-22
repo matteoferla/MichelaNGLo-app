@@ -377,9 +377,11 @@ class Venus(VenusBase):
                 log.info(msg)
                 self.reply['warnings'].append(msg)
             else:  # this should not happen in step 3.
+                # causes: PDB given was a fake. How does that happen?
+                # causes the PBD given was too big. e.g. 7MQ8
                 msg = f'Major issue ({error.__class__.__name__}) with model {chosen_structure.code} ({error})'
                 self.reply['warnings'].append(msg)
-                log.critical(msg)
+                log.warning(msg)
                 Comms.notify_admin(msg)
             # ---- repeat
             self.structural_step(retrieve=False)
