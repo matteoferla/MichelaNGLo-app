@@ -185,7 +185,7 @@ def get_references(code):
         code = code.replace('based upon', '').strip().split('.')[0]
         if len(code) == 0:
             return ''
-        elif 'alphafold' in code:
+        elif 'alphafold' in code or 'AF-' in code:
             return 'Model derived from EBI AlphaFold2 ' + \
                    '<a href="https://www.nature.com/articles/s41586-021-03819-2" target="_blank">' + \
                    'Jumper, J., Evans, R., Pritzel, A. et al. Highly accurate protein structure prediction with AlphaFold. Nature (2021).' + \
@@ -195,7 +195,14 @@ def get_references(code):
                    'Waterhouse, A., Bertoni, M., Bienert, S., Studer, G., Tauriello, G., Gumienny, R., Heer, F.T., de Beer, T.A.P., Rempfer, C., Bordoli, L., Lepore, R., Schwede, T.' + \
                    ' (2018) SWISS-MODEL: homology modelling of protein structures and complexes. <i>Nucleic Acids Res.</i> <b>46(W1)</b>, W296-W303.</a>'
         else:
-            reply = requests.get(f'https://www.ebi.ac.uk/pdbe/api/pdb/entry/publications/{code}').json()
+            try:
+                raw_reply = requests.get(f'https://www.ebi.ac.uk/pdbe/api/pdb/entry/publications/{code}')
+                assert raw_reply.status_code == 200, f'Request gave a {raw_reply.status_code} code'
+                reply = raw_reply.json()
+            except Exception as err:
+                msg = f'{err.__class__.__name__}: {err} for {code} in `get_references`'
+                log.warning(msg)
+                reply = {}
             if reply:
                 citations = []
                 for ref in reply[code.lower()]:
@@ -217,9 +224,10 @@ def get_references(code):
             else:
                 return ''
     except Exception as error:
-        msg = f'get_reference {error.__class__.__name__} - {error} for "{code}"'
-        log.error(msg)
+        msg = f'Severe/impossible... get_reference {error.__class__.__name__} - {error} for "{code}"'
+        log.warning(msg)
         Comms.notify_admin(msg)
+        return ''
 
 
 def save_file(request, extension, field='file'):
