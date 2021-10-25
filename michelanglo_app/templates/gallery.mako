@@ -11,7 +11,7 @@
 
 <%block name="main">
     <%
-        from michelanglo_app.models import Publication, Doi
+        from michelanglo_app.models import Publication, Doi, Page
 
         def publication(page):
             pub = request.dbsession.query(Publication).filter_by(identifier=page.identifier).first()
@@ -19,6 +19,13 @@
                 return pub.to_html()
             else:
                 return '(No publication data set)'
+
+        def publication_year(page):
+            pub = request.dbsession.query(Publication).filter_by(identifier=page.identifier).first()
+            if pub:
+                return pub.year
+            else:
+                return 1970
 
         from datetime import datetime, timedelta
         unedited_time = datetime.now() - timedelta(days=20)
@@ -95,13 +102,19 @@
                     'other': 'This should not exist!'}
 
             sortedpages = {c: [] for c in cats}
-            for page in pages:
+            for page in pages: #type: Page
                 if page.privacy in cats.keys():
                     sortedpages[page.privacy].append(page)
                 elif page.privacy is False or page.privacy == 'false':
                     sortedpages['private'].append(page) ###this should not happen, but lets play it safe.
                 else:
                     sortedpages['other'].append(page)
+            for cat in cats: #type: str
+                if cat == 'published':
+                    sorter = lambda page: publication_year(page)
+                else:
+                    sorter = lambda page: page.timestamp
+                sortedpages[cat] = sorted(sortedpages[cat], key=sorter, reverse=True)
         %>
 
         %for k in cats:
