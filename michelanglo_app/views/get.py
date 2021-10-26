@@ -194,6 +194,7 @@ def set_ajax(request):
         if malformed:
             return {'status': malformed}
         publication = Publication.from_request(request)
+        return {'status': 'success'}
     elif request.params['item'] == 'task':
         malformed = is_malformed(request, 'task')
         if malformed:
