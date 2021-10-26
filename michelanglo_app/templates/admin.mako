@@ -90,10 +90,24 @@
         </div>
 
     <h3>Task controls</h3>
+        <p>See <code>scheduler.py</code>. Note kill kills all stuck threads, not termininates the app.</p>
         <div class="row border rounded w-100 p-2 m-2">
                 % for task in ('kill','monitor','daily', 'spam','unjam','clear_buffer'):
                     <div class="col-2"><a class="btn btn-outline-info" href="set?item=task&task=${task}">${task}</a></div>
                 % endfor
+        </div>
+    <h3>Reset app</h3>
+        <p>Reset the app by killing the process, which gets respawned by the michelanglo.service. It is not graceful.
+        The secret code is the one in <code>request.registry.settings['michelanglo.secretcode']</code>.
+        </p>
+        <div class="row border rounded w-100 p-2 m-2">
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" id="secretcode" placeholder="secret code"
+                 aria-label="secret code" aria-describedby="resetter">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" id="resetter">Reset</button>
+          </div>
+        </div>
         </div>
     <h3>Reversed request log</h3>
     <div style="height: 70vh; overflow: scroll;">

@@ -6,6 +6,8 @@
 %>
 */
 window.userdata = ${str(udex)|n};
+
+//<%text>
 //<buttom role="button" class="btn btn-outline-info btn-sm" data-toggle="user" data-target="{u.name}"><i class="far "></i> make admin</buttom>
 $("[data-target='#mod']").click(function () {
     $('#mod .modal-title').html('Loading error');
@@ -74,6 +76,13 @@ $("[data-target='#mod']").click(function () {
         }).done( (msg) => $('#mod .modal-body').append(msg));
 });
 
+$('#resetter').click(event => $.ajax({url: "/set",
+                                     data: {item: 'terminate',
+                                            code: $('#secretcode').val()},
+                                            method: 'POST'}).done((msg) => ops.addToast('done', 'Success', JSON.stringify(msg), 'bg-success'))
+);
+
+
 window.setMsg = (bg) => {
     $.ajax({url: "/set",
             data: {item: 'msg',
@@ -91,3 +100,4 @@ window.clearMsg = (bg) => {
         })
         .done((msg) => ops.addToast('done', 'Success', JSON.stringify(msg), 'bg-success'));
 };
+//</%text>
