@@ -18,6 +18,7 @@ from pyramid.view import view_config, view_defaults
 from pyramid.renderers import render_to_response
 from ..common_methods import Comms
 import pyramid.httpexceptions as exc
+from time import sleep
 
 import json, os, logging, operator
 
@@ -125,7 +126,7 @@ class Venus(VenusBase):
 
     def has(self, key: Optional[str] = None) -> bool:
         # checks whether the protein object has a filled value (not the reply!)
-        if self.handle not in system_storage:  # this is already done
+        if self.handle not in system_storage:  # this is not already done
             return False
         elif key is None:
             return True
@@ -135,6 +136,8 @@ class Venus(VenusBase):
             return False
         else:
             return True
+
+    # ------ Steps -----------------------------------------------------------------------------------------------------
 
     @property
     def steps(self):
@@ -192,7 +195,7 @@ class Venus(VenusBase):
         Check mutations are valid
         """
         self.start_timer()
-        if self.has():  # this is already done (very unlikely/
+        if self.has():  # this is already done?
             protein = system_storage[self.handle]
         else:
             log.info(f'Step 1 analysis requested by {User.get_username(self.request)}')
@@ -206,6 +209,7 @@ class Venus(VenusBase):
             assert protein.exists(), f'{uniprot} of {taxid} is absent'
             protein.load()
             protein.mutation = mutation
+            setattr(protein, 'current_step_complete', False)  # venus specific
         # assess
         if not protein.check_mutation():
             log.info('protein mutation discrepancy error')
@@ -218,6 +222,7 @@ class Venus(VenusBase):
         else:
             system_storage[self.handle] = protein
             self.reply['protein'] = self.jsonable(protein)
+        protein.current_step_complete = True
         self.stop_timer()
 
     ### STEP 2
@@ -230,9 +235,10 @@ class Venus(VenusBase):
         ## has the previous step been done?
         if not self.has():
             self.protein_step()
-        # if protein.mutation has already run??
+        # if protein.mutation has already run it still does it again...
         # no shortcut useful.
         protein = system_storage[self.handle]
+        protein.current_step_complete = False
         protein.predict_effect()
         featpos = protein.get_features_at_position(protein.mutation.residue_index)
         featnear = protein.get_features_near_position(protein.mutation.residue_index)
@@ -242,10 +248,10 @@ class Venus(VenusBase):
                                   'features_near_mutation':      featnear,
                                   'position_as_protein_percent': pos_percent,
                                   'gnomAD_near_mutation':        protein.get_gnomAD_near_position()}
+        protein.current_step_complete = True
         self.stop_timer()
 
-        ### STEP 3
-
+    ### STEP 3
     def structural_step(self, structure=None, retrieve=True):
         """
         runs protein.analyse_structure() iteratively until it works.
@@ -256,24 +262,167 @@ class Venus(VenusBase):
         if not self.has():
             self.mutation_step()
         protein = system_storage[self.handle]
-        if not self.has('structural'):  # this step has not been run before.
+        # this is slightly odd because structural None is either not done or no model
+        if self.has('structural'):
+            self.reply['structural'] = self.jsonable(protein.structural)
+            self.reply['has_structure'] = True
+        elif protein.current_step_complete is False:
+            while protein.current_step_complete is False: # polling
+                log.debug('Waiting for structural_step')
+                sleep(5)
+            return self.structural_step(structure, retrieve) # retry
+        else:
+            # this step has not been run before
+            protein.current_step_complete = False
             if structure is not None:  # user submitted structure.
                 protein.analyse_structure(structure=structure,
                                           **self.get_user_modelling_options()
                                           )
             else:
                 self.structural_workings(protein, retrieve)
-        if protein.structural:
-            self.reply['structural'] = self.jsonable(protein.structural)
-            self.reply['has_structure'] = True
-        else:
-            log.info('No structural data available')
-            self.reply['status'] = 'terminated'
-            self.reply['error'] = 'No crystal structures or models available.'
-            self.reply['msg'] = 'Structrual analyses cannot be performed.'
-            self.reply['has_structure'] = False
-            raise VenusException(self.reply['msg'])
+            if protein.structural:
+                self.reply['structural'] = self.jsonable(protein.structural)
+                self.reply['has_structure'] = True
+            else:
+                log.info('No structural data available')
+                self.reply['status'] = 'terminated'
+                self.reply['error'] = 'No crystal structures or models available.'
+                self.reply['msg'] = 'Structrual analyses cannot be performed.'
+                self.reply['has_structure'] = False
+                raise VenusException(self.reply['msg'])
+        protein.current_step_complete = True
         self.stop_timer()
+
+    ### Step 4
+    def ddG_step(self):
+        self.start_timer()
+        log.info(f'Step 4 analysis requested by {User.get_username(self.request)}')
+        # ------- get protein
+        if self.handle not in system_storage:
+            for fun in (self.protein_step, self.mutation_step, self.structural_step):
+                fun()
+                if 'error' in self.reply:
+                    return self.reply
+        protein = system_storage[self.handle]
+        # -------- analyse
+        if self.has('energetics'):
+            analysis = protein.energetics
+        elif protein.current_step_complete is False:
+            while protein.current_step_complete is False: # polling
+                log.debug('Waiting for ddG_step')
+                sleep(5)
+            return self.ddG_step()  # retry
+        else:
+            protein.current_step_complete = False
+            applicable_keys = ('scorefxn_name', 'outer_constrained', 'remove_ligands',
+                               'neighbour_only_score',
+                               'scaling_factor', 'prevent_acceptance_of_incrementor',
+                               'single_chain', 'radius', 'cycles')
+            user_options = self.get_user_modelling_options()
+            options = {k: v for k, v in user_options.items() if k in applicable_keys}
+            # radius and cycle minima are applied already
+            analysis = protein.analyse_FF(**options, spit_process=True)
+        if analysis is None:
+            self.log_if_error('pyrosetta step', 'likely segfault')
+        elif 'error' in analysis:
+            self.log_if_error('pyrosetta step', analysis)
+        else:
+            self.reply['ddG'] = analysis
+            # {ddG: float, scores: Dict[str, float], native:str, mutant:str, rmsd:int}
+        protein.current_step_complete = True
+        self.stop_timer()
+
+    ### Step 5
+    def ddG_gnomad_step(self):
+        log.info(f'Step 5 analysis requested by {User.get_username(self.request)}')
+        if self.handle not in system_storage:
+            status = self.protein_step()
+            if 'error' in status:
+                return status
+            status = self.mutation_step()
+            if 'error' in status:
+                return status
+        protein = system_storage[self.handle]
+        if self.has('energetics_gnomAD'):
+            analysis = protein.energetics_gnomAD
+        elif protein.current_step_complete is False:
+            while protein.current_step_complete is False: # polling
+                log.debug('Waiting for ddG_gnomad_step')
+                sleep(5)
+            return self.ddG_gnomad_step()  # retry
+        else:
+            protein.current_step_complete = False
+            applicable_keys = ('scorefxn_name', 'outer_constrained', 'remove_ligands',
+                               'scaling_factor',
+                               'single_chain', 'cycles', 'radius')
+            options = {k: v for k, v in self.get_user_modelling_options().items() if k in applicable_keys}
+            # speedy
+            options['cycles'] = 1
+            options['radius'] = min(6, options['radius'] if 'radius' in options else 6)
+            analysis = protein.analyse_gnomad_FF(**options, spit_process=True)
+        if analysis is None:
+            analysis = dict(error='likely segfault', msg='likely segfault')
+        if 'error' in analysis:  # it is a failure.
+            self.log_if_error('ddG_gnomad_step', analysis)
+            self.reply['status'] = 'error'
+            self.reply['error'] = 'pyrosetta step'
+            self.reply['msg'] = analysis['error']
+        else:
+            self.reply['gnomAD_ddG'] = analysis
+        protein.current_step_complete = True
+
+    ### STEP EXTRA
+    def extra_step(self, mutation, algorithm):
+        if self.has():
+            self.ddG_step()
+        protein = system_storage[self.handle]
+        protein.current_step_complete = False
+        log.info(f'Extra analysis ({algorithm}) requested by {User.get_username(self.request)}')
+        applicable_keys = ('scorefxn_name', 'outer_constrained', 'remove_ligands',
+                           'scaling_factor',
+                           'single_chain', 'cycles', 'radius')
+        options = {k: v for k, v in self.get_user_modelling_options().items() if k in applicable_keys}
+        self.reply = {**self.reply,
+                      **protein.analyse_other_FF(**options, mutation=mutation, algorithm=algorithm, spit_process=True)}
+        self.log_if_error('extra_step')
+        protein.current_step_complete = True
+
+    ### STEP EXTRA2
+    def phospho_step(self):
+        if self.has():
+            self.ddG_step()
+        protein = system_storage[self.handle]
+        protein.current_step_complete = False
+        log.info(f'Phosphorylation requested by {User.get_username(self.request)}')
+        coordinates = protein.phosphorylate_FF(spit_process=True)
+        if isinstance(coordinates, str):
+            self.reply['coordinates'] = coordinates
+        elif isinstance(coordinates, dict):
+            self.reply = {**self.reply, **coordinates}  # it is an error msg!
+        else:
+            self.reply = {**self.reply, 'status': 'error', 'error': 'Unknown', 'msg': 'No coordinates returned'}
+        self.log_if_error('phospho_step')
+        protein.current_step_complete = True
+
+    ### CHANGE STEP
+    def change_to_file(self, block, name, params: List[str] = ()):
+        # params is either None or a list of topology files
+        if self.has():
+            self.mutation_step()
+        protein = system_storage[self.handle]
+        protein.structural = None
+        protein.energetics = None
+        protein.current_step_complete = False
+        protein.rosetta_params_filenames = params
+        title, ext = os.path.splitext(name)
+        structure = Structure(title, 'Custom', 0, 9999, title,
+                              type='custom', chain="A", offset=0, coordinates=block)
+        structure.is_satisfactory(protein.mutation.residue_index)
+        self.structural_step(structure=structure)
+        protein.current_step_complete = True
+        return self.reply
+
+    # ----- inner methods ----------------------------------------------------------------------------------------------
 
     def get_user_modelling_options(self):
         """
@@ -388,115 +537,6 @@ class Venus(VenusBase):
                 Comms.notify_admin(msg)
             # ---- repeat
             self.structural_step(retrieve=False)
-
-    ### Step 4
-    def ddG_step(self):
-        self.start_timer()
-        log.info(f'Step 4 analysis requested by {User.get_username(self.request)}')
-        # ------- get protein
-        if self.handle not in system_storage:
-            for fun in (self.protein_step, self.mutation_step, self.structural_step):
-                fun()
-                if 'error' in self.reply:
-                    return self.reply
-        protein = system_storage[self.handle]
-        # -------- analyse
-        if hasattr(protein, 'energetics') and protein.energetics is not None:
-            analysis = protein.energetics
-        else:
-            applicable_keys = ('scorefxn_name', 'outer_constrained', 'remove_ligands',
-                               'neighbour_only_score',
-                               'scaling_factor', 'prevent_acceptance_of_incrementor',
-                               'single_chain', 'radius', 'cycles')
-            user_options = self.get_user_modelling_options()
-            options = {k: v for k, v in user_options.items() if k in applicable_keys}
-            # radius and cycle minima are applied already
-            analysis = protein.analyse_FF(**options, spit_process=True)
-        if analysis is None:
-            self.log_if_error('pyrosetta step', 'likely segfault')
-        elif 'error' in analysis:
-            self.log_if_error('pyrosetta step', analysis)
-        else:
-            self.reply['ddG'] = analysis
-            # {ddG: float, scores: Dict[str, float], native:str, mutant:str, rmsd:int}
-        self.stop_timer()
-
-    ### Step 5
-    def ddG_gnomad_step(self):
-        log.info(f'Step 5 analysis requested by {User.get_username(self.request)}')
-        if self.handle not in system_storage:
-            status = self.protein_step()
-            if 'error' in status:
-                return status
-            status = self.mutation_step()
-            if 'error' in status:
-                return status
-        protein = system_storage[self.handle]
-        if hasattr(protein, 'energetics_gnomAD') and protein.energetics_gnomAD is not None:
-            analysis = protein.energetics_gnomAD
-        else:
-            applicable_keys = ('scorefxn_name', 'outer_constrained', 'remove_ligands',
-                               'scaling_factor',
-                               'single_chain', 'cycles', 'radius')
-            options = {k: v for k, v in self.get_user_modelling_options().items() if k in applicable_keys}
-            # speedy
-            options['cycles'] = 1
-            options['radius'] = min(6, options['radius'] if 'radius' in options else 6)
-            analysis = protein.analyse_gnomad_FF(**options, spit_process=True)
-        if analysis is None:
-            analysis = dict(error='likely segfault', msg='likely segfault')
-        if 'error' in analysis:  # it is a failure.
-            self.log_if_error('ddG_gnomad_step', analysis)
-            self.reply['status'] = 'error'
-            self.reply['error'] = 'pyrosetta step'
-            self.reply['msg'] = analysis['error']
-        else:
-            self.reply['gnomAD_ddG'] = analysis
-
-    ### STEP EXTRA
-    def extra_step(self, mutation, algorithm):
-        if self.has():
-            self.ddG_step()
-        protein = system_storage[self.handle]
-        log.info(f'Extra analysis ({algorithm}) requested by {User.get_username(self.request)}')
-        applicable_keys = ('scorefxn_name', 'outer_constrained', 'remove_ligands',
-                           'scaling_factor',
-                           'single_chain', 'cycles', 'radius')
-        options = {k: v for k, v in self.get_user_modelling_options().items() if k in applicable_keys}
-        self.reply = {**self.reply,
-                      **protein.analyse_other_FF(**options, mutation=mutation, algorithm=algorithm, spit_process=True)}
-        self.log_if_error('extra_step')
-
-    ### STEP EXTRA2
-    def phospho_step(self):
-        if self.has():
-            self.ddG_step()
-        protein = system_storage[self.handle]
-        log.info(f'Phosphorylation requested by {User.get_username(self.request)}')
-        coordinates = protein.phosphorylate_FF(spit_process=True)
-        if isinstance(coordinates, str):
-            self.reply['coordinates'] = coordinates
-        elif isinstance(coordinates, dict):
-            self.reply = {**self.reply, **coordinates}  # it is an error msg!
-        else:
-            self.reply = {**self.reply, 'status': 'error', 'error': 'Unknown', 'msg': 'No coordinates returned'}
-        self.log_if_error('phospho_step')
-
-    ### CHANGE STEP
-    def change_to_file(self, block, name, params: List[str] = ()):
-        # params is either None or a list of topology files
-        if self.has():
-            self.mutation_step()
-        protein = system_storage[self.handle]
-        protein.structural = None
-        protein.energetics = None
-        protein.rosetta_params_filenames = params
-        title, ext = os.path.splitext(name)
-        structure = Structure(title, 'Custom', 0, 9999, title,
-                              type='custom', chain="A", offset=0, coordinates=block)
-        structure.is_satisfactory(protein.mutation.residue_index)
-        self.structural_step(structure=structure)
-        return self.reply
 
     def save_params(self) -> List[str]:
         """

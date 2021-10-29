@@ -172,9 +172,20 @@ class Venus {
         return $.post({url: "venus_analyse",
                        data: data,
                        timeout: this.timeout
-                       }).fail(ops.addErrorToast)
-                         .fail(error => this.setStatus(`Error: ${error.message}`, 'crash'))
-                          .then(reply => {
+                       }).fail((error, text) => {
+                             if (text !== 'timeout') {
+                                 ops.addErrorToast(error);
+                                 this.setStatus(`Error: ${error.message}`, 'crash');
+                             } else {
+                                 // polling
+                                 ops.addToast('polling',
+                                     'Slow task',
+                                     'The task is taking longer than expected (possibly large protein?)',
+                                     'bg-warning');
+                                 return this.analyse(step, extras);
+                             }
+
+                         }).then(reply => {
                                             this.timeTaken = reply.time_taken;
                                             return reply
                                         });
@@ -620,7 +631,20 @@ class Venus {
             url: "venus_analyse",
             data: submissionData,
             timeout: this.timeout,
-        }).fail(ops.addErrorToast)
+        }).fail((error, text) => {
+                             if (text !== 'timeout') {
+                                 ops.addErrorToast(error);
+                                 this.setStatus(`Error: ${error.message}`, 'crash');
+                             } else {
+                                 // polling
+                                 setTimeout(() => this.analyse_target(mutation, algorithm), 30000);
+                                 ops.addToast('polling',
+                                     'Slow task',
+                                     'The task is taking longer than expected (possibly large protein?)',
+                                     'bg-warning');
+                             }
+
+                         })
             .done(msg => {
                 if (msg.error) {
                     this.setStatus('Failure at extra job', 'crash');
