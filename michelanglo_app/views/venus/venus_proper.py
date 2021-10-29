@@ -45,7 +45,7 @@ class Venus(VenusBase):
         if 'mutation' not in self.request.params or 'uniprot' not in self.request.params:
             return None
         if str(self.request.params['uniprot']) == '9606' or str(self.request.params['mutation']) == '9606':
-            raise ValueError('Chrome autofill')   # this is uncaught
+            raise ValueError('Chrome autofill')  # this is uncaught
         settings = self.get_user_modelling_options()
         concatenation = self.request.params['uniprot'] + \
                         self.request.params['mutation'] + \
@@ -56,7 +56,7 @@ class Venus(VenusBase):
     ############################### server main page
     @view_config(renderer="../../templates/venus/venus_main.mako")
     def main_view(self):
-        return {'user': self.request.user,
+        return {'user':          self.request.user,
                 'mutation_mode': 'main',
                 **self.generic_data}
 
@@ -77,7 +77,7 @@ class Venus(VenusBase):
                 i = random.randint(pdb.x, pdb.y)
                 # the to_resn cannot be the same as original or *
                 to_resn = random.choice(list(set(Mutation.aa_list) - {'*', protein.sequence[i - 1]}))
-                return {'name': name, 'uniprot': uniprot, 'taxid': '9606', 'species': 'human',
+                return {'name':     name, 'uniprot': uniprot, 'taxid': '9606', 'species': 'human',
                         'mutation': f'p.{protein.sequence[i - 1]}{i}{to_resn}'}
             except IndexError:
                 log.error(f'Impossible... pdb.x out of bounds in unicode for gene {uniprot}')
@@ -139,10 +139,10 @@ class Venus(VenusBase):
     @property
     def steps(self):
         # this is strictly an instance attribute not a class one.
-        return {'protein': self.protein_step,
-                'mutation': self.mutation_step,
+        return {'protein':    self.protein_step,
+                'mutation':   self.mutation_step,
                 'structural': self.structural_step,
-                'ddG': self.ddG_step,
+                'ddG':        self.ddG_step,
                 'ddG_gnomad': self.ddG_gnomad_step}
 
     def do_step(self, step):
@@ -163,7 +163,7 @@ class Venus(VenusBase):
                 self.protein_step()
             protein = system_storage[self.handle]
             return render_to_response(os.path.join("..", "..", "templates", "results", "features.js.mako"),
-                                      {'protein': protein,
+                                      {'protein':     protein,
                                        'featureView': '#fv',
                                        'include_pdb': False,
                                        'alphafolded': is_alphafold_taxon(self.request.params['species'])
@@ -211,8 +211,8 @@ class Venus(VenusBase):
             log.info('protein mutation discrepancy error')
             discrepancy = protein.mutation_discrepancy()
             self.reply = {**self.reply,
-                          'error': 'mutation',
-                          'msg': discrepancy,
+                          'error':  'mutation',
+                          'msg':    discrepancy,
                           'status': 'error'}
             raise VenusException(discrepancy)
         else:
@@ -238,13 +238,14 @@ class Venus(VenusBase):
         featnear = protein.get_features_near_position(protein.mutation.residue_index)
         pos_percent = round(protein.mutation.residue_index / len(protein) * 100)
         self.reply['mutation'] = {**self.jsonable(protein.mutation),
-                                  'features_at_mutation': featpos,
-                                  'features_near_mutation': featnear,
+                                  'features_at_mutation':        featpos,
+                                  'features_near_mutation':      featnear,
                                   'position_as_protein_percent': pos_percent,
-                                  'gnomAD_near_mutation': protein.get_gnomAD_near_position()}
+                                  'gnomAD_near_mutation':        protein.get_gnomAD_near_position()}
         self.stop_timer()
 
         ### STEP 3
+
     def structural_step(self, structure=None, retrieve=True):
         """
         runs protein.analyse_structure() iteratively until it works.
@@ -278,12 +279,11 @@ class Venus(VenusBase):
         """
         User dictated choices.
         """
-        user_modelling_options = {'allow_pdb': True,
-                                  'allow_swiss': True,
+        user_modelling_options = {'allow_pdb':       True,
+                                  'allow_swiss':     True,
                                   'allow_alphafold': True,
-                                  'scaling_factor': 0.239  # this is the kJ/mol <--> kcal/mol mystery value
-                                 }
-
+                                  'scaling_factor':  0.239  # this is the kJ/mol <--> kcal/mol "mystery" value
+                                  }
 
         # ------ booleans
         for key in ['allow_pdb',
@@ -300,16 +300,19 @@ class Venus(VenusBase):
             else:
                 user_modelling_options[key] = self.request.params[key] not in (False, 0, 'false', '0')
         # ------ floats
-        for key in ['swiss_oligomer_identity_cutoff','swiss_monomer_identity_cutoff',
-                    'swiss_oligomer_qmean_cutoff','swiss_monomer_qmean_cutoff']:
+        for key in ['swiss_oligomer_identity_cutoff', 'swiss_monomer_identity_cutoff',
+                    'swiss_oligomer_qmean_cutoff', 'swiss_monomer_qmean_cutoff']:
             if key not in self.request.params:
                 pass  # defaults from defaults in protein class. This must be an API call.
             else:
                 user_modelling_options[key] = float(self.request.params[key])
         # ----- for ddG calculations.
-        for key, minimum, maximum in (('cycles',1,5), ('radius',8, 15) ):
+        for key, minimum, maximum in (('cycles', 1, 5), ('radius', 8, 15)):
             if key in self.request.params:
                 user_modelling_options[key] = max(minimum, min(maximum, int(self.request.params[key])))
+            else:
+                user_modelling_options[key] = minimum
+                log.debug(f'No {key} provided...')
         # scorefxn... More are okay... but I really do not wish for users to randomly use these.
         allowed_names = ('ref2015', 'beta_july15', 'beta_nov16',
                          'ref2015_cart', 'beta_july15_cart', 'beta_nov16_cart')
@@ -386,7 +389,6 @@ class Venus(VenusBase):
             # ---- repeat
             self.structural_step(retrieve=False)
 
-
     ### Step 4
     def ddG_step(self):
         self.start_timer()
@@ -402,16 +404,13 @@ class Venus(VenusBase):
         if hasattr(protein, 'energetics') and protein.energetics is not None:
             analysis = protein.energetics
         else:
-            applicable_keys = ( 'scorefxn_name', 'outer_constrained', 'remove_ligands',
-                                'scaling_factor',
-                                'single_chain')
+            applicable_keys = ('scorefxn_name', 'outer_constrained', 'remove_ligands',
+                               'neighbour_only_score',
+                               'scaling_factor', 'prevent_acceptance_of_incrementor',
+                               'single_chain', 'radius', 'cycles')
             user_options = self.get_user_modelling_options()
             options = {k: v for k, v in user_options.items() if k in applicable_keys}
-            options['cycles'] = 1
-            if 'radius' in user_options:
-                options['radius'] = min(9, user_options['radius'])
-            else:
-                options['radius'] = 9
+            # radius and cycle minima are applied already
             analysis = protein.analyse_FF(**options, spit_process=True)
         if analysis is None:
             self.log_if_error('pyrosetta step', 'likely segfault')
@@ -437,9 +436,12 @@ class Venus(VenusBase):
             analysis = protein.energetics_gnomAD
         else:
             applicable_keys = ('scorefxn_name', 'outer_constrained', 'remove_ligands',
-                                'scaling_factor',
+                               'scaling_factor',
                                'single_chain', 'cycles', 'radius')
             options = {k: v for k, v in self.get_user_modelling_options().items() if k in applicable_keys}
+            # speedy
+            options['cycles'] = 1
+            options['radius'] = min(6, options['radius'] if 'radius' in options else 6)
             analysis = protein.analyse_gnomad_FF(**options, spit_process=True)
         if analysis is None:
             analysis = dict(error='likely segfault', msg='likely segfault')
@@ -458,7 +460,7 @@ class Venus(VenusBase):
         protein = system_storage[self.handle]
         log.info(f'Extra analysis ({algorithm}) requested by {User.get_username(self.request)}')
         applicable_keys = ('scorefxn_name', 'outer_constrained', 'remove_ligands',
-                                'scaling_factor',
+                           'scaling_factor',
                            'single_chain', 'cycles', 'radius')
         options = {k: v for k, v in self.get_user_modelling_options().items() if k in applicable_keys}
         self.reply = {**self.reply,
