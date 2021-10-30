@@ -1,5 +1,5 @@
 import json, pickle
-import markdown, re
+import markdown, re, datetime
 
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
@@ -105,6 +105,9 @@ def get_userdata(request, pagename):
             settings['revisions'] = []
         user = request.user
         settings['user'] = user
+        # touch it.
+        page.timestamp = datetime.datetime.utcnow()
+        # log visit
         if user:
             if pagename not in user.owned.pages:
                 user.visited.add(pagename)
