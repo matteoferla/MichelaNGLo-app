@@ -136,7 +136,8 @@ class Entasker:
                 if page.age < int(days_delete_unedited):
                     continue  # too young
                 else:  # delete.
-                    log.info(f'Deleting unedited page {page.identifier} by {page}')
+                    # to find owner one would need to look in `user.owned.pages`
+                    log.info(f'Deleting unedited page {page.identifier} entitled {page.title}')
                     n += 1
                     page.delete()
             for page in self.session.query(Page).filter(and_(Page.existant == True,
