@@ -105,7 +105,7 @@ def get_userdata(request, pagename):
             settings['revisions'] = []
         user = request.user
         settings['user'] = user
-        # touch it.
+        # touch it. Although loading touches it. This is like double tapping.
         page.timestamp = datetime.datetime.utcnow()
         # log visit
         if user:
