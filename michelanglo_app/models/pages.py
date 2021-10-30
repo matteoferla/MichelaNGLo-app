@@ -46,7 +46,7 @@ class Page(Base):
     id = Column(Integer, primary_key=True)
     identifier = Column(Text, nullable=False, unique=True)
     title = Column(Text, default='')
-    existant = Column(Boolean, default=True)
+    existant = Column(Boolean, default=True)  # existent is the correct spelling. exists is a key word in SQLite
     edited = Column(Boolean, default=False)
     encrypted = Column(Boolean, default=False)
     timestamp = Column(DateTime, nullable=False) #, default=datetime.datetime.utcnow)
@@ -190,14 +190,12 @@ class Page(Base):
         return data[:-padding]  # remove the padding
 
     def delete(self):
-        if self.existant:
-            if os.path.exists(self.path):
-                os.remove(self.path)
-            else:
-                pass
-            self.existant = False
+        if os.path.exists(self.path):
+            os.remove(self.path)
         else:
-            print('DEBUG.... DELETION OF A NON EXISTANT PAGE IS IMPOSSIBLE')
+            pass
+        self.existant = False
+        # print('DEBUG.... DELETION OF A NON EXISTANT PAGE IS IMPOSSIBLE')
         return self
 
     def is_public(self):

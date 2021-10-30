@@ -129,11 +129,10 @@ class Entasker:
     def kill_task(cls, days_delete_unedited: int=30, days_delete_untouched: int=365):
         self = cls()
         with transaction.manager:
-            n = 0
+            n, m = 0, 0
             for page in self.session.query(Page).filter(
                     and_(Page.existant == True,
                          Page.edited == False)):  # deletable.
-
                 if page.age < int(days_delete_unedited):
                     continue  # too young
                 else:  # delete.
@@ -152,14 +151,14 @@ class Entasker:
                     log.info(f'Deleting abandoned page {page.identifier} ({page.timestamp})')
                     try:
                         page.delete()
-                    except FileNotFoundError:
+                        m += 1
+                    except FileNotFoundError: # this is impossible as now `delete` check if valid.
                         # file has been deleted manually!?
                         # this is a pretty major incident.
                         page.existant = False
                         log.warning(f'{page.identifier} does not exist.')
                         Comms.notify_admin(f'{page.identifier} does not exist.')
-                    n += 1
-            Comms.notify_admin(f'Deleted {n} pages in cleanup.')
+            Comms.notify_admin(f'Deleted {n} unedited and {m} edited pages in cleanup.')
         self.session.commit()
 
     @classmethod
