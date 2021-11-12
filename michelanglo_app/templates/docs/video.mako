@@ -18,7 +18,8 @@ youtube_videos = {'Introduction': 'v3B3Ok2X5ck',
                   'Proteins 101': 'TgjtPUikjfE',
                   'Advanced editing': 'PjPmXs_wE9Y',
                   'Page monitoring': 'ospuYm60j58',
-                  'Venus': 'OVBeE0DmQes'}
+                  'Venus': 'OVBeE0DmQes',
+                  'Venus — note on custom models': 'bFTryyZvegE'}
 %>
 
 <%include file="subparts/docs_nav.mako"/>
