@@ -27,6 +27,6 @@
     ${list_entry('users', 'user', 'Users & pages', 'Information and policy about users and personal pages.')}
     ${list_entry('gene', 'dna', 'Making the perfect structure', 'Advice on creating a protein model that suits your needs.')}
     ${list_entry('venus', 'biohazard', 'VENUS', 'Predict the possible effects of a missense mutation on a given protein.')}
-    ## ${list_entry('video', 'camera-movie', 'Videos', 'Tutorials ranging from protein basics to advanced editing')}
+    ${list_entry('video', 'camera-movie', 'Videos', 'Tutorials ranging from protein basics to advanced editing')}
 </ul>
 </%block>
