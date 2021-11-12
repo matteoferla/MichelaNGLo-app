@@ -12,39 +12,26 @@
 </%block>
 
 <%block name="main">
+<%
+youtube_videos = {'Introduction': 'v3B3Ok2X5ck',
+                  'Basic editing': 'uQs3LsjgB68',
+                  'Proteins 101': 'TgjtPUikjfE',
+                  'Advanced editing': 'PjPmXs_wE9Y',
+                  'Page monitoring': 'ospuYm60j58',
+                  'Venus': 'OVBeE0DmQes'}
+%>
 
 <%include file="subparts/docs_nav.mako"/>
 
     <ul class="list-group list-group-flush">
-  <li class="list-group-item">
-      <h4>Introduction</h4>
-        <div class="embed-responsive embed-responsive-16by9">
-          <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/v3B3Ok2X5ck" allowfullscreen></iframe>
-        </div>
-  </li>
-  <li class="list-group-item">
-      <h4>Basic editing</h4>
-<div class="embed-responsive embed-responsive-16by9">
-  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/uQs3LsjgB68" allowfullscreen></iframe>
-</div>
-  </li>
-  <li class="list-group-item">
-      <h4>Proteins 101</h4>
-      <div class="embed-responsive embed-responsive-16by9">
-  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/TgjtPUikjfE" allowfullscreen></iframe>
-</div>
-  </li>
-  <li class="list-group-item">
-      <h4>Advanced editing</h4>
-      <div class="embed-responsive embed-responsive-16by9">
-  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/PjPmXs_wE9Y" allowfullscreen></iframe>
-</div>
-  </li>
-  <li class="list-group-item">
-      <h4>Page monitoring</h4>
-      <div class="embed-responsive embed-responsive-16by9">
-  <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/ospuYm60j58" allowfullscreen></iframe>
-</div>
-</ul>
+    %for video_title, youtube in youtube_videos.items():
+        <li class="list-group-item">
+          <h4>${video_title}</h4>
+            <div class="embed-responsive embed-responsive-16by9">
+              <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/${youtube}" allowfullscreen></iframe>
+            </div>
+        </li>
+    %endfor
+    </ul>
 
 </%block>
