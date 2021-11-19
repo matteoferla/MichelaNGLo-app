@@ -1,21 +1,30 @@
 import csv, re, os
-from typing import Dict, Union
+from typing import *
+from ..models import User
 from Bio import SeqIO, pairwise2
 from michelanglo_protein import global_settings, ProteinCore
 from .common_methods import is_malformed
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound
 import logging
+
 log = logging.getLogger(__name__)
+
 
 @view_config(route_name='venus_transcript', renderer='json')
 def venus_transcript(request):
     """
-    This route is available for humans only.
+    This is for human transcripts only!
+
+    This route is accepts enst and mutation and returns {'uniprot': ..., 'mutation': ...}
     """
-    malformed = is_malformed(request, 'enst', 'mutation')
+    malformed = is_malformed(request, 'mutation')
     if malformed:
         return {'status': malformed}
+    elif not any([k in request.params for k in EnsemblMapper.tags]):
+        request.response.status = 422
+        log.warning(f'{User.get_username(request)} malformed request due to missing ensembl')
+        return {'status': 'error, not ensembl'}
     try:
         data = get_transcript(request)
         if 'redirect' in request.params:
@@ -25,23 +34,35 @@ def venus_transcript(request):
     except Exception as err:
         msg = f'{err.__class__.__name__}: {err}'
         log.warning(msg)
+        request.response.status = 422
         return {'error': msg, 'status': 'error'}
 
 
 def get_transcript(request):
-    enst = request.params['enst']
     mutation = request.params['mutation']
-    mapper = ENSTMapper(enst)
+    for label in EnsemblMapper.tags:
+        if label in request.params and request.params[label] != '':
+            acc = request.params[label]
+            mapper = EnsemblMapper(**{label: acc})
+            break
+    else: # impossible but hey
+        request.response.status = 422
+        log.warning(f'{User.get_username(request)} malformed request due to missing ensembl')
+        return {'status': 'error, not ensembl'}
     if mapper.is_full_match():
-        return {'uniprot': mapper.uniprot,
+        return {'uniprot':  mapper.uniprot,
+                'mutation': mutation,
+                'ENST':     mapper.enst,
+                'ENSP':     mapper.ensp,
+                'ENSG':     mapper.ensg,
                 'mutation': mutation}
     else:
         p = ProteinCore(uniprot=mapper.uniprot, taxid=9606).load()
-        return {'uniprot': mapper.uniprot,
+        return {'uniprot':  mapper.uniprot,
                 'mutation': mapper.convert(p.sequence, mutation)}
 
 
-class ENSTMapper:
+class EnsemblMapper:
     """
     Map an Ensembl ENST transcript id and position to a uniprot one.
     Requires the files:
@@ -49,21 +70,39 @@ class ENSTMapper:
     - ftp://ftp.ensembl.org/pub/release-99/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz
     - ftp://ftp.ensembl.org/pub/release-99/tsv/homo_sapiens/Homo_sapiens.GRCh38.99.uniprot.tsv.gz
 
-    >>> ENSTMapper('ENST00000454575.6').convert('MAAAA....AAAAA', 1932)
+    >>> EnsemblMapper('ENST00000454575.6').convert('MAAAA....AAAAA', 1932)
     """
-    def __init__(self, enst: str):
-        self.enst = re.sub(r'\.\d+', '', enst)  # version does not matter.
-        # create self.info:Dict
-        self.info = self.ENST2info()
-        self.ensp = self.info['protein_stable_id']
-        self.uniprot = self.info['xref']
+    tags = ('ensg', 'enst', 'ensp')
 
-    def ENST2info(self) -> Dict:
+    def __init__(self, enst: Optional[str] = None, ensg: Optional[str] = None, ensp: Optional[str] = None):
+        if enst:
+            self.info: Dict = self.ENST2info(enst)
+        elif ensp:
+            self.info: Dict = self.ENSP2info(ensp)
+        elif ensg:
+            self.info: Dict = self.ENSG2info(ensg)
+        else:
+            raise KeyError('Please provide at least one accession')
+        self.enst: str = self.info['transcript_stable_id']
+        self.ensp: str = self.info['protein_stable_id']
+        self.ensg: str = self.info['gene_stable_id']
+        self.uniprot: str = self.info['xref']
+
+    def ENSX2info(self, query: str, column: str) -> Dict:
         for entry in csv.DictReader(global_settings.open('ensembl-uniprot'), delimiter='\t'):
-            if entry['transcript_stable_id'] == self.enst:
+            if entry[column] == re.sub(r'\.\d+', '', query):  # version does not matter.
                 return entry
         else:
-            raise ValueError(f'Cannot find {self.enst}')
+            raise ValueError(f'Cannot find {query}')
+
+    def ENST2info(self, query: str) -> Dict:
+        return self.ENSX2info(query, 'transcript_stable_id')
+
+    def ENSG2info(self, query: str) -> Dict:
+        return self.ENSX2info(query, 'gene_stable_id')
+
+    def ENSP2info(self, query: str) -> Dict:
+        return self.ENSX2info(query, 'protein_stable_id')
 
     def is_full_match(self) -> bool:
         """
@@ -96,12 +135,12 @@ class ENSTMapper:
         """
         ref = self.clean_sequence(self.sequence)
         seq = self.clean_sequence(sequence)
-        print(self.ensp, len(ref), self.uniprot, len(seq))
+        # print(self.ensp, len(ref), self.uniprot, len(seq))
         alignement = pairwise2.align.globalxx(ref, seq)[0]
         a_ref = alignement[0]
         a_query = alignement[1]
-        mapping_ref = [i+1 for i, r in enumerate(a_ref) if r != '-']
-        mapping_query = [i+1 for i, r in enumerate(a_query) if r != '-']
+        mapping_ref = [i + 1 for i, r in enumerate(a_ref) if r != '-']
+        mapping_query = [i + 1 for i, r in enumerate(a_query) if r != '-']
         mp = mapping_ref[position]  # this is the position in the aligned sequence.
         ar = a_ref[mp]  # residue at mp
         aq = a_query[mp]  # residue at mp
@@ -110,7 +149,7 @@ class ENSTMapper:
 
     def convert(self, sequence: str, mutation: str) -> str:
         """
-        Convert the mutation to the numbering of the seuwnece provided.
+        Convert the mutation to the numbering of the sequence provided.
         See ``self.convert_position(sequence, position)`` for more.
         """
         position = self.clean_position(mutation)
@@ -120,9 +159,9 @@ class ENSTMapper:
 
 def test():
     # ENST00000635253.2 is Q96N67
-    assert ENSTMapper('ENST00000635253.2').is_full_match(), 'Error: ENST00000635253.2 is Q96N67 in full'
+    assert EnsemblMapper('ENST00000635253.2').is_full_match(), 'Error: ENST00000635253.2 is Q96N67 in full'
     # ENST00000454575.6 is not
-    assert not ENSTMapper('ENST00000635253.2').is_full_match(), 'Error: ENST00000635253.2 is not Q96N67 in full'
+    assert not EnsemblMapper('ENST00000635253.2').is_full_match(), 'Error: ENST00000635253.2 is not Q96N67 in full'
     u = '''MAERRAFAQKISRTVAAEVRKQISGQYSGSPQLLKNLNIVGNISHHTTVPLTEAVDPVDL
     EDYLITHPLAVDSGPLRDLIEFPPDDIEVVYSPRDCRTLVSAVPEESEMDPHVRDCIRSY
     TEDWAIVIRKYHKLGTGFNPNTLDKQKERQKGLPKQVFESDEAPDGNSYQDDQDDLKRRS
@@ -160,7 +199,7 @@ def test():
     AQVFLSEIPSDPKLFRHHNKLRLCFKDFTKRCEDALRKNKSLIGPDQKEYQRELERNYHR
     LKEALQPLINRKIPQLYKAVLPVTCHRDSFSRMSLRKMDL
     '''
-    assert ENSTMapper('ENST00000454575.6').convert(u, 1932) == 1943, 'Error: ENST00000635253.2 @ 1932 is Q96N67 @ 1943'
+    assert EnsemblMapper('ENST00000454575.6').convert(u, 1932) == 1943, 'Error: ENST00000635253.2 @ 1932 is Q96N67 @ 1943'
 
     if __name__ == '__main__':
         test()

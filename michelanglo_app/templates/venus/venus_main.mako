@@ -19,7 +19,8 @@
 <%block name="main">
         <p>A tool to help in the discovery of why a given mutation is pathogenic (see <a href="/docs/venus">documentation</a>).
             To view multiple mutations at the same time see <a href="/venus_multiple">multiple mutant page</a>.
-            For a random protein and mutation <a href="/venus?random">click here</a>.</p>
+            For a random protein and mutation <a href="/venus?random">click here</a>.
+            For an ENSEMBL id <a href="#" data-toggle="modal" data-target="#transcriptModal">click here</a>.</p>
 
     <%include file="venus_input.mako"/>
             #################### ALERTS
@@ -50,6 +51,7 @@
     ### This adds #modalStructureless
     <%include file="venus_no_structure.mako"/>
     <%include file="extra_info.mako"/>
+    <%include file="venus_transcript.mako"/>
 </%block>
 
 <%block name='script'>

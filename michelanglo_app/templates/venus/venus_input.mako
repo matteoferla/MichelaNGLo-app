@@ -1,10 +1,10 @@
 <%
 # this is a very silly grammatical change.
 if mutation_mode == 'main':
-    mut_label = 'Mutation'
+    mut_label = 'AA mutation'
     mut_title = 'A protein mutation within the canonical transcript of the chosen gene (e.g. p.A20W). The "p." is redundant, but tolerated'
 elif mutation_mode == 'multi':
-     mut_label = 'Mutations'
+     mut_label = 'AA mutations'
      mut_title = 'A series of protein mutations within the canonical transcript of the chosen gene (e.g. p.A20W). The "p." is redundant, but tolerated. Space, comma, semicolon or tab separated.'
 else:
     raise Exception('No mode!')

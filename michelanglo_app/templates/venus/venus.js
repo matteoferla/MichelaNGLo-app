@@ -256,5 +256,33 @@ $('#save').click(function () {
     }
     });
 
+$('#transcript_convert').click(event => {
+    ['ensg', 'enst', 'ensp', 'mutation'].forEach(v => $(`#transcript_${v}_error`).hide());
+    const mutation =  $('#transcript_mutation').val();
+    if (mutation.match(/(\d+)/) === null) { $('#transcript_mutation_error').show(); return; }
+    ['ensg', 'enst', 'ensp'].forEach(label => {
+                                     const id = $(`#transcript_${label}`).val();
+                                     if (id === '') return;
+                                     const postData = {'mutation': mutation};
+                                     postData[label] = id; // dynamic attribute.
+                                     $.post('/venus_transcript', postData)
+                                        .fail(xhr => $(`#transcript_${label}_error`)
+                                                       .show()
+                                                       .text(xhr.responseText.error)
+
+                                            )
+                                        .then(msg => {
+                                            ops.addToast('conversion',
+                                                        'Conversion',
+                                                        `${mutation} in (${msg.ensg} &rarr; ${msg.enst} &rarr; ${msg.ensp}) is ${msg.mutation} in ${msg.uniprot}`,
+                                                        'bg-success');
+                                            $('#gene').val(msg.uniprot);
+                                            $('#mutation').val(msg.mutation);
+                                            $('#transcriptModal').modal('hide');
+                                            $('#venus_calc').show();
+                                        });
+                                    });
+});
+
 
 //</%text>
