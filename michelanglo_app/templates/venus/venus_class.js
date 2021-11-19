@@ -201,8 +201,13 @@ class Venus {
             'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W',
             'ALA': 'A', 'VAL': 'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M'
         };
-        let parts = this.mutation.match(/^(\D{1,3})(\d+)(\D{1,3})$/);
+        let parts = this.mutation.trim().match(/^(\D{1,3})(\d+)(\D{1,3})$/);
         if (parts === null) return false; //Not a typo: a failed match returns null not undefined.
+        // parts 0: full match, 1:from 2:index 3:to
+        if (parts[3] === '=') {
+            parts[3] = parts[1];
+        }
+        // deal with identity
         // deal with three letter code.
         if (aa[parts[1]] !== undefined) {
             parts[1] = aa[parts[1]]
