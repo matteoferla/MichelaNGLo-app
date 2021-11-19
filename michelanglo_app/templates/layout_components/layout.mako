@@ -307,8 +307,8 @@
     <div class="container-fluid">
         <div class="row" style="line-height: 1rem;">
             <div class="col-12 col-lg-5 offset-lg-1 text-muted px-3 pt-3">
-                <small><a href="https://www.schrodinger.com/" target="_blank">PyMOL <i
-                        class="far fa-external-link-square"></i></a> is a trademark of <a href="https://pymol.org/2/"
+                <small><a href="https://pymol.org/2/" target="_blank">PyMOL <i
+                        class="far fa-external-link-square"></i></a> is a trademark of <a href="https://www.schrodinger.com/"
                                                                                           target="_blank">Schr&ouml;dinger
                     , LLC <i class="far fa-external-link-square"></i></a>. The authors are not affiliated or involved
                     with PyMOL or Schr&ouml;dinger.

@@ -56,8 +56,8 @@ class Venus {
             //'indestr': 'This is a purely based on the nature of the amino acids without taking into account the position. Despite this, it is a strong predictor.',
             'effect': 'Summary of effect',
             'strcha': 'Model based residue details',
-            'ddg': 'Forcefield calculations. A negative value is stabilising, and a value of 1-2 kcal/mol is neutral. A hydrogen bond has about 1-2 kcal/mol. For more see documentation.',
-            'neigh': 'Model based, what residues are within 4 &aring;ngstr&ouml;m?',
+            'ddg': 'Forcefield calculations. A negative value is stabilising, and a value >2 kcal/mol is destabilising. A hydrogen bond has about 1-2 kcal/mol. See documentation for details.',
+            'neigh': 'Displays residues within 10 &aring;ngstr&ouml; of the mutation, as determined from the model',
             'location': 'What domains are nearby linearly &mdash;but not necessarily containing the residue',
             'domdet': 'what is this?',
             'gnomad': 'gnomAD mutations with 5 residues distance (structure independent)',
@@ -505,7 +505,8 @@ class Venus {
                 //     liEl('ddG contributed by residue', this.energetical.ddG_residue.toFixed(1) + ' kcal/mol') +
                 //     liEl('Native residue terms', innerList(this.energetical.native_residue_terms)) +
                 //     liEl('Mutant residue terms', innerList(this.energetical.mutant_residue_terms));
-                let modalText = `<p>Detail for &Delta;&Delta;G score.
+                let modalText = `<p>Individual values for components of ΔΔG score, intended for advanced use.
+                                    See documentation for discussion of &Delta;&Delta;G.
                                     For meaning, see <a href="/docs/venus" target="_blank">documentation</a>.</p>
                                     <p><b>Total &Delta;&Delta;G</b>: ${this.energetical.ddG.toFixed(1)} kcal/mol<br/>
                                     <b>Residue contribution to &Delta;&Delta;G</b>: ${this.energetical.ddG_residue.toFixed(1)} kcal/mol<br/>
@@ -516,12 +517,12 @@ class Venus {
                               <thead>
                                 <tr>
                                   <th scope="col">Term</th>
-                                  <th scope="col">Meaning</th>
-                                  <th scope="col">Weight</th>
+                                  <th scope="col">Definition</th>
+                                  <th scope="col">Weight factor</th>
                                   <th scope="col">Difference</th>
                                   <th scope="col">Weighted difference</th>
-                                  <th scope="col">Native</th>
-                                  <th scope="col">Mutant</th>
+                                  <th scope="col">Score Native</th>
+                                  <th scope="col">Score Mutant</th>
                                 </tr>
                               </thead>
                               <tbody>`;
@@ -1115,7 +1116,7 @@ class Venus {
                                 ${modalAttr}
                                 >(` + Object.entries(effect)
                         .filter(([k, v]) => v !== 0)
-                        .map(([k, v]) => `${k}: ${v}`).join(', ')
+                        .map(([k, v]) => `N<sub>${k}</sub>: ${v}`).join(', ')
                     + ` <i class="far fa-calculator" ${modalAttr}></i></span>)`;
             }
         };
@@ -1529,13 +1530,15 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         let detail = ''; // mdash sepearated. Mostly.
         // ----------------------------- Interface
         if (data.other_chain) {
-            const chainDeets = this.structural.chain_definitions.filter(v => v.chain = 'A');
-            if (chainDeets) {
-                detail = ` from interacting protein (${data.chain}: ${chainDeets[0].name})`;
-            } else {
-                 console.log('Warning: no name in chain definitions??');
-                 detail = ` from interacting protein (${data.chain})`;
-            }
+            detail = ` from interacting protein (chain ${data.chain})`;
+            // Todo fix the following.
+            // const chainDeets = this.structural.chain_definitions.filter(v => v.chain = 'A');
+            // if (chainDeets) {
+            //     // chainDeets[0].name is undefined?
+            //     detail = ` from interacting protein (${data.chain}${chainDeets[0].name ? ': '+chainDeets[0].name : ''})`;
+            // } else {
+            //      console.log('Warning: no name in chain definitions??');
+            // }
         }
         // ----------------------------- Fill PTMs stuff.
         data.ptms.map(ptm => {

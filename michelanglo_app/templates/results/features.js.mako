@@ -1,6 +1,7 @@
 ####### THIS IS A JS FILE ##########################
 ####### THE EXTENSION IS MAKO AS THE RENDERER IS MAKO
 ####### THIS IS NOT GREAT CODING.
+####### DO NOT ADD A TEXT TAG WITHOUT DUMPING THE DATA FIRST.
 // <script>
 
 
@@ -92,26 +93,29 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
 %if combo_roi:
     ft.addFeature({
         data: ${str(combo_roi)|n},
-        name: "region of interest",
+        name: "Region of interest",
         className: "domain",
         color: "teal",
         type: "rect",
         filter: "Domain"
     });
 
-    addFeatureTooltip("region of interest", "A collection of various Uniprot annotations: 'transmembrane region','intramembrane region','region of interest','peptide','site','active site','binding site','calcium-binding region','zinc finger region','metal ion-binding site','DNA-binding region','lipid moiety-binding region', 'nucleotide phosphate-binding region'");
+    addFeatureTooltip("Region of interest", "A collection of various Uniprot annotations: "+
+            "'transmembrane region','intramembrane region','region of interest','peptide','site','active site',"+
+            "'binding site','calcium-binding region','zinc finger region','metal ion-binding site','DNA-binding region',"+
+            "'lipid moiety-binding region', 'nucleotide phosphate-binding region'");
 %endif
 
 %if combo_other:
     ft.addFeature({
         data: ${str(combo_other)|n},
-        name: "other regions",
+        name: "Other regions",
         className: "domain",
         color: "lavender",
         type: "rect",
         filter: "Domain"
     });
-    addFeatureTooltip("other regions", "A collection of various Uniprot annotations: 'propeptide','signal peptide','repeat','coiled-coil region','compositionally biased region','short sequence motif','topological domain','transit peptide'");
+    addFeatureTooltip("Other regions", "A collection of various Uniprot annotations: 'propeptide','signal peptide','repeat','coiled-coil region','compositionally biased region','short sequence motif','topological domain','transit peptide'");
 %endif
 
 %if combo_ptm:
@@ -135,7 +139,7 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
         type: "unique",
         filter: "Modified"
     });
-    addFeatureTooltip("Mod. residues (HT)", "Post translational modifications from Phosphosite-plus");
+    addFeatureTooltip("Mod. residues (HT)", "Post translational modifications from Phosphosite-plus (High throughput");
 %endif
 
 
@@ -235,7 +239,8 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
         height: 1,
         filter: "type2"
     });
-    addFeatureTooltip("Flexibility","Flexibility predicted by amino acid identity. low flexibility generally means a structured protein");
+    addFeatureTooltip("Flexibility","Flexibility predicted by amino acid identity. Low flexibility generally means a structured protein."+
+            " Technically 'Normalized flexibility parameters (B-values), average' from Vihinen M., Torkkila E., Riikonen P. Proteins. 19(2):141-9(1994).");
 %endif
 ################### Structures #######################
 <%

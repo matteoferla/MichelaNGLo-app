@@ -69,7 +69,7 @@ dict(id='modalUbiquitination',
 dict(id='modalDisulfide',
     title='Lost disulfide',
     description='''Disulfides allow the protein to maintain structural cohesion in harsh environments.
-    Disulfides are found in ER, Golgi or secreted protein in Eukaryotes,
+    Disulfides are found in ER, Golgi or secreted protein in eukaryotes,
     and in the periplasmic or secreted protein in bacteria.
     A potential lack of calculated destabilisation does not indicate that the protein is stable
     outside of the cytoplasm.
@@ -158,7 +158,7 @@ ref_inner = ''.join([table_rower('VENUS',
                                  linker('https://doi.org/10.1002/elps.200900140')
                                  ),
                      table_rower('Eukaryotic Linear Motif (ELM)',
-                                 'The ELM database contains a myriad know linear motifs in Eukarytes',
+                                 'The ELM database contains a myriad know linear motifs found in eukarytes',
                                  linker('https://elm.eu.org/'),
                                  'Kumar, M., Gouw, M., Michael, S., Sámano-Sánchez, H., Pancsa, R., Glavina, J., Diakogianni, A., Valverde, J. A., Bukirova, D., Signalyševa, J., Palopoli, N., Davey, N. E., Chemes, L. B., & Gibson, T. J. (2020). ELM-the eukaryotic linear motif resource in 2020. Nucleic Acids Research, 48(D1), D296–D306.' +
                                  linker('https://doi.org/10.1093/nar/gkz1030')
