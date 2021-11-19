@@ -20,7 +20,7 @@
     However, this is a simple form, so for more extensive descriptions and details for crystal structures use the <a href="http://www.rcsb.org/" target="_blank">PDB <i class="far fa-external-link"></i></a></p>
     <h5>Tips when using the PDB</h5>
 <p>Often there will be either none or a couple.</p>
-<p>When you click on one, keep an eye out for the organism. Also look at the feature view (<i>e.g.</i> <a href="https://www.rcsb.org/pdb/protein/P42212" target="_blank">ID:P42212 <i class="far fa-external-link"></i></a>), this provides a really nice overview of your protein, showing what the lengths are of the crystals.
+<p>When you click on one, keep an eye out for the organism. Also look at the feature view (<i>e.g.</i> <a href="https://www.rcsb.org/uniprot/P42212" target="_blank">ID:P42212 <i class="far fa-external-link"></i></a>), this provides a really nice overview of your protein, showing what the lengths are of the crystals.
     If you cannot find your protein use your uniprot ID and add it to the end of the URL <code>www.rcsb.org/pdb/protein/</code>.
     At the bottom is the premade Swissmodel structure based on homologues and will be longer that the crystal structures, but is a threaded structure, so cannot be fully trusted without checking whether any observations are true for the template model.</p>
 

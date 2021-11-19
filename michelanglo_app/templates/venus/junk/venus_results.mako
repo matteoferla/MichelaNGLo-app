@@ -210,7 +210,7 @@
 
                         ${line_fore('External links')}
                             <a href="https://www.uniprot.org/uniprot/${protein.uniprot}" target="_blank">Uniprot:${protein.uniprot} <i class="far fa-external-link-square"></i></a> &mdash;
-                            <a href="https://www.rcsb.org/pdb/protein/${protein.uniprot}" target="_blank">PDB:${protein.uniprot} <i class="far fa-external-link-square"></i></a> &mdash;
+                            <a href="https://www.rcsb.org/uniprot/${protein.uniprot}" target="_blank">PDB:${protein.uniprot} <i class="far fa-external-link-square"></i></a> &mdash;
                             <a href="https://gnomAD.broadinstitute.org/gene/${protein.gene_name}" target="_blank">gnomAD:${protein.gene_name} <i class="far fa-external-link-square"></i></a>
                         ${line_aft()}
 
