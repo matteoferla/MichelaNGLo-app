@@ -37,6 +37,17 @@ class Venus {
             'Z': 'Glutamate/glutamine (Z/Glx)',
             '*': 'Stop (*/Stop)'
         };
+        this.subpopulations = {
+            "afr": "African/African American",
+            "ami": "Amish", "amr": "Latino/Admixed American",
+            "asj": "Ashkenazi Jewish",
+            "eas": "East Asian",
+            "fin": "European (Finnish)",
+            "mid": "Middle Eastern",
+            "nfe": "European (non-Finnish)",
+            "sas": "South Asian",
+            "oth": "Other"
+        };
         this.mutalist = $('#results_mutalist');
         // these will be declared later. these here are for self clarity
         this.job_id = undefined;
@@ -160,35 +171,38 @@ class Venus {
         };
         extras = extras || this.get_user_settings();
         // chrome autofills usernames and passwords or 9606
-        if ((this.uniprot + '' === '9606')  ||
+        if ((this.uniprot + '' === '9606') ||
             (this.mutation + '' === '9606') ||
             (this.uniprot.search(/\d/) === -1) ||
             (this.mutation.search(/\d/) === -1)
-        ) { throw 'chrome autofill prevented.'}
+        ) {
+            throw 'chrome autofill prevented.'
+        }
         for (const [key, value] of Object.entries(extras)) {
             // no sanitisation ATM
             data[key] = value;
         }
-        return $.post({url: "venus_analyse",
-                       data: data,
-                       timeout: this.timeout
-                       }).fail((error, text) => {
-                             if (text !== 'timeout') {
-                                 ops.addErrorToast(error);
-                                 this.setStatus(`Error: ${error.message}`, 'crash');
-                             } else {
-                                 // polling
-                                 ops.addToast('polling',
-                                     'Slow task',
-                                     'The task is taking longer than expected (possibly large protein?)',
-                                     'bg-warning');
-                                 return this.analyse(step, extras);
-                             }
+        return $.post({
+            url: "venus_analyse",
+            data: data,
+            timeout: this.timeout
+        }).fail((error, text) => {
+            if (text !== 'timeout') {
+                ops.addErrorToast(error);
+                this.setStatus(`Error: ${error.message}`, 'crash');
+            } else {
+                // polling
+                ops.addToast('polling',
+                    'Slow task',
+                    'The task is taking longer than expected (possibly large protein?)',
+                    'bg-warning');
+                return this.analyse(step, extras);
+            }
 
-                         }).then(reply => {
-                                            this.timeTaken = reply.time_taken;
-                                            return reply
-                                        });
+        }).then(reply => {
+            this.timeTaken = reply.time_taken;
+            return reply
+        });
     }
 
     //step 0
@@ -316,7 +330,8 @@ class Venus {
                     let gnomADtext = `<p>Structure independent, sequence proximity (see structural neighbour for 3D) ${omni}.</p>`;
                     gnomADtext += '<ul>';
                     const gMut = (v) => v[4].toUpperCase().split(' ')[0];
-                    gnomADtext += this.mutational.gnomAD_near_mutation.map(v => `<li>${this.makeProlink(v)}: (${v[3].toLowerCase()}, <i class="far fa-flask-potion venus-no-mike" data-gnomad='${JSON.stringify([gMut(v)])}' style="cursor: pointer;"></i>)</li>`).join('');
+                    gnomADtext += this.mutational.gnomAD_near_mutation
+                                      .map(v => `<li>${this.makeProlink(v)}: (${v[3].toLowerCase()}, <i class="far fa-flask-potion venus-no-mike" data-variant='${JSON.stringify([gMut(v)])}' style="cursor: pointer;"></i>)</li>`).join('');
                     gnomADtext += '</ul>';
                     this.createEntry('gnomad', 'gnomAD', gnomADtext);
                 }
@@ -442,17 +457,32 @@ class Venus {
                 ddgtext += `<i>Estimated &Delta;&Delta;G (with backbone movement allowed):</i> ${ddGLine} ${units} `;
 
                 let shape = ['silent',
-                            ...['smaller', 'bigger','differently shaped', 'equally sized']
-                                .filter(v => venus.mutational.apriori_effect.includes(v))
-                            ].pop();
+                    ...['smaller', 'bigger', 'differently shaped', 'equally sized']
+                        .filter(v => venus.mutational.apriori_effect.includes(v))
+                ].pop();
                 // MAE from O2567
-                const data = {"buried": {"bigger": {"MAE": 1.27, "MSE": -0.75, "SE": 0.12, "allocation": 0.69}, "differently shaped": {"MAE": 2.23, "MSE": -1.96, "SE": 0.36, "allocation": 0.53}, "equally sized": {"MAE": 1.27, "MSE": -1.27, "SE": 0.29, "allocation": 0.5}, "proline involved": {"MAE": 2.32, "MSE": 1.49, "SE": 0.48, "allocation": 0.67}, "smaller": {"MAE": 2.01, "MSE": -1.69, "SE": 0.09, "allocation": 0.48}}, "surface": {"bigger": {"MAE": 0.81, "MSE": 0.37, "SE": 0.02, "allocation": 0.84}, "differently shaped": {"MAE": 0.58, "MSE": 0.07, "SE": 0.02, "allocation": 0.86}, "equally sized": {"MAE": 0.71, "MSE": -0.14, "SE": 0.06, "allocation": 0.79}, "proline involved": {"MAE": 1.06, "MSE": 0.07, "SE": 0.08, "allocation": 0.79}, "smaller": {"MAE": 0.93, "MSE": -0.6, "SE": 0.02, "allocation": 0.7}}};
+                const data = {
+                    "buried": {
+                        "bigger": {"MAE": 1.27, "MSE": -0.75, "SE": 0.12, "allocation": 0.69},
+                        "differently shaped": {"MAE": 2.23, "MSE": -1.96, "SE": 0.36, "allocation": 0.53},
+                        "equally sized": {"MAE": 1.27, "MSE": -1.27, "SE": 0.29, "allocation": 0.5},
+                        "proline involved": {"MAE": 2.32, "MSE": 1.49, "SE": 0.48, "allocation": 0.67},
+                        "smaller": {"MAE": 2.01, "MSE": -1.69, "SE": 0.09, "allocation": 0.48}
+                    },
+                    "surface": {
+                        "bigger": {"MAE": 0.81, "MSE": 0.37, "SE": 0.02, "allocation": 0.84},
+                        "differently shaped": {"MAE": 0.58, "MSE": 0.07, "SE": 0.02, "allocation": 0.86},
+                        "equally sized": {"MAE": 0.71, "MSE": -0.14, "SE": 0.06, "allocation": 0.79},
+                        "proline involved": {"MAE": 1.06, "MSE": 0.07, "SE": 0.08, "allocation": 0.79},
+                        "smaller": {"MAE": 0.93, "MSE": -0.6, "SE": 0.02, "allocation": 0.7}
+                    }
+                };
                 let cat_mae = 'N/A';
                 let cat_mad = 'N/A';
                 let cat_allocation = 'N/A';
                 let buriedStr = ['surface', 'buried'][this.structural.buried + 0]; // coerce this.structural.buried to int
                 if (shape !== 'silent') {
-                    const subdata = data[buriedStr][shape] ;
+                    const subdata = data[buriedStr][shape];
                     cat_mae = subdata["MAE"];
                     cat_mad = subdata["SE"];
                     cat_allocation = subdata["allocation"];
@@ -638,19 +668,19 @@ class Venus {
             data: submissionData,
             timeout: this.timeout,
         }).fail((error, text) => {
-                             if (text !== 'timeout') {
-                                 ops.addErrorToast(error);
-                                 this.setStatus(`Error: ${error.message}`, 'crash');
-                             } else {
-                                 // polling
-                                 setTimeout(() => this.analyse_target(mutation, algorithm), 30000);
-                                 ops.addToast('polling',
-                                     'Slow task',
-                                     'The task is taking longer than expected (possibly large protein?)',
-                                     'bg-warning');
-                             }
+            if (text !== 'timeout') {
+                ops.addErrorToast(error);
+                this.setStatus(`Error: ${error.message}`, 'crash');
+            } else {
+                // polling
+                setTimeout(() => this.analyse_target(mutation, algorithm), 30000);
+                ops.addToast('polling',
+                    'Slow task',
+                    'The task is taking longer than expected (possibly large protein?)',
+                    'bg-warning');
+            }
 
-                         })
+        })
             .done(msg => {
                 if (msg.error) {
                     this.setStatus('Failure at extra job', 'crash');
@@ -759,10 +789,10 @@ class Venus {
                                   </div>
                                 </div>`);
         $('#results_status').mouseover(event => {
-                                            if ($(event.target).data('toggle')) {
-                                                $('#results_status_caption').html(`<br/>(${event.target.title})`);
-                                            }
-                                        })
+            if ($(event.target).data('toggle')) {
+                $('#results_status_caption').html(`<br/>(${event.target.title})`);
+            }
+        })
             .toast('show');
         if (mode === 'done') setTimeout(() => $('#results_status').hide(), this.animation_speed * 2);
     }
@@ -1111,7 +1141,7 @@ class Venus {
                     }, {destabilising: 0, neutral: 0, stabilising: 0});
                 if (Object.values(effect).reduce((a, v) => a + v, 0) === 0) return '';
                 let variants = gnomads.map(g => `${g} (≈${parseInt(this.energetical_gnomAD[g])} kcal/mol)`).join(', ');
-                const modalAttr = `data-toggle="tooltip" title="${variants}" data-gnomad='${JSON.stringify(gnomads)}'`;
+                const modalAttr = `data-toggle="tooltip" title="${variants}" data-variant='${JSON.stringify(gnomads)}'`;
                 return ` <span class="underlined venus-plain-mike" style="cursor: pointer;"
                                 ${modalAttr}
                                 >(` + Object.entries(effect)
@@ -1150,7 +1180,7 @@ class Venus {
     }
 
     activate_data_gnomad() { //called by step 5.
-        const dg = $('[data-gnomad]');
+        const dg = $('[data-variant]');
         dg.off('click'); //Unsure when this would occur.
         dg.click(event => {
             $('#gnomad_extra').modal('show');
@@ -1161,7 +1191,7 @@ class Venus {
             let homoTargets;
             let heteroTargets;
             if (this.energetical_gnomAD !== undefined) {
-                const allTargets = el.data('gnomad')
+                const allTargets = el.data('variant')
                     .filter(mutation => {
                         if (this.energetical_gnomAD[mutation] === undefined) return false;
                         else return this.energetical_gnomAD[mutation] >= this.energetical.ddG;
@@ -1214,7 +1244,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                                     </div>
                                 </li>`;
             };
-            content += el.data('gnomad').map(v => addLi(v)).join('');
+            content += el.data('variant').map(v => addLi(v)).join('');
             content += '</ul>';
             $('#gnomad_extra .modal-body').html(content);
             const pros = $('#gnomad_extra [data-toggle="protein"]');
@@ -1274,12 +1304,38 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
 
     get_gnomAD_details(mutation) {
         //Python Variant object (gnomad) wass saved as string --> corrected.
-        // mutation is str "A23Q" returns { id: "gnomAD_114_114_rs1163968308", x: 114, y: 114, impact: "MODERATE", description: "V114L (rs1163968308)", homozygous: 0 }
+        /* mutation is str "A23Q" returns
+            {'id': 'gnomAD_8_8_rs1323613865', 'x': 8, 'y': 8, 'description': 'V8A (rs1323613865)',
+            'from_residue': 'V', 'residue_index': 8, 'to_residue': 'A',
+            'impact': 'MODERATE', 'homozygous': 0, 'frequency': 0, 'N': 1, 'consequence':
+            'missense_variant', 'frequencies': {'afr': 0.0, 'amr': 0.0, 'asj': 0.0,
+            'eas': 0.000411862, 'fin': 0.0, 'mid': 0.0, 'nfe': 0.0, 'sas': 0.0, 'oth': 0.0},
+            'type': 'missense'}
+         */
         const detail = this.protein.gnomAD.filter(v => v.description.includes(mutation))[0];
-        if (this.energetical_gnomAD !== undefined && this.energetical_gnomAD[mutation] !== undefined) {
+        return this.add_ddG_details(mutation, detail);
+    }
+
+    add_ddG_details(mutation, detail) {
+        if (this.custom_ddG !== undefined && this.custom_ddG[mutation] !== undefined) {
+            detail.ddG = this.custom_ddG[mutation];
+        } else if (this.energetical_gnomAD !== undefined && this.energetical_gnomAD[mutation] !== undefined) {
             detail.ddG = this.energetical_gnomAD[mutation];
         }
-        return detail
+        return detail;
+    }
+
+    get_clinvar_details(mutation) {
+        /*
+        {"id":"clinvar_12_12_rs104894229","x":12,"y":12,
+        "description":"Neoplasm of the thyroid gland; Neoplasm of the large intestine",
+        "from_residue":"G","residue_index":12,"to_residue":"R","impact":"Pathogenic/Likely pathogenic",
+        "homozygous":null,"frequency":0,"N":1,"consequence":"single nucleotide variant",
+        "frequencies":null,"type":"missense"}
+         */
+        const detail = this.protein.clinvar.filter(v => `${v.from_residue}${v.residue_index}${v.to_residue}`
+                                                        .includes(mutation))[0];
+        return this.add_ddG_details(mutation, detail);
     }
 
     loadStructure() {
@@ -1337,8 +1393,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             //     strloctext += `<p data-toggle="tooltip" title="In a crystal structure, high b-factor is bad, but is a relative value dependant on the resolution etc.">
             //                     <i>b-factor</i>: ${this.structural.bfactor.toFixed(2)}</p>`;
             // }
-        }
-        else if (this.structural.structure.type === 'swissmodel') {
+        } else if (this.structural.structure.type === 'swissmodel') {
             // warnings
             const qmean = this.structural.structure.extra.qmean.qmean4_z_score;
             const identity = this.structural.structure.extra.identity;
@@ -1376,8 +1431,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             const seqs = msa.io.fasta.parse(`>template\n${this.structural.structure.alignment.template}\n` +
                 `>uniprot\n${this.structural.structure.alignment.uniprot}\n`);
             align.on('shown.bs.modal', event => msa({el: align.find('#msa_viewer'), seqs: seqs}).render());
-        }
-        else if (this.structural.structure.type === 'alphafold2') {
+        } else if (this.structural.structure.type === 'alphafold2') {
             strloctext += '<p><i>Chosen model:</i> ';
             strloctext += this.makeExt("https://alphafold.ebi.ac.uk/entry/" + this.uniprot, 'AlphaFold2:' + this.uniprot);
             strloctext += ` (<span class='prolink' data-target="#viewport" data-toggle="protein" data-selection="*"
@@ -1388,16 +1442,13 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             if (this.structural.bfactor > 90) {
                 plddt_color = 'bg-success';
                 plddt_word = 'very highly confident';
-            }
-            else if (this.structural.bfactor > 70) {
+            } else if (this.structural.bfactor > 70) {
                 plddt_color = 'bg-info';
                 plddt_word = 'confident';
-            }
-            else if (this.structural.bfactor > 50) {
+            } else if (this.structural.bfactor > 50) {
                 plddt_color = 'bg-warning'; //text-white and bg-warning looks fine.
                 plddt_word = 'low';
-            }
-            else {
+            } else {
                 plddt_color = 'bg-danger';
                 plddt_word = 'very low';
             }
@@ -1419,7 +1470,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         } else {
             simbaVerdict = 'neutral';
         }
-        strloctext += `<p><i>Quick ∆∆G (SIMBA-I)</i> ${Math.round(this.structural.simbai_ddG * 10)/10} kcal/mol (${simbaVerdict})</p>`;
+        strloctext += `<p><i>Quick ∆∆G (SIMBA-I)</i> ${Math.round(this.structural.simbai_ddG * 10) / 10} kcal/mol (${simbaVerdict})</p>`;
         strloctext += `<p><i>Secondary structure type:</i> ${this.structural.SS}</p>`;
         strloctext += `<p><i>Residue resolution:</i> ${(this.structural.has_all_heavy_atoms) ? 'Resolved in crystal/model' : 'Some heavy atoms unresolved (too dynamic)'}</p>`;
         if (this.structural.closest_ligand !== undefined && this.structural.closest_ligand.match(/\[.*\]/) !== null) {
@@ -1481,32 +1532,32 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
 
         // ## the ptm selector
         const ptmSele = this.structural.neighbours
-                            .filter(v => v.ptms.length)
-                            .map(v => v.resi + ':A').join(' or ');
+            .filter(v => v.ptms.length)
+            .map(v => v.resi + ':A').join(' or ');
         const ptms = `<span ${this.prolink} data-color="turquoise"  data-focus="residue" data-selection="${ptmSele}">
                     PTM sites</span>`;
 
         // ## the gnomad selector
         const gnomadSele = this.structural.neighbours
-                            .filter(v => Object.keys(v.gnomads).length)
-                            .map(v => v.resi + ':A').join(' or ');
+            .filter(v => Object.keys(v.gnomads).length)
+            .map(v => v.resi + ':A').join(' or ');
         const gnomads = `<span ${this.prolink} data-color="turquoise"  data-focus="residue" data-selection="${gnomadSele}">
                     gnomAD</span>`;
         let badGnomads = '';
         if (this.energetical_gnomAD !== undefined) {
             // there should always be an object gnomads, so the ternary is overkill
             const cacognomadSele = this.structural.neighbours
-                            .filter(v => Object.keys(v.gnomads)
-                                               .map(mutation => this.get_gnomAD_details(mutation).ddG >= 2)
-                                               .some(v=>v)
-                            )
-                            .map(v => v.resi + ':A').join(' or ');
+                .filter(v => Object.keys(v.gnomads)
+                    .map(mutation => this.get_gnomAD_details(mutation).ddG >= 2)
+                    .some(v => v)
+                )
+                .map(v => v.resi + ':A').join(' or ');
             badGnomads = `<span ${this.prolink} data-color="salmon"  data-focus="residue" data-selection="${cacognomadSele}">
                     destabilising gnomAD</span>`;
         }
         let ddGNeighs = '';
         if (this.energetical !== undefined) {
-            const energySele = this.energetical.neighbours.map(v => v.trim().replace(' ',':')).join(' or ');
+            const energySele = this.energetical.neighbours.map(v => v.trim().replace(' ', ':')).join(' or ');
             ddGNeighs = `<span ${this.prolink} data-color="teal"  data-focus="residue" data-selection="${energySele}">
                     minimisation</span>`;
         }
@@ -1520,9 +1571,17 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         // this.structural.neighbours.filter(v => v.detail.includes('gnomAD:')).map(v => v.detail.replace('gnomAD:', '').split(' ')[0])
         // done!
         this.createEntry('neigh', 'Structural neighbourhood', strtext);
+        // this.activate_data_gnomad(); // currently run in step 5 only due to ${detail.description} (≈${parseInt(this.energetical_gnomAD[mutation])} kcal/mol)
     }
 
     makeNeighbourLI(data) {
+        /* data is an element of this.structural.neighbours
+        This attribute is first filled with the return of `StructureAnalyser().get_neighbours()`,
+        but it is actually expanded by `ProteinAnalyser().annotate_neighbours()`.
+        Data is a dictionary with keys `neigh`: `resi` (changed to int), `resn` (changed to 1 letter),
+        `chain`, `distance`,  `detail` (str), `ptms` (list), `gnomads`  (list), `clinvar`  (list)
+        and `other_chain` (bool).
+        */
         const label = data.resn + data.resi; //NB. resi is a string because PyMOL and it may be an insertion code (!?)
         const selector = data.resi + ":" + data.chain;
         const prolink = this.makeProlink(selector, label);
@@ -1542,51 +1601,129 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         }
         // ----------------------------- Fill PTMs stuff.
         data.ptms.map(ptm => {
-                  detail += ' &mdash; ' + ptm;
-              });
+            detail += ' &mdash; ' + ptm;
+        });
         // ----------------------------- Fill gnomAD stuff.
-        Object.keys(data.gnomads)
-              .map(mutation => {
-                         const properties = data.gnomads[mutation];
-                         const datagnomad = `data-gnomad='${JSON.stringify([mutation])}'`;
-                         const deets = this.get_gnomAD_details(mutation);
-                         const homozygous = deets.homozygous;
-                         const icon = homozygous === 0 ? 'far fa-adjust' : 'fas fa-circle';
-                         const iconed = `<i class="far ${icon}" ${datagnomad} data-toggle="tooltip" title="${homozygous} homozygous cases"></i>`;
+        data.gnomads.map(mutation => {
+                const datagnomad = `data-variant='${JSON.stringify([mutation])}'`;
+                // `deets` is this.protein.gnomAD + this.energetical_gnomAD + this.custom_ddG :
+                const deets = this.get_gnomAD_details(mutation);
+                /*
+                deets is somethings like:
 
-                         if (! deets) {
-                             //glitched? Generally nonsense mutations?
-                             detail += ' &mdash; ' + data.detail;
-                         }
-                         else if (deets.type !== 'missense') {
-                                // Not a missense.
-                                detail += ` &mdash;
-                                      ${properties.full}
+                   {"id":"gnomAD_79_79_rs193163027",
+                   "x":79,"y":79,
+                   "description":"L79V (rs193163027)",
+                   "from_residue":"L",
+                   "residue_index":79,
+                   "to_residue":"V",
+                   "impact":"MODERATE",
+                   "homozygous":0,
+                   "frequency":0.000145943,
+                   "N":1,
+                   "consequence":"missense_variant",
+                   "frequencies":{"afr":0,"amr":0,"asj":0,"eas":0,"fin":0,"mid":0,"nfe":0.000145943,"sas":0,"oth":0},
+                   "type":"missense"}
+                */
+                let freqicon;
+                const catfreq = Object.entries(deets.frequencies)
+                                       .map(([k, v]) => `${this.subpopulations[k]}: ${v.toPrecision(2)}`)
+                                       .join(';<br>');
+                const freqInner = `data-toggle="tooltip"
+                                   data-html="true" 
+                                   title="Frequency in gnomAD controls dataset:
+                                    ${deets.frequency.toPrecision(2)}.<br>
+                                    ${catfreq}.<br> 
+                                    Allele count: ${deets.N}.
+                                    "
+                                   `;
+                if (deets.frequency > 0.05) {
+                    freqicon = 'fa-signal';
+                } else if (deets.frequency > 0.037525) {
+                    freqicon = 'fa-signal-4';
+                } else if (deets.frequency > 0.02505) {
+                    freqicon = 'fa-signal-3';
+                } else if (deets.frequency > 0.012575) {
+                    freqicon= 'fa-signal-2';
+                } else if (deets.frequency > 0.0001) {
+                    freqicon = 'fa-signal-1';
+                } else { // impossible.
+                    freqicon = 'fa-signal-slash';
+                }
+                const zygoicon = deets.homozygous === 0 ? 'far fa-adjust' : 'fas fa-circle';
+                const underline = this.energetical_gnomAD !== undefined ? 'underlined' : '';
+                const iconed = `<i class="fad ${freqicon}" ${freqInner} style="cursor:help"></i>
+                                <i class="far ${zygoicon}" ${datagnomad} style="cursor:help" data-toggle="tooltip"
+                                title="${deets.homozygous} homozygous cases in gnomAD control dataset"></i>`
+                                .replaceAll(/[\s\n]+/g, ' ');
+                                // ^^^^^ just because the spaces look rubbish in the HTML.
+
+                if (!deets) {
+                    //glitched? Generally nonsense mutations?
+                    detail += ' &mdash; ' + data.detail;
+                } else if (deets.type !== 'missense') {
+                    // Not a missense. (nonsense).
+                    detail += ` &mdash;
+                                      ${mutation}
                                       ${iconed}`;
-                         }
-                         else if (deets.ddG === undefined) {
-                                // Missense w/o ddG
-                                detail += ` &mdash;
+                } else if (deets.ddG === undefined) {
+                    // Missense w/o ddG
+                    detail += ` &mdash;
                                       <span style='cursor: pointer;'
-                                            class='underlined venus-plain-mike'
+                                            class='${underline} venus-plain-mike'
                                             ${datagnomad}>
-                                      ${properties.full}
+                                      ${deets.description}
                                       </span>
                                       ${iconed}`;
-                         }
-                         else {
-                             // Missense w/ ddG
-                             const kcalColor = deets.ddG < 2 ? 'text-muted' : 'text-danger';
-                             const kcal = `<span class='${kcalColor}' ${datagnomad}>${deets.ddG.toPrecision(2)} kcal/mol</span>`;
-                             detail += ` &mdash;
+                } else {
+                    // Missense w/ ddG
+                    const kcalColor = deets.ddG < 2 ? 'text-muted' : 'text-danger';
+                    const kcal = `<span class='${kcalColor}' ${datagnomad}>${deets.ddG.toPrecision(2)} kcal/mol</span>`;
+                    detail += ` &mdash;
                                       <span style='cursor: pointer;'
-                                            class='underlined venus-plain-mike'
+                                            class='${underline} venus-plain-mike'
                                             ${datagnomad}>
-                                      ${properties.full} ${kcal}
+                                      ${deets.description} ${kcal}
                                       </span>
                                       ${iconed}`;
-                         }
-              });
+                }
+            });
+        // ---------------------------- Fill clivar stuff
+        data.clinvars.map(mutation => {
+            const dataclinvar = `data-variant='${JSON.stringify([mutation])}'`;
+            // `deets` is this.protein.gnomAD + this.energetical_gnomAD + this.custom_ddG :
+            const deets = this.get_clinvar_details(mutation);
+            let clinColor;
+            if (deets.impact.toLowerCase().includes('pathogenic')) {
+                clinColor = 'text-danger';
+            }
+            else if (deets.impact.toLowerCase().includes('benign')) {
+                clinColor = 'text-success';
+            }
+            else {
+                clinColor = 'text-muted';
+            }
+
+            let kcal = '';
+            if (deets.ddG) {
+                const kcalColor = deets.ddG < 2 ? 'text-muted' : 'text-danger';
+                kcal = `<span class='${kcalColor}' ${dataclinvar}>${deets.ddG.toPrecision(2)} kcal/mol</span>`;
+            }
+            const underline = this.energetical_gnomAD !== undefined ? 'underlined' : '';
+            detail+= `&mdash;
+                       <span class="${clinColor}">ClinVar ${deets.impact}</span>
+                        <span style='cursor: pointer;'
+                                            class='${underline} venus-plain-mike'
+                                            ${dataclinvar}>
+                                      ${mutation} ${kcal}
+                                      </span>
+                        
+                       <i class="far fa-stethoscope"
+                            data-toggle="tooltip" title="${deets.description}. Number of submissions: ${deets.N}"
+                            style="cursor: help;">
+                       </i>
+                     `;
+        });
         // ----------------------------- conservation
         let conservation = '';
         if (!!this.structural.has_conservation) {
@@ -1727,6 +1864,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             })
             .fail(ops.addErrorToast);
     }
+
 // ------------ Summary conclusions ----------------------------------------
 // From mutational
     concludeMutational() {
@@ -1759,10 +1897,10 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         //        'alter',
         const icon = '<span class="fa-li"><i class="far fa-lightbulb-on"></i></span>';
         const effect = ('<ul  class="fa-ul">' +
-                            (effects.map(v => `<li>${icon}${v}</li>`)).join('\n') +
-                            '<li><span class="fa-li"><i class="far fa-clipboard-list-check"></i></span> For a discussion of possible hypotheses to draw see <a href="/docs/venus_hypothesis" target="_blank">hypothesis generation notes</a></li>' +
-                            '</ul>'
-                        );
+            (effects.map(v => `<li>${icon}${v}</li>`)).join('\n') +
+            '<li><span class="fa-li"><i class="far fa-clipboard-list-check"></i></span> For a discussion of possible hypotheses to draw see <a href="/docs/venus_hypothesis" target="_blank">hypothesis generation notes</a></li>' +
+            '</ul>'
+        );
         this.createEntry('effect', 'Effect', effect);
     }
 
