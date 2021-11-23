@@ -350,8 +350,9 @@
 
 <!-- Bootstrap core JavaScript-->
     %if offline:
-        ### if you get an error here that the file jquery is missing it is because you did not npm built it!
-        <script type="text/javascript">${open('../../static/ThirdParty/jquery.min.js').read()|n}</script>
+        ## if you get an error here that the file jquery is missing it is because you did not npm built it!
+        ## This assumes the current working dir: /Users/matteo/Coding/michelanglo/app
+        <script type="text/javascript">${open('michelanglo_app/static/ThirdParty/jquery.min.js').read()|n}</script>
         <script type="text/javascript">${open('michelanglo_app/static/ThirdParty/bootstrap/dist/js/bootstrap.min.js').read()|n}</script>
         <!-- cannot compile popper -->
     %else:
