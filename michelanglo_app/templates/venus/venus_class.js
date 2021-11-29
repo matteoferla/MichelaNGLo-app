@@ -324,14 +324,23 @@ class Venus {
                 this.createLocation();
                 //this.createEntry('domdet', 'Domain detail', 'To Do figure out how to mine what the domain does. See notes "domain_function".');
 
-                //gnomAD
+                //gnomAD... This is redudant and less good than the structural one...
                 if (this.mutational.gnomAD_near_mutation.length) {
                     let omni = this.makeProlink(this.mutational.gnomAD_near_mutation.map(v => v[1] + ':A').join(' or '), '(all)');
-                    let gnomADtext = `<p>Structure independent, sequence proximity (see structural neighbour for 3D) ${omni}.</p>`;
+                    let gnomADtext = `<p>Structure independent, sequence proximity (see structural neighbour for 3D, when it completes) ${omni}.</p>`;
                     gnomADtext += '<ul>';
-                    const gMut = (v) => v[4].toUpperCase().split(' ')[0];
+                    const gMut = (v) => v[3].toUpperCase().split(' ')[0];
                     gnomADtext += this.mutational.gnomAD_near_mutation
-                                      .map(v => `<li>${this.makeProlink(v)}: (${v[3].toLowerCase()}, <i class="far fa-flask-potion venus-no-mike" data-variant='${JSON.stringify([gMut(v)])}' style="cursor: pointer;"></i>)</li>`).join('');
+                                      .map(v => {
+                                          let element = '<li>';
+                                          element += `${this.makeProlink(v, gMut(v))}: `;
+                                          element += `${v[3]}`;
+                                          if (v[11] === 'missense_variant') {
+                                              element += `<i class="far fa-calculator venus-no-mike" data-variant='${JSON.stringify([gMut(v)])}' style="cursor: pointer;"></i>`;
+                                          }
+                                          element += '</li>'
+                                          return element
+                                      }).join('');
                     gnomADtext += '</ul>';
                     this.createEntry('gnomad', 'gnomAD', gnomADtext);
                 }
@@ -446,11 +455,11 @@ class Venus {
                 let ddgtext = '<i>Predicted effect: </i>';
                 const cutoff = 2;
                 if (this.energetical.ddG < -cutoff) {
-                    ddgtext += '<b>stabilising</b>'
+                    ddgtext += '<b data-toggle="tooltip" title="A variant may be structurally stabilising, but phenotypically deleterious.">stabilising</b>'
                 } else if (this.energetical.ddG > +cutoff) {
-                    ddgtext += '<b>destabilising</b>'
+                    ddgtext += '<b data-toggle="tooltip" title="A variant may be structurally deleterious, but phenotypically neutral.">destabilising</b>'
                 } else {
-                    ddgtext += '<b>neutral</b>'
+                    ddgtext += '<b data-toggle="tooltip" title="A variant may be structurally neutral, but phenotypically deleterious.">structurally neutral</b>'
                 }
                 ddgtext += '<br/>';
                 const ddGLine = this.energetical.ddG < 10 ? Math.round(this.energetical.ddG) : '>10';
@@ -519,7 +528,7 @@ class Venus {
                   </div>
                   <input type="text" class="form-control" placeholder="extra mutation" aria-label="extra mutation" aria-describedby="#extraCalculate"  id="extraWanted">
                   <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="button" id="extraCalculate"><i class="far fa-calculator"></i></button>
+                    <button class="btn btn-outline-secondary" type="button" id="extraCalculate"><i class="far fa-calculator venus-no-mike"></i></button>
                   </div>
                 </div>
                 `;
@@ -1079,9 +1088,9 @@ class Venus {
         if (typeof v === "string") {
             return `<span ${this.prolink} data-color="cyan" data-focus="residue" data-selection="${v}">${label}</span>`;
         } else if (Array.isArray(v)) {
-            //gnomad
+            //old gnomad
             //["gnomAD_101_101_rs1131691997",101,101,"MODERATE","K101R (rs1131691997)",0]
-            let p = v[4];
+            let p = v[1];
             if (parseInt(v[1]) === this.position) p = '<b>' + p + '</b>';
             return `<span  ${this.prolink} data-focus="residue" data-color="cyan" data-selection="${v[1]}:A">${p}</span>`;
         } else if (v.x !== undefined) {
@@ -1183,10 +1192,18 @@ class Venus {
         const dg = $('[data-variant]');
         dg.off('click'); //Unsure when this would occur.
         dg.click(event => {
-            $('#gnomad_extra').modal('show');
             const el = $(event.target);
-
-
+            const variants = el.data('variant').filter(variant => {
+                                                        const deets = this.get_gnomAD_details(variant);
+                                                        if (deets === undefined) {return false}
+                                                        else if (deets.consequence !== 'missense_variant') {return false}
+                                                        else {return true}
+                                                     }
+                                                     );
+            if (variants.length === 0) {
+                window.ops.addToast('nonsense', '∆∆G calculations for missense', 'It is not possible to calculate the ∆∆G for a nonsense mutation', 'bg-info');
+                return}
+            $('#gnomad_extra').modal('show');
             let btn = '';
             let homoTargets;
             let heteroTargets;
@@ -1196,8 +1213,8 @@ class Venus {
                         if (this.energetical_gnomAD[mutation] === undefined) return false;
                         else return this.energetical_gnomAD[mutation] >= this.energetical.ddG;
                     });
-                homoTargets = allTargets.filter(mutation => venus.get_gnomAD_details(mutation).homozygous > 0);
-                heteroTargets = allTargets.filter(mutation => venus.get_gnomAD_details(mutation).homozygous === 0);
+                homoTargets = allTargets.filter(mutation => this.get_gnomAD_details(mutation).homozygous > 0);
+                heteroTargets = allTargets.filter(mutation => this.get_gnomAD_details(mutation).homozygous === 0);
                 if (allTargets.length > 0) {
                     btn = `
 <div class="input-group mb-3">
@@ -1206,11 +1223,11 @@ class Venus {
   </div>
   <button class="btn btn-outline-info border-right-0 border-left-0 rounded-0" type="button" id="ddGHeteroGnomADs"
     ${heteroTargets.length ? '' : 'disabled'}
-    ><i class="far fa-calculator"></i> All het<br/> (<i class="far fa-adjust"></i>)</button>
+    ><i class="far fa-calculatorvenus-no-mike"></i> All het<br/> (<i class="far fa-adjust"></i>)</button>
   <div class="input-group-append">
     <button class="btn btn-outline-info" type="button"  id="ddGHomoGnomADs"
     ${homoTargets.length ? '' : 'disabled'}
-    ><i class="far fa-calculator"></i> All hom<br/> (<i class="fas fa-circle"></i>)</button>
+    ><i class="far fa-calculator venus-no-mike"></i> All hom<br/> (<i class="fas fa-circle"></i>)</button>
   </div>
 </div>`;
                 }
@@ -1267,7 +1284,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                 bulker(heteroTargets);
             });
             pros.each((i, e) => $(e).protein());
-            pros.click(event => $('#gnomad_extra').modal('hide'));
+            pros.click(event => $('#gnomad_extra').modal('hide') );
             $('#gnomad_extra .modal-hider').click(event => {
                 $('#gnomad_extra').modal('hide');
                 const mutation = $(event.target).data('mutation');
@@ -1317,7 +1334,9 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
     }
 
     add_ddG_details(mutation, detail) {
-        if (this.custom_ddG !== undefined && this.custom_ddG[mutation] !== undefined) {
+        if (detail === undefined) {
+            return undefined
+        } else if (this.custom_ddG !== undefined && this.custom_ddG[mutation] !== undefined) {
             detail.ddG = this.custom_ddG[mutation];
         } else if (this.energetical_gnomAD !== undefined && this.energetical_gnomAD[mutation] !== undefined) {
             detail.ddG = this.energetical_gnomAD[mutation];
@@ -1633,19 +1652,19 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                                    data-html="true" 
                                    title="Frequency in gnomAD controls dataset:
                                     ${deets.frequency.toPrecision(2)}.<br>
-                                    ${catfreq}.<br> 
-                                    Allele count: ${deets.N}.
+                                    <b>Allele count: ${deets.N}.</b><br>
+                                    ${catfreq}.
                                     "
                                    `;
-                if (deets.frequency > 0.05) {
+                if (deets.N > 1000) {
                     freqicon = 'fa-signal';
-                } else if (deets.frequency > 0.037525) {
+                } else if (deets.N > 100) {
                     freqicon = 'fa-signal-4';
-                } else if (deets.frequency > 0.02505) {
+                } else if (deets.N > 10) {
                     freqicon = 'fa-signal-3';
-                } else if (deets.frequency > 0.012575) {
+                } else if (deets.N > 5) {
                     freqicon= 'fa-signal-2';
-                } else if (deets.frequency > 0.0001) {
+                } else if (deets.N > 1) {
                     freqicon = 'fa-signal-1';
                 } else { // impossible.
                     freqicon = 'fa-signal-slash';
@@ -1698,7 +1717,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                 clinColor = 'text-danger';
             }
             else if (deets.impact.toLowerCase().includes('benign')) {
-                clinColor = 'text-success';
+                clinColor = 'text-muted';
             }
             else {
                 clinColor = 'text-muted';
