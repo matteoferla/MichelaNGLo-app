@@ -1696,7 +1696,11 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                                       ${iconed}`;
                 } else {
                     // Missense w/ ddG
-                    const kcalColor = deets.ddG < 2 ? 'text-muted' : 'text-danger';
+                    let kcalColor;
+                    if (deets.ddG >= 2) {kcalColor = 'text-danger'}
+                    else if (deets.ddG >= 1.2) {kcalColor = 'text-warning'}
+                    else if (deets.ddG < -2) {kcalColor = 'text-muted'}
+                    else {kcalColor = 'text-info'}
                     const kcal = `<span class='${kcalColor}' ${datagnomad}>${deets.ddG.toPrecision(2)} kcal/mol</span>`;
                     detail += ` &mdash;
                                       <span style='cursor: pointer;'
