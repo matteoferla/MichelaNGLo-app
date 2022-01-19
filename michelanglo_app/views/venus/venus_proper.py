@@ -431,7 +431,8 @@ class Venus(VenusBase):
         user_modelling_options = {'allow_pdb':       True,
                                   'allow_swiss':     True,
                                   'allow_alphafold': True,
-                                  'scaling_factor':  0.239  # this is the kJ/mol <--> kcal/mol "mystery" value
+                                  'scaling_factor':  0.239,  # this is the kJ/mol <--> kcal/mol "mystery" value
+                                  'no_conservation': True,  # Consurf SSL issue.
                                   }
 
         # ------ booleans
@@ -500,7 +501,8 @@ class Venus(VenusBase):
             chosen_structure = protein.get_best_model(**user_modelling_options)
             # IMPORTANT PART ****************************************************
             # ------------- find the best and analyse it
-            protein.analyse_structure(structure=chosen_structure, **user_modelling_options)
+            protein.analyse_structure(structure=chosen_structure,
+                                      **user_modelling_options)
             # *******************************************************************
         except Exception as error:
             if not self.suppress_errors or chosen_structure is None:
