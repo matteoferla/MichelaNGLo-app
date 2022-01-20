@@ -1585,15 +1585,24 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                         (see ${this.makeExt('https://gnomad.broadinstitute.org/', 'gnomAD')} and
                         ${this.makeExt('https://www.phosphosite.org', 'PhosphoSitePlus')} 
                         for extra information)</p>`;
-        strtext += '<ul>' + this.structural.neighbours.sort((a, b) => a.distance - b.distance)
-            .map(v => this.makeNeighbourLI(v)).join('') + '</ul>';
-        // this.structural.neighbours.filter(v => v.detail.includes('gnomAD:')).map(v => v.detail.replace('gnomAD:', '').split(' ')[0])
-        // done!
+        strtext += '<table class="table">';
+        let con_th = this.structural && this.structural.has_conservation ? '<th scope="col">Conservation</th>' : '';
+        strtext += `<thead><tr>
+                    <th scope="col">Residue</th>
+                    <th scope="col">Distance</th>
+                    ${con_th}
+                    <th scope="col">Features of note</th>
+                    </tr></thead>`;
+        strtext += '<tbody>'
+        strtext += this.structural.neighbours.sort((a, b) => a.distance - b.distance)
+                       .map(v => this.makeNeighbourRow(v)).join('');
+        strtext += '</tbody>'
+        strtext += '</table>'
         this.createEntry('neigh', 'Structural neighbourhood', strtext);
         // this.activate_data_gnomad(); // currently run in step 5 only due to ${detail.description} (≈${parseInt(this.energetical_gnomAD[mutation])} kcal/mol)
     }
 
-    makeNeighbourLI(data) {
+    makeNeighbourRow(data) {
         /* data is an element of this.structural.neighbours
         This attribute is first filled with the return of `StructureAnalyser().get_neighbours()`,
         but it is actually expanded by `ProteinAnalyser().annotate_neighbours()`.
@@ -1604,11 +1613,11 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         const label = data.resn + data.resi; //NB. resi is a string because PyMOL and it may be an insertion code (!?)
         const selector = data.resi + ":" + data.chain;
         const prolink = this.makeProlink(selector, label);
-        const distance = ` &mdash; ${data.distance.toFixed(1)} &Aring; away`;
-        let detail = ''; // mdash sepearated. Mostly.
+        const distance = `${data.distance.toFixed(1)} &Aring;`;
+        let details = []; // formerly mdash sepearated. Mostly. Now joined by br
         // ----------------------------- Interface
         if (data.other_chain) {
-            detail = ` from interacting protein (chain ${data.chain})`;
+            details.push(`from interacting protein (chain ${data.chain})`);
             // Todo fix the following.
             // const chainDeets = this.structural.chain_definitions.filter(v => v.chain = 'A');
             // if (chainDeets) {
@@ -1619,100 +1628,131 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             // }
         }
         // ----------------------------- Fill PTMs stuff.
-        data.ptms.map(ptm => {
-            detail += ' &mdash; ' + ptm;
-        });
+        details.push(...data.ptms);
         // ----------------------------- Fill gnomAD stuff.
-        data.gnomads.map(mutation => {
-                const datagnomad = `data-variant='${JSON.stringify([mutation])}'`;
-                // `deets` is this.protein.gnomAD + this.energetical_gnomAD + this.custom_ddG :
-                const deets = this.get_gnomAD_details(mutation);
-                /*
-                deets is somethings like:
-
-                   {"id":"gnomAD_79_79_rs193163027",
-                   "x":79,"y":79,
-                   "description":"L79V (rs193163027)",
-                   "from_residue":"L",
-                   "residue_index":79,
-                   "to_residue":"V",
-                   "impact":"MODERATE",
-                   "homozygous":0,
-                   "frequency":0.000145943,
-                   "N":1,
-                   "consequence":"missense_variant",
-                   "frequencies":{"afr":0,"amr":0,"asj":0,"eas":0,"fin":0,"mid":0,"nfe":0.000145943,"sas":0,"oth":0},
-                   "type":"missense"}
-                */
-                let freqicon;
-                const catfreq = Object.entries(deets.frequencies)
-                                       .map(([k, v]) => `${this.subpopulations[k]}: ${v.toPrecision(2)}`)
-                                       .join(';<br>');
-                const freqInner = `data-toggle="tooltip"
-                                   data-html="true" 
-                                   title="Frequency in gnomAD controls dataset:
-                                    ${deets.frequency.toPrecision(2)}.<br>
-                                    <b>Allele count: ${deets.N}.</b><br>
-                                    ${catfreq}.
-                                    "
-                                   `;
-                if (deets.N > 1000) {
-                    freqicon = 'fa-signal';
-                } else if (deets.N > 100) {
-                    freqicon = 'fa-signal-4';
-                } else if (deets.N > 10) {
-                    freqicon = 'fa-signal-3';
-                } else if (deets.N > 5) {
-                    freqicon= 'fa-signal-2';
-                } else if (deets.N > 1) {
-                    freqicon = 'fa-signal-1';
-                } else { // impossible.
-                    freqicon = 'fa-signal-slash';
-                }
-                const zygoicon = deets.homozygous === 0 ? 'far fa-adjust' : 'fas fa-circle';
-                const underline = this.energetical_gnomAD !== undefined ? 'underlined' : '';
-                const iconed = `<i class="fad ${freqicon}" ${freqInner} style="cursor:help"></i>
-                                <i class="far ${zygoicon}" ${datagnomad} style="cursor:help" data-toggle="tooltip"
-                                title="${deets.homozygous} homozygous cases in gnomAD control dataset"></i>`
-                                .replaceAll(/[\s\n]+/g, ' ');
-                                // ^^^^^ just because the spaces look rubbish in the HTML.
-
-                if (!deets) {
-                    //glitched? Generally nonsense mutations?
-                    detail += ' &mdash; ' + data.detail;
-                } else if (deets.type !== 'missense') {
-                    // Not a missense. (nonsense).
-                    detail += ` &mdash;
-                                      ${mutation}
-                                      ${iconed}`;
-                } else if (deets.ddG === undefined) {
-                    // Missense w/o ddG
-                    detail += ` &mdash;
-                                      <span style='cursor: pointer;'
-                                            class='${underline} venus-plain-mike'
-                                            ${datagnomad}>
-                                      ${deets.description}
-                                      </span>
-                                      ${iconed}`;
-                } else {
-                    // Missense w/ ddG
-                    let kcalColor;
-                    if (deets.ddG >= 2) {kcalColor = 'text-danger'}
-                    else if (deets.ddG >= 1.2) {kcalColor = 'text-warning'}
-                    else if (deets.ddG < -2) {kcalColor = 'text-muted'}
-                    else {kcalColor = 'text-info'}
-                    const kcal = `<span class='${kcalColor}' ${datagnomad}>${deets.ddG.toPrecision(2)} kcal/mol</span>`;
-                    detail += ` &mdash;
-                                      <span style='cursor: pointer;'
-                                            class='${underline} venus-plain-mike'
-                                            ${datagnomad}>
-                                      ${deets.description} ${kcal}
-                                      </span>
-                                      ${iconed}`;
-                }
-            });
+        details.push(...data.gnomads.map(this.gnomad2cell.bind(this)));
         // ---------------------------- Fill clivar stuff
-        data.clinvars.map(mutation => {
+        details.push(...data.clinvars.map(this.clinvar2cell.bind(this)));
+        // ----------------------------- conservation
+        let conservation = '';
+        if (!!this.structural.has_conservation) {
+            conservation = 'no conservation data';
+            if (data.conscore !== undefined) {
+                let con_color = data.conscore < 0 ? 'text-primary' : 'text-secondary';
+                conservation = `<span  title='Consurf normalised homology score: positive = less conserved. negative = conserved' 
+                                       data-toggle='tooltip'
+                                       class="${con_color}"
+                                       >
+                                ${data.conscore.toFixed(1)}
+                                </span>
+                                <span title='alterative residues in homologous protein: ${data.variety.join('/')}' data-toggle='tooltip'>
+                                    alts: ${data.variety.length}
+                                </span>
+                                `;
+            }
+        }
+        // ----------------------------- Output
+        let headerCell = `<th scope="row">${prolink}</th>`;
+        if (this.mutational.residue_index.toString() === data.resi.toString()) {
+            // This neighbour is the mutated residue itself.
+            headerCell = `<th scope="row">${prolink} (target)</th>`;
+        }
+        const distanceCell = `<td>${distance}</td>`;
+        const detailCell = `<td>${details.join('<br/>')}</td>`;
+        let conservationCell = '';
+        if (this.structural && this.structural.has_conservation) {
+            conservationCell = `<td>${conservation}</td>`;
+        }
+        return `<tr>${headerCell}${distanceCell}${conservationCell}${detailCell}</tr>`;
+
+    }
+
+    gnomad2cell(mutation) {
+        const datagnomad = `data-variant='${JSON.stringify([mutation])}'`;
+        // `deets` is this.protein.gnomAD + this.energetical_gnomAD + this.custom_ddG :
+        const deets = this.get_gnomAD_details(mutation);
+        /*
+        deets is somethings like:
+
+           {"id":"gnomAD_79_79_rs193163027",
+           "x":79,"y":79,
+           "description":"L79V (rs193163027)",
+           "from_residue":"L",
+           "residue_index":79,
+           "to_residue":"V",
+           "impact":"MODERATE",
+           "homozygous":0,
+           "frequency":0.000145943,
+           "N":1,
+           "consequence":"missense_variant",
+           "frequencies":{"afr":0,"amr":0,"asj":0,"eas":0,"fin":0,"mid":0,"nfe":0.000145943,"sas":0,"oth":0},
+           "type":"missense"}
+        */
+        let freqicon;
+        const catfreq = Object.entries(deets.frequencies)
+                               .map(([k, v]) => `${this.subpopulations[k]}: ${v.toPrecision(2)}`)
+                               .join(';<br>');
+        const freqInner = `data-toggle="tooltip"
+                           data-html="true" 
+                           title="Frequency in gnomAD controls dataset:
+                            ${deets.frequency.toPrecision(2)}.<br>
+                            <b>Allele count: ${deets.N}.</b><br>
+                            ${catfreq}.
+                            "
+                           `;
+        if (deets.N > 1000) {
+            freqicon = 'fa-signal';
+        } else if (deets.N > 100) {
+            freqicon = 'fa-signal-4';
+        } else if (deets.N > 10) {
+            freqicon = 'fa-signal-3';
+        } else if (deets.N > 5) {
+            freqicon= 'fa-signal-2';
+        } else if (deets.N > 1) {
+            freqicon = 'fa-signal-1';
+        } else { // impossible.
+            freqicon = 'fa-signal-slash';
+        }
+        const zygoicon = deets.homozygous === 0 ? 'far fa-adjust' : 'fas fa-circle';
+        const underline = this.energetical_gnomAD !== undefined ? 'underlined' : '';
+        const iconed = `<i class="fad ${freqicon}" ${freqInner} style="cursor:help"></i>
+                        <i class="far ${zygoicon}" ${datagnomad} style="cursor:help" data-toggle="tooltip"
+                        title="${deets.homozygous} homozygous cases in gnomAD control dataset"></i>`
+                        .replaceAll(/[\s\n]+/g, ' ');
+                        // ^^^^^ just because the spaces look rubbish in the HTML.
+
+        if (!deets) {
+            //glitched? Generally nonsense mutations?
+            return mutation;
+        } else if (deets.type !== 'missense') {
+            // Not a missense. (nonsense).
+            return `${mutation} ${iconed}`;
+        } else if (deets.ddG === undefined) {
+            // Missense w/o ddG
+            return `<span style='cursor: pointer;'
+                                    class='${underline} venus-plain-mike'
+                                    ${datagnomad}>
+                              ${deets.description}
+                              </span>
+                              ${iconed}`;
+        } else {
+            // Missense w/ ddG
+            let kcalColor;
+            if (deets.ddG >= 2) {kcalColor = 'text-danger'}
+            else if (deets.ddG >= 1.2) {kcalColor = 'text-warning'}
+            else if (deets.ddG < -2) {kcalColor = 'text-muted'}
+            else {kcalColor = 'text-info'}
+            const kcal = `<span class='${kcalColor}' ${datagnomad}>${deets.ddG.toPrecision(2)} kcal/mol</span>`;
+            return `<span style='cursor: pointer;'
+                                    class='${underline} venus-plain-mike'
+                                    ${datagnomad}>
+                              ${deets.description} ${kcal}
+                              </span>
+                              ${iconed}`;
+        }
+    }
+
+    clinvar2cell(mutation) {
             const dataclinvar = `data-variant='${JSON.stringify([mutation])}'`;
             // `deets` is this.protein.gnomAD + this.energetical_gnomAD + this.custom_ddG :
             const deets = this.get_clinvar_details(mutation);
@@ -1733,8 +1773,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                 kcal = `<span class='${kcalColor}' ${dataclinvar}>${deets.ddG.toPrecision(2)} kcal/mol</span>`;
             }
             const underline = this.energetical_gnomAD !== undefined ? 'underlined' : '';
-            detail+= `&mdash;
-                       <span class="${clinColor}">ClinVar ${deets.impact}</span>
+            return `<span class="${clinColor}">ClinVar ${deets.impact}</span>
                         <span style='cursor: pointer;'
                                             class='${underline} venus-plain-mike'
                                             ${dataclinvar}>
@@ -1746,31 +1785,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                             style="cursor: help;">
                        </i>
                      `;
-        });
-        // ----------------------------- conservation
-        let conservation = '';
-        if (!!this.structural.has_conservation) {
-            conservation = ' &mdash; no conservation data';
-            if (data.conscore !== undefined) {
-                conservation = `&mdash; <span  title='Consurf normalised homology score: positive = less conserved. negative = conserved' data-toggle='tooltip'>
-                                conservation=${data.conscore.toFixed(1)}
-                                </span>,
-                                <span title='alterative residues in homologous protein: ${data.variety.join('/')}' data-toggle='tooltip'>
-                                    alts: ${data.variety.length}
-                                </span>
-                                `;
-            }
         }
-        // ----------------------------- Output
-        if (this.mutational.residue_index.toString() === data.resi.toString()) {
-            // This neighbour is the mutated residue itself.
-            return `<li><b>${prolink}</b> (target) ${detail} ${conservation}</li>`;
-        } else {
-            // This is a normal neighbour
-            return `<li>${prolink} ${distance} ${detail} ${conservation}</li>`;
-        }
-
-    }
 
     updateStructureOption() {
         const so = $('#structureOption');
