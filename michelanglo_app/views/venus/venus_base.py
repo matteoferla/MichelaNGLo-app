@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from ..uniprot_data import *
 # ProteinCore organism human uniprot2pdb
-from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structure, Variant, StructureAnalyser
+from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structure, Variant
 
 from ...models import User, Page  ##needed solely for log.
 from ..common_methods import is_malformed, Comms, get_pdb_block_from_request
@@ -29,16 +29,6 @@ log = logging.getLogger(__name__)
 from ..buffer import system_storage
 
 
-# ------------- DEBUG -------------------------------------------
-# this should and will probably be brought to the app.py config
-suppress_errors = True
-
-from michelanglo_protein.analyse import StructureAnalyser
-# do not raise error on missing conservation
-StructureAnalyser.error_on_missing_conservation = not suppress_errors
-
-# ----------------------------------------------------------------
-
 ######################
 
 class VenusException(Exception):
@@ -60,7 +50,7 @@ class VenusBase:
                     'meta_url': 'https://michelanglo.sgc.ox.ac.uk/',
                     'contents': contents
                     }
-    suppress_errors = suppress_errors
+    suppress_errors = True
 
     def __init__(self, request):
         self.request = request
@@ -78,6 +68,7 @@ class VenusBase:
             self.suppress_errors = False
             log.info('Debug mode requested!')
             # The following is dangerous. Comment out if needed...
+            from michelanglo_protein.analyse import StructureAnalyser
             StructureAnalyser.error_on_missing_conservation = True
 
     @property
