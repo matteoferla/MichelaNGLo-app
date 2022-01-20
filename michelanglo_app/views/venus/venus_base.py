@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from ..uniprot_data import *
 # ProteinCore organism human uniprot2pdb
-from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structure, Variant
+from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structure, Variant, StructureAnalyser
 
 from ...models import User, Page  ##needed solely for log.
 from ..common_methods import is_malformed, Comms, get_pdb_block_from_request
@@ -73,9 +73,12 @@ class VenusBase:
         # status=error, error=single-word, msg=long
         self._tick = float('nan')  # required for self.reply['time_taken']
         self.time_taken = 0.
+        # ## User requested debug mode!
         if 'debug' in self.request.params and self.request.params['debug']:
             self.suppress_errors = False
             log.info('Debug mode requested!')
+            # The following is dangerous. Comment out if needed...
+            StructureAnalyser.error_on_missing_conservation = True
 
     @property
     def handle(self):
