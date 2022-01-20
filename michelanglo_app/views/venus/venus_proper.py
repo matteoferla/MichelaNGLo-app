@@ -1,38 +1,27 @@
 from __future__ import annotations
-# venus parts common to regular venus and multiple mutant version.
 
-
-from ..uniprot_data import *
-# ProteinCore organism human uniprot2pdb
-from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structure
-from michelanglo_transpiler import PyMolTranspiler  # used solely for temp folder
-
-from ...models import User, Page  ##needed solely for log.
-from ..common_methods import is_malformed, get_pdb_block_from_request, is_alphafold_taxon
-from ..user_management import permission
-from .. import custom_messages
-
-from typing import Optional, Any, List, Union, Tuple, Dict
-import random, traceback, sys
-from pyramid.view import view_config, view_defaults
-from pyramid.renderers import render_to_response
-from ..common_methods import Comms
-import pyramid.httpexceptions as exc
+import random
+import traceback
 from time import sleep
+from typing import Optional, List
 
-import json, os, logging, operator
-
-log = logging.getLogger(__name__)
-# from pprint import PrettyPrinter
-# pprint = PrettyPrinter().pprint
-
-### This is a weird way to solve the status 206 issue.
-from ..buffer import system_storage
+from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structure, is_alphafold_taxon  # noqa
+from michelanglo_transpiler import PyMolTranspiler  # used solely for temp folder
+from pyramid.renderers import render_to_response
+from pyramid.view import view_config, view_defaults
 
 from .venus_base import VenusException, VenusBase
+from ..common_methods import Comms
+from ..common_methods import get_pdb_block_from_request
+from ..uniprot_data import *
+from ..buffer import system_storage
+from ...models import User  # needed solely for log.
+
+log = logging.getLogger(__name__)
 
 
-############################### Analyse the mutation
+# ====================== Analyse the mutation ======================
+# venus parts common to regular venus and multiple mutant version.
 @view_defaults(route_name='venus')
 class Venus(VenusBase):
 
@@ -48,20 +37,22 @@ class Venus(VenusBase):
         if str(self.request.params['uniprot']) == '9606' or str(self.request.params['mutation']) == '9606':
             raise ValueError('Chrome autofill')  # this is uncaught
         settings = self.get_user_modelling_options()
-        concatenation = self.request.params['uniprot'] + \
-                        self.request.params['mutation'] + \
-                        '-'.join(map(str, settings.values()))
+        concatenation = (
+                self.request.params['uniprot'] +
+                self.request.params['mutation'] +
+                '-'.join(map(str, settings.values()))
+        )
         log.debug(f'request handle: {str(hash(concatenation))}')
         return str(hash(concatenation))
 
-    ############################### server main page
+    # ---------- server main page ----------
     @view_config(renderer="../../templates/venus/venus_main.mako")
     def main_view(self):
         return {'user':          self.request.user,
                 'mutation_mode': 'main',
                 **self.generic_data}
 
-    ############################### Give a random view that will give a protein
+    # ---------- Give a random view that will give a protein ----------
     @view_config(route_name='venus_random', renderer="json")
     def random_view(self):
         while True:
@@ -88,20 +79,17 @@ class Venus(VenusBase):
     def debug(self):
         return {'user': self.request.user, 'mutation_mode': 'main', **self.generic_data}
 
-    ############################### Analyse
+    #  ================= Analyse =================
     @view_config(route_name='venus_analyse', renderer="json")
-    def analyse(self):
+    def analyse(self) -> dict:
         """
         View that does the analysis. Formerly returned html now returns json.
         The request has to contain each of following 'step', 'uniprot', 'species', 'mutation' fields.
         /venus_analyse?species=9606&uniprot=Q96C12&mutation=p.V123F&step=protein
         step can be protein
         Species is taxid. Human is 9606.
-
-        :param request:
-        :return: self.reply
         """
-        ### check valid
+        # ## check valid
         try:
             self.assert_malformed('uniprot', 'species', 'mutation')
             if 'step' not in self.request.params:
@@ -110,7 +98,12 @@ class Venus(VenusBase):
                 step = self.request.params['step']
             return self.do_step(step)
         except VenusException as err:
-            log.info(err)
+            # this is right at the top:
+            # it should not be conditional to `self.suppress_errors`
+            if self.suppress_errors:
+                log.info(f'VenusException: {err}')
+            else:
+                log.warning(f'VenusException: {err} under debug mode')
             return self.reply
         except Exception as err:
             if self.reply['status'] != 'error':
@@ -161,7 +154,7 @@ class Venus(VenusBase):
             self.steps[step]()
             return self.reply
         elif step == 'fv':
-            ## this is the same as get_uniprot but does not redundantly redownload the data.
+            # this is the same as get_uniprot but does not redundantly redownload the data.
             if not self.has():
                 self.protein_step()
             protein = system_storage[self.handle]
@@ -189,7 +182,7 @@ class Venus(VenusBase):
             self.request.response.status = 422
             return {'status': 'error', 'error': 'Unknown step'}
 
-    ### STEP 1
+    # ===== STEP 1 =======
     def protein_step(self):
         """
         Check mutations are valid
@@ -202,7 +195,7 @@ class Venus(VenusBase):
             uniprot = self.request.params['uniprot']
             taxid = self.request.params['species']
             mutation_text = self.request.params['mutation']
-            ## Do analysis
+            # ## Do analysis
             mutation = Mutation(mutation_text)
             protein = ProteinAnalyser(uniprot=uniprot,
                                       taxid=taxid)
@@ -225,14 +218,14 @@ class Venus(VenusBase):
         protein.current_step_complete = True
         self.stop_timer()
 
-    ### STEP 2
-    def mutation_step(self):
+    # ======= STEP 2 =======
+    def mutation_step(self) -> None:
         """
         Runs protein.predict_effect()
         """
         self.start_timer()
         log.info(f'Step 2 analysis requested by {User.get_username(self.request)}')
-        ## has the previous step been done?
+        # ## has the previous step been done?
         if not self.has():
             self.protein_step()
         # if protein.mutation has already run it still does it again...
@@ -251,7 +244,7 @@ class Venus(VenusBase):
         protein.current_step_complete = True
         self.stop_timer()
 
-    ### STEP 3
+    # ======= STEP 3 =======
     def structural_step(self, structure=None, retrieve=True):
         """
         runs protein.analyse_structure() iteratively until it works.
@@ -267,10 +260,10 @@ class Venus(VenusBase):
             self.reply['structural'] = self.jsonable(protein.structural)
             self.reply['has_structure'] = True
         elif protein.current_step_complete is False:
-            while protein.current_step_complete is False: # polling
+            while protein.current_step_complete is False:  # polling
                 log.debug('Waiting for structural_step')
                 sleep(5)
-            return self.structural_step(structure, retrieve) # retry
+            return self.structural_step(structure, retrieve)  # retry
         else:
             # this step has not been run before
             protein.current_step_complete = False
@@ -293,8 +286,8 @@ class Venus(VenusBase):
         protein.current_step_complete = True
         self.stop_timer()
 
-    ### Step 4
-    def ddG_step(self):
+    # ===== Step 4 =====
+    def ddG_step(self): # noqa ddG is not camelcase but abbreviation which is PEP8 compliant.
         self.start_timer()
         log.info(f'Step 4 analysis requested by {User.get_username(self.request)}')
         # ------- get protein
@@ -308,7 +301,7 @@ class Venus(VenusBase):
         if self.has('energetics'):
             analysis = protein.energetics
         elif protein.current_step_complete is False:
-            while protein.current_step_complete is False: # polling
+            while protein.current_step_complete is False:  # polling
                 log.debug('Waiting for ddG_step')
                 sleep(5)
             return self.ddG_step()  # retry
@@ -332,21 +325,21 @@ class Venus(VenusBase):
         protein.current_step_complete = True
         self.stop_timer()
 
-    ### Step 5
+    # ====== Step 5 ======
     def ddG_gnomad_step(self):
         log.info(f'Step 5 analysis requested by {User.get_username(self.request)}')
         if self.handle not in system_storage:
-            status = self.protein_step()
-            if 'error' in status:
-                return status
-            status = self.mutation_step()
-            if 'error' in status:
-                return status
+            self.protein_step()
+            if 'error' in self.reply:
+                return self.reply['error']
+            self.mutation_step()
+            if 'error' in self.reply:
+                return self.reply['error']
         protein = system_storage[self.handle]
         if self.has('energetics_gnomAD'):
             analysis = protein.energetics_gnomAD
         elif protein.current_step_complete is False:
-            while protein.current_step_complete is False: # polling
+            while protein.current_step_complete is False:  # polling
                 log.debug('Waiting for ddG_gnomad_step')
                 sleep(5)
             return self.ddG_gnomad_step()  # retry
@@ -371,7 +364,7 @@ class Venus(VenusBase):
             self.reply['gnomAD_ddG'] = analysis
         protein.current_step_complete = True
 
-    ### STEP EXTRA
+    # ======= STEP EXTRA =======
     def extra_step(self, mutation, algorithm):
         if self.has():
             self.ddG_step()
@@ -387,7 +380,7 @@ class Venus(VenusBase):
         self.log_if_error('extra_step')
         protein.current_step_complete = True
 
-    ### STEP EXTRA2
+    # ========= STEP EXTRA2 =========
     def phospho_step(self):
         if self.has():
             self.ddG_step()
@@ -404,7 +397,7 @@ class Venus(VenusBase):
         self.log_if_error('phospho_step')
         protein.current_step_complete = True
 
-    ### CHANGE STEP
+    # ========= CHANGE STEP =========
     def change_to_file(self, block, name, params: List[str] = ()):
         # params is either None or a list of topology files
         if self.has():
@@ -427,12 +420,15 @@ class Venus(VenusBase):
     def get_user_modelling_options(self):
         """
         User dictated choices.
+
+        Note `debug` is in the VenusBase.__init__
+
         """
         user_modelling_options = {'allow_pdb':       True,
                                   'allow_swiss':     True,
                                   'allow_alphafold': True,
                                   'scaling_factor':  0.239,  # this is the kJ/mol <--> kcal/mol "mystery" value
-                                  'no_conservation': True,  # Consurf SSL issue.
+                                  'no_conservation': False,  # Consurf SSL issue --> True
                                   }
 
         # ------ booleans
@@ -509,13 +505,13 @@ class Venus(VenusBase):
                 raise error
             # ConnectionError: # failed to download model...
             if protein.swissmodel.count(chosen_structure) != 0:
-                i = protein.swissmodel.remove(chosen_structure)
+                protein.swissmodel.remove(chosen_structure)
                 source = 'Swissmodel'
             elif protein.pdbs.count(chosen_structure) != 0:
-                i = protein.pdbs.remove(chosen_structure)
+                protein.pdbs.remove(chosen_structure)
                 source = 'RCSB PDB'
             elif protein.alphafold2.count(chosen_structure) != 0:
-                i = protein.alphafold2.remove(chosen_structure)
+                protein.alphafold2.remove(chosen_structure)
                 source = 'AlphaFold2'
                 msg = 'AlphaFold2 model was problematic'
                 log.critical(msg)  # ideally should message admin.
@@ -530,9 +526,10 @@ class Venus(VenusBase):
                 msg = f'Residue missing in structure ({source}): {chosen_structure.code} ({error})'
                 log.info(msg)
                 self.reply['warnings'].append(msg)
-            else:  # this should not happen in step 3.
+            else:
+                # this should not happen in step 3.
                 # causes: PDB given was a fake. How does that happen?
-                # causes the PBD given was too big. e.g. 7MQ8
+                # causes: the PBD given was too big. e.g. 7MQ8
                 msg = f'Major issue ({error.__class__.__name__}) with model {chosen_structure.code} ({error})'
                 self.reply['warnings'].append(msg)
                 log.warning(msg)
