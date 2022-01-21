@@ -331,16 +331,16 @@ class Venus {
                     gnomADtext += '<ul>';
                     const gMut = (v) => v[3].toUpperCase().split(' ')[0];
                     gnomADtext += this.mutational.gnomAD_near_mutation
-                                      .map(v => {
-                                          let element = '<li>';
-                                          element += `${this.makeProlink(v, gMut(v))}: `;
-                                          element += `${v[3]}`;
-                                          if (v[11] === 'missense_variant') {
-                                              element += `<i class="far fa-calculator venus-no-mike" data-variant='${JSON.stringify([gMut(v)])}' style="cursor: pointer;"></i>`;
-                                          }
-                                          element += '</li>'
-                                          return element
-                                      }).join('');
+                        .map(v => {
+                            let element = '<li>';
+                            element += `${this.makeProlink(v, gMut(v))}: `;
+                            element += `${v[3]}`;
+                            if (v[11] === 'missense_variant') {
+                                element += `<i class="far fa-calculator venus-no-mike" data-variant='${JSON.stringify([gMut(v)])}' style="cursor: pointer;"></i>`;
+                            }
+                            element += '</li>'
+                            return element
+                        }).join('');
                     gnomADtext += '</ul>';
                     this.createEntry('gnomad', 'gnomAD', gnomADtext);
                 }
@@ -1194,15 +1194,20 @@ class Venus {
         dg.click(event => {
             const el = $(event.target);
             const variants = el.data('variant').filter(variant => {
-                                                        const deets = this.get_gnomAD_details(variant);
-                                                        if (deets === undefined) {return false}
-                                                        else if (deets.consequence !== 'missense_variant') {return false}
-                                                        else {return true}
-                                                     }
-                                                     );
+                    const deets = this.get_gnomAD_details(variant);
+                    if (deets === undefined) {
+                        return false
+                    } else if (deets.consequence !== 'missense_variant') {
+                        return false
+                    } else {
+                        return true
+                    }
+                }
+            );
             if (variants.length === 0) {
                 window.ops.addToast('nonsense', '∆∆G calculations for missense', 'It is not possible to calculate the ∆∆G for a nonsense mutation', 'bg-info');
-                return}
+                return
+            }
             $('#gnomad_extra').modal('show');
             let btn = '';
             let homoTargets;
@@ -1284,7 +1289,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                 bulker(heteroTargets);
             });
             pros.each((i, e) => $(e).protein());
-            pros.click(event => $('#gnomad_extra').modal('hide') );
+            pros.click(event => $('#gnomad_extra').modal('hide'));
             $('#gnomad_extra .modal-hider').click(event => {
                 $('#gnomad_extra').modal('hide');
                 const mutation = $(event.target).data('mutation');
@@ -1353,7 +1358,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         "frequencies":null,"type":"missense"}
          */
         const detail = this.protein.clinvar.filter(v => `${v.from_residue}${v.residue_index}${v.to_residue}`
-                                                        .includes(mutation))[0];
+            .includes(mutation))[0];
         return this.add_ddG_details(mutation, detail);
     }
 
@@ -1586,16 +1591,39 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                         ${this.makeExt('https://www.phosphosite.org', 'PhosphoSitePlus')} 
                         for extra information)</p>`;
         strtext += '<table class="table">';
-        let con_th = this.structural && this.structural.has_conservation ? '<th scope="col">Conservation</th>' : '';
+        let con_th = '';
+        // See venus_text.py for modal descriptions which get added by extra_info.mako
+        const infoMaker = (id) => `<span data-toggle="modal" data-target="#${id}"><i class="fas fa-question-circle"></i>`;
+        const subcaptionClass = 'class="text-muted font-weight-normal"';
+        const infoClick = ' Click on info icon for more info.';
+        if (this.structural && this.structural.has_conservation) {
+            con_th = `<th scope="col" class="align-top"
+                          title="Consurf normalised homology score: positive = less conserved. negative = conserved. ${infoClick}"
+                          data-toggle="tooltip"> 
+                      Conservation<br/>
+                      <span ${subcaptionClass}>
+                      (ConsurfDB grades 
+                      ${infoMaker('consurfModal')}
+                      </span>
+                      )</span>
+                      </th>`;
+        }
         strtext += `<thead><tr>
-                    <th scope="col">Residue</th>
-                    <th scope="col">Distance</th>
+
+                    <th scope="col" class="align-top">Residue</th>
+                    <th scope="col" class="align-top"
+                        title="Neighbouring residues sorted by distance to the target residue. ${infoClick}"
+                        data-toggle="tooltip"
+                    >Distance <span ${subcaptionClass}>(sorted by distance ${infoMaker('distanceModal')})</span></th>
                     ${con_th}
-                    <th scope="col">Features of note</th>
+                    <th scope="col" class="align-top"
+                        title="Noteworthy features involving the residue from a variety of sources. ${infoClick}"
+                        data-toggle="tooltip"
+                    >Features <span ${subcaptionClass}>${infoMaker('featureModal')}</span></th>
                     </tr></thead>`;
         strtext += '<tbody>'
         strtext += this.structural.neighbours.sort((a, b) => a.distance - b.distance)
-                       .map(v => this.makeNeighbourRow(v)).join('');
+            .map(v => this.makeNeighbourRow(v)).join('');
         strtext += '</tbody>'
         strtext += '</table>'
         this.createEntry('neigh', 'Structural neighbourhood', strtext);
@@ -1639,7 +1667,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             conservation = 'no conservation data';
             if (data.conscore !== undefined) {
                 let con_color = data.conscore < 0 ? 'text-primary' : 'text-secondary';
-                conservation = `<span  title='Consurf normalised homology score: positive = less conserved. negative = conserved' 
+                conservation = `<span  title='ConsurfDB normalised homology score: positive = less conserved. negative = conserved' 
                                        data-toggle='tooltip'
                                        class="${con_color}"
                                        >
@@ -1690,8 +1718,8 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         */
         let freqicon;
         const catfreq = Object.entries(deets.frequencies)
-                               .map(([k, v]) => `${this.subpopulations[k]}: ${v.toPrecision(2)}`)
-                               .join(';<br>');
+            .map(([k, v]) => `${this.subpopulations[k]}: ${v.toPrecision(2)}`)
+            .join(';<br>');
         const freqInner = `data-toggle="tooltip"
                            data-html="true" 
                            title="Frequency in gnomAD controls dataset:
@@ -1707,7 +1735,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         } else if (deets.N > 10) {
             freqicon = 'fa-signal-3';
         } else if (deets.N > 5) {
-            freqicon= 'fa-signal-2';
+            freqicon = 'fa-signal-2';
         } else if (deets.N > 1) {
             freqicon = 'fa-signal-1';
         } else { // impossible.
@@ -1718,8 +1746,8 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         const iconed = `<i class="fad ${freqicon}" ${freqInner} style="cursor:help"></i>
                         <i class="far ${zygoicon}" ${datagnomad} style="cursor:help" data-toggle="tooltip"
                         title="${deets.homozygous} homozygous cases in gnomAD control dataset"></i>`
-                        .replaceAll(/[\s\n]+/g, ' ');
-                        // ^^^^^ just because the spaces look rubbish in the HTML.
+            .replaceAll(/[\s\n]+/g, ' ');
+        // ^^^^^ just because the spaces look rubbish in the HTML.
 
         if (!deets) {
             //glitched? Generally nonsense mutations?
@@ -1738,10 +1766,15 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         } else {
             // Missense w/ ddG
             let kcalColor;
-            if (deets.ddG >= 2) {kcalColor = 'text-danger'}
-            else if (deets.ddG >= 1.2) {kcalColor = 'text-warning'}
-            else if (deets.ddG < -2) {kcalColor = 'text-muted'}
-            else {kcalColor = 'text-info'}
+            if (deets.ddG >= 2) {
+                kcalColor = 'text-danger'
+            } else if (deets.ddG >= 1.2) {
+                kcalColor = 'text-warning'
+            } else if (deets.ddG < -2) {
+                kcalColor = 'text-muted'
+            } else {
+                kcalColor = 'text-info'
+            }
             const kcal = `<span class='${kcalColor}' ${datagnomad}>${deets.ddG.toPrecision(2)} kcal/mol</span>`;
             return `<span style='cursor: pointer;'
                                     class='${underline} venus-plain-mike'
@@ -1753,27 +1786,25 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
     }
 
     clinvar2cell(mutation) {
-            const dataclinvar = `data-variant='${JSON.stringify([mutation])}'`;
-            // `deets` is this.protein.gnomAD + this.energetical_gnomAD + this.custom_ddG :
-            const deets = this.get_clinvar_details(mutation);
-            let clinColor;
-            if (deets.impact.toLowerCase().includes('pathogenic')) {
-                clinColor = 'text-danger';
-            }
-            else if (deets.impact.toLowerCase().includes('benign')) {
-                clinColor = 'text-muted';
-            }
-            else {
-                clinColor = 'text-muted';
-            }
+        const dataclinvar = `data-variant='${JSON.stringify([mutation])}'`;
+        // `deets` is this.protein.gnomAD + this.energetical_gnomAD + this.custom_ddG :
+        const deets = this.get_clinvar_details(mutation);
+        let clinColor;
+        if (deets.impact.toLowerCase().includes('pathogenic')) {
+            clinColor = 'text-danger';
+        } else if (deets.impact.toLowerCase().includes('benign')) {
+            clinColor = 'text-muted';
+        } else {
+            clinColor = 'text-muted';
+        }
 
-            let kcal = '';
-            if (deets.ddG) {
-                const kcalColor = deets.ddG < 2 ? 'text-muted' : 'text-danger';
-                kcal = `<span class='${kcalColor}' ${dataclinvar}>${deets.ddG.toPrecision(2)} kcal/mol</span>`;
-            }
-            const underline = this.energetical_gnomAD !== undefined ? 'underlined' : '';
-            return `<span class="${clinColor}">ClinVar ${deets.impact}</span>
+        let kcal = '';
+        if (deets.ddG) {
+            const kcalColor = deets.ddG < 2 ? 'text-muted' : 'text-danger';
+            kcal = `<span class='${kcalColor}' ${dataclinvar}>${deets.ddG.toPrecision(2)} kcal/mol</span>`;
+        }
+        const underline = this.energetical_gnomAD !== undefined ? 'underlined' : '';
+        return `<span class="${clinColor}">ClinVar ${deets.impact}</span>
                         <span style='cursor: pointer;'
                                             class='${underline} venus-plain-mike'
                                             ${dataclinvar}>
@@ -1785,7 +1816,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                             style="cursor: help;">
                        </i>
                      `;
-        }
+    }
 
     updateStructureOption() {
         const so = $('#structureOption');

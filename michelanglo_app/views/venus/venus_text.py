@@ -1,4 +1,5 @@
 # "export contents"
+# contents get filled out in the mako extra_info.
 
 read_more = '''The next step would be to read if anything is known about this site.
 The <a class="uniprotLink">Uniprot entry</a> may provide some information.'''
@@ -93,7 +94,102 @@ dict(id='modalDestabilisation',
     —E. coli protein are more stable than human proteins.
     Export machinery is less tolerant to partially unfolded protein.
     But generally a ∆∆G over +5 kcal/mol is unlikely to be anything but deleterious.
-    ''')
+    '''),
+dict(id='consurfModal',
+     title='ConsurfDB',
+     icon='scroll-old',
+     description="""Conservation data is taken from 
+     <a href="https://consurfdb.tau.ac.il/" target="_blank>ConsurfDB <i class="far fa-external-link"></i></a>.
+     ConsurfDB is a site that provides pre-calculated conservation profiles for PDB structures
+     as calculated by the tool <code>rates4sites</code>.
+     In the case of <span style="font-variant: small-caps;">Swiss-Model</span> structures,
+     Venus migrates the residue grades (and the conservation colour) from the template that
+     was used for threading.
+     <br/>
+     Buried residues are expected to be more conserved in light of the fact that a mutation is generally
+     structurally deleterious and may require a compensating mutation 
+     (i.e. <a href="https://en.wikipedia.org/wiki/Epistasis" target="_blank">epistatis <i class="fab fa-wikipedia-w"></i></a>),
+     however, surface mutations may also be conserved if they have a role, such as an interface with another protein.
+     <br/>
+     At present, there is no conservation data provided for AlphaFold2 models, but will be implemented soon.
+     <br/>
+     <b>Reference</b> <a href="https://doi.org/10.1002/pro.3779, 2020" target="_blank">
+     Adi Ben Chorin, Gal Masrati, Amit Kessel, Aya Narunsky, Josef Sprinzak, Shlomtzion Lahav, Haim Ashkenazy, Nir Ben-Tal
+     ConSurf-DB: An accessible repository for the evolutionary conservation patterns of the majority of PDB proteins
+     Protein Science, 29:258–267 <i class="far fa-external-link"></i></a>
+     <br/>See also <a href="#referenceModal" data-toggle="modal" data-target="#referenceModal">here for all relevant papers and resources</a>
+     """),
+dict(id='distanceModal',
+     title='Residue distance',
+     icon='ruler',
+     description="""The distance between residues stated herein is the closest distance between any atom
+     of the two residues
+     in the given structure (before energy minimisation).
+     Namely, it does not take into account<ul>
+     <li>whether the two residue's sidechains may rotate making them closer
+      (for which an MD simulation would be required)</li>
+     <li>whether the side chains moved during minimisation (of the wild type or mutant)</li>
+     <li>whether the side chain was placed incorrectly by Coot</li>
+     </ul>
+      Parenthetically, the neighbour for energy minimsation is calculated by PyRosetta 
+      from C&beta; to C&beta; (a proxy for
+      the baricentre of a residue).
+     """),
+dict(id='featureModal',
+     title='Residue features',
+     icon='medal',
+     description="""
+     This column collates information from a few sources.
+     <ul class="list-group list-group-flush">
+     <li class="list-group-item">
+    <h3>Uniprot</h3>
+    <a href="https://www.uniprot.org/uniprot/" target="_blank>Uniprot <i class="far fa-external-link"></i></a>
+     is a database of manually curated entries with pieces of information taken from the literature,
+    which in turn will have more information on that residues making it a logical next step in the exploration
+    of the possible effects of a variant.
+    <b>Reference</b> <a href="https://doi.org/10.1093/nar/gkaa1100" target="_blank"> 
+    Bateman, A., Martin, M. J., Orchard, S., Magrane, M., Agivetova, R., Ahmad, S., Alpi, E., Bowler-Barnett, E. H., Britto, R., Bursteinas, B., Bye-A-Jee, H., Coetzee, R., Cukura, A., Silva, A. Da, Denny, P., Dogan, T., Ebenezer, T. G., Fan, J., Castro, L. G., … Zhang, J. (2021). UniProt: The universal protein knowledgebase in 2021. Nucleic Acids Research, 49(D1), D480–D489.
+    <i class="far fa-external-link"></i></a>
+    </li>
+    <li class="list-group-item">
+    <h3>gnomAD</h3>
+     (human substitions only)<br>
+    <a href="https://gnomad.broadinstitute.org/" target="_blank>gnomAD <i class="far fa-external-link"></i></a> 
+     is a database that collects the variants found in the healthy wild type human population.
+     As discussed in <a href="/docs/venus_hypothesis">the hypothesis generation notes</a>
+     it is useful to see nearby residues for gnomAD variants as it is likely that they may have 
+     a similar effect to the substitution investigated. However, some mutations may be conservative, 
+     hence why the ∆∆G is calculated —greater than +2 kcal/mol is destabilising (to that conformation).
+     Do note that if a variant is found in one or two individuals
+     (as marked with <i class="fad fa-signal-slash"></i>) it should be treated with caution.
+     Also note that gnomAD does not cover the entirety of the healthy human population,
+     therefore a back-of-the-envelope calculation is in order to say what are the chances of one or more
+      individuals with two copies of that allele (homozygous).
+     <b>Reference</b> <a href="https://doi.org/10.1038/s41586-020-2308-7 " target="_blank">
+     Karczewski, K. J., Francioli, L. C., Tiao, G., Cummings, B. B., Alföldi, J., Wang, Q., Collins, R. L., Laricchia, K. M., Ganna, A., Birnbaum, D. P., Gauthier, L. D., Brand, H., Solomonson, M., Watts, N. A., Rhodes, D., Singer-Berk, M., England, E. M., Seaby, E. G., Kosmicki, J. A., … MacArthur, D. G. (2020). The mutational constraint spectrum quantified from variation in 141,456 humans. Nature, 581(7809), 434–443. <i class="far fa-external-link"></i></a>
+    </li>
+    <li class="list-group-item">
+    <h3>ClinVar</h3>
+     (human substitions only)<br>
+    <a href="https://www.ncbi.nlm.nih.gov/clinvar/" target="_blank>ClinVar <i class="far fa-external-link"></i></a> 
+     collates indentified pathogenic variants.
+     <b>Reference</b> <a href="https://doi.org/10.1093/nar/gkz972" target="_blank">
+     Landrum, M. J., Chitipiralla, S., Brown, G. R., Chen, C., Gu, B., Hart, J., Hoffman, D., Jang, W., Kaur, K., Liu, C., Lyoshin, V., Maddipatla, Z., Maiti, R., Mitchell, J., O'Leary, N., Riley, G. R., Shi, W., Zhou, G., Schneider, V., Maglott, D., Holmes, J.B., Kattman, B. L. ClinVar: improvements to accessing data. Nucleic Acids Res. 2020;48(D1):D835-D844.
+     <i class="far fa-external-link"></i></a>
+    </li>
+     <li class="list-group-item">
+    <h3>PhosphoSitePlus</h3>
+     (human substitions only)<br>
+     <a href="https://www.phosphosite.org/" target="_blank>PhosphoSitePlus <i class="far fa-external-link"></i></a> 
+     is a database collecting post-translational modifications from high throughput screens.
+     This is useful as most post-translational modifications have not been investigated and some of which may have a
+     strong functional role.
+     <b>Reference</b> <a href="https://doi.org/10.1002/elps.200900140" target="_blank">
+     Guex, N., Peitsch, M. C., & Schwede, T. (2009). Automated comparative protein structure modeling with SWISS-MODEL and Swiss-PdbViewer: A historical perspective. ELECTROPHORESIS, 30(S1), S162–S173.
+     </li>
+     </ul>
+     <br/>See also <a href="#referenceModal" data-toggle="modal" data-target="#referenceModal">here for all relevant papers and resources</a>
+     """)
 ]
 
 # ===== Reference modal => special =====================================================================================
@@ -152,7 +248,7 @@ ref_inner = ''.join([table_rower('VENUS',
                                  'Context dependent fetched information'
                                  ),
                      table_rower('PhosphoSitePlus',
-                                 'The paper associated with a structure (or the homologue used by Swiss-Model or other tools) generally contains a treasure trove of information',
+                                 'PSP is a database collecting post-translational modifications from high throughput screens.',
                                  linker('https://www.phosphosite.org/'),
                                  'Guex, N., Peitsch, M. C., & Schwede, T. (2009). Automated comparative protein structure modeling with SWISS-MODEL and Swiss-PdbViewer: A historical perspective. ELECTROPHORESIS, 30(S1), S162–S173.' +
                                  linker('https://doi.org/10.1002/elps.200900140')
