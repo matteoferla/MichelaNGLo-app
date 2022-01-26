@@ -1663,7 +1663,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                 if (raw_structural_descriptions.betaturn) {
                     structural_descriptions.push(`likely &beta;-turn: ${raw_structural_descriptions.betaturn}`)
                 }
-                const bond2text = bond => `${bond.direction} h-bond `+
+                const bond2text = bond => `${bond.direction} H-bond `+
                                             '<small class="text-muted font-weight-normal">('+
                                            `by ${bond.own_atm_name} with ${bond.other_atm_name}`+
                                            ` of ${bond.other_pdb_idx}:${bond.other_pdb_chain}, `+
