@@ -1657,7 +1657,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                                                .filter(o => (o.pdb_idx === data.resi) && (o.pdb_chain === data.chain) )
                                                .shift();
             if (raw_structural_descriptions !== undefined) {
-                const ss_type = {L: 'Loop', S: 'Sheet', H: 'Helix'};
+                const ss_type = {L: 'Loop', E: 'Sheet', H: 'Helix'};
                 structural_descriptions.push( ss_type[raw_structural_descriptions.ss] );
                 structural_descriptions.push( raw_structural_descriptions.omega );
                 if (raw_structural_descriptions.betaturn) {
