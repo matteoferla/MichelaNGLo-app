@@ -626,6 +626,7 @@ class Venus {
                     this.analyse_target(mutation, 'relax');
                 });
                 this.updateStructureOption();
+                this.updateNeighbourhood();
                 this.concludeMutational();
             }
             //{ddG: float, scores: Dict[str, float], native:str, mutant:str, rmsd:int}
@@ -1617,6 +1618,10 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                     >Distance <span ${subcaptionClass}>(sorted by distance ${infoMaker('distanceModal')})</span></th>
                     ${con_th}
                     <th scope="col" class="align-top"
+                        title="Secondary and tertiary structure"
+                        data-toggle="tooltip"
+                    >Structural detail</th>
+                    <th scope="col" class="align-top"
                         title="Noteworthy features involving the residue from a variety of sources. ${infoClick}"
                         data-toggle="tooltip"
                     >Features <span ${subcaptionClass}>${infoMaker('featureModal')}</span></th>
@@ -1642,6 +1647,33 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         const selector = data.resi + ":" + data.chain;
         const prolink = this.makeProlink(selector, label);
         const distance = `${data.distance.toFixed(1)} &Aring;`;
+        let structural_descriptions = [];
+        if (this.energetical) { // hydrogen bonding etc. is via PyRosetta
+            // {"pose_idx":336,"pdb_idx":336,"pdb_chain":"A","resn":"SER","is_protein":true,"omega":"trans","ss":"L",
+            // "betaturn":"TurnAA_I",
+            // "hbonds":[{"distance":1.9845822998206568,"energy":-1.5254094966466458,"acc_resi":339,"acc_resn":"GLN","acc_atm_name":"OE1","don_resi":336,"don_resn":"SER","don_atm_name":"H","direction":"donor","other_pdb_idx":339,"other_pdb_chain":"A","other_atm_name":"OE1","own_atm_name":"H"},
+            // {"distance":1.9551069428506849,"energy":-1.2034188581245286,"acc_resi":336,"acc_resn":"SER","acc_atm_name":"O","don_resi":340,"don_resn":"LYS","don_atm_name":"H","direction":"acceptor","other_pdb_idx":340,"other_pdb_chain":"A","other_atm_name":"H","own_atm_name":"O"}]}
+            const raw_structural_descriptions = this.energetical.neighbor_description
+                                               .filter(o => (o.pdb_idx === data.resi) && (o.pdb_chain === data.chain) )
+                                               .shift();
+            if (raw_structural_descriptions !== undefined) {
+                const ss_type = {L: 'Loop', S: 'Sheet', H: 'Helix'};
+                structural_descriptions.push( ss_type[raw_structural_descriptions.ss] );
+                structural_descriptions.push( raw_structural_descriptions.omega );
+                if (raw_structural_descriptions.betaturn) {
+                    structural_descriptions.push(`likely &beta;-turn: ${raw_structural_descriptions.betaturn}`)
+                }
+                const bond2text = bond => `${bond.direction} h-bond `+
+                                            '<small class="text-muted font-weight-normal">('+
+                                           `by ${bond.own_atm_name} with ${bond.other_atm_name}`+
+                                           ` of ${bond.other_pdb_idx}:${bond.other_pdb_chain}, `+
+                                           `${bond.distance.toFixed(1)} Å, ${bond.energy.toFixed(1)} kcal/mol`+
+                                            ')</small>';
+                structural_descriptions.push(...raw_structural_descriptions.hbonds.map(bond2text));
+
+            }
+        }
+
         let details = []; // formerly mdash sepearated. Mostly. Now joined by br
         // ----------------------------- Interface
         if (data.other_chain) {
@@ -1666,13 +1698,13 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         if (!!this.structural.has_conservation) {
             conservation = 'no conservation data';
             if (data.conscore !== undefined) {
-                let con_color = data.conscore < 0 ? 'text-primary' : 'text-secondary';
+                let con_color = data.conscore < 0 ? 'bg-primary text-white' : 'bg-secondary text-white';
                 conservation = `<span  title='ConsurfDB normalised homology score: positive = less conserved. negative = conserved' 
                                        data-toggle='tooltip'
                                        class="${con_color}"
                                        >
-                                ${data.conscore.toFixed(1)}
-                                </span>
+                                ${data.conscore.toFixed(1)}</span>
+                                
                                 <span title='alterative residues in homologous protein: ${data.variety.join('/')}' data-toggle='tooltip'>
                                     alts: ${data.variety.length}
                                 </span>
@@ -1691,7 +1723,9 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         if (this.structural && this.structural.has_conservation) {
             conservationCell = `<td>${conservation}</td>`;
         }
-        return `<tr>${headerCell}${distanceCell}${conservationCell}${detailCell}</tr>`;
+        const structural_lis = structural_descriptions.map(s => `<li class="list-group-item p-0">${s}</li>`);
+        const structCell = `<td><ul class="list-group list-group-flush">${structural_lis.join('')}</ul></td>`;
+        return `<tr>${headerCell}${distanceCell}${conservationCell}${structCell}${detailCell}</tr>`;
 
     }
 
