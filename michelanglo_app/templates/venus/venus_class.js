@@ -562,7 +562,7 @@ class Venus {
                                     <b>Scorefunction</b>: ${this.energetical.score_fxn}<br/>
                                     <b>FastRelax cycles</b>: ${this.energetical.cycles}</p>
                                     <b>Movemap radius</b>: ${this.energetical.radius}</p>`;
-                modalText += `<table class="table">
+                modalText += `<table class="table" style="hyphens: auto; word-break: break-all;">
                               <thead>
                                 <tr>
                                   <th scope="col">Term</th>
