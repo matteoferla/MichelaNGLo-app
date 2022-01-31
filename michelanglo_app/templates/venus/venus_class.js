@@ -1601,7 +1601,8 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                         (see ${this.makeExt('https://gnomad.broadinstitute.org/', 'gnomAD')} and
                         ${this.makeExt('https://www.phosphosite.org', 'PhosphoSitePlus')} 
                         for extra information)</p>`;
-        strtext += '<table class="table">';
+        // hyphens is great... but works only in certain cases...
+        strtext += '<table class="table" style="hyphens: auto; word-break: break-all;">';
         let con_th = '';
         // See venus_text.py for modal descriptions which get added by extra_info.mako
         const infoMaker = (id) => `<span data-toggle="modal" data-target="#${id}"><i class="fas fa-question-circle"></i>`;
