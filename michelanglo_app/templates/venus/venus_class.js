@@ -451,17 +451,27 @@ class Venus {
                 this.energetical = msg.ddG;
                 //this.loadStructure();
                 const units = '<span title="Technically REU, Rosetta Energy Units, which are approximately the same as kcal/mol when using the ref2015 force-field score function">kcal/mol</span> ';
-
+                let ddgnote = 'impossible';
+                let ddgverdict = 'impossible';
                 let ddgtext = '<i>Predicted effect: </i>';
                 const cutoff = 2;
                 if (this.energetical.ddG < -cutoff) {
-                    ddgtext += '<b data-toggle="tooltip" title="A variant may be structurally stabilising, but phenotypically deleterious.">stabilising</b>'
+                    ddgnote = 'A variant may be structurally stabilising, but phenotypically deleterious.';
+                    ddgverdict = 'stabilising';
                 } else if (this.energetical.ddG > +cutoff) {
-                    ddgtext += '<b data-toggle="tooltip" title="A variant may be structurally deleterious, but phenotypically neutral.">destabilising</b>'
+                    ddgnote = 'A variant may be structurally destabilising, but phenotypically neutral.';
+                    ddgverdict = 'destabilising';
                 } else {
-                    ddgtext += '<b data-toggle="tooltip" title="A variant may be structurally neutral, but phenotypically deleterious.">structurally neutral</b>'
+                    ddgnote = 'A variant may be structurally neutral, but phenotypically deleterious.';
+                    ddgverdict = 'structurally neutral';
                 }
-                ddgtext += '<br/>';
+                ddgtext += `<b data-toggle="tooltip" title="${ddgnote}">${ddgverdict}</b>`;
+                ddgtext += `<div class="alert alert-warning alert-dismissible fade show" role="alert">
+                              <strong>NB</strong> ${ddgnote}
+                              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                            </div>`
                 const ddGLine = this.energetical.ddG < 10 ? Math.round(this.energetical.ddG) : '>10';
                 ddgtext += `<i>Estimated &Delta;&Delta;G (with backbone movement allowed):</i> ${ddGLine} ${units} `;
 
