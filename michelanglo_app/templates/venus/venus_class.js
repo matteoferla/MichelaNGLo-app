@@ -1638,6 +1638,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                     >Features <span ${subcaptionClass}>${infoMaker('featureModal')}</span></th>
                     </tr></thead>`;
         strtext += '<tbody>'
+        // Special case...
         strtext += this.structural.neighbours.sort((a, b) => a.distance - b.distance)
             .map(v => this.makeNeighbourRow(v)).join('');
         strtext += '</tbody>'
@@ -1668,11 +1669,24 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                                                .filter(o => (o.pdb_idx === data.resi) && (o.pdb_chain === data.chain) )
                                                .shift();
             if (raw_structural_descriptions !== undefined) {
+                if (! raw_structural_descriptions.is_protein) {
+                    structural_descriptions.push(`ligand`);
+                }
                 const ss_type = {L: 'Loop', E: 'Sheet', H: 'Helix'};
                 structural_descriptions.push( ss_type[raw_structural_descriptions.ss] );
-                structural_descriptions.push( raw_structural_descriptions.omega );
+                if ((raw_structural_descriptions.omega === 'cis') || (raw_structural_descriptions.resn === 'PRO') ) {
+                    structural_descriptions.push( raw_structural_descriptions.omega );
+                }
                 if (raw_structural_descriptions.betaturn) {
                     structural_descriptions.push(`likely &beta;-turn: ${raw_structural_descriptions.betaturn}`)
+                }
+                // !! {} is true. Go JS...
+                if (Object.keys(raw_structural_descriptions.xlink).length) {
+                    // {"other_idx":47,"other_name3":"CYS","other_is_protein":true,"own_atom_name":"SG","other_atom_name":"SG"}
+                    structural_descriptions.push(`cross-link between 
+                    atom ${raw_structural_descriptions.xlink.own_atom_name} and atom 
+                    ${raw_structural_descriptions.xlink.other_atom_name} of
+                    ${raw_structural_descriptions.xlink.other_name3}${raw_structural_descriptions.xlink.other_pdb_idx}:${raw_structural_descriptions.xlink.other_pdb_chain}`)
                 }
                 const bond2text = bond => `${bond.direction} H-bond `+
                                             '<small class="text-muted font-weight-normal">('+
@@ -1689,7 +1703,8 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         // ----------------------------- Interface
         if (data.other_chain) {
             details.push(`from interacting protein (chain ${data.chain})`);
-            // Todo fix the following.
+            // NB Ligands are not protein! tut tut
+            // Todo fix the following...
             // const chainDeets = this.structural.chain_definitions.filter(v => v.chain = 'A');
             // if (chainDeets) {
             //     // chainDeets[0].name is undefined?
@@ -1992,10 +2007,11 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         let effects = [this.mutational.apriori_effect,
             this.concludeMutational_nonsense(details),
             this.concludeMutational_destabilising(details),
-            this.concludeMutational_phospho(details),
+            this.concludeDistance(details),
             this.concludeMutational_disulfo(details),
-            this.concludeMutational_ubi(details),
-            this.concludeDistance(details),]
+            this.concludeMutational_other(details),
+            this.concludeMutational_phospho(details),
+            this.concludeMutational_ubi(details),]
             .filter(v => v !== null);
 
         // ubiquitin
@@ -2050,8 +2066,13 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
     }
 
     concludeMutational_phospho({buried, distorted, toNegCharged}) {
-        const phosphoFilter = entry => entry.description === 'phosphorylated' || entry.ptm === 'p';
-        const [isAt, isNear, opening] = this.concludeMutational_filter(phosphoFilter);
+        let filter = entry => entry.description === 'phosphorylated' || entry.ptm === 'p';
+        let [isAt, isNear, opening] = this.concludeMutational_filter(filter);
+        if (! isAt && ! isNear) {
+            // this is really not okay!
+            filter = entry => entry.type === 'modified residue';
+            [isAt, isNear, opening] = this.concludeMutational_filter(filter);
+        }
         let phosphoeffects = [];
         if (isAt || isNear) {
             // buried
@@ -2091,12 +2112,12 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
     }
 
     concludeMutational_disulfo({}) {
-        const filter = entry => entry.description === 'disulfide';
+        const filter = entry => entry.type === 'disulfide bond';
         const [isAt, isNear, opening] = this.concludeMutational_filter(filter);
         if (isAt || isNear) {
             return opening +
                 this.concludeMutational_buttonMaker('modalDisulfide',
-                    'a disulfide bond') +
+                    opening+' a disulfide bond') +
                 '.';
         } else {
             return null;
@@ -2104,13 +2125,46 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
     }
 
     concludeMutational_ubi({}) {
-        const filter = entry => entry.ptm === 'ub' || entry.ptm === 'sm';
+        const filter = entry => entry.ptm === 'ub' || entry.ptm === 'sm' || entry.description === "ubiquitinated";
         const [isAt, isNear, opening] = this.concludeMutational_filter(filter);
         if (isAt || isNear) {
             return opening +
                 this.concludeMutational_buttonMaker('modalUbiquitination',
                     'a ubiquitination site') +
                 '.';
+        } else {
+            return null;
+        }
+    }
+
+    concludeMutational_other({}) {
+        /*
+        Basically everything else that is shorter than 10 AA.
+         */
+        const filter = entry => (entry.ptm !== 'ub' &&
+                                 entry.ptm !== 'sm' &&
+                                 entry.description !== "ubiquitinated"  &&
+                                 entry.type !== 'disulfide bond' &&
+                                 entry.description !== 'phosphorylated' &&
+                                 entry.ptm !== 'p' &&
+                                 entry.y - entry.x <= 10
+                                 );
+        const feats_at = this.mutational.features_at_mutation.filter(filter);
+        const feats_near = this.mutational.features_near_mutation.filter(filter);
+        const at_ids = venus.mutational.features_at_mutation.map(v => v.id);
+        const feats_exclusive_near = feats_near.filter(v => ! at_ids.includes(v.id))
+        venus.mutational.features_near_mutation
+        if  (feats_at.length) {
+            return feats_at.map(v => `Mutated residues is involved in or is within ${v.type} (${v.description}).`)
+                           .join('');
+        }
+        else if  (feats_exclusive_near.length) {
+            return feats_near.map(v => `Mutated residues is near a residue involved in or within ${v.type} (${v.description}).`)
+                           .join('');
+        }
+        const [isAt, isNear, opening] = this.concludeMutational_filter(filter);
+        if (isAt || isNear) {
+            return opening + '???';
         } else {
             return null;
         }

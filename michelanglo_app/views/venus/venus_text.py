@@ -74,6 +74,11 @@ dict(id='modalDisulfide',
     and in the periplasmic or secreted protein in bacteria.
     A potential lack of calculated destabilisation does not indicate that the protein is stable
     outside of the cytoplasm.
+    
+    NB. that unfortunately the NGL.js library (used for the protein visualisation)
+    does not show disulfides and cross-linked molecules connected if connected via LINK or SSBOND entries,
+    only CONECT, which is non-standard. As a result the cross-link is present the calculations by PyRosetta,
+    but visually it is not shown.
     '''),
 
 # --------------------------------------------------------------------------------------------------------------
