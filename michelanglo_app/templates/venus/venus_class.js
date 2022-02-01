@@ -2146,25 +2146,21 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                                  entry.description !== "ubiquitinated"  &&
                                  entry.type !== 'disulfide bond' &&
                                  entry.description !== 'phosphorylated' &&
+                                 entry.type !== 'helix' &&
+                                 entry.type !== 'sheet' &&
                                  entry.ptm !== 'p' &&
                                  entry.y - entry.x <= 10
                                  );
         const feats_at = this.mutational.features_at_mutation.filter(filter);
         const feats_near = this.mutational.features_near_mutation.filter(filter);
+        // feats near includes at, so these need removing.
         const at_ids = venus.mutational.features_at_mutation.map(v => v.id);
-        const feats_exclusive_near = feats_near.filter(v => ! at_ids.includes(v.id))
-        venus.mutational.features_near_mutation
-        if  (feats_at.length) {
-            return feats_at.map(v => `Mutated residues is involved in or is within ${v.type} (${v.description}).`)
-                           .join('');
-        }
-        else if  (feats_exclusive_near.length) {
-            return feats_near.map(v => `Mutated residues is near a residue involved in or within ${v.type} (${v.description}).`)
-                           .join('');
-        }
-        const [isAt, isNear, opening] = this.concludeMutational_filter(filter);
-        if (isAt || isNear) {
-            return opening + '???';
+        const feats_exclusive_near = feats_near.filter(v => ! at_ids.includes(v.id));
+        const conclusions = [...feats_at.map(v => `Mutated residues is involved in or is within ${v.type} (${v.description}).`),
+                             ...feats_exclusive_near.map(v => `Mutated residues is near a residue involved in or within ${v.type} (${v.description}).`)
+        ]
+        if  (conclusions.length) {
+            return conclusions.join('<br/>');
         } else {
             return null;
         }
