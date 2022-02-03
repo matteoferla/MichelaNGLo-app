@@ -456,23 +456,20 @@ class Venus {
                 let ddgtext = '<i>Predicted effect: </i>';
                 const cutoff = 2;
                 if (this.energetical.ddG < -cutoff) {
-                    ddgnote = 'A variant may be structurally stabilising, but phenotypically deleterious.';
+                    ddgnote = 'a variant may be structurally stabilising, but phenotypically deleterious.';
                     ddgverdict = 'stabilising';
                 } else if (this.energetical.ddG > +cutoff) {
-                    ddgnote = 'A variant may be structurally destabilising, but phenotypically neutral.';
+                    ddgnote = 'a variant may be structurally destabilising, but phenotypically neutral.';
                     ddgverdict = 'destabilising';
                 } else {
-                    ddgnote = 'A variant may be structurally neutral, but phenotypically deleterious.';
+                    ddgnote = 'a variant may be structurally neutral, but phenotypically deleterious.';
                     ddgverdict = 'structurally neutral';
                 }
                 ddgtext += `<b>${ddgverdict}</b>`; // no more data-toggle="tooltip" title="${ddgnote}"
-                ddgtext += `<div class="alert alert-warning alert-dismissible fade show" role="alert">
-                              <strong>NB</strong> ${ddgnote}<br/>
-                              However, for further confirmation one could consult other
-                              <a href="/docs/venus_other_ddG" target="_blank">∆∆G web apps</a>.
-                              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                              </button>
+                ddgtext += `<div class="alert alert-warning" role="alert">
+                              Do note that ${ddgnote}<br/>
+                              For further confirmation of ∆∆G, one could consult other
+                              <a href="/docs/venus_other_ddG" target="_blank">web calculators</a>.
                             </div>`
                 const ddGLine = this.energetical.ddG < 10 ? Math.round(this.energetical.ddG) : '>10';
                 ddgtext += `<i>Estimated &Delta;&Delta;G (with backbone movement allowed):</i> ${ddGLine} ${units} `;
