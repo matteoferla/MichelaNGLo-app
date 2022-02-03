@@ -483,6 +483,7 @@ class Venus(VenusBase):
             # swissmodel
             try:
                 if user_modelling_options['allow_pdb'] or user_modelling_options['allow_swiss']:
+                    # The following _retrieves_ but also adds to self:
                     protein.retrieve_structures_from_swissmodel()  # protein::swissmodel_retrieval::FromSwissmodel
             except Exception as error:
                 if not self.suppress_errors:
