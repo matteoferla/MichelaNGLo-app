@@ -16,7 +16,7 @@
 <%block name="body">
     <%namespace file="../layout_components/common_methods.mako" name="common"/>
     <%include file="subparts/docs_nav.mako"/>
-        <%include file="subparts/docs_venus_nav.mako" args='topic="energy"'/>
+        <%include file="subparts/docs_venus_nav.mako" args='topic="other"'/>
         <h3>Other tools</h3>
         <div class="alert alert-warning alert-dismissible fade show" role="alert">
             <strong>Disclaimer</strong>: The list below is by no means exhaustive or is an endorsement of these

@@ -9,4 +9,5 @@
   <a href="/docs/venus_model" class="btn btn-outline-info ${'disabled' if topic=='model' else ''}">model choice</a>
   <a href="/docs/venus_energetics" class="btn btn-outline-info ${'disabled' if topic=='energy' else ''}">Free energy</a>
   <a href="/docs/venus_urls" class="btn btn-outline-info ${'disabled' if topic=='url' else ''}">URLs</a>
+    <a href="/docs/venus_other_ddG" class="btn btn-outline-info ${'disabled' if topic=='other' else ''}">Other sites</a>
 </div>
