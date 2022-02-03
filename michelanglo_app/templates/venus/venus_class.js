@@ -467,7 +467,9 @@ class Venus {
                 }
                 ddgtext += `<b>${ddgverdict}</b>`; // no more data-toggle="tooltip" title="${ddgnote}"
                 ddgtext += `<div class="alert alert-warning alert-dismissible fade show" role="alert">
-                              <strong>NB</strong> ${ddgnote}
+                              <strong>NB</strong> ${ddgnote}<br/>
+                              However, for further confirmation one could consult other
+                              <a href="/docs/venus_other_ddG" target="_blank">∆∆G web apps</a>.
                               <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                               </button>
