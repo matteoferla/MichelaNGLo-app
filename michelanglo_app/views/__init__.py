@@ -7,6 +7,5 @@
 from .custom_message import custom_messages
 
 from collections import defaultdict
-votes = defaultdict(lambda: {'up': 0, 'down': 0})
 
 valid_extensions = ['pdb', 'cif', 'mmtf', 'pqr', 'sdf', 'mol', 'mol2']

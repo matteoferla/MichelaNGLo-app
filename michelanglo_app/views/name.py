@@ -37,6 +37,8 @@ def choose_pdb(request):
         malformed = is_malformed(request, 'species', 'gene')
         if malformed:
             return {'status': malformed}
+        if not str(request.params['species']).isdigit():
+            return {'status': 'invalid species'}
         species = int(request.params['species'])
         gene = str(request.params['gene'])
         if not gene:

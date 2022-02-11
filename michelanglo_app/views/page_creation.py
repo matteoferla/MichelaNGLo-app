@@ -207,7 +207,7 @@ def convert_pse(request):
                                              color='bg-info')
         return {'page': pagename}
     except Exception as err:
-        log.exception(f'serious error in page creation from PyMol: {err}')
+        log.error(f'serious error in page creation from PyMol: {err}')
         request.response.status = 500
         request.session['status'] = make_msg('A server-side error arose', 'The code failed to run serverside.', 'error',
                                              'bg-danger')
@@ -316,7 +316,7 @@ def convert_pdb(request):
         settings['js'] = 'external'
         settings['title'] = 'User submitted structure (from uploaded PDB)'
     else:
-        log.exception(f'I have no idea what is uploaded as `pdb`. type: {type(pdb)} {pdb}')
+        log.error(f'I have no idea what is uploaded as `pdb`. type: {type(pdb)} {pdb}')
     commit_submission(request, settings, pagename)
     return {'page': pagename}
 

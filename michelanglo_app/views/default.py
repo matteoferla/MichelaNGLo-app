@@ -5,6 +5,7 @@ from pyramid.request import Request
 import os, json, time
 from ..models import User, Page
 from . import custom_messages, valid_extensions
+import datetime as dt
 
 from .buffer import system_storage
 
@@ -106,15 +107,31 @@ class DefaultViews:
             return render_to_response("../templates/registration_virtues.mako", self.reply, self.request)
         return self.reply
 
+    def is_admin(self):
+        return self.user and self.user.role == 'admin'
+
+
     @view_config(route_name='admin', renderer='../templates/admin.mako', http_cache=0)
     def admin(self):
-        if not self.user or (self.user and self.user.role != 'admin'):
+        if not self.is_admin():
             log.warning(f'Non admin user ({User.get_username(self.request)}) attempted to view admin page')
             self.request.response.status = 401
-            return self.reply
         else:
             self.reply['users'] = self.request.dbsession.query(User).all()
-            return self.reply
+        return self.reply
+
+    @view_config(route_name='errors', renderer='../templates/errors.mako', http_cache=0)
+    def error_view(self):
+        """
+        Show the errors caught by the exception_view_config
+        which are stored in  self.request.registry.settings['caught_errors']
+        these are the severe one.
+        """
+        if not self.is_admin():
+            log.warning(f'Non admin user ({User.get_username(self.request)}) attempted to view error page')
+            self.request.response.status = 401
+        return self.reply
+
 
     @view_config(route_name='status', renderer='json')
     def status_view(self):
@@ -136,15 +153,29 @@ class DefaultViews:
 # this view does not work in DefaultViews
 from pyramid.exceptions import URLDecodeError
 from pyramid.view import exception_view_config
+from .common_methods import Comms
 
-from pyramid.request import Request
-
-@exception_view_config(context=URLDecodeError, renderer='json')
-def attack(context, request):
-    request.response.status = 418
-    request.environ['PATH_INFO'] = 'HACKING-ATTEMPT'
-    time.sleep(0.5)
-    return {'status': 404}
+@exception_view_config(context=Exception, renderer='json')
+def capture_error(error, request):
+    if isinstance(error, URLDecodeError):
+        request.response.status = 418
+        request.environ['PATH_INFO'] = 'HACKING-ATTEMPT'
+        time.sleep(0.5)
+        return {'status': 404, 'msg': 'Null byte attacks are always attacks. You will be blocked next time.'}
+    else:
+        username = User.get_username(request)
+        request.response.status = 500
+        error_msg = f'{type(error).__name__}: {error}'
+        full_error_msg = f'{username} encountered {error_msg} in {request.matched_route.name}'
+        logging.error(full_error_msg)
+        Comms.notify_admin(full_error_msg)
+        request.registry.settings['caught_errors'].append(dict(username=username,
+                                                               time=dt.datetime.now(),
+                                                               error=error,
+                                                               routename=request.matched_route.name
+                                                               )
+                                                          )
+        return {'status': 'error', 'msg': f'serverside error ({error_msg}). The admin has been notified.'}
 
 @notfound_view_config(renderer="../templates/404.mako")
 def fourzerofour(request):

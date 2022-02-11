@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 from .common_methods import is_malformed, Comms
 from ..scheduler import Entasker
 
-from . import custom_messages, votes
+from . import custom_messages
 
 #### note that a few non-setting get json funs are actually hiding in name.py.
 @view_config(route_name='get')
@@ -18,7 +18,7 @@ def get_ajax(request):
         return {'status': malformed}
 
     def log_it():
-        log.warn(f'{User.get_username(request)} was refused {request.params["item"]}, code: {request.response.status}')
+        log.warning(f'{User.get_username(request)} was refused {request.params["item"]}, code: {request.response.status}')
 
     user = request.user
     modals = {'register': "../templates/login/register_modalcont.mako",
@@ -67,6 +67,22 @@ def get_ajax(request):
             return {'status': 'Not a swissmodel url'}
         else:
             return request.get(url).text()
+    elif request.params['item'] == 'codeblock':
+        if request.user and request.user.role == 'admin':
+            malformed = is_malformed(request, 'filename')
+            if malformed:
+                return {'status': malformed}
+            filename = request.params['filename']
+            if filename[-3:] != '.py':
+                log.critical(f'code specific hacking attempt by {request.user}')
+                Comms.notify_admin('Line 78. Compromised password??')
+                return {'status': 'code specific hacking attempt'}
+            with open(filename) as fh:
+                response = fh.read()
+        else:
+            response = 'forbidden'
+            request.response.status = 410
+        return render_to_response("string", response, request)
     else:
         request.response.status = 400
         log_it()
@@ -207,6 +223,22 @@ def set_ajax(request):
         except Exception as error:
             log.warning(f'Admin directed task {taskname} failed - {error.__class__.__name__}: {error}')
             return {'status': 'error', 'msg': f'{error.__class__.__name__}: {error}'}
+    elif request.params['item'] == 'test':
+        # these are not setters.
+        if request.user and request.user.role == 'admin':
+            malformed = is_malformed(request, 'task')
+            if malformed:
+                return {'status': malformed}
+            task = request.params['task']
+            if task == 'raise':
+                raise NotImplementedError('This error was requested.')
+            elif task == 'votes':
+                return {'status': 'ok', 'votes': dict(request.registry.settings['votes'])}
+            response = {'status': '410'}
+        else:
+            response = {'error': '410'}
+            request.response.status = 410
+        return render_to_response("json", response, request)
     else:
         return {'status': 'unknown cmd'}
 
@@ -221,7 +253,7 @@ def vote(request):
     direction = request.params['direction']
     if not isinstance(topic, str) or direction not in ('up', 'down'):
         return {'status': 'behave.'}
-    votes[topic][direction] += 1
+    request.registry.settings['votes'][topic][direction] += 1
     return {'status': 'Thanks for the feedback'}
 
 

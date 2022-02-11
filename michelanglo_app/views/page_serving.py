@@ -11,7 +11,7 @@ from pyramid.httpexceptions import HTTPFound
 import logging, json, os
 log = logging.getLogger(__name__)
 
-from . import custom_messages, votes
+from . import custom_messages
 from .common_methods import is_malformed, is_js_true
 from .buffer import system_storage
 
@@ -93,7 +93,7 @@ def get_userdata(request, pagename):
         elif settings['is_unseen']:
             settings['firsttime'] = True
             settings['is_unseen'] = False # switch it off.
-            settings['votes'] = dict(votes)
+            settings['votes'] = dict(request.registry.settings['votes'])
             page.save(settings)
         else:
             settings['is_unseen'] = False
