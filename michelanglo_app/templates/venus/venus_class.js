@@ -468,8 +468,10 @@ class Venus {
                 ddgtext += `<b>${ddgverdict}</b>`; // no more data-toggle="tooltip" title="${ddgnote}"
                 ddgtext += `<div class="alert alert-warning" role="alert">
                               Do note that ${ddgnote}<br/>
-                              For further confirmation of ∆∆G, one could consult other
-                              <a href="/docs/venus_other_ddG" target="_blank">web calculators</a>.
+                              <small>
+                              For more, compare with the ∆∆G of nearby gnomAD and ClinVar variants reported below.
+                              For further confirmation of ∆∆G value, consult other
+                              <a href="/docs/venus_other_ddG" target="_blank">web calculators</a>.</small>
                             </div>`
                 const ddGLine = this.energetical.ddG < 10 ? Math.round(this.energetical.ddG) : '>10';
                 ddgtext += `<i>Estimated &Delta;&Delta;G (with backbone movement allowed):</i> ${ddGLine} ${units} `;
@@ -540,6 +542,10 @@ class Venus {
                     <button class="btn btn-outline-secondary" type="button" id="extraCalculate"><i class="far fa-calculator venus-no-mike"></i></button>
                   </div>
                 </div>
+                <p><i class="far fa-clipboard-list-check"></i> 
+                    For details of how Venus performs ∆∆G see 
+                    <a href="/docs/venus_energetics" target="_blank">free energy notes</a>.
+                </p>
                 `;
                 this.createEntry('ddg', 'Free energy calculation', ddgtext);
 
@@ -1544,6 +1550,9 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                 }
             });
         strloctext += `<p>Chains:</p><div class="list-group" id="chainDescr">${ulInner.join('')}</div>`;
+        strloctext += `<p><i class="far fa-clipboard-list-check"></i> 
+                        For details of how Venus choses the models see 
+                        <a href="/docs/venus_model" target="_blank">model choice notes</a>.</p>`
         // structural character
         this.createEntry('strcha', 'Structural character', strloctext);
         // unsure why these do not get picked up.

@@ -5,7 +5,6 @@
 
 %>
 */
-window.userdata = ${str(udex)|n};
 
 //<%text>
 //<buttom role="button" class="btn btn-outline-info btn-sm" data-toggle="user" data-target="{u.name}"><i class="far "></i> make admin</buttom>

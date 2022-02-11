@@ -149,17 +149,10 @@
     </div>
 </%block>
 
-
-
-
-
-
-
-
-
 <%block name="script">
     % if user and user.role == 'admin':
         <script type="text/javascript">
+        window.userdata=${str(udex)|n};
         <%include file="admin.js"/>
         </script>
     %endif
