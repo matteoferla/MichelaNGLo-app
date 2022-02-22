@@ -72,7 +72,7 @@
                             <h2>Error Nº${i} from last</h2>
                             <ul class="list-group  list-group-flush">
                                 <li class="list-group-item"><b>Type</b> ${error.__class__.__name__}</li>
-                                <li class="list-group-item"><b>Message</b> ${error}</li>
+                                <li class="list-group-item"><b>Message</b> <pre><code>${error}</code></pre></li>
                                 <li class="list-group-item"><b>User</b> ${username}</li>
                                 <li class="list-group-item"><b>Time</b> ${time}</li>
                                 <li class="list-group-item"><b>Page</b> ${routename}</li>

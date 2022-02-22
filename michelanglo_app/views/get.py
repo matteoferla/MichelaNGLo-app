@@ -74,9 +74,9 @@ def get_ajax(request):
                 return {'status': malformed}
             filename = request.params['filename']
             if filename[-3:] != '.py':
-                log.critical(f'code specific hacking attempt by {request.user}')
-                Comms.notify_admin('Line 78. Compromised password??')
-                return {'status': 'code specific hacking attempt'}
+                log.critical(f'code-specific hacking attempt by {request.user}')
+                Comms.notify_admin(f'Line 78. Compromised password?? ({filename} is not python file')
+                return render_to_response('json', response={'status': 'code-specific hacking attempt'}, request=request)
             with open(filename) as fh:
                 response = fh.read()
         else:
