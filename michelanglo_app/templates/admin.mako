@@ -151,6 +151,11 @@
 
 <%block name="script">
     % if user and user.role == 'admin':
+        /*
+        <%
+            udex = [{a: getattr(u,a) if getattr(u,a) else "" for a in ('name', 'role', 'visited_pages', 'owned_pages')} for u in users]
+        %>
+        */
         <script type="text/javascript">
         window.userdata=${str(udex)|n};
         <%include file="admin.js"/>

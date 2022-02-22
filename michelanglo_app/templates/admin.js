@@ -1,11 +1,3 @@
-
-/*
-<%
-    udex = [{a: getattr(u,a) if getattr(u,a) else "" for a in ('name', 'role', 'visited_pages', 'owned_pages')} for u in users]
-
-%>
-*/
-
 //<%text>
 //<buttom role="button" class="btn btn-outline-info btn-sm" data-toggle="user" data-target="{u.name}"><i class="far "></i> make admin</buttom>
 $("[data-target='#mod']").click(function () {
