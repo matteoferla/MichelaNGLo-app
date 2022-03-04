@@ -194,7 +194,34 @@ dict(id='featureModal',
      </li>
      </ul>
      <br/>See also <a href="#referenceModal" data-toggle="modal" data-target="#referenceModal">here for all relevant papers and resources</a>
-     """)
+     """),
+
+
+
+
+dict(id='modalPore',
+     title='Transmembrane',
+     icon='archway',
+     description="""
+     <p>The mutation is in a transmembrane region as annotated in Uniprot.
+     Mutations can have a variety of possible effects.</p>
+     <p><b>Note</b> Venus calculates ∆∆G in a aqueous implicit solvent model
+     even if the protein is marked as membrane bound, because it is a non-trivial process to set up due many corner cases.
+     As a result do treat the difference in Gibbs free energy with caution.
+     </p>
+     <p>A substitution to a charged residue in the membrane may result 
+     in an inability to be embedded —resulting in degradation by the quality control machinery, 
+     making it a loss of function variant.</p>
+     <p>In some protein, the transmembrane region alters conformation upon a conformational shift in an aqueous domains.
+     In some protein transmembrane region features a pore or channel allowing ion or small molecule passage.
+     This can be spotted by looking at the surface 
+     (<a hfref='#' onclick="NGL.specialOps.showSurface('viewport', '*', undefined, 0.4, true)">show</span>).
+     In many cases, the channel is closed but opens upon a conformational shift. Hydrophobic residues that form a barrier
+     are normally referred to as a "gate", while charged residues controlling specificity as a "filter".
+     the analysis of a substitution affecting a conformational change requires at least two or more conformations
+     representing the open and closed states. Such a variant may favour one over the other —closed &rarr; LoF, open &rarr; GoF.
+     Do note the effect may be partial and a full loss of gating or filter may be lethal for the cell —akin to an ionophore.
+     """),
 ]
 
 # ===== Reference modal => special =====================================================================================
