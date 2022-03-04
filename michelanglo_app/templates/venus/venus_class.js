@@ -3,302 +3,6 @@
 // .venus-no-mike css classes do not get ported to Michelanglo
 // .venus-plain-mike css classes is ported as text to Michelanglo
 
-const clinvarFreq = {'hom': {'Counts': {'counts': {'benign': 7174, 'pathogenic': 4747},
-   'fraction': {'benign': 1.0, 'pathogenic': 1.0},
-   'ratio': 1.0},
-  'Destabilising (> 2 kcal/mol)': {'counts': {'benign': 360,
-    'pathogenic': 977},
-   'fraction': {'benign': 0.05018120992472819,
-    'pathogenic': 0.2058141984411207},
-   'ratio': 4.10141961004611},
-  'Destabilising (> 1 kcal/mol)': {'counts': {'benign': 828,
-    'pathogenic': 1760},
-   'fraction': {'benign': 0.11541678282687483,
-    'pathogenic': 0.37076048030334946},
-   'ratio': 3.2123619392466534},
-  'Destabilising (> 0 kcal/mol)': {'counts': {'benign': 3584,
-    'pathogenic': 3267},
-   'fraction': {'benign': 0.4995818232506273,
-    'pathogenic': 0.6882241415630925},
-   'ratio': 1.3776004440774625},
-  'Close to ligand': {'counts': {'benign': 174, 'pathogenic': 539},
-   'fraction': {'benign': 0.024254251463618624,
-    'pathogenic': 0.11354539709290078},
-   'ratio': 4.681463670945231},
-  'Close to NAG': {'counts': {'benign': 144, 'pathogenic': 263},
-   'fraction': {'benign': 0.020072483969891274,
-    'pathogenic': 0.0554034126816937},
-   'ratio': 2.760167240128268},
-  'Close to ligand (corrected)': {'counts': {'benign': 122, 'pathogenic': 420},
-   'fraction': {'benign': 0.017005854474491218,
-    'pathogenic': 0.08847693279966294},
-   'ratio': 5.202733736924443},
-  'Close to interface': {'counts': {'benign': 254, 'pathogenic': 759},
-   'fraction': {'benign': 0.03540563144689155,
-    'pathogenic': 0.15989045713081945},
-   'ratio': 4.515961178962594},
-  'Close to post-translational-modification': {'counts': {'benign': 2718,
-    'pathogenic': 2582},
-   'fraction': {'benign': 0.3788681349316978,
-    'pathogenic': 0.5439224773541184},
-   'ratio': 1.435651159874336},
-  'Close to phosphorylation': {'counts': {'benign': 1799, 'pathogenic': 1796},
-   'fraction': {'benign': 0.25076665737385, 'pathogenic': 0.3783442174004634},
-   'ratio': 1.5087500920683294},
-  'Close to destabilising homozygous gnomADs (> 2 kcal/mol)': {'counts': {'benign': 317,
-    'pathogenic': 57},
-   'fraction': {'benign': 0.04418734318371899,
-    'pathogenic': 0.012007583737097115},
-   'ratio': 0.2717426048262924},
-  'Close to destabilising homozygous gnomADs (> 1 kcal/mol)': {'counts': {'benign': 699,
-    'pathogenic': 142},
-   'fraction': {'benign': 0.09743518260384723,
-    'pathogenic': 0.029913629660838423},
-   'ratio': 0.3070105567766164},
-  'Close to destabilising common gnomADs (0.0005, > 2 kcal/mol)': {'counts': {'benign': 168,
-    'pathogenic': 59},
-   'fraction': {'benign': 0.023417897964873154,
-    'pathogenic': 0.012428902464714557},
-   'ratio': 0.5307437278682275},
-  'Close to destabilising common gnomADs (0.0005, > 1 kcal/mol)': {'counts': {'benign': 402,
-    'pathogenic': 125},
-   'fraction': {'benign': 0.056035684415946474,
-    'pathogenic': 0.026332420476090163},
-   'ratio': 0.46992234949122097},
-  'Close to destabilising gnomADs (> 1 kcal/mol)': {'counts': {'benign': 3088,
-    'pathogenic': 2603},
-   'fraction': {'benign': 0.4304432673543351,
-    'pathogenic': 0.5483463239941015},
-   'ratio': 1.2739107928541724},
-  'Close to destabilising gnomADs  (> 2 kcal/mol)': {'counts': {'benign': 1720,
-    'pathogenic': 1502},
-   'fraction': {'benign': 0.23975466964036798,
-    'pathogenic': 0.31641036444069937},
-   'ratio': 1.3197255549404519}},
- 'het': {'Counts': {'counts': {'benign': 3530, 'pathogenic': 3712},
-   'fraction': {'benign': 1.0, 'pathogenic': 1.0},
-   'ratio': 1.0},
-  'Destabilising (> 2 kcal/mol)': {'counts': {'benign': 217,
-    'pathogenic': 643},
-   'fraction': {'benign': 0.061473087818696884,
-    'pathogenic': 0.1732219827586207},
-   'ratio': 2.8178506872715716},
-  'Destabilising (> 1 kcal/mol)': {'counts': {'benign': 413,
-    'pathogenic': 1165},
-   'fraction': {'benign': 0.1169971671388102,
-    'pathogenic': 0.31384698275862066},
-   'ratio': 2.6825177945228353},
-  'Destabilising (> 0 kcal/mol)': {'counts': {'benign': 1601,
-    'pathogenic': 2319},
-   'fraction': {'benign': 0.4535410764872521,
-    'pathogenic': 0.6247306034482759},
-   'ratio': 1.3774509869908895},
-  'Close to ligand': {'counts': {'benign': 68, 'pathogenic': 407},
-   'fraction': {'benign': 0.019263456090651557,
-    'pathogenic': 0.10964439655172414},
-   'ratio': 5.691834115111562},
-  'Close to NAG': {'counts': {'benign': 67, 'pathogenic': 145},
-   'fraction': {'benign': 0.018980169971671387, 'pathogenic': 0.0390625},
-   'ratio': 2.0580690298507465},
-  'Close to ligand (corrected)': {'counts': {'benign': 35, 'pathogenic': 343},
-   'fraction': {'benign': 0.009915014164305949,
-    'pathogenic': 0.09240301724137931},
-   'ratio': 9.319504310344827},
-  'Close to interface': {'counts': {'benign': 107, 'pathogenic': 577},
-   'fraction': {'benign': 0.03031161473087819,
-    'pathogenic': 0.1554418103448276},
-   'ratio': 5.128127014179826},
-  'Close to post-translational-modification': {'counts': {'benign': 1400,
-    'pathogenic': 2028},
-   'fraction': {'benign': 0.39660056657223797,
-    'pathogenic': 0.5463362068965517},
-   'ratio': 1.3775477216748768},
-  'Close to phosphorylation': {'counts': {'benign': 991, 'pathogenic': 1449},
-   'fraction': {'benign': 0.28073654390934843,
-    'pathogenic': 0.39035560344827586},
-   'ratio': 1.3904695057239291},
-  'Close to destabilising homozygous gnomADs (> 2 kcal/mol)': {'counts': {'benign': 126,
-    'pathogenic': 42},
-   'fraction': {'benign': 0.035694050991501414,
-    'pathogenic': 0.011314655172413793},
-   'ratio': 0.31698994252873564},
-  'Close to destabilising homozygous gnomADs (> 1 kcal/mol)': {'counts': {'benign': 225,
-    'pathogenic': 62},
-   'fraction': {'benign': 0.06373937677053824,
-    'pathogenic': 0.01670258620689655},
-   'ratio': 0.2620450191570881},
-  'Close to destabilising common gnomADs (0.0005, > 2 kcal/mol)': {'counts': {'benign': 58,
-    'pathogenic': 4},
-   'fraction': {'benign': 0.01643059490084986,
-    'pathogenic': 0.0010775862068965517},
-   'ratio': 0.06558412604042806},
-  'Close to destabilising common gnomADs (0.0005, > 1 kcal/mol)': {'counts': {'benign': 86,
-    'pathogenic': 9},
-   'fraction': {'benign': 0.024362606232294616,
-    'pathogenic': 0.0024245689655172415},
-   'ratio': 0.09952009823576585},
-  'Close to destabilising gnomADs (> 1 kcal/mol)': {'counts': {'benign': 1046,
-    'pathogenic': 873},
-   'fraction': {'benign': 0.2963172804532578,
-    'pathogenic': 0.2351831896551724},
-   'ratio': 0.7936870549548362},
-  'Close to destabilising gnomADs  (> 2 kcal/mol)': {'counts': {'benign': 572,
-    'pathogenic': 456},
-   'fraction': {'benign': 0.16203966005665724,
-    'pathogenic': 0.12284482758620689},
-   'ratio': 0.7581158066071858}},
- 'null': {'Counts': {'counts': {'benign': 3545, 'pathogenic': 1465},
-   'fraction': {'benign': 1.0, 'pathogenic': 1.0},
-   'ratio': 1.0},
-  'Destabilising (> 2 kcal/mol)': {'counts': {'benign': 211,
-    'pathogenic': 285},
-   'fraction': {'benign': 0.059520451339915376,
-    'pathogenic': 0.1945392491467577},
-   'ratio': 3.268443783058085},
-  'Destabilising (> 1 kcal/mol)': {'counts': {'benign': 479,
-    'pathogenic': 541},
-   'fraction': {'benign': 0.13511988716502116,
-    'pathogenic': 0.36928327645051195},
-   'ratio': 2.733004624252745},
-  'Destabilising (> 0 kcal/mol)': {'counts': {'benign': 1832,
-    'pathogenic': 1024},
-   'fraction': {'benign': 0.5167842031029619,
-    'pathogenic': 0.6989761092150171},
-   'ratio': 1.3525492943052595},
-  'Close to ligand': {'counts': {'benign': 102, 'pathogenic': 136},
-   'fraction': {'benign': 0.028772919605077572,
-    'pathogenic': 0.09283276450511946},
-   'ratio': 3.2263936291240047},
-  'Close to NAG': {'counts': {'benign': 73, 'pathogenic': 65},
-   'fraction': {'benign': 0.02059238363892807,
-    'pathogenic': 0.04436860068259386},
-   'ratio': 2.154612183832811},
-  'Close to ligand (corrected)': {'counts': {'benign': 68, 'pathogenic': 118},
-   'fraction': {'benign': 0.01918194640338505,
-    'pathogenic': 0.08054607508532423},
-   'ratio': 4.199056414374623},
-  'Close to interface': {'counts': {'benign': 145, 'pathogenic': 223},
-   'fraction': {'benign': 0.04090267983074753,
-    'pathogenic': 0.1522184300341297},
-   'ratio': 3.721478168765447},
-  'Close to post-translational-modification': {'counts': {'benign': 1196,
-    'pathogenic': 702},
-   'fraction': {'benign': 0.33737658674188997,
-    'pathogenic': 0.47918088737201364},
-   'ratio': 1.4203145867339368},
-  'Close to phosphorylation': {'counts': {'benign': 827, 'pathogenic': 521},
-   'fraction': {'benign': 0.23328631875881523,
-    'pathogenic': 0.3556313993174061},
-   'ratio': 1.5244417298430528},
-  'Close to destabilising homozygous gnomADs (> 2 kcal/mol)': {'counts': {'benign': 187,
-    'pathogenic': 28},
-   'fraction': {'benign': 0.05275035260930889,
-    'pathogenic': 0.01911262798634812},
-   'ratio': 0.36232227920643895},
-  'Close to destabilising homozygous gnomADs (> 1 kcal/mol)': {'counts': {'benign': 466,
-    'pathogenic': 66},
-   'fraction': {'benign': 0.1314527503526093,
-    'pathogenic': 0.04505119453924915},
-   'ratio': 0.3427177782009404},
-  'Close to destabilising common gnomADs (0.0005, > 2 kcal/mol)': {'counts': {'benign': 126,
-    'pathogenic': 22},
-   'fraction': {'benign': 0.03554301833568406,
-    'pathogenic': 0.015017064846416382},
-   'ratio': 0.42250392762338157},
-  'Close to destabilising common gnomADs (0.0005, > 1 kcal/mol)': {'counts': {'benign': 272,
-    'pathogenic': 50},
-   'fraction': {'benign': 0.0767277856135402,
-    'pathogenic': 0.034129692832764506},
-   'ratio': 0.44481529813290505},
-  'Close to destabilising gnomADs (> 1 kcal/mol)': {'counts': {'benign': 1850,
-    'pathogenic': 1008},
-   'fraction': {'benign': 0.5218617771509168,
-    'pathogenic': 0.6880546075085324},
-   'ratio': 1.318461396550134},
-  'Close to destabilising gnomADs  (> 2 kcal/mol)': {'counts': {'benign': 1159,
-    'pathogenic': 687},
-   'fraction': {'benign': 0.32693935119887163,
-    'pathogenic': 0.4689419795221843},
-   'ratio': 1.434339359280538}},
- 'total': {'Counts': {'counts': {'benign': 14414, 'pathogenic': 9960},
-   'fraction': {'benign': 1.0, 'pathogenic': 1.0},
-   'ratio': 1.0},
-  'Destabilising (> 2 kcal/mol)': {'counts': {'benign': 797,
-    'pathogenic': 1909},
-   'fraction': {'benign': 0.05529346468710975,
-    'pathogenic': 0.19166666666666668},
-   'ratio': 3.4663529903805945},
-  'Destabilising (> 1 kcal/mol)': {'counts': {'benign': 1735,
-    'pathogenic': 3478},
-   'fraction': {'benign': 0.12036908561121132,
-    'pathogenic': 0.34919678714859437},
-   'ratio': 2.901050426489821},
-  'Destabilising (> 0 kcal/mol)': {'counts': {'benign': 7097,
-    'pathogenic': 6636},
-   'fraction': {'benign': 0.4923685305952546,
-    'pathogenic': 0.6662650602409639},
-   'ratio': 1.3531836801906796},
-  'Close to ligand': {'counts': {'benign': 347, 'pathogenic': 1088},
-   'fraction': {'benign': 0.024073817122242266,
-    'pathogenic': 0.10923694779116466},
-   'ratio': 4.537583185769012},
-  'Close to NAG': {'counts': {'benign': 285, 'pathogenic': 473},
-   'fraction': {'benign': 0.019772443457749412,
-    'pathogenic': 0.04748995983935743},
-   'ratio': 2.401825547805256},
-  'Close to ligand (corrected)': {'counts': {'benign': 226, 'pathogenic': 887},
-   'fraction': {'benign': 0.01567920077702234,
-    'pathogenic': 0.0890562248995984},
-   'ratio': 5.679895688950492},
-  'Close to interface': {'counts': {'benign': 510, 'pathogenic': 1564},
-   'fraction': {'benign': 0.03538226724018315,
-    'pathogenic': 0.1570281124497992},
-   'ratio': 4.438045515394913},
-  'Close to post-translational-modification': {'counts': {'benign': 5354,
-    'pathogenic': 5329},
-   'fraction': {'benign': 0.37144442902733454,
-    'pathogenic': 0.5350401606425703},
-   'ratio': 1.4404312430896542},
-  'Close to phosphorylation': {'counts': {'benign': 3644, 'pathogenic': 3781},
-   'fraction': {'benign': 0.25280976828083807,
-    'pathogenic': 0.37961847389558234},
-   'ratio': 1.5015973333509671},
-  'Close to destabilising homozygous gnomADs (> 2 kcal/mol)': {'counts': {'benign': 642,
-    'pathogenic': 127},
-   'fraction': {'benign': 0.04454003052587762,
-    'pathogenic': 0.012751004016064257},
-   'ratio': 0.2862818876753118},
-  'Close to destabilising homozygous gnomADs (> 1 kcal/mol)': {'counts': {'benign': 1409,
-    'pathogenic': 270},
-   'fraction': {'benign': 0.09775218537532954,
-    'pathogenic': 0.02710843373493976},
-   'ratio': 0.2773179303445151},
-  'Close to destabilising common gnomADs (0.0005, > 2 kcal/mol)': {'counts': {'benign': 360,
-    'pathogenic': 85},
-   'fraction': {'benign': 0.024975718051893993,
-    'pathogenic': 0.00853413654618474},
-   'ratio': 0.34169734493529674},
-  'Close to destabilising common gnomADs (0.0005, > 1 kcal/mol)': {'counts': {'benign': 773,
-    'pathogenic': 184},
-   'fraction': {'benign': 0.053628416816983486,
-    'pathogenic': 0.018473895582329317},
-   'ratio': 0.34447960016001916},
-  'Close to destabilising gnomADs (> 1 kcal/mol)': {'counts': {'benign': 6053,
-    'pathogenic': 4502},
-   'fraction': {'benign': 0.419938948244762,
-    'pathogenic': 0.45200803212851404},
-   'ratio': 1.0763660622997524},
-  'Close to destabilising gnomADs  (> 2 kcal/mol)': {'counts': {'benign': 3493,
-    'pathogenic': 2659},
-   'fraction': {'benign': 0.24233384209796033,
-    'pathogenic': 0.26696787148594375},
-   'ratio': 1.1016532778695658}},
- 'schema': {'top_keys': ['hom', 'het', 'null', 'total'],
-  'middle_keys': '[fields]',
-  'inner_keys': ['counts', 'fraction', 'ratio'],
-  'innermost_keys': ['benign', 'pathogenic']}};
-
-
 class Venus {
     constructor() {
         this.prepareDOM();
@@ -2323,6 +2027,28 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
     }
 
 // ------------ Summary conclusions ----------------------------------------
+        get lof_intolerance() {
+        /*
+        hmz intolerant = recessive
+        het = dominant
+         */
+        if (this.protein.pLI == -1) {return undefined}
+        if (this.protein.pLI > 0.5) {return 'het'}
+        if (this.protein.pRec > 0.5) {return 'hom'}
+        if (this.protein.pNull > 0.5) {return 'null'}
+        if ((this.protein.pLI > this.protein.pRec) && (this.protein.pLI > this.protein.pNull)) {return 'het'}
+        if ((this.protein.pLI < this.protein.pRec) && (this.protein.pRec > this.protein.pNull)) {return 'hom'}
+        return 'null'
+    }
+
+    get lof_name() {
+        const names = {'hom': 'protein with high pLI (intolerance to loss-of-function in heterozygous status)',
+                               'het': 'protein with high pRec (intolerance to loss-of-function in homozygous status)',
+                               'null': 'protein with high pNull (tolerance to loss-of-function)'
+                              };
+        return names[this.lof_intolerance]
+    }
+    
 // From mutational
     concludeMutational() {
         // is it a PTM?
@@ -2396,6 +2122,320 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         return [isAt, isNear, opening];
     }
 
+    clinvarFreq = {'hom': {'Counts': {'counts': {'benign': 7174, 'pathogenic': 4747},
+                           'fraction': {'benign': 1.0, 'pathogenic': 1.0},
+                           'ratio': 1.0},
+                          'Destabilising (> 2 kcal/mol)': {'counts': {'benign': 360,
+                            'pathogenic': 977},
+                           'fraction': {'benign': 0.05018120992472819,
+                            'pathogenic': 0.2058141984411207},
+                           'ratio': 4.10141961004611},
+                          'Destabilising (> 1 kcal/mol)': {'counts': {'benign': 828,
+                            'pathogenic': 1760},
+                           'fraction': {'benign': 0.11541678282687483,
+                            'pathogenic': 0.37076048030334946},
+                           'ratio': 3.2123619392466534},
+                          'Destabilising (> 0 kcal/mol)': {'counts': {'benign': 3584,
+                            'pathogenic': 3267},
+                           'fraction': {'benign': 0.4995818232506273,
+                            'pathogenic': 0.6882241415630925},
+                           'ratio': 1.3776004440774625},
+                          'Close to ligand': {'counts': {'benign': 174, 'pathogenic': 539},
+                           'fraction': {'benign': 0.024254251463618624,
+                            'pathogenic': 0.11354539709290078},
+                           'ratio': 4.681463670945231},
+                          'Close to NAG': {'counts': {'benign': 144, 'pathogenic': 263},
+                           'fraction': {'benign': 0.020072483969891274,
+                            'pathogenic': 0.0554034126816937},
+                           'ratio': 2.760167240128268},
+                          'Close to ligand (corrected)': {'counts': {'benign': 122, 'pathogenic': 420},
+                           'fraction': {'benign': 0.017005854474491218,
+                            'pathogenic': 0.08847693279966294},
+                           'ratio': 5.202733736924443},
+                          'Close to interface': {'counts': {'benign': 254, 'pathogenic': 759},
+                           'fraction': {'benign': 0.03540563144689155,
+                            'pathogenic': 0.15989045713081945},
+                           'ratio': 4.515961178962594},
+                          'Close to post-translational-modification': {'counts': {'benign': 2718,
+                            'pathogenic': 2582},
+                           'fraction': {'benign': 0.3788681349316978,
+                            'pathogenic': 0.5439224773541184},
+                           'ratio': 1.435651159874336},
+                          'Close to phosphorylation': {'counts': {'benign': 1799, 'pathogenic': 1796},
+                           'fraction': {'benign': 0.25076665737385, 'pathogenic': 0.3783442174004634},
+                           'ratio': 1.5087500920683294},
+                          'Close to destabilising homozygous gnomADs (> 2 kcal/mol)': {'counts': {'benign': 317,
+                            'pathogenic': 57},
+                           'fraction': {'benign': 0.04418734318371899,
+                            'pathogenic': 0.012007583737097115},
+                           'ratio': 0.2717426048262924},
+                          'Close to destabilising homozygous gnomADs (> 1 kcal/mol)': {'counts': {'benign': 699,
+                            'pathogenic': 142},
+                           'fraction': {'benign': 0.09743518260384723,
+                            'pathogenic': 0.029913629660838423},
+                           'ratio': 0.3070105567766164},
+                          'Close to destabilising common gnomADs (0.0005, > 2 kcal/mol)': {'counts': {'benign': 168,
+                            'pathogenic': 59},
+                           'fraction': {'benign': 0.023417897964873154,
+                            'pathogenic': 0.012428902464714557},
+                           'ratio': 0.5307437278682275},
+                          'Close to destabilising common gnomADs (0.0005, > 1 kcal/mol)': {'counts': {'benign': 402,
+                            'pathogenic': 125},
+                           'fraction': {'benign': 0.056035684415946474,
+                            'pathogenic': 0.026332420476090163},
+                           'ratio': 0.46992234949122097},
+                          'Close to destabilising gnomADs (> 1 kcal/mol)': {'counts': {'benign': 3088,
+                            'pathogenic': 2603},
+                           'fraction': {'benign': 0.4304432673543351,
+                            'pathogenic': 0.5483463239941015},
+                           'ratio': 1.2739107928541724},
+                          'Close to destabilising gnomADs  (> 2 kcal/mol)': {'counts': {'benign': 1720,
+                            'pathogenic': 1502},
+                           'fraction': {'benign': 0.23975466964036798,
+                            'pathogenic': 0.31641036444069937},
+                           'ratio': 1.3197255549404519}},
+                         'het': {'Counts': {'counts': {'benign': 3530, 'pathogenic': 3712},
+                           'fraction': {'benign': 1.0, 'pathogenic': 1.0},
+                           'ratio': 1.0},
+                          'Destabilising (> 2 kcal/mol)': {'counts': {'benign': 217,
+                            'pathogenic': 643},
+                           'fraction': {'benign': 0.061473087818696884,
+                            'pathogenic': 0.1732219827586207},
+                           'ratio': 2.8178506872715716},
+                          'Destabilising (> 1 kcal/mol)': {'counts': {'benign': 413,
+                            'pathogenic': 1165},
+                           'fraction': {'benign': 0.1169971671388102,
+                            'pathogenic': 0.31384698275862066},
+                           'ratio': 2.6825177945228353},
+                          'Destabilising (> 0 kcal/mol)': {'counts': {'benign': 1601,
+                            'pathogenic': 2319},
+                           'fraction': {'benign': 0.4535410764872521,
+                            'pathogenic': 0.6247306034482759},
+                           'ratio': 1.3774509869908895},
+                          'Close to ligand': {'counts': {'benign': 68, 'pathogenic': 407},
+                           'fraction': {'benign': 0.019263456090651557,
+                            'pathogenic': 0.10964439655172414},
+                           'ratio': 5.691834115111562},
+                          'Close to NAG': {'counts': {'benign': 67, 'pathogenic': 145},
+                           'fraction': {'benign': 0.018980169971671387, 'pathogenic': 0.0390625},
+                           'ratio': 2.0580690298507465},
+                          'Close to ligand (corrected)': {'counts': {'benign': 35, 'pathogenic': 343},
+                           'fraction': {'benign': 0.009915014164305949,
+                            'pathogenic': 0.09240301724137931},
+                           'ratio': 9.319504310344827},
+                          'Close to interface': {'counts': {'benign': 107, 'pathogenic': 577},
+                           'fraction': {'benign': 0.03031161473087819,
+                            'pathogenic': 0.1554418103448276},
+                           'ratio': 5.128127014179826},
+                          'Close to post-translational-modification': {'counts': {'benign': 1400,
+                            'pathogenic': 2028},
+                           'fraction': {'benign': 0.39660056657223797,
+                            'pathogenic': 0.5463362068965517},
+                           'ratio': 1.3775477216748768},
+                          'Close to phosphorylation': {'counts': {'benign': 991, 'pathogenic': 1449},
+                           'fraction': {'benign': 0.28073654390934843,
+                            'pathogenic': 0.39035560344827586},
+                           'ratio': 1.3904695057239291},
+                          'Close to destabilising homozygous gnomADs (> 2 kcal/mol)': {'counts': {'benign': 126,
+                            'pathogenic': 42},
+                           'fraction': {'benign': 0.035694050991501414,
+                            'pathogenic': 0.011314655172413793},
+                           'ratio': 0.31698994252873564},
+                          'Close to destabilising homozygous gnomADs (> 1 kcal/mol)': {'counts': {'benign': 225,
+                            'pathogenic': 62},
+                           'fraction': {'benign': 0.06373937677053824,
+                            'pathogenic': 0.01670258620689655},
+                           'ratio': 0.2620450191570881},
+                          'Close to destabilising common gnomADs (0.0005, > 2 kcal/mol)': {'counts': {'benign': 58,
+                            'pathogenic': 4},
+                           'fraction': {'benign': 0.01643059490084986,
+                            'pathogenic': 0.0010775862068965517},
+                           'ratio': 0.06558412604042806},
+                          'Close to destabilising common gnomADs (0.0005, > 1 kcal/mol)': {'counts': {'benign': 86,
+                            'pathogenic': 9},
+                           'fraction': {'benign': 0.024362606232294616,
+                            'pathogenic': 0.0024245689655172415},
+                           'ratio': 0.09952009823576585},
+                          'Close to destabilising gnomADs (> 1 kcal/mol)': {'counts': {'benign': 1046,
+                            'pathogenic': 873},
+                           'fraction': {'benign': 0.2963172804532578,
+                            'pathogenic': 0.2351831896551724},
+                           'ratio': 0.7936870549548362},
+                          'Close to destabilising gnomADs  (> 2 kcal/mol)': {'counts': {'benign': 572,
+                            'pathogenic': 456},
+                           'fraction': {'benign': 0.16203966005665724,
+                            'pathogenic': 0.12284482758620689},
+                           'ratio': 0.7581158066071858}},
+                         'null': {'Counts': {'counts': {'benign': 3545, 'pathogenic': 1465},
+                           'fraction': {'benign': 1.0, 'pathogenic': 1.0},
+                           'ratio': 1.0},
+                          'Destabilising (> 2 kcal/mol)': {'counts': {'benign': 211,
+                            'pathogenic': 285},
+                           'fraction': {'benign': 0.059520451339915376,
+                            'pathogenic': 0.1945392491467577},
+                           'ratio': 3.268443783058085},
+                          'Destabilising (> 1 kcal/mol)': {'counts': {'benign': 479,
+                            'pathogenic': 541},
+                           'fraction': {'benign': 0.13511988716502116,
+                            'pathogenic': 0.36928327645051195},
+                           'ratio': 2.733004624252745},
+                          'Destabilising (> 0 kcal/mol)': {'counts': {'benign': 1832,
+                            'pathogenic': 1024},
+                           'fraction': {'benign': 0.5167842031029619,
+                            'pathogenic': 0.6989761092150171},
+                           'ratio': 1.3525492943052595},
+                          'Close to ligand': {'counts': {'benign': 102, 'pathogenic': 136},
+                           'fraction': {'benign': 0.028772919605077572,
+                            'pathogenic': 0.09283276450511946},
+                           'ratio': 3.2263936291240047},
+                          'Close to NAG': {'counts': {'benign': 73, 'pathogenic': 65},
+                           'fraction': {'benign': 0.02059238363892807,
+                            'pathogenic': 0.04436860068259386},
+                           'ratio': 2.154612183832811},
+                          'Close to ligand (corrected)': {'counts': {'benign': 68, 'pathogenic': 118},
+                           'fraction': {'benign': 0.01918194640338505,
+                            'pathogenic': 0.08054607508532423},
+                           'ratio': 4.199056414374623},
+                          'Close to interface': {'counts': {'benign': 145, 'pathogenic': 223},
+                           'fraction': {'benign': 0.04090267983074753,
+                            'pathogenic': 0.1522184300341297},
+                           'ratio': 3.721478168765447},
+                          'Close to post-translational-modification': {'counts': {'benign': 1196,
+                            'pathogenic': 702},
+                           'fraction': {'benign': 0.33737658674188997,
+                            'pathogenic': 0.47918088737201364},
+                           'ratio': 1.4203145867339368},
+                          'Close to phosphorylation': {'counts': {'benign': 827, 'pathogenic': 521},
+                           'fraction': {'benign': 0.23328631875881523,
+                            'pathogenic': 0.3556313993174061},
+                           'ratio': 1.5244417298430528},
+                          'Close to destabilising homozygous gnomADs (> 2 kcal/mol)': {'counts': {'benign': 187,
+                            'pathogenic': 28},
+                           'fraction': {'benign': 0.05275035260930889,
+                            'pathogenic': 0.01911262798634812},
+                           'ratio': 0.36232227920643895},
+                          'Close to destabilising homozygous gnomADs (> 1 kcal/mol)': {'counts': {'benign': 466,
+                            'pathogenic': 66},
+                           'fraction': {'benign': 0.1314527503526093,
+                            'pathogenic': 0.04505119453924915},
+                           'ratio': 0.3427177782009404},
+                          'Close to destabilising common gnomADs (0.0005, > 2 kcal/mol)': {'counts': {'benign': 126,
+                            'pathogenic': 22},
+                           'fraction': {'benign': 0.03554301833568406,
+                            'pathogenic': 0.015017064846416382},
+                           'ratio': 0.42250392762338157},
+                          'Close to destabilising common gnomADs (0.0005, > 1 kcal/mol)': {'counts': {'benign': 272,
+                            'pathogenic': 50},
+                           'fraction': {'benign': 0.0767277856135402,
+                            'pathogenic': 0.034129692832764506},
+                           'ratio': 0.44481529813290505},
+                          'Close to destabilising gnomADs (> 1 kcal/mol)': {'counts': {'benign': 1850,
+                            'pathogenic': 1008},
+                           'fraction': {'benign': 0.5218617771509168,
+                            'pathogenic': 0.6880546075085324},
+                           'ratio': 1.318461396550134},
+                          'Close to destabilising gnomADs  (> 2 kcal/mol)': {'counts': {'benign': 1159,
+                            'pathogenic': 687},
+                           'fraction': {'benign': 0.32693935119887163,
+                            'pathogenic': 0.4689419795221843},
+                           'ratio': 1.434339359280538}},
+                         'total': {'Counts': {'counts': {'benign': 14414, 'pathogenic': 9960},
+                           'fraction': {'benign': 1.0, 'pathogenic': 1.0},
+                           'ratio': 1.0},
+                          'Destabilising (> 2 kcal/mol)': {'counts': {'benign': 797,
+                            'pathogenic': 1909},
+                           'fraction': {'benign': 0.05529346468710975,
+                            'pathogenic': 0.19166666666666668},
+                           'ratio': 3.4663529903805945},
+                          'Destabilising (> 1 kcal/mol)': {'counts': {'benign': 1735,
+                            'pathogenic': 3478},
+                           'fraction': {'benign': 0.12036908561121132,
+                            'pathogenic': 0.34919678714859437},
+                           'ratio': 2.901050426489821},
+                          'Destabilising (> 0 kcal/mol)': {'counts': {'benign': 7097,
+                            'pathogenic': 6636},
+                           'fraction': {'benign': 0.4923685305952546,
+                            'pathogenic': 0.6662650602409639},
+                           'ratio': 1.3531836801906796},
+                          'Close to ligand': {'counts': {'benign': 347, 'pathogenic': 1088},
+                           'fraction': {'benign': 0.024073817122242266,
+                            'pathogenic': 0.10923694779116466},
+                           'ratio': 4.537583185769012},
+                          'Close to NAG': {'counts': {'benign': 285, 'pathogenic': 473},
+                           'fraction': {'benign': 0.019772443457749412,
+                            'pathogenic': 0.04748995983935743},
+                           'ratio': 2.401825547805256},
+                          'Close to ligand (corrected)': {'counts': {'benign': 226, 'pathogenic': 887},
+                           'fraction': {'benign': 0.01567920077702234,
+                            'pathogenic': 0.0890562248995984},
+                           'ratio': 5.679895688950492},
+                          'Close to interface': {'counts': {'benign': 510, 'pathogenic': 1564},
+                           'fraction': {'benign': 0.03538226724018315,
+                            'pathogenic': 0.1570281124497992},
+                           'ratio': 4.438045515394913},
+                          'Close to post-translational-modification': {'counts': {'benign': 5354,
+                            'pathogenic': 5329},
+                           'fraction': {'benign': 0.37144442902733454,
+                            'pathogenic': 0.5350401606425703},
+                           'ratio': 1.4404312430896542},
+                          'Close to phosphorylation': {'counts': {'benign': 3644, 'pathogenic': 3781},
+                           'fraction': {'benign': 0.25280976828083807,
+                            'pathogenic': 0.37961847389558234},
+                           'ratio': 1.5015973333509671},
+                          'Close to destabilising homozygous gnomADs (> 2 kcal/mol)': {'counts': {'benign': 642,
+                            'pathogenic': 127},
+                           'fraction': {'benign': 0.04454003052587762,
+                            'pathogenic': 0.012751004016064257},
+                           'ratio': 0.2862818876753118},
+                          'Close to destabilising homozygous gnomADs (> 1 kcal/mol)': {'counts': {'benign': 1409,
+                            'pathogenic': 270},
+                           'fraction': {'benign': 0.09775218537532954,
+                            'pathogenic': 0.02710843373493976},
+                           'ratio': 0.2773179303445151},
+                          'Close to destabilising common gnomADs (0.0005, > 2 kcal/mol)': {'counts': {'benign': 360,
+                            'pathogenic': 85},
+                           'fraction': {'benign': 0.024975718051893993,
+                            'pathogenic': 0.00853413654618474},
+                           'ratio': 0.34169734493529674},
+                          'Close to destabilising common gnomADs (0.0005, > 1 kcal/mol)': {'counts': {'benign': 773,
+                            'pathogenic': 184},
+                           'fraction': {'benign': 0.053628416816983486,
+                            'pathogenic': 0.018473895582329317},
+                           'ratio': 0.34447960016001916},
+                          'Close to destabilising gnomADs (> 1 kcal/mol)': {'counts': {'benign': 6053,
+                            'pathogenic': 4502},
+                           'fraction': {'benign': 0.419938948244762,
+                            'pathogenic': 0.45200803212851404},
+                           'ratio': 1.0763660622997524},
+                          'Close to destabilising gnomADs  (> 2 kcal/mol)': {'counts': {'benign': 3493,
+                            'pathogenic': 2659},
+                           'fraction': {'benign': 0.24233384209796033,
+                            'pathogenic': 0.26696787148594375},
+                           'ratio': 1.1016532778695658}},
+                         'schema': {'top_keys': ['hom', 'het', 'null', 'total'],
+                          'middle_keys': '[fields]',
+                          'inner_keys': ['counts', 'fraction', 'ratio'],
+                          'innermost_keys': ['benign', 'pathogenic']}};
+
+    addClinFreq(category, cleanName) {
+        // 'cleanName = 'phosphorylation site'; category = 'Close to phosphorylation'
+        let response = '';
+        const clinvar = this.concludeMutational_buttonMaker('modalClinvarAnalysis', 'In ClinVar');
+        if (this.lof_intolerance) {
+                const clindata = this.clinvarFreq[this.lof_intolerance][category];
+                response += ` ${clinvar} a ${cleanName} is found within 10 &Aring; in
+                ${(100 * clindata.fraction.pathogenic).toPrecision(2)}% of cases (${clindata.counts.benign}) with a pathogenic consequence and
+                in ${(100 * clindata.fraction.benign).toPrecision(2)}% of cases (${clindata.counts.benign}) with a benign consequence
+                (ratio ${clindata.ratio.toPrecision(3)}) for ${this.lof_name}.`;
+            }
+        const clindataTotal = this.clinvarFreq['total'][category];
+        response += ` ${clinvar}, in total, a ${cleanName} is found within 10 &Aring; in
+        ${(100 * clindataTotal.fraction.pathogenic).toPrecision(2)}% of cases (${clindataTotal.counts.benign}) with a pathogenic consequence and
+        in ${(100 * clindataTotal.fraction.benign).toPrecision(2)}% of cases (${clindataTotal.counts.benign}) with a benign consequence
+        (ratio ${clindataTotal.ratio.toPrecision(3)}).`;
+        return response;
+    }
+
     concludeMutational_phospho({buried, distorted, toNegCharged}) {
         let filter = entry => entry.description === 'phosphorylated' || entry.ptm === 'p';
         let [isAt, isNear, opening] = this.concludeMutational_filter(filter);
@@ -2436,6 +2476,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                 phosphoeffect += phosphoeffects.join(', ');
             }
             phosphoeffect += '.';
+            phosphoeffect += this.addClinFreq('Close to phosphorylation', 'phosphorylation site');
             return phosphoeffect;
         } else {
             return null;
@@ -2509,9 +2550,11 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         } else if (this.energetical.ddG > 5) {
             return `the mutation is strongly ${destabilising} (∆∆G: ${venus.energetical.ddG.toFixed(1)} kcal/mol)`
         } else if (this.energetical.ddG > 2) {
+            return `the mutation is ${destabilising} (∆∆G: ${venus.energetical.ddG.toFixed(1)} kcal/mol)`
+        } else if (this.energetical.ddG > 2) {
             return `the mutation is mildly ${destabilising} (∆∆G: ${venus.energetical.ddG.toFixed(1)} kcal/mol)`
         } else {
-            return null;
+            return `the mutation may not disrupt stability (∆∆G: ${venus.energetical.ddG.toFixed(1)} kcal/mol)`
         }
     }
 
@@ -2522,11 +2565,16 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             const name = this.structural.closest_ligand.match(/\[.*\]/) !== null ?
                 this.structural.closest_ligand.match(/\[(.*)\]/)[1] :
                 'unknown';
+            if (name === 'NAG') {
             return `the mutation is ${this.structural.distance_to_closest_ligand.toPrecision(2)} 
-            &Aring; away from the ligand labelled ${name}`;
-        } else {
-            return null;
-        }
+            &Aring; away from a N-acetyl-beta-D-glucosamine. ${this.addClinFreq('Close to NAG', 'ligand')}`;
+            }
+            else if (! ['NAG','UNK','UNX','MSE','MES','CSO'].includes(name)) {
+            return `the mutation is ${this.structural.distance_to_closest_ligand.toPrecision(2)} 
+            &Aring; away from the ligand labelled ${name}. ${this.addClinFreq('Close to ligand (corrected)', 'ligand')}`;
+            }
+        } 
+        return null;
     }
 
     concludeMutational_TM({}) {
@@ -2548,7 +2596,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
 
         let text = 'In the healthy population sampled in gnomAD there are ';
         let clin = '';
-        if (this.protein.pLI != -1) {
+        if (this.protein.pLI !== -1) {
             clin = `gnomAD predicts the probability of loss of function intolerance to be ${this.protein.pLI}, `;
             clin += `the probability of loss of recessive to be ${this.protein.pRec} and `;
             clin += `the probability of loss of recessive to be ${this.protein.pNull}.`
@@ -2561,14 +2609,29 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
     }
 
     concludeMutational_gnomAD({}) {
+        if (this.structural === undefined) {
+            return null;
+        }
         const distances = this.distances2gnomAD();
-        if (distances.hmz_2ddG >= 0) {return `There is a homozygous >2 kcal/mol destabilising gnomAD variant at ${distances.hmz_2ddG} &Aring; countering a recessive destabilisation hypothesis`}
-        if (distances.freq_2ddG >= 0) {return `There is a frequent (5e-4) >2 kcal/mol destabilising gnomAD variant at ${distances.freq_2ddG} &Aring; countering a recessive destabilisation hypothesis`}
-        if (distances.hmz_1ddG >= 0) {return `There is a homozygous >1 kcal/mol destabilising gnomAD variant at ${distances.hmz_1ddG} &Aring; possibly countering a recessive destabilisation hypothesis`}
-        if (distances.freq_1ddG >= 0) {return `There is a frequent (5e-4) >1 kcal/mol destabilising gnomAD variant at ${distances.freq_1ddG} &Aring; possibly countering a recessive destabilisation hypothesis`}
-        if (distances.any_2ddG >= 0) {return `There is an uncommon >2 kcal/mol destabilising gnomAD variant at ${distances.any_2ddG} &Aring; possibly countering a dominant destabilisation hypothesis`}
-        if (distances.any_1ddG >= 0) {return `There is an uncommon (5e-4) >1 kcal/mol destabilising gnomAD variant at ${distances.any_1ddG} &Aring; possibly countering a dominant destabilisation hypothesis`}
-        if (distances.any >= 0) {return `There is a gnomAD variant at ${distances.any} &Aring; that is neutral stability-wise.`}
+        if (distances.hmz_2ddG >= 0) {return `There is a homozygous >2 kcal/mol destabilising gnomAD variant at ${distances.hmz_2ddG} &Aring;, 
+                                                countering a recessive destabilisation hypothesis.  
+                                                ${this.addClinFreq('Close to destabilising homozygous gnomADs (> 2 kcal/mol)', 'homozygous destabilising gnomAD variant')}`}
+        if (distances.freq_2ddG >= 0) {return `There is a frequent (5e-4) >2 kcal/mol destabilising gnomAD variant at ${distances.freq_2ddG} &Aring;, 
+                                                countering a recessive destabilisation hypothesis.  
+                                                ${this.addClinFreq('Close to destabilising common gnomADs (> 2 kcal/mol)', 'common destabilising gnomAD variant')}`}
+        if (distances.hmz_1ddG >= 0) {return `There is a homozygous >1 kcal/mol destabilising gnomAD variant at ${distances.hmz_1ddG} &Aring;, 
+                                                possibly countering a recessive destabilisation hypothesis.  
+                                                ${this.addClinFreq('Close to destabilising homozygous gnomADs (> 1 kcal/mol)', 'homozygous mildly destabilising gnomAD variant')}`}
+        if (distances.freq_1ddG >= 0) {return `There is a frequent (5e-4) >1 kcal/mol destabilising gnomAD variant at ${distances.freq_1ddG} &Aring;, 
+                                                possibly countering a recessive destabilisation hypothesis.  
+                                                ${this.addClinFreq('Close to destabilising common gnomADs (> 1 kcal/mol)', 'common mildly destabilising gnomAD variant')}`}
+        if (distances.any_2ddG >= 0) {return `There is an uncommon >2 kcal/mol destabilising gnomAD variant at ${distances.any_2ddG} &Aring;,
+                                              possibly countering a dominant destabilisation hypothesis.
+                                              ${this.addClinFreq('Close to destabilising gnomADs (> 2 kcal/mol)', 'destabilising gnomAD variant')}`}
+        if (distances.any_1ddG >= 0) {return `There is an uncommon (5e-4) >1 kcal/mol destabilising gnomAD variant at ${distances.any_1ddG} &Aring;,
+                                              possibly countering a dominant destabilisation hypothesis.
+                                              ${this.addClinFreq('Close to destabilising gnomADs (> 1 kcal/mol)', 'mildly destabilising gnomAD variant')}`}
+        if (distances.any >= 0) {return `There is a gnomAD variant at ${distances.any.toPrecision(2)} &Aring; that is neutral stability-wise.`}
         return null;
     }
 
@@ -2591,6 +2654,11 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             'freq_2ddG': getDistance(gnomadNeighs.filter(o => o.gnomad_full.filter(mut => ((mut.frequency > 5e-4) && (mut.ddG > 2))).length)),
         }
     }
+    
+    // concludeMutational_interface({}) {
+    //     this.structural.neighbours
+    //    
+    // }
 }
 
 //</%text>

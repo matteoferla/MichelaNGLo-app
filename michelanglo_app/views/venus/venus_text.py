@@ -222,6 +222,21 @@ dict(id='modalPore',
      representing the open and closed states. Such a variant may favour one over the other —closed &rarr; LoF, open &rarr; GoF.
      Do note the effect may be partial and a full loss of gating or filter may be lethal for the cell —akin to an ionophore.
      """),
+
+dict(id='modalClinvarAnalysis',
+     title='ClinVar Frequency',
+     icon='abacus',
+     description="""All variants in ClinVar along with their neighbours were scores with the backend of Venus 
+     (see <a href="https://github.com/matteoferla/validation_of_venus_ddG" target="_blank">repo <i class="fab fa-github"></i></a>).
+     ClinVar does not frequently report the mode of inheritance (homozygous or heterozygous/de novo),
+     therefore the data is both for homozygous and heterozygous. 
+     The split presented here using gnomADs pLI scores is to counter this.
+     The impact in ClinVar can be unknown, conflicting, likely benign, benign, pathogenic, likely pathogenic and 
+     a dozen others. For the data presented here only the 'benign' and 'pathogenic' are presented.
+     (Full dataset summary on GitHub).
+     The summary of each variant in Venus is done on the frontend (JS), 
+     while the summary in the analysis was on a cluster (Python) therefore the categories differ.
+     """),
 ]
 
 # ===== Reference modal => special =====================================================================================
