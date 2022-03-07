@@ -172,9 +172,9 @@ class Venus {
         extras = extras || this.get_user_settings();
         // chrome autofills usernames and passwords or 9606
         if ((this.uniprot + '' === '9606') ||
-            (this.mutation + '' === '9606') ||
-            (this.uniprot.search(/\d/) === -1) ||
-            (this.mutation.search(/\d/) === -1)
+           (this.mutation + '' === '9606') ||
+           (this.uniprot.search(/\d/) === -1) ||
+           (this.mutation.search(/\d/) === -1)
         ) {
             throw 'chrome autofill prevented.'
         }
@@ -1467,7 +1467,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             align.find('.modal-body').append(`<p>Template: the sequence of the protein structure used for threading by Swissmodel,
                             in this case template(${venus.structural.code.split(' ')[2]})<br/>
                             Uniprot: the sequence of this protein under investigation 
-                            (${this.protein.gene_name}).</p><div id="msa_viewer" class="p-2"></div>`);
+                           (${this.protein.gene_name}).</p><div id="msa_viewer" class="p-2"></div>`);
             const seqs = msa.io.fasta.parse(`>template\n${this.structural.structure.alignment.template}\n` +
                 `>uniprot\n${this.structural.structure.alignment.uniprot}\n`);
             align.on('shown.bs.modal', event => msa({el: align.find('#msa_viewer'), seqs: seqs}).render());
@@ -1530,7 +1530,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                 if (definition.uniprot === this.protein.uniprot) {
                     return `<a href="#viewport"  class="list-group-item list-group-item-action" ${prolink}>${chain}
                                                 Protein of interest 
-                                                (${this.protein.gene_name},
+                                               (${this.protein.gene_name},
                                                 ${definition.x}&ndash;${definition.y})</a>`;
                 }
                 let text = chain;
@@ -1606,7 +1606,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         }
 
         let strtext = `<p>Structural neighbourhood (${omni}; ${ptms}; ${gnomads}; ${badGnomads}; ${ddGNeighs}).
-                        (see ${this.makeExt('https://gnomad.broadinstitute.org/', 'gnomAD')} and
+                       (see ${this.makeExt('https://gnomad.broadinstitute.org/', 'gnomAD')} and
                         ${this.makeExt('https://www.phosphosite.org', 'PhosphoSitePlus')} 
                         for extra information)</p>`;
         // hyphens is great... but works only in certain cases...
@@ -1622,7 +1622,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                           data-toggle="tooltip"> 
                       Conservation<br/>
                       <span ${subcaptionClass}>
-                      (ConsurfDB grades 
+                     (ConsurfDB grades 
                       ${infoMaker('consurfModal')}
                       </span>
                       )</span>
@@ -1660,7 +1660,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         This attribute is first filled with the return of `StructureAnalyser().get_neighbours()`,
         but it is actually expanded by `ProteinAnalyser().annotate_neighbours()`.
         Data is a dictionary with keys `neigh`: `resi` (changed to int), `resn` (changed to 1 letter),
-        `chain`, `distance`,  `detail` (str), `ptms` (list), `gnomads`  (list), `clinvar`  (list)
+        `chain`, `distance`,  `detail` (str), `ptms` (list), `gnomads` (list), `clinvar` (list)
         and `other_chain` (bool).
         */
         const label = data.resn + data.resi; //NB. resi is a string because PyMOL and it may be an insertion code (!?)
@@ -1737,7 +1737,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         // this is a map fx...
         const filterEntries = ([name, entries]) => [name, entries.filter(filterWithinEntry).filter(filterMaxEntry)];
         // Xlinks are special as they are not domains! so no size limit!
-        const filterNotX = ([name, entries]) => (! ['cross-link', 'disulfide bond', 'chain'].includes(name));
+        const filterNotX = ([name, entries]) => (! ['cross-link', 'disulfide bond', 'chain', 'strand', 'helix', 'splice variant', 'PSP_modified_residues'].includes(name));
         const filterX = ([name, entries]) => (['cross-link', 'disulfide bond'].includes(name));
         const joinEntries = entries => new Array(...(new Set(entries.filter(entry => !! entry.description).map(entry => entry.description + '-'+entry.x + ':'+entry.y)))).join(' - ');
         const convertEntries = ([name, entries]) => `<small>${name} <i class="far fa-question-circle" data-toggle="tooltip" title="${joinEntries(entries)}"></i></small>`;
@@ -2084,7 +2084,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         //        'alter',
         const icon = '<span class="fa-li"><i class="far fa-lightbulb-on"></i></span>';
         const effect = ('<ul  class="fa-ul">' +
-            (effects.map(v => `<li>${icon}${v}</li>`)).join('\n') +
+           (effects.map(v => `<li>${icon}${v}</li>`)).join('\n') +
             '<li><span class="fa-li"><i class="far fa-clipboard-list-check"></i></span> For a discussion of possible hypotheses to draw see <a href="/docs/venus_hypothesis" target="_blank">hypothesis generation notes</a></li>' +
             '</ul>'
         );
@@ -2189,7 +2189,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                            'fraction': {'benign': 0.4304432673543351,
                             'pathogenic': 0.5483463239941015},
                            'ratio': 1.2739107928541724},
-                          'Close to destabilising gnomADs  (> 2 kcal/mol)': {'counts': {'benign': 1720,
+                          'Close to destabilising gnomADs (> 2 kcal/mol)': {'counts': {'benign': 1720,
                             'pathogenic': 1502},
                            'fraction': {'benign': 0.23975466964036798,
                             'pathogenic': 0.31641036444069937},
@@ -2261,7 +2261,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                            'fraction': {'benign': 0.2963172804532578,
                             'pathogenic': 0.2351831896551724},
                            'ratio': 0.7936870549548362},
-                          'Close to destabilising gnomADs  (> 2 kcal/mol)': {'counts': {'benign': 572,
+                          'Close to destabilising gnomADs (> 2 kcal/mol)': {'counts': {'benign': 572,
                             'pathogenic': 456},
                            'fraction': {'benign': 0.16203966005665724,
                             'pathogenic': 0.12284482758620689},
@@ -2334,7 +2334,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                            'fraction': {'benign': 0.5218617771509168,
                             'pathogenic': 0.6880546075085324},
                            'ratio': 1.318461396550134},
-                          'Close to destabilising gnomADs  (> 2 kcal/mol)': {'counts': {'benign': 1159,
+                          'Close to destabilising gnomADs (> 2 kcal/mol)': {'counts': {'benign': 1159,
                             'pathogenic': 687},
                            'fraction': {'benign': 0.32693935119887163,
                             'pathogenic': 0.4689419795221843},
@@ -2407,7 +2407,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                            'fraction': {'benign': 0.419938948244762,
                             'pathogenic': 0.45200803212851404},
                            'ratio': 1.0763660622997524},
-                          'Close to destabilising gnomADs  (> 2 kcal/mol)': {'counts': {'benign': 3493,
+                          'Close to destabilising gnomADs (> 2 kcal/mol)': {'counts': {'benign': 3493,
                             'pathogenic': 2659},
                            'fraction': {'benign': 0.24233384209796033,
                             'pathogenic': 0.26696787148594375},
@@ -2418,6 +2418,11 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                           'innermost_keys': ['benign', 'pathogenic']}};
 
     addClinFreq(category, cleanName) {
+        const clindataTotal = this.clinvarFreq['total'][category];
+        if (clindataTotal === undefined) {
+            console.log(`Category ${category} does not exist.`);
+            return '';
+        }
         // 'cleanName = 'phosphorylation site'; category = 'Close to phosphorylation'
         let response = '';
         const clinvar = this.concludeMutational_buttonMaker('modalClinvarAnalysis', 'In ClinVar');
@@ -2426,13 +2431,12 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                 response += ` ${clinvar} a ${cleanName} is found within 10 &Aring; in
                 ${(100 * clindata.fraction.pathogenic).toPrecision(2)}% of cases (${clindata.counts.benign}) with a pathogenic consequence and
                 in ${(100 * clindata.fraction.benign).toPrecision(2)}% of cases (${clindata.counts.benign}) with a benign consequence
-                (ratio ${clindata.ratio.toPrecision(3)}) for ${this.lof_name}.`;
+               (ratio ${clindata.ratio.toPrecision(3)}) for ${this.lof_name}.`;
             }
-        const clindataTotal = this.clinvarFreq['total'][category];
         response += ` ${clinvar}, in total, a ${cleanName} is found within 10 &Aring; in
         ${(100 * clindataTotal.fraction.pathogenic).toPrecision(2)}% of cases (${clindataTotal.counts.benign}) with a pathogenic consequence and
         in ${(100 * clindataTotal.fraction.benign).toPrecision(2)}% of cases (${clindataTotal.counts.benign}) with a benign consequence
-        (ratio ${clindataTotal.ratio.toPrecision(3)}).`;
+       (ratio ${clindataTotal.ratio.toPrecision(3)}).`;
         return response;
     }
 
@@ -2531,7 +2535,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         const conclusions = [...feats_at.map(v => `Mutated residues is involved in or is within ${v.type} (${v.description}).`),
                              ...feats_exclusive_near.map(v => `Mutated residues is near a residue involved in or within ${v.type} (${v.description}).`)
         ]
-        if  (conclusions.length) {
+        if (conclusions.length) {
             return conclusions.join('<br/>');
         } else {
             return null;
@@ -2545,7 +2549,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
             return null;
         } else if (this.energetical.ddG > 10) {
             return `the mutation is extremely ${destabilising} and the calculations are likely to be inaccurate
-            (∆∆G: <span class="text-decoration-underline" data-toggle="tooltip" data-title="~${venus.energetical.ddG.toFixed(0)} kcal/mol">&gt; 10</span>
+           (∆∆G: <span class="text-decoration-underline" data-toggle="tooltip" data-title="~${venus.energetical.ddG.toFixed(0)} kcal/mol">&gt; 10</span>
              kcal/mol)`
         } else if (this.energetical.ddG > 5) {
             return `the mutation is strongly ${destabilising} (∆∆G: ${venus.energetical.ddG.toFixed(1)} kcal/mol)`
