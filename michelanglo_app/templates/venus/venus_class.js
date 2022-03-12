@@ -327,7 +327,15 @@ class Venus {
                 //gnomAD... This is redudant and less good than the structural one...
                 if (this.mutational.gnomAD_near_mutation.length) {
                     let omni = this.makeProlink(this.mutational.gnomAD_near_mutation.map(v => v[1] + ':A').join(' or '), '(all)');
-                    let gnomADtext = `<p>Structure independent, sequence proximity (see structural neighbour for 3D, when it completes) ${omni}.</p>`;
+                    let gnomADtext = '';
+                    if (this.protein.pLI != -1) {
+                        gnomADtext += `<p>gnomAD predicted intolerances (pLI, pRec, pNull): 
+                                            ${this.protein.pLI}, 
+                                            ${this.protein.pRec},
+                                            ${this.protein.pNull}<br/>
+                                        ∴ ${this.lof_name}</p>`;
+                    }
+                    gnomADtext += `<p>Structure independent, sequence proximity (see structural neighbour for 3D, when it completes) ${omni}.</p>`;
                     gnomADtext += '<ul>';
                     const gMut = (v) => v[3].toUpperCase().split(' ')[0];
                     gnomADtext += this.mutational.gnomAD_near_mutation
@@ -1562,6 +1570,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
 
     updateNeighbourhood() {
         // # =========== Neighbours ===========
+        // this sets the div for `makeNeighbourRow` tr.
         // ## The all selector
         const allSele = this.structural.neighbours.map(v => v.resi + ':A').join(' or ');
         let omni;
@@ -1613,7 +1622,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         strtext += '<table class="table" style="hyphens: auto; word-break: break-all;">';
         let con_th = '';
         // See venus_text.py for modal descriptions which get added by extra_info.mako
-        const infoMaker = (id) => `<span data-toggle="modal" data-target="#${id}"><i class="fas fa-question-circle"></i>`;
+        const infoMaker = (id) => `<span data-toggle="modal" data-target="#${id}"><i class="fas fa-question-circle"></i></span>`;
         const subcaptionClass = 'class="text-muted font-weight-normal"';
         const infoClick = ' Click on info icon for more info.';
         if (this.structural && this.structural.has_conservation) {
@@ -1624,7 +1633,6 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
                       <span ${subcaptionClass}>
                      (ConsurfDB grades 
                       ${infoMaker('consurfModal')}
-                      </span>
                       )</span>
                       </th>`;
         }
@@ -1803,6 +1811,8 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
            "impact":"MODERATE",
            "homozygous":0,
            "frequency":0.000145943,
+           "precomputed_ddG": null,
+           "ddG": ???
            "N":1,
            "consequence":"missense_variant",
            "frequencies":{"afr":0,"amr":0,"asj":0,"eas":0,"fin":0,"mid":0,"nfe":0.000145943,"sas":0,"oth":0},
@@ -1833,6 +1843,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         } else { // impossible.
             freqicon = 'fa-signal-slash';
         }
+        const ddG = deets.ddG || deets.precomputed_ddG || undefined;
         const zygoicon = deets.homozygous === 0 ? 'far fa-adjust' : 'fas fa-circle';
         const underline = this.energetical_gnomAD !== undefined ? 'underlined' : '';
         const iconed = `<i class="fad ${freqicon}" ${freqInner} style="cursor:help"></i>
@@ -1847,7 +1858,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         } else if (deets.type !== 'missense') {
             // Not a missense. (nonsense).
             return `${mutation} ${iconed}`;
-        } else if (deets.ddG === undefined) {
+        } else if (ddG === undefined) {
             // Missense w/o ddG
             return `<span style='cursor: pointer;'
                                     class='${underline} venus-plain-mike'
@@ -1858,16 +1869,16 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         } else {
             // Missense w/ ddG
             let kcalColor;
-            if (deets.ddG >= 2) {
+            if (ddG >= 2) {
                 kcalColor = 'text-danger'
-            } else if (deets.ddG >= 1.2) {
+            } else if (ddG >= 1.2) {
                 kcalColor = 'text-warning'
-            } else if (deets.ddG < -2) {
+            } else if (ddG < -2) {
                 kcalColor = 'text-muted'
             } else {
                 kcalColor = 'text-info'
             }
-            const kcal = `<span class='${kcalColor}' ${datagnomad}>${deets.ddG.toPrecision(2)} kcal/mol</span>`;
+            const kcal = `<span class='${kcalColor}' ${datagnomad}>${ddG.toPrecision(2)} kcal/mol</span>`;
             return `<span style='cursor: pointer;'
                                     class='${underline} venus-plain-mike'
                                     ${datagnomad}>
@@ -1881,6 +1892,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         const dataclinvar = `data-variant='${JSON.stringify([mutation])}'`;
         // `deets` is this.protein.gnomAD + this.energetical_gnomAD + this.custom_ddG :
         const deets = this.get_clinvar_details(mutation);
+        const ddG = deets.ddG || deets.precomputed_ddG || undefined;
         let clinColor;
         if (deets.impact.toLowerCase().includes('pathogenic')) {
             clinColor = 'text-danger';
@@ -1891,9 +1903,9 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         }
 
         let kcal = '';
-        if (deets.ddG) {
-            const kcalColor = deets.ddG < 2 ? 'text-muted' : 'text-danger';
-            kcal = `<span class='${kcalColor}' ${dataclinvar}>${deets.ddG.toPrecision(2)} kcal/mol</span>`;
+        if (ddG !== undefined) {
+            const kcalColor = ddG < 2 ? 'text-muted' : 'text-danger';
+            kcal = `<span class='${kcalColor}' ${dataclinvar}>${ddG.toPrecision(2)} kcal/mol</span>`;
         }
         const underline = this.energetical_gnomAD !== undefined ? 'underlined' : '';
         return `<span class="${clinColor}">ClinVar ${deets.impact}</span>
@@ -2042,8 +2054,8 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
     }
 
     get lof_name() {
-        const names = {'hom': 'protein with high pLI (intolerance to loss-of-function in heterozygous status)',
-                               'het': 'protein with high pRec (intolerance to loss-of-function in homozygous status)',
+        const names = {'het': 'protein with high pLI (intolerance to loss-of-function in heterozygous/de-novo status)',
+                               'hom': 'protein with high pRec (intolerance to loss-of-function in homozygous/comp-htz status)',
                                'null': 'protein with high pNull (tolerance to loss-of-function)'
                               };
         return names[this.lof_intolerance]
@@ -2601,9 +2613,9 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         let text = 'In the healthy population sampled in gnomAD there are ';
         let clin = '';
         if (this.protein.pLI !== -1) {
-            clin = `gnomAD predicts the probability of loss of function intolerance to be ${this.protein.pLI}, `;
-            clin += `the probability of loss of recessive to be ${this.protein.pRec} and `;
-            clin += `the probability of loss of recessive to be ${this.protein.pNull}.`
+            clin = `gnomAD predicts the probability of loss of function intolerance to be ${this.protein.pLI.toPrecision(2)}, `;
+            clin += `the probability of loss of recessive to be ${this.protein.pRec.toPrecision(2)} and `;
+            clin += `the probability of loss of recessive to be ${this.protein.pNull.toPrecision(2)}.`
         }
         if (n_hmz_prior_indels > 0) {return `${text} ${n_hmz_prior_indels} different homozygous variants causing a truncation prior to the position of interest. ${clin}`}
         else if ((n_hmz_indels > 0) && (n_prior_indels > 0)) {return `${text} ${n_hmz_indels} different homozygous variants causing a truncation but only after the position of interest and ${n_prior_indels} different heterozygous variants causing a truncation prior to it. ${clin}`}
@@ -2635,7 +2647,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         if (distances.any_1ddG >= 0) {return `There is an uncommon (5e-4) >1 kcal/mol destabilising gnomAD variant at ${distances.any_1ddG} &Aring;,
                                               possibly countering a dominant destabilisation hypothesis.
                                               ${this.addClinFreq('Close to destabilising gnomADs (> 1 kcal/mol)', 'mildly destabilising gnomAD variant')}`}
-        if (distances.any >= 0) {return `There is a gnomAD variant at ${distances.any.toPrecision(2)} &Aring; that is neutral stability-wise.`}
+        if (distances.any >= 0) {return `There is a gnomAD variant at ${distances.any.toPrecision(2)} &Aring; that is non-destabilising.`}
         return null;
     }
 
