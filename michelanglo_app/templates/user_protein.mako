@@ -8,7 +8,7 @@
         <h1>${title}</h1>
         <small class="text-muted">The content of this page was
             %if authors:
-                edited by ${' and '.join(authors)} on the ${date}.<br/>
+                edited by ${' and '.join([str(author).split('@')[0] for author in authors])} on the ${date}.<br/>
                 The administrators of this site take no legal responsibility for the content of this page, if you believe this page is in violation of the law, <a href="#" id="report">please report it</a>.
             % else:
                 generated on the ${date}.
@@ -198,8 +198,17 @@ $(document).ready(function () {
 
 
 
-        $('#report').click((event) => $.ajax({url: "/msg",
-                                            data: {'text': prompt("Reason for flagging?", "Data breach"),
+        $('#report').click((event) => {
+                        let msg = prompt("Reason for flagging? (e.g. data breach or obsenity)");
+                        if (msg === null) {
+                            ops.addToast('userreportedgood','Reported cancelled','The site admin has **not** been notified.', 'bg-warning');
+                            return}
+                        msg = msg.trim();
+                        if (msg == '') {
+ops.                        addToast('userreportedgood','Nothing to report','The site admin has **not** been notified.', 'bg-warning');
+                            return}
+                        $.ajax({url: "/msg",
+                                            data: {'text': msg,
                                                     page: "${page}",
                                                     event: 'report'
                                                   },
@@ -207,6 +216,7 @@ $(document).ready(function () {
                                         })
                         .done((msg) => ops.addToast('userreportedgood','Reported','Thank you! The site admin will look at the page shortly.', 'bg-success'))
                         .fail(ops.addErrorToast)
+                }
                     ); //click.
 
     %endif
