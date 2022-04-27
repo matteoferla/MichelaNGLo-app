@@ -330,9 +330,9 @@ class Venus {
                     let gnomADtext = '';
                     if (this.protein.pLI != -1) {
                         gnomADtext += `<p>gnomAD predicted intolerances (pLI, pRec, pNull): 
-                                            ${this.protein.pLI}, 
-                                            ${this.protein.pRec},
-                                            ${this.protein.pNull}<br/>
+                                            ${this.protein.pLI.toPrecision(1)}, 
+                                            ${this.protein.pRec.toPrecision(1)},
+                                            ${this.protein.pNull.toPrecision(1)}<br/>
                                         ∴ ${this.lof_name}</p>`;
                     }
                     gnomADtext += `<p>Structure independent, sequence proximity (see structural neighbour for 3D, when it completes) ${omni}.</p>`;
