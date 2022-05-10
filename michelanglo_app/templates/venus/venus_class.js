@@ -795,7 +795,7 @@ class Venus {
         extras.pdb = window.user_uploaded_data.pdb;
         extras.filename = window.user_uploaded_data.name;
         extras.params = window.user_uploaded_data.params;
-        extras.format = window.user_uploaded_data.name;
+        extras.format = window.user_uploaded_data.name.split('.').pop();
         return this.analyse('customfile', extras);
     }
 
