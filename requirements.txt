@@ -21,7 +21,7 @@ transaction
 zope.sqlalchemy
 bcrypt
 numpy
-pycrypto
+pycryptodome # do not use pycrypto
 markdown
 psycopg2-binary
 requests
