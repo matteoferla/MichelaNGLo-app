@@ -198,7 +198,6 @@ class Venus {
                     'bg-warning');
                 return this.analyse(step, extras);
             }
-
         }).then(reply => {
             this.timeTaken = reply.time_taken;
             return reply

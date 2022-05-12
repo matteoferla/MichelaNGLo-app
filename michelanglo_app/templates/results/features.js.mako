@@ -44,7 +44,7 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
 ################### Domains #######################
 %if 'domain' in protein.features:
     ft.addFeature({
-        data: ${str(protein.features['domain'])|n},
+        data: ${json.dumps(protein.features['domain'])|n},
         name: "Domain",
         className: "domain",
         color: "lightblue",
@@ -92,7 +92,7 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
 %>
 %if combo_roi:
     ft.addFeature({
-        data: ${str(combo_roi)|n},
+        data: ${json.dumps(combo_roi)|n},
         name: "Region of interest",
         className: "domain",
         color: "teal",
@@ -108,7 +108,7 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
 
 %if combo_other:
     ft.addFeature({
-        data: ${str(combo_other)|n},
+        data: ${json.dumps(combo_other)|n},
         name: "Other regions",
         className: "domain",
         color: "lavender",
@@ -120,7 +120,7 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
 
 %if combo_ptm:
     ft.addFeature({
-        data: ${str(combo_ptm)|n},
+        data: ${json.dumps(combo_ptm)|n},
         name: "Modified residues",
         className: "modified",
         color: "slateblue",
@@ -132,7 +132,7 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
 
 %if 'PSP_modified_residues' in protein.features and protein.features['PSP_modified_residues']:
     ft.addFeature({
-        data: ${str(feature_viewer_standardise(protein.features['PSP_modified_residues']))|n},
+        data: ${json.dumps(feature_viewer_standardise(protein.features['PSP_modified_residues']))|n},
         name: "Mod. residues (HT)",
         className: "modified",
         color: "slateblue",
@@ -146,7 +146,7 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
 
 %if combo_ss:
     ft.addFeature({
-        data: ${str(combo_ss)|n},
+        data: ${json.dumps(combo_ss)|n},
         name: "Secondary structure",
         className: "domain",
         color: "olive",
@@ -160,7 +160,7 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
 
 %if 'sequence variant' in protein.features:
     ft.addFeature({
-        data: ${str(protein.features['sequence variant'])|n},
+        data: ${json.dumps(protein.features['sequence variant'])|n},
         name: "seq. variant",
         className: "modified",
         color: "firebrick",
@@ -172,7 +172,7 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
 
 %if 'splice variant' in protein.features:
     ft.addFeature({
-        data: ${str(protein.features['splice variant'])|n},
+        data: ${json.dumps(protein.features['splice variant'])|n},
         name: "Splice variant",
         className: "domain",
         color: "sandybrown",
@@ -184,7 +184,7 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
 
 %if protein.gnomAD:
     ft.addFeature({
-        data: ${str([dict(snp._asdict()) for snp in protein.gnomAD])|n},
+        data: ${json.dumps([dict(snp._asdict()) for snp in protein.gnomAD])|n},
         name: "gnomAD",
         className: "modified",
         color: "skyblue",
@@ -196,7 +196,7 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
 
 %if 'disulfide bond' in protein.features:
     ft.addFeature({
-        data: ${str(protein.features['disulfide bond'])|n},
+        data: ${json.dumps(protein.features['disulfide bond'])|n},
         name: "disulfide bond",
         className: "dsB",
         color: "orange",
@@ -208,7 +208,7 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
 
 %if 'cross-link' in protein.features:
     ft.addFeature({
-        data: ${str(protein.features['cross-link'])|n},
+        data: ${json.dumps(protein.features['cross-link'])|n},
         name: "disulfide bond",
         className: "dsB",
         color: "orange",
@@ -220,7 +220,7 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
 
 %if hasattr(protein, 'properties') and protein.properties:
     ft.addFeature({
-        data: ${str([{'x': i+4, 'y': score} for i, score in enumerate(protein.properties["kd"])])|n},
+        data: ${json.dumps([{'x': i+4, 'y': score} for i, score in enumerate(protein.properties["kd"])])|n},
         name: "Hydrophobilicity",
         className: "kyledolittle",
         color: "#008080",
@@ -231,7 +231,7 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
     addFeatureTooltip("Hydrophobilicity","Kyle-Dolitte hydrophobilicity index: high hydrophobility generally means a structured protein");
 
         ft.addFeature({
-        data: ${str([{'x': i+4, 'y': score - 1} for i, score in enumerate(protein.properties["Flex"])])|n},
+        data: ${json.dumps([{'x': i+4, 'y': score - 1} for i, score in enumerate(protein.properties["Flex"])])|n},
         name: "Flexibility",
         className: "kyledolittle",
         color: "#ff7f50", //coral
@@ -265,7 +265,7 @@ const addFeatureTooltip = (featLabel, text) => $('.yaxis:contains('+featLabel+')
 %for title, data, color, classname in (("Crystal structures",p, 'lime', 'pdb'),("AlphaFold2", af, 'turquoise', 'alphafold'), ("Swissmodel", s, 'GreenYellow', 'swiss'), ("Homologue structures", m, 'khaki', 'homo')):
     %if data:
     ft.addFeature({
-        data: ${str(data)|n},
+        data: ${json.dumps(data)|n},
         name: "${title}",
         className: "${classname}",
         color: "${color}",
@@ -292,7 +292,7 @@ $('.swiss').click(function () {
 
 $('.alphafold').click(function () {
 
-    let url = 'https://alphafold.ebi.ac.uk/files/AF-'+window.uniprotValue+'-F1-model_v1.pdb';
+    let url = 'https://alphafold.ebi.ac.uk/files/AF-'+window.uniprotValue+'-F1-model_v2.pdb';
     load_pdb(url);
 });
 
