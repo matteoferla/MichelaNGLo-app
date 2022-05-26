@@ -1,3 +1,6 @@
+# this is no longer called from the main app
+# sentry changed their plans
+
 import os, sentry_sdk
 from typing import *
 from sentry_sdk.integrations.pyramid import PyramidIntegration
