@@ -242,10 +242,6 @@ def set_ajax(request):
     else:
         return {'status': 'unknown cmd'}
 
-@view_config(route_name='status', renderer='json')
-def status(request):
-    return {'status': 'ok'}
-
 @view_config(route_name='vote', renderer='json')
 def vote(request):
     malformed = is_malformed(request, 'topic', 'direction')
