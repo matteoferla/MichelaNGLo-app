@@ -4,6 +4,7 @@ import random
 import traceback
 from time import sleep
 from typing import Optional, List
+from types import TracebackType
 
 from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structure, is_alphafold_taxon  # noqa
 from michelanglo_transpiler import PyMolTranspiler  # used solely for temp folder
@@ -97,13 +98,15 @@ class Venus(VenusBase):
             else:
                 step = self.request.params['step']
             return self.do_step(step)
-        except VenusException as err:
+        except VenusException as error:
             # this is right at the top:
             # it should not be conditional to `self.suppress_errors`
-            if self.suppress_errors:
-                log.info(f'VenusException: {err}')
-            else:
-                log.warning(f'VenusException: {err} under debug mode')
+            # as this is user requested...
+            log.info(f'VenusException: {error}')
+            traceback: TracebackType = error.__traceback__
+            if traceback:
+                log.debug(f'Traceback: {traceback.tb_frame.f_code.co_name} - ' +
+                          f'{traceback.tb_frame.f_code.co_filename}:{traceback.tb_lineno}')
             return self.reply
         except Exception as err:
             if self.reply['status'] != 'error':
