@@ -1,24 +1,19 @@
 from __future__ import annotations
-# venus parts common to regular venus and multiple mutant version.
 
+import time
+from abc import abstractmethod
+from typing import Optional, Any
 
-from ..uniprot_data import *
 # ProteinCore organism human uniprot2pdb
-from michelanglo_protein import ProteinAnalyser, Mutation, ProteinCore, Structure, Variant
+from michelanglo_protein import Variant
 
-from ...models import User, Page  ##needed solely for log.
-from ..common_methods import is_malformed, Comms, get_pdb_block_from_request
-from ..user_management import permission
-from ..custom_message import custom_messages
 from .venus_text import contents as contents
+from ..common_methods import is_malformed
+from ..custom_message import custom_messages
+from ..uniprot_data import *
+from ...models import User  ##needed solely for log.
 
-from typing import Optional, Any, List, Union, Tuple, Dict
-import random
-from pyramid.view import view_config, view_defaults
-from pyramid.renderers import render_to_response
-import pyramid.httpexceptions as exc
-
-import json, os, logging, operator, time
+# venus parts common to regular venus and multiple mutant version.
 
 log = logging.getLogger(__name__)
 # from pprint import PrettyPrinter
@@ -33,6 +28,7 @@ from ..buffer import system_storage
 
 class VenusException(Exception):
     pass
+
 
 class VenusBase:
     """
@@ -54,14 +50,15 @@ class VenusBase:
 
     def __init__(self, request):
         self.request = request
-        self.reply = {'status': 'success',   # filled by the steps and kept even if an error is raised.
+        self.reply = {'status': 'success',  # filled by the steps and kept even if an error is raised.
                       'warnings': [],
                       'time_taken': 0
-        }
+                      }
         if self.handle:
             self.reply['job_id'] = self.handle
         # status=error, error=single-word, msg=long
         self._tick = float('nan')  # required for self.reply['time_taken']
+        self._tick_ns = time.time_ns()
         self.time_taken = 0.
         # ## User requested debug mode!
         if 'debug' in self.request.params and self.request.params['debug']:
@@ -71,9 +68,9 @@ class VenusBase:
             from michelanglo_protein.analyse import StructureAnalyser
             StructureAnalyser.error_on_missing_conservation = True
 
-    @property
-    def handle(self):
-        pass # overridden.
+    @abstractmethod
+    def get_user_modelling_options(self):
+        pass  # overridden.
 
     def start_timer(self):
         self._tick = time.time()
@@ -85,6 +82,10 @@ class VenusBase:
         self.time_taken += tock - tick
         self._tick = time.time()
         self.reply['time_taken'] += self.time_taken
+
+    def get_elapsed_ns(self) -> float:
+        tock = time.time_ns()
+        return tock - self._tick_ns
 
     def assert_malformed(self, *args):
         malformed = is_malformed(self.request, *args)
@@ -130,3 +131,38 @@ class VenusBase:
                 return str(x)  # really ought to deal with falseys.
 
         return {a: deobjectify(getattr(obj, a, '')) for a in obj.__dict__}
+
+    # management
+
+    @property
+    def handle(self):
+        """
+        The subterfuge isn't that required: this is not written to disk
+        """
+        if 'job_id' in self.request.params:
+            return str(self.request.params['job_id'])
+        if 'mutation' not in self.request.params or 'uniprot' not in self.request.params:
+            return None
+        if str(self.request.params['uniprot']) == '9606' or str(self.request.params['mutation']) == '9606':
+            raise ValueError('Chrome autofill')  # this is uncaught
+        settings = self.get_user_modelling_options()
+        concatenation = (
+                self.request.params['uniprot'] +
+                self.request.params['mutation'] +
+                '-'.join(map(str, settings.values()))
+        )
+        log.debug(f'request handle: {str(hash(concatenation))}')
+        return str(hash(concatenation))
+
+    def has(self, key: Optional[str] = None) -> bool:
+        # checks whether the protein object has a filled value (not the reply!)
+        if self.handle not in system_storage:  # this is not already done
+            return False
+        elif key is None:
+            return True
+        elif not hasattr(system_storage[self.handle], key):
+            return False
+        elif getattr(system_storage[self.handle], key) is None:
+            return False
+        else:
+            return True

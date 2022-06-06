@@ -14,8 +14,8 @@
 <%block name="main">
 % if user and user.role == 'admin':
     <%
-        icon = {'basic': 'user', 'friend': 'user-tie', 'guest': 'user-secret', 'admin': 'user-crown', 'new': 'user-astronaut', 'hacker': 'user-ninja', 'trashcan': 'dumpster'}
-
+        icon = {'basic': 'user', 'friend': 'user-tie', 'guest': 'user-secret', 'admin': 'user-crown',
+                'new': 'user-astronaut', 'hacker': 'user-ninja', 'trashcan': 'dumpster'}
         import logging
         log = logging.getLogger()
         filehandlers = [handler for handler in log.handlers if isinstance(handler, logging.FileHandler)]
@@ -23,8 +23,6 @@
             log = ''.join(reversed(open(filehandlers[0].baseFilename,'r').readlines()[-500:]))
         else:
             log = 'No logging enabled'
-
-        from michelanglo_app.models import Doi
         shortened = [(d.long, d.short) for d in request.dbsession.query(Doi).all()]
 
     %>
@@ -44,6 +42,31 @@
                 </span> ${u.name} </a></li>
             %endfor
         </ul>
+    <h3>Venus stats</h3>
+    <table class="table table-striped">
+        <thead>
+                <tr>
+                    <th>Step</th>
+                    <th>Count</th>
+                    <th>N_running</th>
+                    <th>N_errors</th>
+                    <th>max_time (ms)</th>
+                    <th>mean_time (ms)</th>
+                </tr>
+        </thead>
+        <tbody>
+        %for step, stat in venus_stats.summarize().items():
+            <tr>
+                <td>${step}</td>
+                <td>${stat['count']}</td>
+                <td>${stat['N_running']}</td>
+                <td>${stat['N_errors']}</td>
+                <td>${f"{stat['max_time'] / 1e6:,.0f}"}</td>
+                <td>${f"{stat['mean_time']/ 1e6:,.0f}"}</td>
+            </tr>
+        %endfor
+        </tbody>
+            </table>
     <h3>Redirects</h3>
         <div class="row border rounded w-100 p-2 m-2">
             % for long, short in shortened:

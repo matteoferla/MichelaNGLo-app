@@ -1,6 +1,8 @@
 from collections.abc import MutableMapping
 from datetime import datetime, timedelta
-from typing import Union
+from typing import Union, Tuple
+from typing_extensions import TypedDict   #  >3.8
+from collections import defaultdict
 
 
 class SysStorage(MutableMapping):
@@ -50,3 +52,42 @@ class SysStorage(MutableMapping):
 
 
 system_storage = SysStorage()
+
+# ----------------------------------------------------------------------------------------------------------------------
+
+class StatsType(TypedDict):
+    running: bool
+    start: float
+    stop: float
+    status: str
+    error: str
+    step: str
+
+class VenusStats(SysStorage):
+    def summarize(self):
+        step_counts = defaultdict(int)
+        step_errors = defaultdict(int)
+        step_times = defaultdict(list)
+        step_running = defaultdict(int)
+        steps = set()
+        stats: StatsType
+        for stats in self.mapping.values():
+            step = stats['step']
+            steps.add(step)
+            step_counts[step] += 1
+            if stats['error']:
+                step_errors[step] += 1
+            diff = stats['stop'] - stats['start']
+            if str(diff) != 'nan':
+                step_times[step].append(diff)
+            if stats['running']:
+                step_running[step] += 1
+        max_times = {step: max(step_times[step]) for step in step_times}
+        mean_times = {step: sum(step_times[step]) / len(step_times[step]) for step in step_times}
+        return {step: {'count': step_counts.get(step, 0),
+                        'N_errors': step_errors.get(step, 0),
+                        'max_time': max_times.get(step, float('nan')),
+                        'mean_time': mean_times.get(step, float('nan')),
+                        'N_running': step_running.get(step, 0)} for step in steps}
+
+venus_stats = VenusStats()

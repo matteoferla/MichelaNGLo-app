@@ -3,11 +3,11 @@ from pyramid.renderers import render_to_response
 from pyramid.response import FileResponse
 from pyramid.request import Request
 import os, json, time
-from ..models import User, Page
+from ..models import User, Page, Doi
 from . import custom_messages, valid_extensions
 import datetime as dt
 
-from .buffer import system_storage
+from .buffer import system_storage, venus_stats
 
 import logging
 log = logging.getLogger(__name__)
@@ -118,6 +118,8 @@ class DefaultViews:
             self.request.response.status = 401
         else:
             self.reply['users'] = self.request.dbsession.query(User).all()
+            self.reply['Doi'] = Doi
+            self.reply['venus_stats'] = venus_stats
         return self.reply
 
     @view_config(route_name='errors', renderer='../templates/errors.mako', http_cache=0)
