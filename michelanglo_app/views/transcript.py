@@ -30,7 +30,7 @@ def venus_transcript(request):
         if 'redirect' in request.params:
             return HTTPFound(location=f'/venus?gene={data["uniprot"]}&species=9606&mutation={data["mutation"]}')
         else:
-            return data
+            return {**data, 'status': 'success'}
     except Exception as err:
         msg = f'{err.__class__.__name__}: {err}'
         log.warning(msg)
