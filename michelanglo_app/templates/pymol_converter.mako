@@ -45,6 +45,11 @@
 <%block name="body">
     <p>See <a href="#" title="Guided tour of the page" data-toggle="tooltip" id="tour">tutorial</a> for help navigating this page.<br/>
         This site works with both version of PyMol and converts most elements (see <a href="#" data-target="#info_modal" data-toggle="modal">compatibility</a> for more).
+        <br/><small><a href="https://pymol.org/2/" target="_blank">PyMOL <i
+                        class="far fa-external-link-square"></i></a> is a trademark of <a href="https://www.schrodinger.com/"
+                                                                                          target="_blank">Schr&ouml;dinger
+                    , LLC <i class="far fa-external-link-square"></i></a>. The authors are not affiliated or involved
+                    with PyMOL or Schr&ouml;dinger.</small>
     </p>
                 <form>
                     <div class="row">

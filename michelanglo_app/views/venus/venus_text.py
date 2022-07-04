@@ -251,7 +251,8 @@ def table_rower(*parts):
 ref_inner = ''.join([table_rower('VENUS',
                                  'This web app',
                                  linker('http://venus.cmd.ox.ac.uk/'),
-                                 '<i>Manuscript in preparation</i>'
+                                 'Ferla MP, Pagnamenta AT, Koukouflis L, Taylor JC, Marsden BD. (2022). Venus: Elucidating the Impact of Amino Acid Variants on Protein Function Beyond Structure Destabilisation. J Mol Biol. 434(11):167567. '+
+                                 linker("https://doi.org/10.1016/j.jmb.2022.167567")
                                  ),
                      table_rower('Michelaɴɢʟo',
                                  'Results can be exported to Michelaɴɢʟo, edited and shared',

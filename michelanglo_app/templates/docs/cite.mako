@@ -15,16 +15,21 @@
 
 <%include file="subparts/docs_nav.mako"/>
 
-<h4>Typography and phonetics</h4>
-<p>Michelaɴɢʟo is a blend of Michelangelo &mdash;as in <a href="https://en.wikipedia.org/wiki/Michelangelo" target="_blank">the sculptor <i class="fab fa-wikipedia-w"></i></a> not the ninja turtle&mdash; and NGL (the library that it uses) and as a consequence it can either be rendered in CamelCase MichelaNGLo or, preferably, with the NGL in <a href="https://en.wikipedia.org/wiki/Small_caps" target="_blank">small caps <i class="fab fa-wikipedia-w"></i></a>, thusly: Michelaɴɢʟo.</p>
-<p>In terms of pronunciation, it is pronounced like the sculptor and it's your call if to pronounce with a terse first syllable /ˌmɪkəlˈændʒəloʊ/ (closer to Italian, albeit technically /mikeˈlandʒelo/) or a lax one /ˌmaɪkəlˈændʒəloʊ/ (as the ninja turtle calls himself) &mdash;the author of this site, despite speaking Italian, goes for the latter as it sounds less pretentious.</p>
-
 <h4>Relevant citation</h4>
     <ul>
         <li><a href="https://doi.org/10.1016/j.jmb.2022.167567" target="_blank">Ferla MP, Pagnamenta AT, Koukouflis L, Taylor JC, Marsden BD. Venus: Elucidating the Impact of Amino Acid Variants on Protein Function Beyond Structure Destabilisation. J Mol Biol. 434(11):167567. 2022 Jun 15. <i class="far fa-external-link"></i></a></li>
         <li><a href="https://doi.org/10.1093/bioinformatics/btaa104" target="_blank">Ferla MP, Pagnamenta AT, Damerell D, Taylor JC, Marsden BD. Michelanglo:  sculpting protein views on web pages without coding. Bioinformatics. 36(10):3268-3270. 2020 Feb 15. <i class="far fa-external-link"></i></a></li>
-        <li><a href="https://dx.doi.org/10.1093/bioinformatics/bty419" target="_blank">AS Rose, AR Bradley, Y Valasatava, JM Duarte, A Prlić and PW Rose. NGL viewer: web-based molecular graphics for large complexes. Bioinformatics: bty419, 2018. <i class="far fa-external-link"></i></a></li>
     </ul>
+<p>Additionally, Michelaɴɢʟo and Venus depend on various other works. Most notably NGL:</p>
+<ul>
+<li><a href="https://dx.doi.org/10.1093/bioinformatics/bty419" target="_blank">AS Rose, AR Bradley, Y Valasatava, JM Duarte, A Prlić and PW Rose. NGL viewer: web-based molecular graphics for large complexes. Bioinformatics: bty419, 2018. <i class="far fa-external-link"></i></a></li>
+</ul>
+<p>Venus relies several datasets which are listed (with relevant publications) in the bottom of an analysis in the Venus page.</p>
+
+<h4>Typography and phonetics</h4>
+<p>Michelaɴɢʟo is a blend of Michelangelo &mdash;as in <a href="https://en.wikipedia.org/wiki/Michelangelo" target="_blank">the sculptor <i class="fab fa-wikipedia-w"></i></a> not the ninja turtle&mdash; and NGL (the library that it uses) and as a consequence it can either be rendered in CamelCase MichelaNGLo or, preferably, with the NGL in <a href="https://en.wikipedia.org/wiki/Small_caps" target="_blank">small caps <i class="fab fa-wikipedia-w"></i></a>, thusly: Michelaɴɢʟo.</p>
+<p>In terms of pronunciation, it is pronounced like the sculptor and it's your call if to pronounce with a terse first syllable /ˌmɪkəlˈændʒəloʊ/ (closer to Italian, albeit technically /mikeˈlandʒelo/) or a lax one /ˌmaɪkəlˈændʒəloʊ/ (as the ninja turtle calls himself) &mdash;the author of this site, despite speaking Italian, goes for the latter as it sounds less pretentious.</p>
+
 <h4>Licence</h4>
 <h5>Michelaɴɢʟo</h5>
 <p>This site is open-source (see <a href="https://github.com/matteoferla/MichelaNGLo" target="_blank">github.com/matteoferla/MichelaNGLo <i class="far fa-external-link"></i></a>) and released under the MIT licence.

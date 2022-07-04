@@ -306,14 +306,10 @@
 <footer class="footer">
     <div class="container-fluid">
         <div class="row" style="line-height: 1rem;">
-            <div class="col-12 col-lg-5 offset-lg-1 text-muted px-3 pt-3">
-                <small><a href="https://pymol.org/2/" target="_blank">PyMOL <i
-                        class="far fa-external-link-square"></i></a> is a trademark of <a href="https://www.schrodinger.com/"
-                                                                                          target="_blank">Schr&ouml;dinger
-                    , LLC <i class="far fa-external-link-square"></i></a>. The authors are not affiliated or involved
-                    with PyMOL or Schr&ouml;dinger.
-                    Data is not kept for commercial purposes, see data <a href="/docs/users">policy
-                        documentation</a>.</small></div>
+            <div class="col-12 col-lg-5 text-muted px-3 pt-3">
+                <small>Data is not kept for commercial purposes, see data <a href="/docs/users">policy
+                        documentation</a>.<br>
+                        See <a href="/docs/cite">documentation</a> for how to cite.</small></div>
             <div class="d-none d-lg-block col-5 offset-lg-1 pt-2">
                 %if offline:
                     University of Oxford &mdash; NIHR: BRC &mdash; SGC
