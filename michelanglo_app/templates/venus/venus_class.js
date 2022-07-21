@@ -2436,7 +2436,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         }
         // 'cleanName = 'phosphorylation site'; category = 'Close to phosphorylation'
         let response = '';
-        const clinvar = this.concludeMutational_buttonMaker('modalClinvarAnalysis', 'In ClinVar');
+        const clinvar = this.concludeMutational_buttonMaker('modalClinvarAnalysis', 'In the whole ClinVar');
         if (this.lof_intolerance) {
                 const clindata = this.clinvarFreq[this.lof_intolerance][category];
                 response += ` ${clinvar} a ${cleanName} is found within 10 &Aring; in
@@ -2448,7 +2448,7 @@ the gnomAD variants may include pathogenic variants (hence the suggestion to che
         ${(100 * clindataTotal.fraction.pathogenic).toPrecision(2)}% of cases (${clindataTotal.counts.benign}) with a pathogenic consequence and
         in ${(100 * clindataTotal.fraction.benign).toPrecision(2)}% of cases (${clindataTotal.counts.benign}) with a benign consequence
        (ratio ${clindataTotal.ratio.toPrecision(3)}).`;
-        return response;
+        return `<small>(Context: ${response})</small>`;
     }
 
     concludeMutational_phospho({buried, distorted, toNegCharged}) {
