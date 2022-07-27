@@ -1507,7 +1507,15 @@ NGL.specialOps.load = function (option, noLoadFun, id) {
     }
     //new model. Force reset
     if (myData.proteins[index].type === 'url') {
-        return NGL.getStage(id).loadFile(myData.proteins[index].value, {'firstModelOnly': true}).then(function (protein) {
+        // there is no default extension... fixing this.
+        let options = {'firstModelOnly': true,
+                       'name': myData.proteins[index].name};
+        let possible = myData.proteins[1].value.split('.').pop().split('?')[0].toLowerCase();
+        if (myData.proteins[index].ext !== undefined) {options['ext'] = myData.proteins[index].ext;}
+        else if (['pdb', 'mol', 'mol2', 'sdf', 'cif'].findIndex(v => v === possible) === -1) {
+            options['ext'] = 'pdb';
+        }
+        return NGL.getStage(id).loadFile(myData.proteins[index].value, options).then(function (protein) {
             if (noLoadFun === false || noLoadFun === undefined) {
                 NGL.specialOps._run_loadFx(protein, myData.proteins[index].loadFx);
             }
