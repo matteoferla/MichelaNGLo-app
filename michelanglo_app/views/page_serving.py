@@ -343,8 +343,6 @@ def save_pdb(request):
         return {'status': f'index exceeds {len(protein)}'}
     # Case: valid index
     p = protein[index]
-    # name, pdb_block
-    pdb: List[Tuple[str, str]] = settings['pdb']
     # type pdb code
     if p['type'] == 'rcsb':  #rcsb PDB code
         return HTTPFound(location=f"https://files.rcsb.org/download/{p['value']}.cif")
@@ -352,10 +350,15 @@ def save_pdb(request):
     if p['type'] == 'url':  #external file
         return HTTPFound(location=p['value'])
     # type old school
-    if isinstance(pdb, str):
+    if isinstance(settings['pdb'], str):
         log.warning(f'{page} has a pre-beta PDB!??')
         request.override_renderer = 'string'
-        return pdb
+        return settings['pdb']
     # normal case
+    pdbs: Dict[str, str] = dict(settings['pdb'])  # name, pdb_block
+    name = p['value']
+    if name not in pdbs:
+        request.response.status = 400
+        return {'status': 'PDB not found', 'name': name}
     request.override_renderer = 'string'
-    return pdb[index][1]
+    return pdbs[name]
