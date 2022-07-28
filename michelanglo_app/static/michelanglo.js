@@ -1510,7 +1510,7 @@ NGL.specialOps.load = function (option, noLoadFun, id) {
         // there is no default extension... fixing this.
         let options = {'firstModelOnly': true,
                        'name': myData.proteins[index].name};
-        let possible = myData.proteins[1].value.split('.').pop().split('?')[0].toLowerCase();
+        let possible = myData.proteins[index].value.split('.').pop().split('?')[0].toLowerCase();
         if (myData.proteins[index].ext !== undefined) {options['ext'] = myData.proteins[index].ext;}
         else if (['pdb', 'mol', 'mol2', 'sdf', 'cif'].findIndex(v => v === possible) === -1) {
             options['ext'] = 'pdb';
