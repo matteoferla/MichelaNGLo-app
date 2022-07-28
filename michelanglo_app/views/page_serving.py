@@ -11,6 +11,8 @@ from pyramid.httpexceptions import HTTPFound
 import logging, json, os
 log = logging.getLogger(__name__)
 
+from typing import Dict, List, Tuple, Union, Any
+
 from . import custom_messages
 from .common_methods import is_malformed, is_js_true
 from .buffer import system_storage
@@ -315,36 +317,45 @@ def save_pdb(request):
     malformed = is_malformed(request, 'uuid', 'index')
     if malformed:
         return {'status': malformed}
-    if isinstance(request.params['index'], str) and request.params['index'] != '-1' and not request.params['index'].isdigit():
+    if isinstance(request.params['index'], str) and \
+            request.params['index'] != '-1' and \
+            not request.params['index'].isdigit():
         request.response.status = 400
-        return {'status': 'index must be number', 'error': f"{request.params['index']} ({type(request.params['index'])}) is not a digit"}
-    page = Page.select(request.dbsession, request.params['uuid'])
+        return {'status': 'index must be number',
+                'error': f"{request.params['index']} ({type(request.params['index'])}) is not a digit"
+                }
+    page:Page = Page.select(request.dbsession, request.params['uuid'])
     index = int(request.params['index'])
     verdict = permission(request, page, key_label='key', mode='view')
+    # invalid verdict
     if verdict['status'] != 'OK':
         return verdict
-    else:
-        settings = page.load().settings
-        protein = json.loads(settings['proteinJSON'])
-        if index == -1:
-            return {'status': 'number of structures', 'number': len(protein), 'definitions': protein}
-        elif index > len(protein):
-            request.response.status = 400
-            return {'status': f'index exceeds {len(protein)}'}
-        else:
-            p = protein[index]
-            pdb = settings['pdb']
-            if p['type'] == 'rcsb': #rcsb PDB code
-                return HTTPFound(location=f"https://files.rcsb.org/download/{p['value']}.cif")
-            elif p['type'] == 'url': #external file
-                return HTTPFound(location=p['value'])
-            elif isinstance(pdb, str):
-                log.warning(f'{page} has a pre-beta PDB!??')
-                request.override_renderer = 'string'
-                return pdb
-            else:
-                request.override_renderer = 'string'
-                return pdb[0][1] #pdb is
-
-
-
+    # ## Return correct
+    settings: Dict[str, Any] = page.load().settings
+    # [{'type': 'data', 'value': 'xxx', 'isVariable': 'true', 'chain_definitions': [], 'history':{}]
+    protein: List[Dict[str, Any]] = json.loads(settings['proteinJSON'])
+    # Error case: no index
+    if index == -1:
+        return {'status': 'number of structures', 'number': len(protein), 'definitions': protein}
+    # Error case: impossible index
+    if index > len(protein):
+        request.response.status = 400
+        return {'status': f'index exceeds {len(protein)}'}
+    # Case: valid index
+    p = protein[index]
+    # name, pdb_block
+    pdb: List[Tuple[str, str]] = settings['pdb']
+    # type pdb code
+    if p['type'] == 'rcsb':  #rcsb PDB code
+        return HTTPFound(location=f"https://files.rcsb.org/download/{p['value']}.cif")
+    # type url
+    if p['type'] == 'url':  #external file
+        return HTTPFound(location=p['value'])
+    # type old school
+    if isinstance(pdb, str):
+        log.warning(f'{page} has a pre-beta PDB!??')
+        request.override_renderer = 'string'
+        return pdb
+    # normal case
+    request.override_renderer = 'string'
+    return pdb[index][1]
