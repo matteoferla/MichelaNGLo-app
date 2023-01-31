@@ -35,7 +35,7 @@
 var pdb = `${pdb|n}`;
         %else:
             %for name, structure in pdb:
-var ${name} = `${structure|n}`;
+var ${name} = `${structure|n}`.replace(/^ +/gm, '');
             %endfor
         %endif
 
