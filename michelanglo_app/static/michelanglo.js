@@ -1591,7 +1591,7 @@ NGL.specialOps.multiLoader = function (id, proteins, backgroundColor, startIndex
     where loadFx is the function to run after loading.
     background is a color (def white).
     The multiLoader calls the load function with an index of startIndex or zero.
-    Do note that the function load returns a pr
+    Do note that the function load returns a promise
      */
     console.log('starting multiloader');
     startIndex = startIndex || 0;
@@ -1632,7 +1632,9 @@ NGL.specialOps.multiLoader = function (id, proteins, backgroundColor, startIndex
             NGL.specialOps.load(startIndex, false, id);
             $('#img_label').detach();
         });
+        return Promise.resolve();
     } else {
+        // this is the normal route
         return NGL.specialOps.load(startIndex, false, id);
     }
 };
@@ -1810,7 +1812,8 @@ NGL.specialOps.prolink = function (prolink) { //prolink is a JQuery object.
         } else if ((view === 'reset') || (view === 'default')) { //special view case.
             // FLAG REFACTOR
             NGL.specialOps._run_loadFx(stage.getComponentByType('structure'), myData.proteins[myData.currentIndices[id]].loadFx);
-        } else if ((!!view) && (typeof view === "string") && (view.match(/^\w+$/) !== null)) { //not auto but different custom fx.
+        } else if ((!!view) && (typeof view === "string") && (view.match(/^\w+$/) !== null)) {
+            //not auto but different custom fx.
             if (typeof window[view] === 'function') {
                 // FLAG REFACTOR
                 window[view](stage.getComponentByType('structure'));
