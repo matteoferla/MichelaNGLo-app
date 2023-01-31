@@ -315,6 +315,7 @@ NGL.specialOps.doubleLoader = function (stage, partner, resolve) {
         window.myData.partner = partner;
         if (m.type === 'data') {
             let pdbblock = m.isVariable === undefined ? m.value : window[partner];
+            pdbblock = pdbblock.replace(/^ +/gm, ''); //remove leading spaces
             p = stage.loadFile(new Blob([pdbblock, {type: 'text/plain'}]), {ext: 'pdb', firstModelOnly: true});
         } else if (m.type === 'rcsb') {
             p = stage.loadFile('rcsb://' + m.value);
